@@ -450,12 +450,12 @@ nav {
 }
 
 /* Features Section */
-.features-section,
+features-section,
 .features-grid,
 .feature-card,
 .feature-icon,
 .feature-content {
-  /* Xóa tất cả các styles liên quan */
+  /* Xóa tất cả các .styles liên quan */
 }
 
 /* Footer */

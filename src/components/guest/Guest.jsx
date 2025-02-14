@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Guest.css";
+import Logo from "../../assets/Logo.png";
 
 function Guest() {
   const navigate = useNavigate();
@@ -9,19 +10,19 @@ function Guest() {
   // Định nghĩa dữ liệu carousel
   const carouselImages = [
     {
-      url: "https://example.com/slide1.jpg",
+      url: "https://www.brighthorizons.com/resources/-/media/bh-new/enews-images/widen-5imzbkuni06_519-babys-first-year.ashx?as=1",
       title: "Welcome to BabyHaven",
       description: "Your trusted partner in parenting journey",
       buttonText: "Learn More",
     },
     {
-      url: "https://example.com/slide2.jpg",
+      url: "https://images.squarespace-cdn.com/content/v1/5b9343ce4611a05bc46ea084/ebfb128d-2704-458b-b68a-b1f22f72768f/baby+mom+blocks.jpeg",
       title: "Expert Guidance",
       description: "Get advice from experienced professionals",
       buttonText: "Meet Our Experts",
     },
     {
-      url: "https://example.com/slide3.jpg",
+      url: "https://www.watchmegrowprogram.com/wp-content/uploads/2023/07/baby-milestones.jpg",
       title: "Track Development",
       description: "Monitor your child's growth milestones",
       buttonText: "Start Tracking",
@@ -53,7 +54,7 @@ function Guest() {
       <header className="homepage-header">
         <nav>
           <div className="logo">
-            <img src="Logo.png" />
+            <img src={Logo} />
             <span>BabyHaven</span>
           </div>
           <div className="nav-links">
@@ -107,9 +108,9 @@ function Guest() {
               Sign Up
             </button>
           </div>
-          <div className="logo">
+          {/* <div className="logo">
             <img src="Logo.png" />
-          </div>
+          </div> */}
         </nav>
       </header>
 
@@ -165,7 +166,7 @@ function Guest() {
       <main className="homepage-main">
         {/* Categories Section */}
         <section className="categories-section">
-          <h2>Danh mục nổi bật</h2>
+          <h2>Popular Blogs</h2>
           <div className="categories-grid">
             <div className="category-card">
               <img
@@ -173,60 +174,75 @@ function Guest() {
                 alt="Product 1"
               />
               <div className="category-content">
-                <h3>2 Genius TikTok Organizing Products, Approved by Moms</h3>
+                <h3>Sức khỏe Bé Yêu </h3>
                 <div className="category-meta">
-                  <span className="author">Author: Miles</span>
-                  <span className="tag">#Nutrition</span>
+                  <span className="author">Author: Kim Đồng</span>
+                  <span className="tag">#Sức Khỏe</span>
                 </div>
               </div>
             </div>
             <div className="category-card">
-              <img src="https://example.com/product2.jpg" alt="Product 2" />
+              <img
+                src="https://mathanoi2.vn/photo/nhng-iu-th-v-v-s-pht-trin-th-gic-ca-tr-s-sinh.jpg"
+                alt="Product 2"
+              />
               <div className="category-content">
-                <h3>2 Genius TikTok Organizing Products, Approved by Moms</h3>
+                <h3>Độ tuổi quan trọng của trẻ</h3>
                 <div className="category-meta">
-                  <span className="author">Author: Miles</span>
-                  <span className="tag">#Nutrition</span>
+                  <span className="author">Author: Thái</span>
+                  <span className="tag">#Kiến Thức</span>
                 </div>
               </div>
             </div>
             <div className="category-card">
-              <img src="https://example.com/pregnancy.jpg" alt="Mang thai" />
+              <img
+                src="https://suckhoe123.vn/uploads/suc-khoe/2021_05/20201121_135025_805909_cho-con-bu-sua-me.max-1800x1800.jpg&w=1200&h=811&checkress=1f3297573afa8ae0043a57fe2dc587e2"
+                alt="Mang thai"
+              />
               <div className="category-content">
-                <h3>2 Genius TikTok Organizing Products, Approved by Moms</h3>
+                <h3>Sữa mẹ hay sữa bột ?</h3>
                 <div className="category-meta">
-                  <span className="author">Author: Miles</span>
-                  <span className="tag">#Nutrition</span>
+                  <span className="author">Author: Tuyền</span>
+                  <span className="tag">#Sức Khỏe</span>
                 </div>
               </div>
             </div>
             <div className="category-card">
-              <img src="https://example.com/nutrition.jpg" alt="Dinh dưỡng" />
+              <img
+                src="https://www.family.abbott/content/dam/an/familyabbott/vn-vi/similac/articles/newborn-babies/the-development-of-premature-babies/SIM_AD_The-Development-Of-Premature-Babies_20230523_IMG01.jpg"
+                alt="Dinh dưỡng"
+              />
               <div className="category-content">
-                <h3>2 Genius TikTok Organizing Products, Approved by Moms</h3>
+                <h3>Bàn tay của trẻ, ảnh hưởng cha mẹ</h3>
                 <div className="category-meta">
-                  <span className="author">Author: Miles</span>
-                  <span className="tag">#Nutrition</span>
+                  <span className="author">Author: Tuấn</span>
+                  <span className="tag">#Tâm Sự</span>
                 </div>
               </div>
             </div>
             <div className="category-card">
-              <img src="https://example.com/development.jpg" alt="Phát triển" />
+              <img
+                src="https://a365reportstorage.blob.core.windows.net/public-blobs/b180edf21f99aa9c1a30ce89c7b5ffd2___slider-1.jpg"
+                alt="Phát triển"
+              />
               <div className="category-content">
-                <h3>2 Genius TikTok Organizing Products, Approved by Moms</h3>
+                <h3>Tuổi trẻ các những đứa trẻ tập lớn</h3>
                 <div className="category-meta">
-                  <span className="author">Author: Miles</span>
-                  <span className="tag">#Nutrition</span>
+                  <span className="author">Author: Tuấn</span>
+                  <span className="tag">#Tâm Sự</span>
                 </div>
               </div>
             </div>
             <div className="category-card">
-              <img src="https://example.com/health.jpg" alt="Sức khỏe" />
+              <img
+                src="https://prod-cdn.pharmacity.io/blog/Thai-nhi-7-thang-tuoi-dang-tiep-tuc-phat-trien-manh-me-.png"
+                alt="Sức khỏe"
+              />
               <div className="category-content">
-                <h3>2 Genius TikTok Organizing Products, Approved by Moms</h3>
+                <h3>Hành trình thai nhi và tới khi chào đời</h3>
                 <div className="category-meta">
-                  <span className="author">Author: Miles</span>
-                  <span className="tag">#Nutrition</span>
+                  <span className="author">Author: Hoàng</span>
+                  <span className="tag">#Kiến Thức</span>
                 </div>
               </div>
             </div>
