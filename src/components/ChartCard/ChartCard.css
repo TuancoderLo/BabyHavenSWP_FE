@@ -1,0 +1,57 @@
+/* src/components/ChartCard/ChartCard.css */
+.chart-card {
+  background-color: #fff;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  padding: 20px;
+
+  /* Cho phép thẻ chart co giãn và xếp theo layout flex */
+  display: flex;
+  flex-direction: column;
+  flex: 1;              /* Card giãn ra chiếm hết chiều ngang container */
+  min-width: 280px;     /* Để card không quá nhỏ trên màn hình hẹp */
+  margin: 10px;
+}
+
+/* Tiêu đề của thẻ chart */
+.chart-title {
+  font-size: 1rem;
+  margin-bottom: 5px;
+  color: #666;
+}
+
+/* Giá trị tiền */
+.chart-amount {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+/* Mô tả phụ (Year-to-Date Sales...) */
+.chart-subtitle {
+  font-size: 0.9rem;
+  color: #999;
+  margin-bottom: 10px;
+}
+
+/* Khu vực hiển thị biểu đồ Recharts */
+.chart-wrapper {
+  width: 100%;      /* Biểu đồ chiếm toàn bộ bề ngang thẻ */
+  height: 200px;    /* Tăng chiều cao để chart dễ nhìn hơn */
+  margin-bottom: 10px;
+}
+
+/* Nút View Report */
+.chart-report-btn {
+  align-self: flex-end;
+  padding: 6px 12px;
+  border: none;
+  background-color: #8884d8;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.chart-report-btn:hover {
+  background-color: #6662b6;
+}
