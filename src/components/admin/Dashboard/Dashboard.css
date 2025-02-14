@@ -1,0 +1,53 @@
+/* src/pages/Dashboard/Dashboard.css */
+.dashboard-container {
+  /* Cho dashboard chiếm toàn bộ chiều cao/chiều rộng còn lại */
+  flex: 1; 
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+/* Khối riêng cho tiêu đề */
+.dashboard-header {
+  background-color: #fff;      /* Cho nền trắng */
+  border-radius: 8px;         /* Bo góc nhẹ */
+  padding: 15px 20px;         /* Tạo khoảng cách trong */
+  margin-bottom: 20px;        /* Cách phía dưới một đoạn */
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1); /* Bóng nhẹ, tùy ý */
+}
+
+/* H2 cho tiêu đề */
+.dashboard-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #333;                /* Hoặc màu tùy thích */
+}
+/* Icon trong tiêu đề Dashboard */
+.header-icon {
+  margin-right: 8px;   /* khoảng cách giữa icon và text */
+  font-size: 1.2rem;   /* kích cỡ icon */
+  color: #333;         /* màu icon */
+  vertical-align: middle; /* căn icon ngang hàng chữ */
+}
+
+
+/* Vùng chứa các biểu đồ */
+.dashboard-charts {
+  display: flex;
+  flex-direction: column;
+  flex: 1;        /* để phần biểu đồ chiếm hết khoảng trống còn lại */
+  width: 100%;
+}
+
+/* Chart lớn phía trên */
+.dashboard-chart-large {
+  display: flex;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+/* 2 chart nhỏ phía dưới */
+.dashboard-chart-row {
+  display: flex;
+  flex-wrap: wrap; /* Cho phép xuống dòng nếu màn hình hẹp */
+  width: 100%;
+}

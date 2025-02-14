@@ -48,7 +48,7 @@ function Login({ onLoginSuccess }) {
 
       // Chuyển hướng dựa vào role
       if (user.role === "admin") {
-        navigate("/admin");
+        navigate("/admin/dashboard");
       } else {
         navigate("/homepage");
       }

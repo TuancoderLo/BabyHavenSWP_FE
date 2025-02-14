@@ -1,0 +1,108 @@
+/* ========== Sidebar.css ========== */
+
+/* Sidebar ở trạng thái thu gọn */
+.sidebar {
+  position: relative;
+  width: 60px; /* Chiều rộng khi thu gọn */
+  background-color: #fff;
+  border-right: 1px solid #e1e1e1;
+  transition: width 0.3s;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  z-index: 10; /* Để Sidebar nổi trên nội dung */
+}
+
+/* Khi sidebar mở rộng */
+.sidebar.open {
+  width: 220px;
+}
+
+/* Nút toggle (nếu có), đặt ở góc trên phải */
+.sidebar-toggle-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+}
+
+/* Nếu bạn dùng ảnh cho nút toggle, chỉnh kích thước */
+.logo-img {
+  width: 40px; 
+  height: 40px;
+  object-fit: contain;
+}
+
+/* Khu vực logo hoặc tiêu đề ở sidebar */
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+  height: 80px;               /* Tăng chiều cao để logo to hơn */
+  border-bottom: 1px solid #e1e1e1;
+}
+
+/* Nếu thay <h2>BabyHaven</h2> bằng ảnh name.png, 
+   bạn có thể dùng class để chỉnh kích thước */
+.name-img {
+  max-width: 120px; 
+  height: auto;
+  object-fit: contain;
+}
+
+/* Nếu vẫn giữ <h2>BabyHaven</h2>, bạn có thể để style cũ hoặc chỉnh to hơn */
+.sidebar-logo h2 {
+  margin: 0;
+  font-size: 1.4rem;  /* to hơn một chút */
+  color: #00bfa5;     /* ví dụ đổi màu xanh */
+}
+
+/* Menu trong sidebar */
+.sidebar-menu {
+  list-style: none;
+  margin-top: 20px;
+  padding: 0; /* bỏ padding mặc định */
+}
+
+/* 
+  Mỗi item trong menu: 
+  - Chúng ta sẽ đặt text trước, icon sau (để icon nằm bên phải chữ).
+  - Dùng flex + gap để canh đều.
+*/
+.sidebar-menu li {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* canh bên trái */
+  gap: 8px;                    /* khoảng cách giữa text & icon */
+  padding: 10px 15px;
+  cursor: pointer;
+  color: #333;
+  transition: background-color 0.2s;
+}
+
+.sidebar-menu li:hover {
+  background-color: #f2f2f2;
+}
+
+/* Icon react-icons, ta cho margin-left để tách khỏi text một chút */
+.icon {
+  font-size: 18px;
+  margin-left: 4px; 
+}
+
+/* Footer (Sign Out) cố định đáy sidebar */
+.sidebar-footer {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 10px 15px;
+  cursor: pointer;
+  color: #333;
+  transition: background-color 0.2s;
+}
+
+.sidebar-footer:hover {
+  background-color: #f2f2f2;
+}

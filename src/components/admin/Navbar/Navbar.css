@@ -1,0 +1,32 @@
+/* src/components/Navbar/Navbar.css */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  height: 60px;
+  border-bottom: 1px solid #e1e1e1;
+  padding: 0 20px;
+}
+
+.navbar-search {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  color: #999;
+}
+
+.navbar-search input {
+  padding: 8px 8px 8px 30px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.navbar-user {
+  font-weight: 500;
+}

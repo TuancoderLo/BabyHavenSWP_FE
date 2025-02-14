@@ -4,9 +4,17 @@ import Guest from "./components/guest/Guest";
 import Login from "./components/login/Login";
 import Register from "./components/register/Register";
 import Homepage from "./components/homepage/HomePage";
-import Admin from "./components/admin/Admin";
+import Dashboard from "./components/admin/Dashboard/Dashboard";
+import Sidebar from "./components/admin/Sidebar/Sidebar";
+import Navbar from "./components/admin/Navbar/Navbar";
 
 function App() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   const [userRole, setUserRole] = useState(() => localStorage.getItem("role"));
   const [isAuthenticated, setIsAuthenticated] = useState(
     () => localStorage.getItem("isAuthenticated") === "true"
@@ -46,37 +54,47 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<Guest />} />
-        <Route
-          path="/login"
-          element={<Login onLoginSuccess={updateAuthState} />}
-        />
-        <Route path="/register" element={<Register />} />
+    <> <div className="app-container">
+      {/* Sidebar */}
+      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
-        {/* Protected routes */}
-        <Route
-          path="/homepage"
-          element={
-            <ProtectedRoute roles={["user"]}>
-              <Homepage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute roles={["admin"]}>
-              <Admin />
-            </ProtectedRoute>
-          }
-        />
+      {/* Phần nội dung chính (Navbar + trang) */}
+      <div className="main-content">
+        <Navbar toggleSidebar={toggleSidebar} />
+        <Dashboard />
+      </div>
+    </div> <BrowserRouter>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Guest />} />
+          <Route
+            path="/login"
+            element={<Login onLoginSuccess={updateAuthState} />}
+          />
+          <Route path="/register" element={<Register />} />
 
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-    </BrowserRouter>
+          {/* Protected routes */}
+          <Route
+            path="/homepage"
+            element={
+              <ProtectedRoute roles={["user"]}>
+                <Homepage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute roles={["admin"]}>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </BrowserRouter></>
+
   );
 }
 
