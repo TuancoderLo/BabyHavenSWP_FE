@@ -24,14 +24,17 @@ nav {
 }
 
 .logo {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
 }
 
 .logo img {
-  height: 45px;
-  border-radius: 8px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .logo span {
@@ -40,7 +43,81 @@ nav {
   color: #2c3e50;
   letter-spacing: -0.5px;
 }
+/* Container chung cho avatar + sidebar */
+.avatar-sidebar-container {
+  position: relative;
+  display: flex; /* hoặc inline-flex, tùy ý */
+  align-items: center;
+  margin-left: 1rem; /* cách logout 1 chút */
+}
 
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4); /* Màu đen trong suốt 40% */
+  z-index: 998; /* Thấp hơn sidebar, nhưng cao hơn nội dung */
+}
+/* Sidebar trượt từ phải */
+.sidebar-menu {
+  position: fixed;
+  top: 0;
+  right: -300px; /* Ẩn sidebar ra ngoài màn hình */
+  width: 300px;
+  height: 100vh;
+  background: #fff;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  transition: right 0.3s ease;
+  z-index: 999;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+/* Khi open = true, sidebar trượt vào màn hình */
+.sidebar-menu.open {
+  right: 0;
+}
+
+/* Phần header của sidebar */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-header i {
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.sidebar-menu hr {
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 0.8rem 0;
+}
+
+/* Các mục trong sidebar */
+.sidebar-section h4 {
+  font-size: 0.85rem;
+  margin-bottom: 0.3rem;
+  color: #888;
+  text-transform: uppercase;
+}
+
+.sidebar-section p {
+  margin: 0.2rem 0;
+  color: #333;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.sidebar-section p:hover {
+  color: #00d0bc;
+}
 /* Navigation Links */
 .nav-links {
   display: flex;
@@ -164,26 +241,6 @@ nav {
   gap: 1rem;
 }
 
-.logout-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1.2rem;
-  background-color: #00d0bc;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.logout-btn:hover {
-  background-color: #00bfa6;
-  transform: translateY(-1px);
-}
-
 /* Hero Section */
 .hero-section {
   background: #ede0fa;
@@ -232,7 +289,7 @@ nav {
 .carousel-content {
   position: relative;
   height: 100%;
-  background: linear-gradient(45deg, #ede0fa, #f5f0ff);
+  background: linear-gradient(to right, rgba(151, 221, 238, 0.2) 0%, rgba(0, 183, 255, 0.2) 50%, rgba(151, 221, 238, 0.2) 75%);
 }
 
 .carousel-slide {

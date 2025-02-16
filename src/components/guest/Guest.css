@@ -232,7 +232,7 @@ nav {
 .carousel-content {
   position: relative;
   height: 100%;
-  background: linear-gradient(45deg, #b3ebfc, #b3ebfc);
+background: linear-gradient(to right, rgba(151, 221, 238, 0.2) 0%, rgba(0, 183, 255, 0.2) 50%, rgba(151, 221, 238, 0.2) 75%);
 }
 
 .carousel-slide {

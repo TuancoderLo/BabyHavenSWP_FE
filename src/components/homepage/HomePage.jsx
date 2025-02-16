@@ -36,6 +36,22 @@ function HomePage() {
 
   ];
 
+  // State quản lý menu đóng/mở
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Toggle sidebar khi click avatar
+  const handleAvatarClick = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  // Bật/tắt sidebar khi hover
+  const handleMouseEnter = () => {
+    setMenuOpen(true);
+  };
+  const handleMouseLeave = () => {
+    setMenuOpen(false);
+  };
+
   // Xử lý chuyển slide
   const nextSlide = () => {
     setCurrentSlide((prev) =>
@@ -108,14 +124,45 @@ function HomePage() {
             <a href="#community">Community</a>
             <a href="#features">Features</a>
           </div>
-          <div className="user-actions">
-            <button className="logout-btn" onClick={() => navigate("/guest")}>
-              <i className="fas fa-sign-in-alt"></i>
-              Logout
-            </button>
-          </div>
-          <div className="logo">
-            <img src={avatar_LOGO} />
+          {/* Container bọc avatar + sidebar, dùng hover */}
+          <div
+            className="avatar-sidebar-container"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            {/* Avatar (logo) */}
+            <div className="logo">
+              <img src={avatar_LOGO} alt="user logo" />
+            </div>
+            {/* Sidebar trượt từ phải */}
+            {menuOpen && <div className="overlay" onClick={() => setMenuOpen(false)}></div>}
+            <div className={`sidebar-menu ${menuOpen ? "open" : ""}`}>
+              <div className="sidebar-header">
+                <i className="fas fa-user-circle"></i>
+                <span>Name</span>
+              </div>
+              <hr />
+              <div className="sidebar-section">
+                <h4>Activity</h4>
+                <p>Growth tracker</p>
+                <p>Doctor consultation</p>
+                <p>Health Analysis</p>
+              </div>
+              <hr />
+              <div className="sidebar-section">
+                <h4>Profile</h4>
+                <p>My children</p>
+                <p>My children’s milestones</p>
+                <p>My membership plans</p>
+                <p>My requests</p>
+              </div>
+              <hr />
+              <div className="sidebar-section">
+                <h4>Setting</h4>
+                <p>Profile setting</p>
+                <p onClick={handleLogout}>Log out</p>
+              </div>
+            </div>
           </div>
         </nav>
       </header>
