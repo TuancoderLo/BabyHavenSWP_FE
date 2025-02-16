@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./HomePage.css";
 import Logo from "../../assets/Logo.png";
-import avatar_LOGO from "../../assets/avatar_LOGO.png";
+import avatar_LOGO from "../../assets/avatar_LOGO.jpg";
 import PregnancySection from "../topics/PregnancySection";
 import BabySection from "../topics/BabySection";
 import ToddleSection from "../topics/ToddleSection";
@@ -80,6 +80,7 @@ function HomePage() {
             <img src={Logo} />
             <img src={Name} />
           </div>
+
           <div className="nav-links">
             <div className="dropdown">
               <a href="#getting-pregnant">Getting Pregnant</a>
@@ -122,7 +123,7 @@ function HomePage() {
               </div>
             </div>
             <a href="#community">Community</a>
-            <a href="#features">Features</a>
+            <a href="#tools-features">Features</a>
           </div>
           {/* Container bọc avatar + sidebar, dùng hover */}
           <div
@@ -130,10 +131,11 @@ function HomePage() {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            {/* Avatar (logo) */}
-            <div className="logo">
-              <img src={avatar_LOGO} alt="user logo" />
+            <div className="avatar-chip-img">
+              <img src={avatar_LOGO} alt="User Avatar" />
             </div>
+            {/* Text Name */}
+            <span className="avatar-chip-text">Name</span>
             {/* Sidebar trượt từ phải */}
             {menuOpen && <div className="overlay" onClick={() => setMenuOpen(false)}></div>}
             <div className={`sidebar-menu ${menuOpen ? "open" : ""}`}>
@@ -406,7 +408,7 @@ function HomePage() {
             </div>
 
             <div className="support-right">
-              <h2>Tools & Features</h2>
+              <h2 id="tools-features">Tools & Features</h2>
               <div className="tools-grid">
                 {[
                   {
@@ -633,7 +635,7 @@ function HomePage() {
           <p>&copy; 2024 BabyHaven. All rights reserved.</p>
         </div>
       </footer>
-    </div>
+    </div >
   );
 }
 

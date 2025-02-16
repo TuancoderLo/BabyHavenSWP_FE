@@ -1114,10 +1114,12 @@ color: rgb(0, 208, 188);
 .doctor-info h3 {
   font-size: 1rem;
   margin-bottom: 0.2rem;
+  color: #333 !important;
 }
 
 .doctor-info p {
   font-size: 0.8rem;
+  color: #333 !important;
 }
 
 .see-more-btn {
@@ -1251,4 +1253,5 @@ color: rgb(0, 208, 188);
   .trust-card p {
     font-size: 1.1rem;
   }
+  
 }

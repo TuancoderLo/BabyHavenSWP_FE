@@ -54,6 +54,17 @@ function Guest() {
     navigate("/login");
   };
 
+  const handleScrollToFeatures = () => {
+    const element = document.getElementById("tools-features");
+    if (element) {
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start", // Cuộn để h2 nằm sát đỉnh màn hình
+      });
+    }
+  };
+
+
   return (
     <div className="homepage">
       {/* Navigation */}
@@ -105,7 +116,7 @@ function Guest() {
               </div>
             </div>
             <a href="#community">Community</a>
-            <a href="#features">Features</a>
+            <a href="#!" onClick={handleScrollToFeatures}>Features</a>
           </div>
           <div className="user-actions">
             <div onClick={() => navigate("/login")}>JOIN</div>
@@ -356,7 +367,7 @@ function Guest() {
             </div>
 
             <div className="support-right">
-              <h2>Tools & Features</h2>
+              <h2 id="tools-features">Tools & Features</h2>
               <div className="tools-grid">
                 {[
                   {

@@ -24,17 +24,14 @@ nav {
 }
 
 .logo {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  overflow: hidden;
-  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
 }
 
 .logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: 45px;
+  border-radius: 8px;
 }
 
 .logo span {
@@ -43,6 +40,43 @@ nav {
   color: #2c3e50;
   letter-spacing: -0.5px;
 }
+.avatar-chip {
+  display: inline-flex;
+  align-items: center;
+  background-color: #ff74c7; /* Màu hồng tùy chọn */
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px; /* Tạo hình pill */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-left: 1rem; /* Tách khỏi menu */
+}
+
+.avatar-chip:hover {
+  background-color: #ff5ab8; /* Đậm hơn chút khi hover */
+}
+
+/* Avatar nhỏ trong chip */
+.avatar-chip-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 0.4rem; /* Khoảng cách giữa avatar và text */
+}
+
+.avatar-chip-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Text “Name” */
+.avatar-chip-text {
+  color: #fff; /* Màu trắng nổi bật trên nền hồng */
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
 /* Container chung cho avatar + sidebar */
 .avatar-sidebar-container {
   position: relative;
@@ -53,40 +87,52 @@ nav {
 
 .overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.4); /* Màu đen trong suốt 40% */
-  z-index: 998; /* Thấp hơn sidebar, nhưng cao hơn nội dung */
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4); /* nền đen mờ */
+  z-index: 998;
 }
-/* Sidebar trượt từ phải */
+
+/* Sidebar glass effect */
 .sidebar-menu {
   position: fixed;
   top: 0;
-  right: -300px; /* Ẩn sidebar ra ngoài màn hình */
+  right: -300px; /* Ẩn khỏi màn hình */
   width: 300px;
   height: 100vh;
-  background: #fff;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
-  transition: right 0.3s ease;
+  background: rgba(255,255,255,0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: -2px 0 15px rgba(0, 208, 188, 0.2);
   z-index: 999;
   padding: 1rem;
   overflow-y: auto;
+  opacity: 0;
 }
 
-/* Khi open = true, sidebar trượt vào màn hình */
 .sidebar-menu.open {
-  right: 0;
+  animation: slideIn 0.4s ease forwards;
 }
 
-/* Phần header của sidebar */
+@keyframes slideIn {
+  from {
+    right: -300px;
+    opacity: 0;
+  }
+  to {
+    right: 0;
+    opacity: 1;
+  }
+}
+
+/* Sidebar header */
 .sidebar-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
+  color: #333;
 }
 
 .sidebar-header i {
@@ -94,29 +140,35 @@ nav {
   color: #333;
 }
 
+/* Dòng kẻ */
 .sidebar-menu hr {
   border: none;
-  border-top: 1px solid #eee;
+  border-top: 1px solid rgba(255,255,255,0.4);
   margin: 0.8rem 0;
 }
 
-/* Các mục trong sidebar */
+/* Sidebar sections */
 .sidebar-section h4 {
   font-size: 0.85rem;
   margin-bottom: 0.3rem;
-  color: #888;
+  color: #302f2f;
   text-transform: uppercase;
 }
 
 .sidebar-section p {
   margin: 0.2rem 0;
-  color: #333;
+  color: #221f1f;;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, background 0.2s ease;
 }
 
+/* Hover item sidebar */
 .sidebar-section p:hover {
-  color: #00d0bc;
+  background: rgba(64, 199, 163, 0.1); /* #40c7a3 = xanh nhạt */
+  color: #4d9b86; /* Text xanh nhạt */
+  border-radius: 6px;
+  padding-left: 0.4rem;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 /* Navigation Links */
 .nav-links {
@@ -1172,10 +1224,12 @@ color: rgb(0, 208, 188);
 .doctor-info h3 {
   font-size: 1rem;
   margin-bottom: 0.2rem;
+  color: #333 !important;
 }
 
 .doctor-info p {
   font-size: 0.8rem;
+  color: #333 !important;
 }
 
 .see-more-btn {
@@ -1310,3 +1364,4 @@ color: rgb(0, 208, 188);
     font-size: 1.1rem;
   }
 }
+
