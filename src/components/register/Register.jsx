@@ -13,6 +13,12 @@ function Register() {
     password: "",
     confirmPassword: "",
   });
+
+  const handleGoogleRedirect = () => {
+    // Sửa URL cho đúng domain + port của BE
+    window.location.href = "https://localhost:7279/api/GoogleAuth/signin-google";
+  };
+
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -215,10 +221,16 @@ function Register() {
             <div className="divider">
               <span>Or</span>
             </div>
-
-            <button type="button" className="social-btn google">
+            {/* Nút Google - Redirect sang BE */}
+            <button
+                type="button"
+                className="social-btn google"
+                onClick={handleGoogleRedirect}
+            >
               <i className="fab fa-google"></i>
+              <span style={{ marginLeft: "8px" }}>Login with Google</span>
             </button>
+
 
             <div className="toggle-form">
               {"Already a member?"}

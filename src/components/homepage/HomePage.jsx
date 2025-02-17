@@ -77,8 +77,8 @@ function HomePage() {
       <header className="homepage-header">
         <nav>
           <div className="logo">
-            <img src={Logo} />
-            <img src={Name} />
+            <img src={Logo}/>
+            <name src={Name}/>
           </div>
 
           <div className="nav-links">
@@ -127,12 +127,12 @@ function HomePage() {
           </div>
           {/* Container bọc avatar + sidebar, dùng hover */}
           <div
-            className="avatar-sidebar-container"
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+              className="avatar-sidebar-container"
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
           >
             <div className="avatar-chip-img">
-              <img src={avatar_LOGO} alt="User Avatar" />
+              <img src={avatar_LOGO} alt="User Avatar"/>
             </div>
             {/* Text Name */}
             <span className="avatar-chip-text">Name</span>
@@ -143,14 +143,14 @@ function HomePage() {
                 <i className="fas fa-user-circle"></i>
                 <span>Name</span>
               </div>
-              <hr />
+              <hr/>
               <div className="sidebar-section">
                 <h4>Activity</h4>
                 <p>Growth tracker</p>
                 <p>Doctor consultation</p>
                 <p>Health Analysis</p>
               </div>
-              <hr />
+              <hr/>
               <div className="sidebar-section">
                 <h4>Profile</h4>
                 <p>My children</p>
@@ -158,7 +158,7 @@ function HomePage() {
                 <p>My membership plans</p>
                 <p>My requests</p>
               </div>
-              <hr />
+              <hr/>
               <div className="sidebar-section">
                 <h4>Setting</h4>
                 <p>Profile setting</p>
