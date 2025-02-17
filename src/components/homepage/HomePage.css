@@ -40,7 +40,136 @@ nav {
   color: #2c3e50;
   letter-spacing: -0.5px;
 }
+.avatar-chip {
+  display: inline-flex;
+  align-items: center;
+  background-color: #ff74c7; /* Màu hồng tùy chọn */
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px; /* Tạo hình pill */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-left: 1rem; /* Tách khỏi menu */
+}
 
+.avatar-chip:hover {
+  background-color: #ff5ab8; /* Đậm hơn chút khi hover */
+}
+
+/* Avatar nhỏ trong chip */
+.avatar-chip-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 0.4rem; /* Khoảng cách giữa avatar và text */
+}
+
+.avatar-chip-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Text “Name” */
+.avatar-chip-text {
+  color: #fff; /* Màu trắng nổi bật trên nền hồng */
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Container chung cho avatar + sidebar */
+.avatar-sidebar-container {
+  position: relative;
+  display: flex; /* hoặc inline-flex, tùy ý */
+  align-items: center;
+  margin-left: 1rem; /* cách logout 1 chút */
+}
+
+.overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4); /* nền đen mờ */
+  z-index: 998;
+}
+
+/* Sidebar glass effect */
+.sidebar-menu {
+  position: fixed;
+  top: 0;
+  right: -300px; /* Ẩn khỏi màn hình */
+  width: 300px;
+  height: 100vh;
+  background: rgba(255,255,255,0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: -2px 0 15px rgba(0, 208, 188, 0.2);
+  z-index: 999;
+  padding: 1rem;
+  overflow-y: auto;
+  opacity: 0;
+}
+
+.sidebar-menu.open {
+  animation: slideIn 0.4s ease forwards;
+}
+
+@keyframes slideIn {
+  from {
+    right: -300px;
+    opacity: 0;
+  }
+  to {
+    right: 0;
+    opacity: 1;
+  }
+}
+
+/* Sidebar header */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.sidebar-header i {
+  font-size: 1.2rem;
+  color: #333;
+}
+
+/* Dòng kẻ */
+.sidebar-menu hr {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.4);
+  margin: 0.8rem 0;
+}
+
+/* Sidebar sections */
+.sidebar-section h4 {
+  font-size: 0.85rem;
+  margin-bottom: 0.3rem;
+  color: #302f2f;
+  text-transform: uppercase;
+}
+
+.sidebar-section p {
+  margin: 0.2rem 0;
+  color: #221f1f;;
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+/* Hover item sidebar */
+.sidebar-section p:hover {
+  background: rgba(64, 199, 163, 0.1); /* #40c7a3 = xanh nhạt */
+  color: #4d9b86; /* Text xanh nhạt */
+  border-radius: 6px;
+  padding-left: 0.4rem;
+  transition: background 0.2s ease, color 0.2s ease;
+}
 /* Navigation Links */
 .nav-links {
   display: flex;
@@ -164,26 +293,6 @@ nav {
   gap: 1rem;
 }
 
-.logout-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1.2rem;
-  background-color: #00d0bc;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.logout-btn:hover {
-  background-color: #00bfa6;
-  transform: translateY(-1px);
-}
-
 /* Hero Section */
 .hero-section {
   background: #ede0fa;
@@ -232,7 +341,7 @@ nav {
 .carousel-content {
   position: relative;
   height: 100%;
-  background: linear-gradient(45deg, #ede0fa, #f5f0ff);
+  background: linear-gradient(to right, rgba(151, 221, 238, 0.2) 0%, rgba(0, 183, 255, 0.2) 50%, rgba(151, 221, 238, 0.2) 75%);
 }
 
 .carousel-slide {
@@ -460,8 +569,8 @@ features-section,
 
 /* Footer */
 .homepage-footer {
-  background-color: #333;
-  color: white;
+  background-color: #f5f5f5;
+  color: black;
   padding: 4rem 2rem 1rem;
 }
 
@@ -475,7 +584,7 @@ features-section,
 
 .footer-section h3 {
   margin-bottom: 1rem;
-  color: #4a90e2;
+color: rgb(0, 208, 188);
 }
 
 .footer-section ul {
@@ -488,7 +597,7 @@ features-section,
 }
 
 .footer-section a {
-  color: white;
+  color: black;
   text-decoration: none;
 }
 
@@ -499,7 +608,7 @@ features-section,
 }
 
 .social-links a {
-  color: white;
+  color: black;
   font-size: 1.5rem;
 }
 
@@ -1115,10 +1224,12 @@ features-section,
 .doctor-info h3 {
   font-size: 1rem;
   margin-bottom: 0.2rem;
+  color: #333 !important;
 }
 
 .doctor-info p {
   font-size: 0.8rem;
+  color: #333 !important;
 }
 
 .see-more-btn {
@@ -1253,3 +1364,4 @@ features-section,
     font-size: 1.1rem;
   }
 }
+

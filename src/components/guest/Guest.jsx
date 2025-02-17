@@ -2,6 +2,11 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Guest.css";
 import Logo from "../../assets/Logo.png";
+import Name from "../../assets/Name.png";
+import PregnancySection from "../topics/PregnancySection";
+import BabySection from "../topics/BabySection";
+import ToddleSection from "../topics/ToddleSection";
+import ChildSection from "../topics/ChildSection";
 
 function Guest() {
   const navigate = useNavigate();
@@ -12,21 +17,22 @@ function Guest() {
     {
       url: "https://www.brighthorizons.com/resources/-/media/bh-new/enews-images/widen-5imzbkuni06_519-babys-first-year.ashx?as=1",
       title: "Welcome to BabyHaven",
-      description: "Your trusted partner in parenting journey",
-      buttonText: "Learn More",
+      description: "We're here to support you every step of your parenting journey.",
+      buttonText: "Discover More",
     },
     {
       url: "https://images.squarespace-cdn.com/content/v1/5b9343ce4611a05bc46ea084/ebfb128d-2704-458b-b68a-b1f22f72768f/baby+mom+blocks.jpeg",
-      title: "Expert Guidance",
-      description: "Get advice from experienced professionals",
+      title: "Friendly Expert Guidance",
+      description: "Connect with caring professionals ready to help you navigate parenthood.",
       buttonText: "Meet Our Experts",
     },
     {
       url: "https://www.watchmegrowprogram.com/wp-content/uploads/2023/07/baby-milestones.jpg",
-      title: "Track Development",
-      description: "Monitor your child's growth milestones",
+      title: "Track Your Baby's Development",
+      description: "Watch as your little one grows and reaches exciting new milestones.",
       buttonText: "Start Tracking",
     },
+
   ];
 
   // Xử lý chuyển slide
@@ -48,6 +54,17 @@ function Guest() {
     navigate("/login");
   };
 
+  const handleScrollToFeatures = () => {
+    const element = document.getElementById("tools-features");
+    if (element) {
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start", // Cuộn để h2 nằm sát đỉnh màn hình
+      });
+    }
+  };
+
+
   return (
     <div className="homepage">
       {/* Navigation */}
@@ -55,7 +72,7 @@ function Guest() {
         <nav>
           <div className="logo">
             <img src={Logo} />
-            <span>BabyHaven</span>
+            <img src={Name} />
           </div>
           <div className="nav-links">
             <div className="dropdown">
@@ -99,7 +116,7 @@ function Guest() {
               </div>
             </div>
             <a href="#community">Community</a>
-            <a href="#features">Features</a>
+            <a href="#!" onClick={handleScrollToFeatures}>Features</a>
           </div>
           <div className="user-actions">
             <div onClick={() => navigate("/login")}>JOIN</div>
@@ -108,16 +125,13 @@ function Guest() {
               Sign Up
             </button>
           </div>
-          {/* <div className="logo">
-            <img src="Logo.png" />
-          </div> */}
         </nav>
       </header>
 
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
-          <h1>Join now to follow your baby's every tiny steps.</h1>
+          <h1>Join now and follow every tiny step of your baby's journey.</h1>
         </div>
       </section>
 
@@ -132,9 +146,8 @@ function Guest() {
             {carouselImages.map((slide, index) => (
               <div
                 key={index}
-                className={`carousel-slide ${
-                  index === currentSlide ? "active" : ""
-                }`}
+                className={`carousel-slide ${index === currentSlide ? "active" : ""
+                  }`}
               >
                 <div className="slide-caption">
                   <h3>{slide.title}</h3>
@@ -168,84 +181,127 @@ function Guest() {
         <section className="categories-section">
           <h2>Popular Blogs</h2>
           <div className="categories-grid">
-            <div className="category-card">
+
+            {/* Card 1 */}
+            <a
+              href="https://merinokids.co.uk/blogs/merino/the-importance-of-temperature-regulation-in-babies"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="category-card"
+            >
               <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVc6sfu1l5-UgwaPFdDVDvwLkRhpIl70AIQw&s"
+                src="https://res.cloudinary.com/djpfqveyz/image/upload/merino-kids-all-in-one-button-through-bodysuit-misty-rose-bodysuits-misty-rose-0-3m-9420056108900-2_74b489b8-3301-46cc-a1c3-1599c2230e73_yn7j19.jpg"
                 alt="Product 1"
               />
               <div className="category-content">
-                <h3>Sức khỏe Bé Yêu </h3>
+                <h3>The importance of temperature regulation in babies</h3>
                 <div className="category-meta">
-                  <span className="author">Author: Kim Đồng</span>
-                  <span className="tag">#Sức Khỏe</span>
+                  <span className="author">Author: Merinokids</span>
+                  <span className="tag">#Health</span>
                 </div>
               </div>
-            </div>
-            <div className="category-card">
+            </a>
+
+            {/* Card 2 */}
+            <a
+              href="https://thoughtfulparent.com/what-is-positive-parenting.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="category-card"
+            >
               <img
-                src="https://mathanoi2.vn/photo/nhng-iu-th-v-v-s-pht-trin-th-gic-ca-tr-s-sinh.jpg"
+                src="https://res.cloudinary.com/djpfqveyz/image/upload/Copy-of-October-2020-33-1_slcseu.png"
                 alt="Product 2"
               />
               <div className="category-content">
-                <h3>Độ tuổi quan trọng của trẻ</h3>
+                <h3>Why is Positive Parenting Important and How Does it Help My Child?</h3>
                 <div className="category-meta">
-                  <span className="author">Author: Thái</span>
-                  <span className="tag">#Kiến Thức</span>
+                  <span className="author">Author: thoughtfulparent</span>
+                  <span className="tag">#Knowledge</span>
                 </div>
               </div>
-            </div>
-            <div className="category-card">
+            </a>
+
+            {/* Card 3 */}
+            <a
+              href="https://www.science-sparks.com/making-a-bottle-rocket/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="category-card"
+            >
               <img
-                src="https://suckhoe123.vn/uploads/suc-khoe/2021_05/20201121_135025_805909_cho-con-bu-sua-me.max-1800x1800.jpg&w=1200&h=811&checkress=1f3297573afa8ae0043a57fe2dc587e2"
-                alt="Mang thai"
+                src="https://res.cloudinary.com/djpfqveyz/image/upload/Child-with-water-bottle-rocket-899x1024_oe5cal.jpg"
+                alt="Breastfeeding"
               />
               <div className="category-content">
-                <h3>Sữa mẹ hay sữa bột ?</h3>
+                <h3>How to make a Bottle Rocket?</h3>
                 <div className="category-meta">
-                  <span className="author">Author: Tuyền</span>
-                  <span className="tag">#Sức Khỏe</span>
+                  <span className="author">Author: Emma Vanstone</span>
+                  <span className="tag">#Play</span>
                 </div>
               </div>
-            </div>
-            <div className="category-card">
+            </a>
+
+            {/* Card 4 */}
+            <a
+              href="https://babymori.com/blogs/baby-stories/how-to-use-a-baby-sleeping-bag"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="category-card"
+            >
               <img
-                src="https://www.family.abbott/content/dam/an/familyabbott/vn-vi/similac/articles/newborn-babies/the-development-of-premature-babies/SIM_AD_The-Development-Of-Premature-Babies_20230523_IMG01.jpg"
-                alt="Dinh dưỡng"
+                src="https://res.cloudinary.com/djpfqveyz/image/upload/merino-kids-cocooi-sleeping-bag-dark-slate-sleeping-bags-dark-slate-0-3m-9420056108788-2_9873a0c6-8ba1-49b0-b17d-39d2164326d8_480x480_sdn2y2.webp"
+                alt="Baby Care"
               />
               <div className="category-content">
-                <h3>Bàn tay của trẻ, ảnh hưởng cha mẹ</h3>
+                <h3>How to use a baby sleeping bag?</h3>
                 <div className="category-meta">
-                  <span className="author">Author: Tuấn</span>
-                  <span className="tag">#Tâm Sự</span>
+                  <span className="author">Author: babymori</span>
+                  <span className="tag">#Knowledge</span>
                 </div>
               </div>
-            </div>
-            <div className="category-card">
+            </a>
+
+            {/* Card 5 */}
+            <a
+              href="https://childdevelopmentinfo.com/child-psychology/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="category-card"
+            >
               <img
-                src="https://a365reportstorage.blob.core.windows.net/public-blobs/b180edf21f99aa9c1a30ce89c7b5ffd2___slider-1.jpg"
-                alt="Phát triển"
+                src="https://res.cloudinary.com/djpfqveyz/image/upload/Depositphotos_73212229_L-1_cjcuju.jpg"
+                alt="Growing Toddlers"
               />
               <div className="category-content">
-                <h3>Tuổi trẻ các những đứa trẻ tập lớn</h3>
+                <h3>How to understand child psychology</h3>
                 <div className="category-meta">
-                  <span className="author">Author: Tuấn</span>
-                  <span className="tag">#Tâm Sự</span>
+                  <span className="author">Author: Childdevelopmentinfo</span>
+                  <span className="tag">#Parenting</span>
                 </div>
               </div>
-            </div>
-            <div className="category-card">
+            </a>
+
+            {/* Card 6 */}
+            <a
+              href="https://www.betterhealth.vic.gov.au/health/healthyliving/pregnancy-week-by-week"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="category-card"
+            >
               <img
-                src="https://prod-cdn.pharmacity.io/blog/Thai-nhi-7-thang-tuoi-dang-tiep-tuc-phat-trien-manh-me-.png"
-                alt="Sức khỏe"
+                src="https://res.cloudinary.com/djpfqveyz/image/upload/pregnancy_675x386_o7wbpl.jpg"
+                alt="Pregnancy"
               />
               <div className="category-content">
-                <h3>Hành trình thai nhi và tới khi chào đời</h3>
+                <h3>Pregnancy - week by week</h3>
                 <div className="category-meta">
-                  <span className="author">Author: Hoàng</span>
-                  <span className="tag">#Kiến Thức</span>
+                  <span className="author">Author: Betterhealth</span>
+                  <span className="tag">#Knowledge</span>
                 </div>
               </div>
-            </div>
+            </a>
+
           </div>
         </section>
 
@@ -253,32 +309,37 @@ function Guest() {
         <section className="features-highlight">
           <div className="features-highlight-content">
             <div className="feature-intro">
-              <h2>BabyHaven is your parenting partner</h2>
+              <h2>BabyHaven - Your Trusted Parenting Companion</h2>
             </div>
 
             <div className="feature-cards">
               <div className="feature-highlight-card">
-                <h3>Comprehensive Growth Tracking for Your Child</h3>
+                <h3>Track Your Child’s Growth with Confidence</h3>
                 <p>
-                  Measure and track metrics based on international standards.
+                  Monitor and analyze your child's development using internationally
+                  recognized standards, ensuring they are on the right path.
                 </p>
               </div>
 
               <div className="feature-highlight-card">
-                <h3>Expert Advice from Experienced Doctors</h3>
-                <p>Quick connect with reliable medical professionals.</p>
+                <h3>Access Trusted Advice from Pediatric Experts</h3>
+                <p>
+                  Instantly connect with experienced doctors and child care specialists
+                  for expert guidance whenever you need it.
+                </p>
               </div>
 
               <div className="feature-highlight-card">
-                <h3>Personalized Alerts and Recommendations</h3>
+                <h3>Personalized Insights & Smart Alerts</h3>
                 <p>
-                  Detect anomalies and receive tailored advice for your child's
-                  needs.
+                  Stay informed with customized recommendations and real-time alerts to
+                  address your child’s unique health and developmental needs.
                 </p>
               </div>
             </div>
           </div>
         </section>
+
 
         {/* Support Section */}
         <section className="support-section">
@@ -289,23 +350,24 @@ function Guest() {
                 little one
               </h2>
               <p>
-                Our mission is to make parents feel confident when taking the
-                biggest leap in their lives: having a baby
+                Parenthood is a journey full of joys and challenges. Our mission is to
+                empower and support you with the guidance and resources you need at
+                every stage.
               </p>
 
               <div className="support-buttons">
                 <h3>How can we support you?</h3>
                 <div className="button-grid">
-                  <button className="support-btn">I am pregnant</button>
+                  <button className="support-btn">I’m expecting</button>
                   <button className="support-btn">I have a baby</button>
-                  <button className="support-btn">I have a toddle</button>
+                  <button className="support-btn">I have a toddler</button>
                   <button className="support-btn">I have a child</button>
                 </div>
               </div>
             </div>
 
             <div className="support-right">
-              <h2>Tools & Features</h2>
+              <h2 id="tools-features">Tools & Features</h2>
               <div className="tools-grid">
                 {[
                   {
@@ -364,270 +426,10 @@ function Guest() {
         {/* Popular Topics Section */}
         <section className="popular-topics">
           <h2>Popular Topics</h2>
-
-          {/* Pregnancy Section */}
-          <div className="topic-section">
-            <h3>Pregnancy</h3>
-            <div className="topic-filters">
-              <button className="filter-btn active">All</button>
-              <button className="filter-btn">Nutrition & Wellness</button>
-              <button className="filter-btn">Exercise & Fitness</button>
-              <button className="filter-btn">Prenatal Care</button>
-              <button className="filter-btn">Preparing for Birth</button>
-              <button className="filter-btn">Emotional Well-being</button>
-            </div>
-
-            <div className="topic-grid">
-              {[
-                {
-                  image:
-                    "https://top3.vn/uploads/source/BaoNgoc/hinh-anh-me-va-be.jpg",
-                  title:
-                    "2 Genius TikTok Organizing Products, Approved by Moms",
-                  author: "John Smith",
-                  tags: ["#Nutrition", "#Wellness", "#Tips"],
-                },
-                {
-                  image:
-                    "https://thuthuatnhanh.com/wp-content/uploads/2022/06/Anh-me-va-be.jpg",
-                  title: "Essential Pregnancy Exercises for a Healthy Journey",
-                  author: "Emma Davis",
-                  tags: ["#Exercise", "#Fitness", "#Health"],
-                },
-                {
-                  image:
-                    "https://img5.thuthuatphanmem.vn/uploads/2021/12/16/hinh-anh-me-va-be-gai-cute_094356707.jpg",
-                  title: "Complete Guide to Prenatal Care: What to Expect",
-                  author: "Dr. Sarah Wilson",
-                  tags: ["#PrenatalCare", "#Health", "#Guide"],
-                },
-                {
-                  image:
-                    "https://studiovietnam.com/wp-content/uploads/2020/10/chup-anh-nghe-thuat-cho-me-va-be-7.jpg",
-                  title: "Nutrition Tips for a Healthy Pregnancy Diet",
-                  author: "Maria Rodriguez",
-                  tags: ["#Nutrition", "#Diet", "#Health"],
-                },
-              ].map((item, index) => (
-                <div key={index} className="topic-card">
-                  <div className="topic-image">
-                    <img src={item.image} alt={item.title} />
-                  </div>
-                  <div className="topic-content">
-                    <h4>{item.title}</h4>
-                    <div className="topic-meta">
-                      <span className="author">{item.author}</span>
-                      <div className="topic-tags">
-                        {item.tags.map((tag, idx) => (
-                          <span key={idx} className="tag">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Baby Section */}
-          <div className="topic-section">
-            <h3>Baby</h3>
-            <div className="topic-filters">
-              <button className="filter-btn active">All</button>
-              <button className="filter-btn">Feeding Essentials</button>
-              <button className="filter-btn">Sleep Training Tips</button>
-              <button className="filter-btn">Developmental Milestones</button>
-              <button className="filter-btn">Health & Immunization</button>
-              <button className="filter-btn">Bonding Activities</button>
-            </div>
-
-            <div className="topic-grid">
-              {[
-                {
-                  image:
-                    "https://images.pexels.com/photos/235127/pexels-photo-235127.jpeg",
-                  title: "Essential Guide to Baby Feeding Schedules",
-                  author: "Dr. Emily Chen",
-                  tags: ["#Feeding", "#Schedule", "#Tips"],
-                },
-                {
-                  image:
-                    "https://images.squarespace-cdn.com/content/v1/5a943503b40b9d58b1938792/1525104916603-YSPWOIJ3SE5SEOOJYEE4/Look+no+further+for+the+quickest+method+to+get+the+sleep+results+you+seek.+With+Extinction%2C+you+allow+your+child+the+opportunity+to+fall+asleep+completely+on+his+own.",
-                  title:
-                    "Sleep Training Methods: Finding What Works for Your Baby",
-                  author: "Lisa Thompson",
-                  tags: ["#Sleep", "#Training", "#Development"],
-                },
-                {
-                  image:
-                    "https://images.pexels.com/photos/3662667/pexels-photo-3662667.jpeg",
-                  title: "Understanding Your Baby's Growth Milestones",
-                  author: "Dr. Michael Brown",
-                  tags: ["#Growth", "#Milestones", "#Development"],
-                },
-                {
-                  image:
-                    "https://images.pexels.com/photos/3875089/pexels-photo-3875089.jpeg",
-                  title: "Fun and Educational Activities for Baby Bonding",
-                  author: "Sarah Parker",
-                  tags: ["#Bonding", "#Activities", "#Learning"],
-                },
-              ].map((item, index) => (
-                <div key={index} className="topic-card">
-                  <div className="topic-image">
-                    <img src={item.image} alt={item.title} />
-                  </div>
-                  <div className="topic-content">
-                    <h4>{item.title}</h4>
-                    <div className="topic-meta">
-                      <span className="author">{item.author}</span>
-                      <div className="topic-tags">
-                        {item.tags.map((tag, idx) => (
-                          <span key={idx} className="tag">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Toddle Section */}
-          <div className="topic-section">
-            <h3>Toddle</h3>
-            <div className="topic-filters">
-              <button className="filter-btn active">All</button>
-              <button className="filter-btn">Discipline & Behavior</button>
-              <button className="filter-btn">Early Learning Tools</button>
-              <button className="filter-btn">Potty Training</button>
-              <button className="filter-btn">Healthy Meals & Snacks</button>
-              <button className="filter-btn">Social Skills Development</button>
-            </div>
-
-            <div className="topic-grid">
-              {[
-                {
-                  image:
-                    "https://todaysparent.mblycdn.com/uploads/tp/2016/03/29-toddler-discipline-tactics-that-work.jpg",
-                  title: "Effective Discipline Strategies for Toddlers",
-                  author: "Dr. Rachel Green",
-                  tags: ["#Discipline", "#Behavior", "#Parenting"],
-                },
-                {
-                  image:
-                    "https://keeptoddlersbusy.com/wp-content/uploads/2020/09/Preschool-Learning-Activity-Counting-clothespin-wheel-1140x933.jpg",
-                  title: "Fun Learning Activities for Toddler Development",
-                  author: "Jessica Williams",
-                  tags: ["#Learning", "#Development", "#Activities"],
-                },
-                {
-                  image:
-                    "https://assets.babycenter.com/ims/2022/10/toddler-potty-training-10-oct-2022_4x3.jpg",
-                  title: "Complete Guide to Successful Potty Training",
-                  author: "Dr. James Anderson",
-                  tags: ["#PottyTraining", "#Tips", "#Guide"],
-                },
-                {
-                  image:
-                    "https://onceuponafarmorganics.com/cdn/shop/articles/2160px_f6ae9da3-be10-4471-a933-d6d0cecf3b4e.jpg?v=1683323853",
-                  title: "Healthy and Easy Toddler Meal Ideas",
-                  author: "Chef Maria Garcia",
-                  tags: ["#Nutrition", "#Meals", "#HealthyEating"],
-                },
-              ].map((item, index) => (
-                <div key={index} className="topic-card">
-                  <div className="topic-image">
-                    <img src={item.image} alt={item.title} />
-                  </div>
-                  <div className="topic-content">
-                    <h4>{item.title}</h4>
-                    <div className="topic-meta">
-                      <span className="author">{item.author}</span>
-                      <div className="topic-tags">
-                        {item.tags.map((tag, idx) => (
-                          <span key={idx} className="tag">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Child Section */}
-          <div className="topic-section">
-            <h3>Child</h3>
-            <div className="topic-filters">
-              <button className="filter-btn active">All</button>
-              <button className="filter-btn">Academic Growth</button>
-              <button className="filter-btn">Extracurricular Activities</button>
-              <button className="filter-btn">Emotional Intelligence</button>
-              <button className="filter-btn">Technology Use</button>
-              <button className="filter-btn">Physical Fitness</button>
-            </div>
-
-            <div className="topic-grid">
-              {[
-                {
-                  image:
-                    "https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg",
-                  title:
-                    "Boosting Your Child's Academic Performance: Expert Tips",
-                  author: "Dr. Robert Miller",
-                  tags: ["#Education", "#Learning", "#Academic"],
-                },
-                {
-                  image:
-                    "https://images.pexels.com/photos/8612900/pexels-photo-8612900.jpeg",
-                  title:
-                    "Best After-School Activities for Well-Rounded Development",
-                  author: "Jennifer Adams",
-                  tags: ["#Activities", "#Development", "#Skills"],
-                },
-                {
-                  image:
-                    "https://images.pexels.com/photos/8613315/pexels-photo-8613315.jpeg",
-                  title: "Building Emotional Intelligence in Children",
-                  author: "Dr. Amanda Lee",
-                  tags: ["#Emotional", "#Growth", "#Development"],
-                },
-                {
-                  image:
-                    "https://images.pexels.com/photos/8612977/pexels-photo-8612977.jpeg",
-                  title: "Balancing Screen Time and Physical Activities",
-                  author: "Coach David Wilson",
-                  tags: ["#Technology", "#Health", "#Balance"],
-                },
-              ].map((item, index) => (
-                <div key={index} className="topic-card">
-                  <div className="topic-image">
-                    <img src={item.image} alt={item.title} />
-                  </div>
-                  <div className="topic-content">
-                    <h4>{item.title}</h4>
-                    <div className="topic-meta">
-                      <span className="author">{item.author}</span>
-                      <div className="topic-tags">
-                        {item.tags.map((tag, idx) => (
-                          <span key={idx} className="tag">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <PregnancySection />
+          <BabySection />
+          <ToddleSection />
+          <ChildSection />
         </section>
 
         {/* Medical Advisory Board Section */}
@@ -635,8 +437,7 @@ function Guest() {
           <div className="board-content">
             <h2>Our Medical Advisory Board</h2>
             <p className="board-description">
-              Meet our medical advisors - highly respected experts who ensure
-              our content is complete and accurate.
+              Our board consists of leading pediatricians, child development experts, and medical specialists dedicated to ensuring the accuracy and reliability of the information we provide.
             </p>
 
             <div className="doctors-grid">
@@ -663,19 +464,19 @@ function Guest() {
                   image:
                     "https://img.freepik.com/free-photo/female-doctor-hospital-with-stethoscope_23-2148827775.jpg",
                   name: "Dr. David Wilson",
-                  specialty: "Pediatric Nutrition Expert",
+                  specialty: "Pediatric Nutrition Specialist",
                 },
                 {
                   image:
                     "https://img.freepik.com/free-photo/doctor-standing-with-folder-stethoscope_1291-16.jpg",
                   name: "Dr. Lisa Thompson",
-                  specialty: "Child Psychology Expert",
+                  specialty: "Child Psychology & Mental Health",
                 },
                 {
                   image:
                     "https://img.freepik.com/free-photo/medium-shot-doctor-with-crossed-arms_23-2148868314.jpg",
                   name: "Dr. James Anderson",
-                  specialty: "Pediatric Immunology",
+                  specialty: "Pediatric Immunology & Allergies",
                 },
               ].map((doctor, index) => (
                 <div key={index} className="doctor-card">
@@ -716,14 +517,14 @@ function Guest() {
               </div>
 
               <div className="trust-card">
-                <h3>Timely</h3>
+                <h3>Always Up-to-Date</h3>
                 <p>Updated regularly to reflect the latest information</p>
               </div>
             </div>
 
             <div className="trust-footer">
               <p>
-                Read our policy and licenses. <a href="#">Read more</a>
+                Learn more about our commitment to quality and accuracy. <a href="#">Read more</a>
               </p>
             </div>
           </div>
@@ -734,44 +535,48 @@ function Guest() {
       <footer className="homepage-footer">
         <div className="footer-content">
           <div className="footer-section">
-            <h3>Về BabyHaven</h3>
+            <h3>About BabyHaven</h3>
             <p>
-              Chúng tôi cung cấp các sản phẩm chất lượng cao cho bé yêu của bạn
+              We are committed to providing high-quality, research-backed products and
+              resources to support your parenting journey.
             </p>
           </div>
+
           <div className="footer-section">
-            <h3>Liên kết nhanh</h3>
+            <h3>Quick Links</h3>
             <ul>
               <li>
-                <a href="#about">Về chúng tôi</a>
+                <a href="#about">About Us</a>
               </li>
               <li>
-                <a href="#products">Sản phẩm</a>
+                <a href="#products">Our Products</a>
               </li>
               <li>
-                <a href="#contact">Liên hệ</a>
+                <a href="#contact">Contact Us</a>
               </li>
               <li>
-                <a href="#policy">Chính sách</a>
+                <a href="#policy">Privacy Policy</a>
               </li>
             </ul>
           </div>
+
           <div className="footer-section">
-            <h3>Liên hệ</h3>
+            <h3>Contact</h3>
             <ul>
               <li>
-                <i className="fas fa-phone"></i> 1900 1234
+                <i className="fas fa-phone"></i> +1 800 1234 5678
               </li>
               <li>
-                <i className="fas fa-envelope"></i> info@babyhaven.com
+                <i className="fas fa-envelope"></i> support@babyhaven.com
               </li>
               <li>
-                <i className="fas fa-map-marker-alt"></i> Hà Nội, Việt Nam
+                <i className="fas fa-map-marker-alt"></i> 123 Parenting Ave, New York, USA
               </li>
             </ul>
           </div>
+
           <div className="footer-section">
-            <h3>Theo dõi chúng tôi</h3>
+            <h3>Follow Us</h3>
             <div className="social-links">
               <a href="#">
                 <i className="fab fa-facebook"></i>
@@ -786,7 +591,7 @@ function Guest() {
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; 2024 BabyHaven. Tất cả quyền được bảo lưu.</p>
+          <p>&copy; 2024 BabyHaven. All rights reserved.</p>
         </div>
       </footer>
     </div>
