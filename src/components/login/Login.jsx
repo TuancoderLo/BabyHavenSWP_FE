@@ -19,7 +19,7 @@ function Login({ onLoginSuccess }) {
       [name]: value,
     }));
   };
-
+  // Xử lý login username/password
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
@@ -55,6 +55,13 @@ function Login({ onLoginSuccess }) {
     } else {
       setError("Tên đăng nhập hoặc mật khẩu không đúng!");
     }
+  };
+
+  // ----- Xử lý “Redirect flow” Google OAuth -----
+  // Chỉ cần 1 nút, khi bấm sẽ redirect sang BE
+  const handleGoogleRedirect = () => {
+    // Sửa URL cho đúng domain + port của BE
+    window.location.href = "https://localhost:7279/api/GoogleAuth/signin-google";
   };
 
   return (
@@ -114,9 +121,14 @@ function Login({ onLoginSuccess }) {
             <div className="divider">
               <span>Or</span>
             </div>
-
-            <button type="button" className="social-btn google">
+            {/* Nút Google - Redirect sang BE */}
+            <button
+              type="button"
+              className="social-btn google"
+              onClick={handleGoogleRedirect}
+            >
               <i className="fab fa-google"></i>
+              <span style={{ marginLeft: "8px" }}>Login with Google</span>
             </button>
 
             <div className="toggle-form">
