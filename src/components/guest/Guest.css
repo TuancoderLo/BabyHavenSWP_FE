@@ -30,7 +30,7 @@ nav {
 }
 
 .logo img {
-  height: 45px;
+  height: 30px;
   border-radius: 8px;
 }
 
@@ -50,7 +50,7 @@ nav {
 
 .nav-links a {
   text-decoration: none;
-  color: #00d0bc;
+  color: #000000;
   font-weight: 500;
   font-size: 0.95rem;
   transition: all 0.3s ease;
@@ -148,7 +148,7 @@ nav {
   left: 50%;
   width: 0;
   height: 2px;
-  background-color: #00d0bc;
+  background-color: #000000;
   transition: all 0.3s ease;
   transform: translateX(-50%);
 }
@@ -169,18 +169,18 @@ nav {
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1.2rem;
-  background-color: #00d0bc;
-  color: white;
+  background-color: #FF74C7;
+  color: #302e2e;
   border: none;
   border-radius: 20px;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .logout-btn:hover {
-  background-color: #00bfa6;
+  background-color: #e344a3;
   transform: translateY(-1px);
 }
 
@@ -493,7 +493,7 @@ color: rgb(0, 208, 188);
 }
 
 .social-links {
-  display: flex;
+  display: contents;
   gap: 1rem;
   margin-top: 1rem;
 }

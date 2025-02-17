@@ -30,7 +30,7 @@ nav {
 }
 
 .logo img {
-  height: 45px;
+  height: 30px;
   border-radius: 8px;
 }
 
@@ -180,7 +180,7 @@ nav {
 .nav-links a {
   text-decoration: none;
   color: #00d0bc;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.95rem;
   transition: all 0.3s ease;
   padding: 0.5rem 0.8rem;
@@ -189,7 +189,8 @@ nav {
 
 .nav-links a:hover {
   background-color: #f8f9fa;
-  color: #00d0bc;
+  color: #000000;
+  font-weight: 600;
 }
 
 /* Dropdown Styles */
@@ -246,7 +247,7 @@ nav {
 
 .dropdown-content a {
   padding: 0.8rem 1.5rem;
-  color: #00d0bc;
+  color: #000000;
   font-weight: normal;
   font-size: 0.9rem;
   display: flex;
@@ -296,12 +297,12 @@ nav {
 /* Hero Section */
 .hero-section {
   background: #ede0fa;
-  height: 9vh;
+  height: 6vh;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  margin-top: 62px;
+  margin-top: 65px;
 }
 
 .hero-content {
@@ -312,7 +313,7 @@ nav {
 .hero-content h1 {
   font-size: 1rem;
   color: #2c3e50;
-  line-height: 1.2;
+  line-height: 16px;
   font-weight: 600;
 }
 
@@ -446,7 +447,7 @@ nav {
 
 .carousel-dots {
   position: absolute;
-  bottom: 30px;
+  bottom: 15px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -1026,6 +1027,7 @@ color: rgb(0, 208, 188);
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
   margin-top: 2rem;
+  padding-bottom: 5rem;
 }
 
 .topic-card {
@@ -1160,8 +1162,8 @@ color: rgb(0, 208, 188);
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
-  margin-bottom: 3rem;
-  max-width: 800px;
+  margin-bottom: 1rem;
+  max-width: 600px;
   margin-left: auto;
   margin-right: auto;
 }
