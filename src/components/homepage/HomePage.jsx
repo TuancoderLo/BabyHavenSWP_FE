@@ -68,7 +68,7 @@ function HomePage() {
   // Xử lý đăng xuất
   const handleLogout = () => {
     localStorage.clear();
-    navigate("/login");
+    navigate("/homepage");
   };
 
   return (
@@ -173,6 +173,7 @@ function HomePage() {
       <section className="hero-section">
         <div className="hero-content">
           <h1>Join now and follow every tiny step of your baby's journey.</h1>
+
         </div>
       </section>
 

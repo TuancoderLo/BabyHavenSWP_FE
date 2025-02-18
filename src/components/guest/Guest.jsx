@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import {Link, NavLink, useNavigate} from "react-router-dom";
 import "./Guest.css";
 import Logo from "../../assets/Logo.png";
 import Name from "../../assets/Name.png";
@@ -73,6 +73,7 @@ function Guest() {
           <div className="logo">
             <img src={Logo} />
             <img src={Name} />
+
           </div>
           <div className="nav-links">
             <div className="dropdown">
@@ -119,7 +120,7 @@ function Guest() {
             <a href="#!" onClick={handleScrollToFeatures}>Features</a>
           </div>
           <div className="user-actions">
-            <div onClick={() => navigate("/login")}>JOIN</div>
+            <div className="join-btn" onClick={() => navigate("/register")}>Join</div>
             <button className="logout-btn" onClick={() => navigate("/login")}>
               {/* <i className="fas fa-sign-in-alt"></i> */}
               Sign Up
@@ -131,7 +132,7 @@ function Guest() {
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
-          <h1>Join now and follow every tiny step of your baby's journey.</h1>
+          <NavLink className="journey" to={"/login"}>Join now and follow every tiny step of your baby's journey.</NavLink>
         </div>
       </section>
 
