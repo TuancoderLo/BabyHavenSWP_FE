@@ -1,0 +1,43 @@
+/* src/pages/Admin/Admin.css */
+
+/* Bố cục chung */
+.admin-container {
+  display: flex;        /* quan trọng: flex layout */
+  min-height: 100vh;    /* full màn hình */
+  background: #ebf3fc;  /* nền pastel */
+}
+
+/* Khu vực chính (bên phải) */
+.admin-main {
+  flex: 1;                  /* chiếm phần còn lại */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Vùng content */
+.admin-content {
+  flex: 1;
+  padding: 20px;
+}
+
+.admin-header {
+  margin-bottom: 20px;
+}
+.admin-header h2 {
+  font-size: 1.2rem;
+  color: #444;
+}
+
+.admin-charts {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.chart-large {
+  width: 100%;
+}
+.chart-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap; /* responsive */
+}

@@ -1,0 +1,60 @@
+/* src/components/admin/SidebarHover.css */
+
+/* Sidebar trái (trong layout flex) */
+.admin-sidebar-hover {
+  width: 60px; /* khi thu gọn */
+  background: #ffffff;
+  border-right: 1px solid #ddd;
+  transition: width 0.3s;
+  display: flex;
+  flex-direction: column;
+  position: relative; /* relative, ko fixed */
+  z-index: 10;
+}
+
+.admin-sidebar-hover.expanded {
+  width: 200px; /* khi hover mở rộng */
+}
+
+/* Logo */
+.sidebar-logo {
+  width: 100%;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.sidebar-logo img {
+  max-width: 40px;
+  height: auto;
+}
+
+/* Menu */
+.admin-sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.admin-sidebar-menu li {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  color: #333;
+  cursor: pointer;
+}
+.admin-sidebar-menu li:hover {
+  background: #f2f2f2;
+}
+
+.admin-icon {
+  font-size: 18px;
+  margin-right: 12px;
+}
+
+.admin-sidebar-footer:hover {
+  background: #f2f2f2;
+}

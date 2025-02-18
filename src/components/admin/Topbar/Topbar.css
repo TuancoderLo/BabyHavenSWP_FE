@@ -1,0 +1,44 @@
+/* src/components/admin/Topbar.css */
+.topbar-container {
+  height: 60px;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  justify-content: space-between;
+}
+
+.topbar-left h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #444;
+}
+
+/* Search */
+.topbar-search {
+  display: flex;
+  align-items: center;
+  background: #f2f2f2;
+  border-radius: 20px;
+  padding: 0 10px;
+}
+
+.search-icon {
+  color: #888;
+  margin-right: 5px;
+}
+
+.topbar-search input {
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 5px 0;
+  width: 180px;
+}
+
+/* Right side */
+.topbar-right {
+  font-size: 0.95rem;
+  color: #555;
+}
