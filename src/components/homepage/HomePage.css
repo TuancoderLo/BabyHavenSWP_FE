@@ -103,7 +103,7 @@ nav {
   background: rgba(255,255,255,0.3);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.2);
-  box-shadow: -2px 0 15px rgba(0, 208, 188, 0.2);
+  box-shadow: -2px 0 15px rgba(255, 255, 255, 0);
   z-index: 999;
   padding: 1rem;
   overflow-y: auto;

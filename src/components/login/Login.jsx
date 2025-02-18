@@ -53,7 +53,7 @@ function Login({ onLoginSuccess }) {
         navigate("/homepage");
       }
     } else {
-      setError("Tên đăng nhập hoặc mật khẩu không đúng!");
+      setError("Username or password is incorrect!");
     }
   };
 
