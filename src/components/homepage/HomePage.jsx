@@ -68,7 +68,7 @@ function HomePage() {
   // Xử lý đăng xuất
   const handleLogout = () => {
     localStorage.clear();
-    navigate("/homepage");
+    navigate("/");
   };
 
   return (
