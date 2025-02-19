@@ -7,6 +7,7 @@ import PregnancySection from "../topics/PregnancySection";
 import BabySection from "../topics/BabySection";
 import ToddleSection from "../topics/ToddleSection";
 import ChildSection from "../topics/ChildSection";
+import Packages from "../packages/Packages";
 
 function Guest() {
   const navigate = useNavigate();
@@ -595,6 +596,8 @@ function Guest() {
           <p>&copy; 2024 BabyHaven. All rights reserved.</p>
         </div>
       </footer>
+            {/* Packages (icon + bảng gói) */}
+            <Packages />
     </div>
   );
 }

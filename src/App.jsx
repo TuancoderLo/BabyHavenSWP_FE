@@ -5,6 +5,7 @@ import Login from "./components/login/Login";
 import Register from "./components/register/Register";
 import Homepage from "./components/homepage/HomePage";
 import Admin from "./components/admin/Admin";
+import Packages from "./components/packages/Packages";
 import ChartCard from "./components/admin/ChartCard/ChartCard";
 import Home from "./components/admin/Component_Sidebar/home/home";
 import Blog from "./components/admin/Component_Sidebar/blog/blog";
@@ -80,6 +81,8 @@ function App() {
               <Admin />
             </ProtectedRoute>
           }
+        />
+        <Route path="/packages" element={<Packages />} />
         >
           <Route index element={<ChartCard />} />
           <Route path="home" element={<Home />} />
@@ -90,7 +93,6 @@ function App() {
           <Route path="settings" element={<Settings />} />
           <Route path="inbox" element={<Inbox />} />
         </Route>
-
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>

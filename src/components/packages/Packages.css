@@ -27,7 +27,7 @@
 /* Overlay mờ toàn trang */
 .packages-overlay {
   position: fixed;
-  top: 0; 
+  top: 0;
   left: 0;
   width: 100%; 
   height: 100%;
@@ -51,7 +51,6 @@
   opacity: 0;
 }
 
-/* Hiệu ứng bung modal */
 @keyframes modal-in {
   to {
     transform: scale(1);
@@ -84,7 +83,7 @@
   line-height: 1.5;
 }
 
-/* Row 3 cột gói */
+/* Row hiển thị gói */
 .packages-row {
   display: flex;
   gap: 1rem;
