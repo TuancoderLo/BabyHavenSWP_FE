@@ -5,7 +5,7 @@ import Login from "./components/login/Login";
 import Register from "./components/register/Register";
 import Homepage from "./components/homepage/HomePage";
 import Admin from "./components/admin/Admin";
-
+import Packages from "./components/packages/Packages";
 
 function App() {
   const [userRole, setUserRole] = useState(() => localStorage.getItem("role"));
@@ -74,7 +74,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-
+        
+        <Route path="/packages" element={<Packages />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
