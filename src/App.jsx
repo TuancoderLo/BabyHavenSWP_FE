@@ -1,19 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+// Guest & Auth
 import Guest from "./components/guest/Guest";
 import Login from "./components/login/Login";
 import Register from "./components/register/Register";
+
+// HomePage (user)
 import Homepage from "./components/homepage/HomePage";
+
+// Admin
 import Admin from "./components/admin/Admin";
-import Packages from "./components/packages/Packages";
 import ChartCard from "./components/admin/ChartCard/ChartCard";
 import Home from "./components/admin/Component_Sidebar/home/home";
 import Blog from "./components/admin/Component_Sidebar/blog/blog";
 import Members from "./components/admin/Component_Sidebar/members/members";
-import Packages from "./components/admin/Component_Sidebar/packages/packages";
+import AdminPackages from "./components/admin/Component_Sidebar/packages/packages";
 import Inbox from "./components/admin/Component_Sidebar/inbox/inbox";
 import Notifications from "./components/admin/Component_Sidebar/notifications/notifications";
 import Settings from "./components/admin/Component_Sidebar/settings/settings";
+
+//Member
+import MemberPackages from "./components/packages/Packages";
+// ↑ đổi tên import (MamberPackages) để khác với AdminPackages
 
 function App() {
   const [userRole, setUserRole] = useState(() => localStorage.getItem("role"));
@@ -21,7 +30,7 @@ function App() {
     () => localStorage.getItem("isAuthenticated") === "true"
   );
 
-  // Thêm hàm để cập nhật state
+  // Cập nhật lại role, auth từ localStorage
   const updateAuthState = () => {
     const role = localStorage.getItem("role");
     const auth = localStorage.getItem("isAuthenticated");
@@ -33,25 +42,19 @@ function App() {
     updateAuthState();
   }, []);
 
-  // Protected Route component
+  // Component bảo vệ route
   const ProtectedRoute = ({ children, roles }) => {
-    console.log("Protected Route Check:", {
-      isAuthenticated,
-      userRole,
-      requiredRoles: roles,
-    });
-
     if (!isAuthenticated) {
-      console.log("Not authenticated, redirecting to login");
+      // Chưa đăng nhập => về login
       return <Navigate to="/login" />;
     }
 
     if (roles && !roles.includes(userRole)) {
-      console.log("Unauthorized role, redirecting to home");
+      // Đăng nhập rồi nhưng role ko phù hợp => về trang chủ
       return <Navigate to="/" />;
     }
 
-    return children;
+    return children; // Cho phép vào
   };
 
   return (
@@ -65,7 +68,7 @@ function App() {
         />
         <Route path="/register" element={<Register />} />
 
-        {/* Protected routes */}
+        {/* Protected route dành cho user */}
         <Route
           path="/homepage"
           element={
@@ -74,6 +77,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* Protected route dành cho admin */}
         <Route
           path="/admin"
           element={
@@ -81,18 +86,22 @@ function App() {
               <Admin />
             </ProtectedRoute>
           }
-        />
-        <Route path="/packages" element={<Packages />} />
         >
+          {/* Các route con trong /admin */}
           <Route index element={<ChartCard />} />
           <Route path="home" element={<Home />} />
           <Route path="blog" element={<Blog />} />
           <Route path="members" element={<Members />} />
-          <Route path="packages" element={<Packages />} />
+          <Route path="packages" element={<AdminPackages />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="settings" element={<Settings />} />
           <Route path="inbox" element={<Inbox />} />
         </Route>
+
+        {/*packages dành cho user */}
+        <Route path="/packages" element={<MemberPackages />} />
+
+        {/* Bắt tất cả còn lại => về "/" */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
