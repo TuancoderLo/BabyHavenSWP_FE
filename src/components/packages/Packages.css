@@ -1,0 +1,167 @@
+/* Icon nổi ở góc phải dưới */
+.floating-icon {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  z-index: 1000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.floating-icon:active {
+  transform: scale(0.9);
+}
+
+.floating-icon img {
+  width: 60%;
+  height: 60%;
+  object-fit: contain;
+}
+
+/* Overlay mờ toàn trang */
+.packages-overlay {
+  position: fixed;
+  top: 0; 
+  left: 0;
+  width: 100%; 
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Bảng packages ở giữa */
+.packages-modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 800px;         /* Độ rộng */
+  max-width: 90%;       /* Responsive */
+  position: relative;   /* Để đặt nút close */
+  animation: modal-in 0.3s ease forwards; /* Hiệu ứng scale/fade in */
+  transform: scale(0.8);
+  opacity: 0;
+}
+
+/* Hiệu ứng bung modal */
+@keyframes modal-in {
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Nút đóng (X) */
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* Tiêu đề, subtitle */
+.modal-title {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.modal-subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+/* Row 3 cột gói */
+.packages-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap; /* Xuống hàng nếu màn hình hẹp */
+}
+
+/* Card gói */
+.package-card {
+  flex: 1;
+  min-width: 220px;
+  max-width: 260px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  position: relative; /* Cho icon Premium */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.package-card h3 {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.package-price {
+  margin-bottom: 1.5rem;
+}
+
+.price-amount {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.price-duration {
+  font-size: 1rem;
+  color: #888;
+}
+
+.package-btn {
+  padding: 0.7rem 1.4rem;
+  background-color: #00d0bc;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.package-btn:hover {
+  background-color: #00bfa6;
+  transform: translateY(-2px);
+}
+
+/* Hover card => nổi xíu */
+.package-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* PREMIUM: viền xanh, icon gắn */
+.package-card.premium {
+  border: 2px solid #00d0bc;
+  background: #fff; /* Nền khác 1 chút */
+}
+
+/* Icon gắn ở góc card PREMIUM */
+.premium-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}

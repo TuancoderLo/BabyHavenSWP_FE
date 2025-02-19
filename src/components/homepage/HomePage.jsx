@@ -8,6 +8,7 @@ import BabySection from "../topics/BabySection";
 import ToddleSection from "../topics/ToddleSection";
 import ChildSection from "../topics/ChildSection";
 import Name from "../../assets/Name.png";
+import Packages from "../packages/Packages";
 
 function HomePage() {
   const navigate = useNavigate();
@@ -636,6 +637,8 @@ function HomePage() {
           <p>&copy; 2024 BabyHaven. All rights reserved.</p>
         </div>
       </footer>
+      {/* Packages (icon + bảng gói) */}
+      <Packages />
     </div >
   );
 }
