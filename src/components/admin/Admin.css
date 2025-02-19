@@ -2,22 +2,22 @@
 
 /* Bố cục chung */
 .admin-container {
-  display: flex;        /* quan trọng: flex layout */
-  min-height: 100vh;    /* full màn hình */
-  background: #ebf3fc;  /* nền pastel */
+  display: flex; /* quan trọng: flex layout */
+  min-height: 100vh; /* full màn hình */
+  background: #ebf3fc; /* nền pastel */
 }
 
 /* Khu vực chính (bên phải) */
 .admin-main {
-  flex: 1;                  /* chiếm phần còn lại */
+  flex: 1; /* chiếm phần còn lại */
   display: flex;
   flex-direction: column;
 }
 
 /* Vùng content */
 .admin-content {
-  flex: 1;
   padding: 20px;
+  width: 100%;
 }
 
 .admin-header {
@@ -40,4 +40,8 @@
   display: flex;
   gap: 20px;
   flex-wrap: wrap; /* responsive */
+}
+
+.chart-container {
+  margin-bottom: 20px;
 }

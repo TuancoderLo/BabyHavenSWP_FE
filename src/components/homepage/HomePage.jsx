@@ -19,22 +19,24 @@ function HomePage() {
     {
       url: "https://www.brighthorizons.com/resources/-/media/bh-new/enews-images/widen-5imzbkuni06_519-babys-first-year.ashx?as=1",
       title: "Welcome to BabyHaven",
-      description: "We're here to support you every step of your parenting journey.",
+      description:
+        "We're here to support you every step of your parenting journey.",
       buttonText: "Discover More",
     },
     {
       url: "https://images.squarespace-cdn.com/content/v1/5b9343ce4611a05bc46ea084/ebfb128d-2704-458b-b68a-b1f22f72768f/baby+mom+blocks.jpeg",
       title: "Friendly Expert Guidance",
-      description: "Connect with caring professionals ready to help you navigate parenthood.",
+      description:
+        "Connect with caring professionals ready to help you navigate parenthood.",
       buttonText: "Meet Our Experts",
     },
     {
       url: "https://www.watchmegrowprogram.com/wp-content/uploads/2023/07/baby-milestones.jpg",
       title: "Track Your Baby's Development",
-      description: "Watch as your little one grows and reaches exciting new milestones.",
+      description:
+        "Watch as your little one grows and reaches exciting new milestones.",
       buttonText: "Start Tracking",
     },
-
   ];
 
   // State quản lý menu đóng/mở
@@ -138,7 +140,9 @@ function HomePage() {
             {/* Text Name */}
             <span className="avatar-chip-text">Name</span>
             {/* Sidebar trượt từ phải */}
-            {menuOpen && <div className="overlay" onClick={() => setMenuOpen(false)}></div>}
+            {menuOpen && (
+              <div className="overlay" onClick={() => setMenuOpen(false)}></div>
+            )}
             <div className={`sidebar-menu ${menuOpen ? "open" : ""}`}>
               <div className="sidebar-header">
                 <i className="fas fa-user-circle"></i>
@@ -174,7 +178,6 @@ function HomePage() {
       <section className="hero-section">
         <div className="hero-content">
           <h1>Join now and follow every tiny step of your baby's journey.</h1>
-
         </div>
       </section>
 
@@ -189,8 +192,9 @@ function HomePage() {
             {carouselImages.map((slide, index) => (
               <div
                 key={index}
-                className={`carousel-slide ${index === currentSlide ? "active" : ""
-                  }`}
+                className={`carousel-slide ${
+                  index === currentSlide ? "active" : ""
+                }`}
               >
                 <div className="slide-caption">
                   <h3>{slide.title}</h3>
@@ -224,7 +228,6 @@ function HomePage() {
         <section className="categories-section">
           <h2>Popular Blogs</h2>
           <div className="categories-grid">
-
             {/* Card 1 */}
             <a
               href="https://merinokids.co.uk/blogs/merino/the-importance-of-temperature-regulation-in-babies"
@@ -257,7 +260,10 @@ function HomePage() {
                 alt="Product 2"
               />
               <div className="category-content">
-                <h3>Why is Positive Parenting Important and How Does it Help My Child?</h3>
+                <h3>
+                  Why is Positive Parenting Important and How Does it Help My
+                  Child?
+                </h3>
                 <div className="category-meta">
                   <span className="author">Author: thoughtfulparent</span>
                   <span className="tag">#Knowledge</span>
@@ -344,7 +350,6 @@ function HomePage() {
                 </div>
               </div>
             </a>
-
           </div>
         </section>
 
@@ -359,30 +364,31 @@ function HomePage() {
               <div className="feature-highlight-card">
                 <h3>Track Your Child’s Growth with Confidence</h3>
                 <p>
-                  Monitor and analyze your child's development using internationally
-                  recognized standards, ensuring they are on the right path.
+                  Monitor and analyze your child's development using
+                  internationally recognized standards, ensuring they are on the
+                  right path.
                 </p>
               </div>
 
               <div className="feature-highlight-card">
                 <h3>Access Trusted Advice from Pediatric Experts</h3>
                 <p>
-                  Instantly connect with experienced doctors and child care specialists
-                  for expert guidance whenever you need it.
+                  Instantly connect with experienced doctors and child care
+                  specialists for expert guidance whenever you need it.
                 </p>
               </div>
 
               <div className="feature-highlight-card">
                 <h3>Personalized Insights & Smart Alerts</h3>
                 <p>
-                  Stay informed with customized recommendations and real-time alerts to
-                  address your child’s unique health and developmental needs.
+                  Stay informed with customized recommendations and real-time
+                  alerts to address your child’s unique health and developmental
+                  needs.
                 </p>
               </div>
             </div>
           </div>
         </section>
-
 
         {/* Support Section */}
         <section className="support-section">
@@ -393,9 +399,9 @@ function HomePage() {
                 little one
               </h2>
               <p>
-                Parenthood is a journey full of joys and challenges. Our mission is to
-                empower and support you with the guidance and resources you need at
-                every stage.
+                Parenthood is a journey full of joys and challenges. Our mission
+                is to empower and support you with the guidance and resources
+                you need at every stage.
               </p>
 
               <div className="support-buttons">
@@ -480,7 +486,9 @@ function HomePage() {
           <div className="board-content">
             <h2>Our Medical Advisory Board</h2>
             <p className="board-description">
-              Our board consists of leading pediatricians, child development experts, and medical specialists dedicated to ensuring the accuracy and reliability of the information we provide.
+              Our board consists of leading pediatricians, child development
+              experts, and medical specialists dedicated to ensuring the
+              accuracy and reliability of the information we provide.
             </p>
 
             <div className="doctors-grid">
@@ -567,7 +575,8 @@ function HomePage() {
 
             <div className="trust-footer">
               <p>
-                Learn more about our commitment to quality and accuracy. <a href="#">Read more</a>
+                Learn more about our commitment to quality and accuracy.{" "}
+                <a href="#">Read more</a>
               </p>
             </div>
           </div>
@@ -580,8 +589,8 @@ function HomePage() {
           <div className="footer-section">
             <h3>About BabyHaven</h3>
             <p>
-              We are committed to providing high-quality, research-backed products and
-              resources to support your parenting journey.
+              We are committed to providing high-quality, research-backed
+              products and resources to support your parenting journey.
             </p>
           </div>
 
@@ -613,7 +622,8 @@ function HomePage() {
                 <i className="fas fa-envelope"></i> support@babyhaven.com
               </li>
               <li>
-                <i className="fas fa-map-marker-alt"></i> 123 Parenting Ave, New York, USA
+                <i className="fas fa-map-marker-alt"></i> 123 Parenting Ave, New
+                York, USA
               </li>
             </ul>
           </div>
@@ -639,7 +649,7 @@ function HomePage() {
       </footer>
       {/* Packages (icon + bảng gói) */}
       <Packages />
-    </div >
+    </div>
   );
 }
 
