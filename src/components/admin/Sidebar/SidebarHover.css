@@ -40,21 +40,38 @@
 }
 
 .admin-sidebar-menu li {
-  display: flex;
-  align-items: center;
-  padding: 10px 15px;
+  padding: 0; /* Bỏ padding ở li */
   color: #333;
   cursor: pointer;
-}
-.admin-sidebar-menu li:hover {
-  background: #f2f2f2;
 }
 
 .admin-icon {
   font-size: 18px;
+  min-width: 18px; /* Thêm min-width để giữ khoảng cách */
   margin-right: 12px;
 }
 
+.admin-icon-signout {
+  font-size: 18px;
+  min-width: 30px; /* Thêm min-width để giữ khoảng cách */
+  margin-right: 25px;
+  margin-top: 10px;
+}
+
 .admin-sidebar-footer:hover {
+  background: #f2f2f2;
+}
+
+.admin-sidebar-menu li a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  width: 100%;
+  padding: 10px 15px; /* Chuyển padding từ li sang a */
+}
+
+.admin-sidebar-menu li:hover,
+.admin-sidebar-menu li a:hover {
   background: #f2f2f2;
 }

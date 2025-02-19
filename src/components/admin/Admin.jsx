@@ -1,5 +1,6 @@
 // src/pages/Admin/Admin.jsx
 import React, { useState, useEffect } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 import SidebarHover from "../../components/admin/Sidebar/SidebarHover";
 import Topbar from "../../components/admin/Topbar/Topbar";
 import ChartCard from "../../components/admin/ChartCard/ChartCard";
@@ -8,6 +9,7 @@ import "./Admin.css";
 function Admin() {
   // State chứa data chart (có trường date)
   const [chartData, setChartData] = useState([]);
+  const location = useLocation();
 
   useEffect(() => {
     // fetch("/api/endpoint")
@@ -42,39 +44,21 @@ function Admin() {
         {/* Thanh trên cùng */}
         <Topbar />
 
-        {/* Phần nội dung Dashboard */}
+        {/* Khu vực nội dung */}
         <div className="admin-content">
-          <div className="admin-header">
-            <h2>Lorem Ipsum</h2>
-          </div>
-
-          <div className="admin-charts">
-            {/* Chart lớn */}
-            <div className="chart-large">
-              <ChartCard
-                title="Annual Sales Performance"
-                amount="127,092.22"
-                data={chartData}
-              />
+          {/* Hiển thị ChartCard khi ở trang admin chính */}
+          {location.pathname === "/admin" && (
+            <div className="chart-container">
+              <ChartCard data={chartData} />
             </div>
+          )}
 
-            {/* 2 chart nhỏ phía dưới */}
-            <div className="chart-row">
-              <ChartCard
-                title="Annual Sales Performance"
-                amount="127,092.22"
-                data={chartData}
-              />
-              <ChartCard
-                title="Annual Sales Performance"
-                amount="127,092.22"
-                data={chartData}
-              />
-            </div>
-          </div>
+          {/* Khu vực hiển thị components con */}
+          <Outlet />
         </div>
       </div>
     </div>
+    //=======================================================================================================
   );
 }
 

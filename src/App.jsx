@@ -5,7 +5,14 @@ import Login from "./components/login/Login";
 import Register from "./components/register/Register";
 import Homepage from "./components/homepage/HomePage";
 import Admin from "./components/admin/Admin";
-
+import ChartCard from "./components/admin/ChartCard/ChartCard";
+import Home from "./components/admin/Component_Sidebar/home/home";
+import Blog from "./components/admin/Component_Sidebar/blog/blog";
+import Members from "./components/admin/Component_Sidebar/members/members";
+import Packages from "./components/admin/Component_Sidebar/packages/packages";
+import Inbox from "./components/admin/Component_Sidebar/inbox/inbox";
+import Notifications from "./components/admin/Component_Sidebar/notifications/notifications";
+import Settings from "./components/admin/Component_Sidebar/settings/settings";
 
 function App() {
   const [userRole, setUserRole] = useState(() => localStorage.getItem("role"));
@@ -73,7 +80,16 @@ function App() {
               <Admin />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<ChartCard />} />
+          <Route path="home" element={<Home />} />
+          <Route path="blog" element={<Blog />} />
+          <Route path="members" element={<Members />} />
+          <Route path="packages" element={<Packages />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="inbox" element={<Inbox />} />
+        </Route>
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
