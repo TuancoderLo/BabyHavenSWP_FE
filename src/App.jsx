@@ -11,13 +11,16 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
     () => localStorage.getItem("isAuthenticated") === "true"
   );
+  const [email, setEmail] = useState(() => localStorage.getItem("email"));
 
   // Thêm hàm để cập nhật state
   const updateAuthState = () => {
     const role = localStorage.getItem("role");
     const auth = localStorage.getItem("isAuthenticated");
+    const email = localStorage.getItem("email");
     setUserRole(role);
     setIsAuthenticated(auth === "true");
+    setEmail(email);
   };
 
   useEffect(() => {
@@ -60,7 +63,7 @@ function App() {
         <Route
           path="/homepage"
           element={
-            <ProtectedRoute roles={["user"]}>
+            <ProtectedRoute role={["1"]}>
               <Homepage />
             </ProtectedRoute>
           }
@@ -68,7 +71,7 @@ function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute roles={["admin"]}>
+            <ProtectedRoute role={["3"]}>
               <Admin />
             </ProtectedRoute>
           }

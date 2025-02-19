@@ -2,14 +2,21 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { users } from "../../data/users";
 import "./Login.css";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "../../config/firebase";
+import api from "../../config/axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { jwtDecode } from "jwt-decode";
 
 function Login({ onLoginSuccess }) {
   console.log("Login component rendered");
   const [formData, setFormData] = useState({
-    username: "",
+    email: "",
     password: "",
   });
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -19,49 +26,148 @@ function Login({ onLoginSuccess }) {
       [name]: value,
     }));
   };
-  // Xử lý login username/password
-  const handleSubmit = (e) => {
+
+  const validateForm = () => {
+    if (!formData.email.trim() || !formData.password.trim()) {
+      setError("Vui lòng điền đầy đủ thông tin!");
+      return false;
+    }
+
+    if (formData.email.trim().length < 3) {
+      setError("Tên đăng nhập/Email phải có ít nhất 3 ký tự!");
+      return false;
+    }
+
+    if (formData.password.length < 6) {
+      setError("Mật khẩu phải có ít nhất 6 ký tự!");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    // Kiểm tra form trống
-    if (!formData.username || !formData.password) {
-      setError("Vui lòng điền đầy đủ thông tin!");
+    if (!validateForm()) {
       return;
     }
 
-    // Tìm user trong data
-    const user = users.find(
-      (u) =>
-        u.username === formData.username && u.password === formData.password
-    );
+    setIsLoading(true);
 
-    if (user) {
-      // Lưu thông tin đăng nhập
+    try {
+      const response = await api.post("Login", formData);
+      console.log("Response:", response.data);
+
+      if (response.data.status === 1) {
+        // Debug để xem cấu trúc data
+        console.log("JWT Token:", response.data.data);
+        console.log("JWT Token type:", typeof response.data.data);
+
+        // Lấy JWT token từ response và đảm bảo là string
+        const jwtToken = response.data.data.toString();
+
+        // Lưu JWT token
+        localStorage.setItem("token", jwtToken);
+        localStorage.setItem("isAuthenticated", "true");
+
+        try {
+          // Decode token với xử lý lỗi
+          const tokenPayload = jwtDecode(jwtToken);
+          console.log("Token Payload:", tokenPayload);
+
+          // Lưu thông tin từ token payload
+          localStorage.setItem("email", tokenPayload.email);
+          localStorage.setItem("role", tokenPayload.roleId);
+          localStorage.setItem("userId", tokenPayload.userId);
+
+          // Cập nhật state trong App
+          onLoginSuccess();
+
+          // Thông báo thành công
+          toast.success("Đăng nhập thành công!");
+
+          // Chuyển hướng dựa vào role
+          switch (tokenPayload.roleId) {
+            case "3":
+              navigate("/admin");
+              break;
+            case "2":
+              navigate("/doctor");
+              break;
+            case "1":
+            default:
+              navigate("/homepage");
+              break;
+          }
+        } catch (tokenError) {
+          console.error("Token decode error:", tokenError);
+          setError("Lỗi xử lý token. Vui lòng thử lại!");
+          toast.error("Lỗi xử lý token. Vui lòng thử lại!");
+        }
+      } else {
+        setError(response.data.message || "Đăng nhập thất bại!");
+        toast.error(response.data.message || "Đăng nhập thất bại!");
+      }
+    } catch (error) {
+      console.log("Error Details:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+      if (error.response) {
+        const errorMessage =
+          error.response.data.message || "Đăng nhập thất bại!";
+        setError(errorMessage);
+        toast.error(errorMessage);
+      } else if (error.request) {
+        const errorMessage =
+          "Không thể kết nối đến server. Vui lòng thử lại sau!";
+        setError(errorMessage);
+        toast.error(errorMessage);
+      } else {
+        const errorMessage = "Có lỗi xảy ra khi đăng nhập!";
+        setError(errorMessage);
+        toast.error(errorMessage);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleRedirect = async () => {
+    setIsLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+
+      const googleToken = result.user.accessToken;
+      const response = await api.post("auth/google", {
+        token: googleToken,
+        email: result.user.email,
+        displayName: result.user.displayName,
+      });
+
+      const { token, user } = response.data;
+
+      localStorage.setItem("token", token);
       localStorage.setItem("isAuthenticated", "true");
       localStorage.setItem("role", user.role);
       localStorage.setItem("username", user.username);
       localStorage.setItem("userId", user.id);
 
-      // Cập nhật state trong App
       onLoginSuccess();
-
-      // Chuyển hướng dựa vào role
-      if (user.role === "admin") {
-        navigate("/admin");
+      navigate("/homepage");
+    } catch (error) {
+      if (error.response) {
+        setError(error.response.data.message || "Đăng nhập Google thất bại!");
       } else {
-        navigate("/homepage");
+        setError("Đăng nhập bằng Google thất bại. Vui lòng thử lại!");
       }
-    } else {
-      setError("Tên đăng nhập hoặc mật khẩu không đúng!");
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  // ----- Xử lý “Redirect flow” Google OAuth -----
-  // Chỉ cần 1 nút, khi bấm sẽ redirect sang BE
-  const handleGoogleRedirect = () => {
-    // Sửa URL cho đúng domain + port của BE
-    window.location.href = "https://localhost:7279/api/GoogleAuth/signin-google";
   };
 
   return (
@@ -95,9 +201,9 @@ function Login({ onLoginSuccess }) {
             <div className="form-group">
               <input
                 type="text"
-                name="username"
-                placeholder="Enter your username"
-                value={formData.username}
+                name="email"
+                placeholder="Enter your email or username"
+                value={formData.email}
                 onChange={handleChange}
                 required
               />
@@ -114,21 +220,24 @@ function Login({ onLoginSuccess }) {
               />
             </div>
 
-            <button type="submit" className="submit-btn">
-              {"Log in"}
+            <button type="submit" className="submit-btn" disabled={isLoading}>
+              {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
 
             <div className="divider">
-              <span>Or</span>
+              <span>Hoặc</span>
             </div>
-            {/* Nút Google - Redirect sang BE */}
+
             <button
               type="button"
               className="social-btn google"
               onClick={handleGoogleRedirect}
+              disabled={isLoading}
             >
               <i className="fab fa-google"></i>
-              <span style={{ marginLeft: "8px" }}>Login with Google</span>
+              <span style={{ marginLeft: "8px" }}>
+                {isLoading ? "Đang xử lý..." : "Đăng nhập với Google"}
+              </span>
             </button>
 
             <div className="toggle-form">

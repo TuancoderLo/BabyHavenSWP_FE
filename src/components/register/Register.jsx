@@ -2,6 +2,11 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { users } from "../../data/users";
 import "./Register.css";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "../../config/firebase";
+import api from "../../config/axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -14,9 +19,35 @@ function Register() {
     confirmPassword: "",
   });
 
-  const handleGoogleRedirect = () => {
-    // Sửa URL cho đúng domain + port của BE
-    window.location.href = "https://localhost:7279/api/GoogleAuth/signin-google";
+  const handleGoogleRedirect = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      // Thêm các tham số để tối ưu hóa popup
+      provider.setCustomParameters({
+        prompt: "select_account",
+      });
+
+      const result = await signInWithPopup(auth, provider);
+
+      // Xử lý kết quả đăng nhập thành công
+      const user = result.user;
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token = credential.accessToken;
+
+      // Gọi API backend của bạn với thông tin user
+      const response = await api.post("google-auth", {
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        uid: user.uid,
+      });
+
+      toast.success("Đăng nhập Google thành công!");
+      navigate("/login"); // hoặc trang bạn muốn chuyển đến
+    } catch (error) {
+      console.error("Lỗi đăng nhập Google:", error);
+      toast.error("Đăng nhập Google thất bại: " + error.message);
+    }
   };
 
   const [error, setError] = useState("");
@@ -30,10 +61,20 @@ function Register() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
+    console.log(response);
+    try {
+      const response = await api.post("register", formData);
+      toast.success("Đăng ký thành công!");
+      navigate("/login");
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
+
+    //=====================
     // Kiểm tra form trống
     const {
       firstName,
@@ -223,14 +264,13 @@ function Register() {
             </div>
             {/* Nút Google - Redirect sang BE */}
             <button
-                type="button"
-                className="social-btn google"
-                onClick={handleGoogleRedirect}
+              type="button"
+              className="social-btn google"
+              onClick={handleGoogleRedirect}
             >
               <i className="fab fa-google"></i>
               <span style={{ marginLeft: "8px" }}>Login with Google</span>
             </button>
-
 
             <div className="toggle-form">
               {"Already a member?"}
