@@ -23,6 +23,7 @@ import Settings from "./components/admin/Component_Sidebar/settings/settings";
 //Member
 import MemberPackages from "./components/packages/Packages";
 // ↑ đổi tên import (MamberPackages) để khác với AdminPackages
+import MemberRoutes from "./components/member/MemberRoutes";
 
 function App() {
   const [userRole, setUserRole] = useState(() => localStorage.getItem("role"));
@@ -67,6 +68,7 @@ function App() {
           element={<Login onLoginSuccess={updateAuthState} />}
         />
         <Route path="/register" element={<Register />} />
+        <Route path="/packages" element={<MemberPackages />} />
 
         {/* Protected route dành cho user */}
         <Route
@@ -77,6 +79,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/member/*" element={<ProtectedRoute roles={["user"]}><MemberRoutes /></ProtectedRoute>} />
+
 
         {/* Protected route dành cho admin */}
         <Route
@@ -97,9 +101,6 @@ function App() {
           <Route path="settings" element={<Settings />} />
           <Route path="inbox" element={<Inbox />} />
         </Route>
-
-        {/*packages dành cho user */}
-        <Route path="/packages" element={<MemberPackages />} />
 
         {/* Bắt tất cả còn lại => về "/" */}
         <Route path="*" element={<Navigate to="/" />} />

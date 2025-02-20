@@ -1,0 +1,219 @@
+/* 1) Sidebar container chung */
+.children-sidebar {
+  background: #fff;
+  border-right: 1px solid #ddd;
+  transition: width 0.3s ease; /* hiệu ứng trượt mở/đóng */
+  overflow: hidden; /* ẩn phần text khi đóng */
+}
+
+/* Khi mở => sidebar rộng hơn, hiển thị cả text */
+.children-sidebar.open {
+  width: 200px; /* điều chỉnh tùy ý */
+}
+
+/* Khi đóng => sidebar thu nhỏ, chỉ logo */
+.children-sidebar.closed {
+  width: 70px; /* điều chỉnh tùy ý */
+}
+
+/* 2) Header sidebar (chứa logo + text) */
+.children-sidebar-header {
+  display: flex;
+  align-items: center;
+  height: 60px;
+  padding: 0 16px; /* khoảng cách trái/phải */
+  border-bottom: 1px solid #ddd;
+  cursor: pointer; /* click để toggle */
+  gap: 8px;        /* khoảng cách giữa logo và chữ */
+  transition: all 0.3s ease;
+}
+
+/* Logo (avatar_LOGO.jpg) */
+.children-sidebar-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: cover; /* hoặc contain, tùy logo */
+  border-radius: 8px; /* bo góc nhẹ nếu muốn */
+}
+
+/* Chữ “BabyHaven” (Name.png) */
+.children-sidebar-name {
+  height: 20px;         /* điều chỉnh cho phù hợp */
+  object-fit: contain;  /* tránh bị méo ảnh */
+  /* margin-left: auto;  nếu muốn đẩy chữ sang phải */
+}
+
+/* 3) Menu */
+.children-sidebar-menu {
+  padding-top: 10px;
+}
+
+.children-sidebar-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.children-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.children-menu-item:hover {
+  background: #f7f7f7;
+}
+
+.children-menu-item.active {
+  background: #e0f7fa;
+  color: #007bff;
+}
+
+.children-menu-item i {
+  font-size: 18px;
+}
+
+.children-menu-item span {
+  /* Khi sidebar đóng => text ẩn (overflow hidden) */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 4) Content bên phải */
+.children-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background: #f0f2f5;
+}
+
+.children-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.children-page-title h1 {
+  margin: 0;
+}
+
+.children-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.children-search-input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.children-user-info {
+  font-weight: 600;
+}
+
+/* 5) Danh sách con */
+.children-child-list {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 20px;
+}
+
+.children-child-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  width: 120px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.children-child-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+}
+
+.children-child-card.active {
+  border: 2px solid #00bfa6;
+}
+
+.children-child-name {
+  font-weight: 600;
+}
+
+.children-child-date {
+  font-size: 0.8rem;
+  color: #777;
+}
+
+.children-add-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.children-add-card i {
+  font-size: 24px;
+  margin-bottom: 6px;
+}
+
+/* 6) Thông tin chi tiết */
+.children-child-details {
+  display: flex;
+  gap: 2rem;
+}
+
+.children-child-info,
+.children-growth-info {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.children-child-info {
+  flex: 0.4;
+}
+
+.children-child-info h2 {
+  margin-top: 0;
+}
+
+.children-child-info button {
+  margin-top: 10px;
+  padding: 0.5rem 1rem;
+  background: #00bfa6;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.children-growth-info {
+  flex: 0.6;
+}
+
+.children-growth-info h3 {
+  margin-top: 0;
+}
+
+.children-chart-container {
+  margin-top: 1rem;
+  height: 200px;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+}

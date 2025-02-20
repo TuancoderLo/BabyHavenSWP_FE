@@ -192,9 +192,8 @@ function HomePage() {
             {carouselImages.map((slide, index) => (
               <div
                 key={index}
-                className={`carousel-slide ${
-                  index === currentSlide ? "active" : ""
-                }`}
+                className={`carousel-slide ${index === currentSlide ? "active" : ""
+                  }`}
               >
                 <div className="slide-caption">
                   <h3>{slide.title}</h3>
