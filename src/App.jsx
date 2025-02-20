@@ -26,17 +26,24 @@ import MemberPackages from "./components/packages/Packages";
 import MemberRoutes from "./components/member/MemberRoutes";
 
 function App() {
-  const [userRole, setUserRole] = useState(() => localStorage.getItem("role"));
+  const [userRole, setUserRole] = useState(() => {
+    const role = localStorage.getItem("role");
+    console.log("Initial role from localStorage:", role);
+    return role;
+  });
   const [isAuthenticated, setIsAuthenticated] = useState(
     () => localStorage.getItem("isAuthenticated") === "true"
   );
+  const [email, setEmail] = useState(() => localStorage.getItem("email"));
 
   // Cập nhật lại role, auth từ localStorage
   const updateAuthState = () => {
     const role = localStorage.getItem("role");
     const auth = localStorage.getItem("isAuthenticated");
+    const email = localStorage.getItem("email");
     setUserRole(role);
     setIsAuthenticated(auth === "true");
+    setEmail(email);
   };
 
   useEffect(() => {
@@ -45,17 +52,24 @@ function App() {
 
   // Component bảo vệ route
   const ProtectedRoute = ({ children, roles }) => {
+    console.log("Protected Route Check:", {
+      isAuthenticated,
+      userRole,
+      requiredRoles: roles,
+    });
+
     if (!isAuthenticated) {
-      // Chưa đăng nhập => về login
+      console.log("Not authenticated, redirecting to login");
       return <Navigate to="/login" />;
     }
 
-    if (roles && !roles.includes(userRole)) {
-      // Đăng nhập rồi nhưng role ko phù hợp => về trang chủ
+    // Kiểm tra role
+    if (!roles.includes(userRole)) {
+      console.log(`User role ${userRole} not in allowed roles ${roles}`);
       return <Navigate to="/" />;
     }
 
-    return children; // Cho phép vào
+    return children;
   };
 
   return (
@@ -70,12 +84,20 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/packages" element={<MemberPackages />} />
 
-        {/* Protected route dành cho user */}
+        {/* Protected routes */}
         <Route
           path="/homepage"
           element={
-            <ProtectedRoute roles={["user"]}>
+            <ProtectedRoute roles={["1"]}>
               <Homepage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/doctor"
+          element={
+            <ProtectedRoute roles={["2"]}>
+              <Navigate to="/" />
             </ProtectedRoute>
           }
         />
@@ -86,7 +108,7 @@ function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute roles={["admin"]}>
+            <ProtectedRoute roles={["3"]}>
               <Admin />
             </ProtectedRoute>
           }
