@@ -29,17 +29,17 @@ function Login({ onLoginSuccess }) {
 
   const validateForm = () => {
     if (!formData.email.trim() || !formData.password.trim()) {
-      setError("Vui lòng điền đầy đủ thông tin!");
+      setError("Email and Password is required");
       return false;
     }
 
     if (formData.email.trim().length < 3) {
-      setError("Tên đăng nhập/Email phải có ít nhất 3 ký tự!");
+      setError("Email must be at least 3 characters long!");
       return false;
     }
 
     if (formData.password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự!");
+      setError("Password must be at least 6 characters long!");
       return false;
     }
 
@@ -78,27 +78,27 @@ function Login({ onLoginSuccess }) {
           console.log("Token Payload:", tokenPayload);
 
           // Lưu role từ http://schemas.microsoft.com/ws/2008/06/identity/claims/role
-          const role =
-            tokenPayload[
-              "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-            ];
-          console.log("Role from token:", role);
+          const user = {
+            roleId: tokenPayload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
+            email: tokenPayload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
+            name: tokenPayload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
+            userId: tokenPayload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"],
+          };
+          console.log("Role from token:", user.roleId);
 
-          localStorage.setItem("role", role);
+          localStorage.setItem("role", user.roleId);
 
           // Lưu thông tin từ token payload
-          localStorage.setItem("email", tokenPayload.email);
-          localStorage.setItem("userId", tokenPayload.userId);
-          localStorage.setItem("name", tokenPayload.name);
+          localStorage.setItem("email", user.email);
+          localStorage.setItem("userId", user.userId);
+          localStorage.setItem("name", user.name);
 
           // Cập nhật state trong App
           onLoginSuccess();
 
-          // Thông báo thành công
-          toast.success("Đăng nhập thành công!");
 
           // Chuyển hướng dựa vào role
-          switch (role) {
+          switch (user.roleId) {
             case "3":
               navigate("/admin");
               break;
@@ -106,18 +106,15 @@ function Login({ onLoginSuccess }) {
               navigate("/doctor");
               break;
             case "1":
-            default:
               navigate("/homepage");
               break;
           }
         } catch (tokenError) {
           console.error("Token decode error:", tokenError);
-          setError("Lỗi xử lý token. Vui lòng thử lại!");
-          toast.error("Lỗi xử lý token. Vui lòng thử lại!");
+          setError("Token decode error. Please try again later.");
         }
       } else {
-        setError(response.data.message || "Đăng nhập thất bại!");
-        toast.error(response.data.message || "Đăng nhập thất bại!");
+        setError(response.data.message || "Login failed. Please try again later.");
       }
     } catch (error) {
       console.log("Error Details:", {
@@ -127,18 +124,15 @@ function Login({ onLoginSuccess }) {
       });
       if (error.response) {
         const errorMessage =
-          error.response.data.message || "Đăng nhập thất bại!";
+          error.response.data.message || "Login failed. Please try again later.";
         setError(errorMessage);
-        toast.error(errorMessage);
       } else if (error.request) {
         const errorMessage =
-          "Không thể kết nối đến server. Vui lòng thử lại sau!";
+          "Login failed. Please try again later.";
         setError(errorMessage);
-        toast.error(errorMessage);
       } else {
-        const errorMessage = "Có lỗi xảy ra khi đăng nhập!";
+        const errorMessage = "Login error";
         setError(errorMessage);
-        toast.error(errorMessage);
       }
     } finally {
       setIsLoading(false);
@@ -230,7 +224,7 @@ function Login({ onLoginSuccess }) {
             </div>
 
             <button type="submit" className="submit-btn" disabled={isLoading}>
-              {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
+              {isLoading ? "Loading..." : "Sign in"}
             </button>
 
             <div className="divider">
@@ -245,7 +239,7 @@ function Login({ onLoginSuccess }) {
             >
               <i className="fab fa-google"></i>
               <span style={{ marginLeft: "8px" }}>
-                {isLoading ? "Đang xử lý..." : "Đăng nhập với Google"}
+                {isLoading ? "Loading..." : "Sign in with Google"}
               </span>
             </button>
 
