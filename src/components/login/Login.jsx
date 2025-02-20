@@ -77,10 +77,19 @@ function Login({ onLoginSuccess }) {
           const tokenPayload = jwtDecode(jwtToken);
           console.log("Token Payload:", tokenPayload);
 
+          // Lưu role từ http://schemas.microsoft.com/ws/2008/06/identity/claims/role
+          const role =
+            tokenPayload[
+              "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+            ];
+          console.log("Role from token:", role);
+
+          localStorage.setItem("role", role);
+
           // Lưu thông tin từ token payload
           localStorage.setItem("email", tokenPayload.email);
-          localStorage.setItem("role", tokenPayload.roleId);
           localStorage.setItem("userId", tokenPayload.userId);
+          localStorage.setItem("name", tokenPayload.name);
 
           // Cập nhật state trong App
           onLoginSuccess();
@@ -89,7 +98,7 @@ function Login({ onLoginSuccess }) {
           toast.success("Đăng nhập thành công!");
 
           // Chuyển hướng dựa vào role
-          switch (tokenPayload.roleId) {
+          switch (role) {
             case "3":
               navigate("/admin");
               break;

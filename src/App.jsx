@@ -7,7 +7,11 @@ import Homepage from "./components/homepage/HomePage";
 import Admin from "./components/admin/Admin";
 
 function App() {
-  const [userRole, setUserRole] = useState(() => localStorage.getItem("role"));
+  const [userRole, setUserRole] = useState(() => {
+    const role = localStorage.getItem("role");
+    console.log("Initial role from localStorage:", role);
+    return role;
+  });
   const [isAuthenticated, setIsAuthenticated] = useState(
     () => localStorage.getItem("isAuthenticated") === "true"
   );
@@ -40,8 +44,9 @@ function App() {
       return <Navigate to="/login" />;
     }
 
-    if (roles && !roles.includes(userRole)) {
-      console.log("Unauthorized role, redirecting to home");
+    // Kiểm tra role
+    if (!roles.includes(userRole)) {
+      console.log(`User role ${userRole} not in allowed roles ${roles}`);
       return <Navigate to="/" />;
     }
 
@@ -63,15 +68,23 @@ function App() {
         <Route
           path="/homepage"
           element={
-            <ProtectedRoute role={["1"]}>
+            <ProtectedRoute roles={["1"]}>
               <Homepage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/doctor"
+          element={
+            <ProtectedRoute roles={["2"]}>
+              <Navigate to="/" />
             </ProtectedRoute>
           }
         />
         <Route
           path="/admin"
           element={
-            <ProtectedRoute role={["3"]}>
+            <ProtectedRoute roles={["3"]}>
               <Admin />
             </ProtectedRoute>
           }

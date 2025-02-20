@@ -10,11 +10,12 @@ import "react-toastify/dist/ReactToastify.css";
 
 function Register() {
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
     username: "",
+    email: "",
+    phoneNumber: "",
+    name: "",
+    gender: "Male",
+    dateOfBirth: "",
     password: "",
     confirmPassword: "",
   });
@@ -65,32 +66,41 @@ function Register() {
     e.preventDefault();
     setError("");
 
-    console.log(response);
     try {
-      const response = await api.post("register", formData);
+      // Tạo object mới không bao gồm confirmPassword
+      const submitData = {
+        username: formData.username,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        name: formData.name,
+        gender: formData.gender,
+        dateOfBirth: formData.dateOfBirth,
+        password: formData.password,
+      };
+
+      const response = await api.post("register", submitData);
       toast.success("Đăng ký thành công!");
       navigate("/login");
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Đăng ký thất bại!");
     }
 
-    //=====================
     // Kiểm tra form trống
     const {
-      firstName,
-      lastName,
-      email,
-      phone,
       username,
+      email,
+      phoneNumber,
+      name,
+      dateOfBirth,
       password,
       confirmPassword,
     } = formData;
     if (
-      !firstName ||
-      !lastName ||
-      !email ||
-      !phone ||
       !username ||
+      !email ||
+      !phoneNumber ||
+      !name ||
+      !dateOfBirth ||
       !password ||
       !confirmPassword
     ) {
@@ -107,7 +117,7 @@ function Register() {
 
     // Kiểm tra định dạng số điện thoại
     const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(phone)) {
+    if (!phoneRegex.test(phoneNumber)) {
       setError("Số điện thoại không hợp lệ!");
       return;
     }
@@ -136,9 +146,9 @@ function Register() {
       username,
       password,
       email,
-      phone,
-      firstName,
-      lastName,
+      phone: phoneNumber,
+      firstName: name.split(" ")[0],
+      lastName: name.split(" ")[1],
       role: "user",
     };
     users.push(newUser);
@@ -166,115 +176,125 @@ function Register() {
         </div>
         <div className="auth-box">
           <div className="auth-header">
-            <h1>{"Start your journey here"}</h1>
+            <h1>Create Account</h1>
             <p className="header-subtitle">
-              {"Come and discovering new adventures with your little one"}
+              Join us to discover amazing experiences
             </p>
           </div>
 
           <form onSubmit={handleSubmit}>
-            {
-              <div className="name-group">
-                <div className="form-group">
-                  <input
-                    type="text"
-                    name="firstName"
-                    placeholder="Enter your first name"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <input
-                    type="text"
-                    name="lastName"
-                    placeholder="Enter your last name"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-              </div>
-            }
+            <div className="form-group">
+              <input
+                type="text"
+                name="username"
+                placeholder="Username"
+                value={formData.username}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <input
+                type="text"
+                name="name"
+                placeholder="Full Name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
             <div className="form-group">
               <input
                 type="email"
                 name="email"
-                placeholder={"Enter your email"}
+                placeholder="Email Address"
                 value={formData.email}
                 onChange={handleChange}
                 required
               />
             </div>
 
-            {
-              <div className="form-group phone-group">
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="Enter your phone number"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                />
-                <span className="country-code">+84</span>
-              </div>
-            }
+            <div className="form-group">
+              <input
+                type="tel"
+                name="phoneNumber"
+                placeholder="Phone Number"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <select
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <input
+                type="date"
+                name="dateOfBirth"
+                value={formData.dateOfBirth}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
             <div className="form-group">
               <input
                 type="password"
                 name="password"
-                placeholder="Enter your password"
+                placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
                 required
               />
             </div>
 
-            {
-              <div className="form-group">
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  placeholder="Confirm your password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            }
+            <div className="form-group">
+              <input
+                type="password"
+                name="confirmPassword"
+                placeholder="Confirm Password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-            {
-              <div className="form-options">
-                <a href="#" className="forgot-password">
-                  Forgot password?
-                </a>
-              </div>
-            }
+            {error && <div className="error-message">{error}</div>}
 
             <button type="submit" className="submit-btn">
-              {"Sign up"}
+              Sign Up
             </button>
 
             <div className="divider">
-              <span>Or</span>
+              <span>or</span>
             </div>
-            {/* Nút Google - Redirect sang BE */}
+
             <button
               type="button"
-              className="social-btn google"
+              className="social-btn"
               onClick={handleGoogleRedirect}
             >
               <i className="fab fa-google"></i>
-              <span style={{ marginLeft: "8px" }}>Login with Google</span>
+              <span>Continue with Google</span>
             </button>
 
             <div className="toggle-form">
-              {"Already a member?"}
-              <span onClick={() => navigate("/login")}>{"Log in"}</span>
+              Already have an account?
+              <span onClick={() => navigate("/login")}>Sign in</span>
             </div>
           </form>
         </div>
