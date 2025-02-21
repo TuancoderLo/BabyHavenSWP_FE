@@ -79,10 +79,21 @@ function Login({ onLoginSuccess }) {
 
           // Lưu role từ http://schemas.microsoft.com/ws/2008/06/identity/claims/role
           const user = {
-            roleId: tokenPayload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
-            email: tokenPayload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
-            name: tokenPayload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
-            userId: tokenPayload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"],
+            roleId:
+              tokenPayload[
+                "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+              ],
+            email:
+              tokenPayload[
+                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+              ],
+            name: tokenPayload[
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+            ],
+            userId:
+              tokenPayload[
+                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+              ],
           };
           console.log("Role from token:", user.roleId);
 
@@ -95,7 +106,6 @@ function Login({ onLoginSuccess }) {
 
           // Cập nhật state trong App
           onLoginSuccess();
-
 
           // Chuyển hướng dựa vào role
           switch (user.roleId) {
@@ -114,7 +124,9 @@ function Login({ onLoginSuccess }) {
           setError("Token decode error. Please try again later.");
         }
       } else {
-        setError(response.data.message || "Login failed. Please try again later.");
+        setError(
+          response.data.message || "Login failed. Please try again later."
+        );
       }
     } catch (error) {
       console.log("Error Details:", {
@@ -124,11 +136,11 @@ function Login({ onLoginSuccess }) {
       });
       if (error.response) {
         const errorMessage =
-          error.response.data.message || "Login failed. Please try again later.";
+          error.response.data.message ||
+          "Login failed. Please try again later.";
         setError(errorMessage);
       } else if (error.request) {
-        const errorMessage =
-          "Login failed. Please try again later.";
+        const errorMessage = "Login failed. Please try again later.";
         setError(errorMessage);
       } else {
         const errorMessage = "Login error";
@@ -205,7 +217,7 @@ function Login({ onLoginSuccess }) {
               <input
                 type="text"
                 name="email"
-                placeholder="Enter your email or username"
+                placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleChange}
                 required
