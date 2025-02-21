@@ -474,7 +474,7 @@ function HomePage() {
 
         {/* Popular Topics Section */}
         <section className="popular-topics">
-          <h2>Popular Topics</h2>
+          <h2>Blogs</h2>
           <PregnancySection />
           <BabySection />
           <ToddleSection />
@@ -616,14 +616,15 @@ function HomePage() {
             <h3>Contact</h3>
             <ul>
               <li>
-                <i className="fas fa-phone"></i> +1 800 1234 5678
+                <i className="fas fa-phone"></i> +84 832909890
               </li>
               <li>
                 <i className="fas fa-envelope"></i> support@babyhaven.com
               </li>
               <li>
-                <i className="fas fa-map-marker-alt"></i> 123 Parenting Ave, New
-                York, USA
+                <i className="fas fa-map-marker-alt"></i> Lô E2a-7, Đường D1, Đ.
+                D1, Long Thạnh Mỹ, Thành Phố Thủ Đức, Hồ Chí Minh 700000,
+                Vietnam
               </li>
             </ul>
           </div>
@@ -644,7 +645,7 @@ function HomePage() {
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; 2024 BabyHaven. All rights reserved.</p>
+          <p>&copy; 2025 BabyHaven. All rights reserved.</p>
         </div>
       </footer>
       {/* Packages (icon + bảng gói) */}
