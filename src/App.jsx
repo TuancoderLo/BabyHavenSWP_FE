@@ -24,6 +24,7 @@ import Settings from "./components/admin/Component_Sidebar/settings/settings";
 import MemberPackages from "./components/packages/Packages";
 // ↑ đổi tên import (MamberPackages) để khác với AdminPackages
 import MemberRoutes from "./components/member/MemberRoutes";
+import GoogleCallback from "./components/login/GoogleCallback.jsx";
 
 function App() {
   const [userRole, setUserRole] = useState(() => {
@@ -81,6 +82,7 @@ function App() {
           path="/login"
           element={<Login onLoginSuccess={updateAuthState} />}
         />
+        <Route path="/google-callback" element={<GoogleCallback />} />
         <Route path="/register" element={<Register />} />
         <Route path="/packages" element={<MemberPackages />} />
 

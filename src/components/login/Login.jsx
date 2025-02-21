@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { users } from "../../data/users";
 import "./Login.css";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../config/firebase";
 import api from "../../config/axios";
-import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { jwtDecode } from "jwt-decode";
 
@@ -57,7 +55,7 @@ function Login({ onLoginSuccess }) {
     setIsLoading(true);
 
     try {
-      const response = await api.post("Login", formData);
+      const response = await api.post("Authentication/Login", formData);
       console.log("Response:", response.data);
 
       if (response.data.status === 1) {
@@ -153,37 +151,24 @@ function Login({ onLoginSuccess }) {
 
   const handleGoogleRedirect = async () => {
     setIsLoading(true);
+
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
+      // Gửi yêu cầu đến backend để lấy URL Google login
+      // Redirect người dùng đến Google login
+      window.location.href = "https://localhost:7279/api/GoogleAuth/signin-google";
 
-      const googleToken = result.user.accessToken;
-      const response = await api.post("auth/google", {
-        token: googleToken,
-        email: result.user.email,
-        displayName: result.user.displayName,
-      });
-
-      const { token, user } = response.data;
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("role", user.role);
-      localStorage.setItem("username", user.username);
-      localStorage.setItem("userId", user.id);
-
-      onLoginSuccess();
-      navigate("/homepage");
     } catch (error) {
+      // Xử lý lỗi nếu có
       if (error.response) {
-        setError(error.response.data.message || "Đăng nhập Google thất bại!");
+        setError(error.response.data.message || "Error while Signing In");
       } else {
-        setError("Đăng nhập bằng Google thất bại. Vui lòng thử lại!");
+        setError("Sign in with Google failed. Please try again later.");
       }
-    } finally {
       setIsLoading(false);
     }
   };
+
+
 
   return (
     <div className="auth-container">

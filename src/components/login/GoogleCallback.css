@@ -1,0 +1,38 @@
+/* Đặt các thuộc tính CSS cho toàn bộ container */
+.google-callback-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f9; /* Màu nền nhẹ nhàng */
+    font-family: 'Arial', sans-serif;
+    color: #333;
+}
+
+.loading-message {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #555;
+}
+
+.spinner {
+    margin: 20px auto;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #4d90fe;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite; /* Vòng xoay spinner */
+}
+
+/* Chuyển động spinner */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+p {
+    margin-top: 15px;
+    font-size: 16px;
+}
