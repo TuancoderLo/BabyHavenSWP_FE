@@ -162,7 +162,7 @@ function HomePage() {
               <hr />
               <div className="sidebar-section">
                 <h4>Profile</h4>
-                <p onClick={handleMember}>My Children</p>
+                <p onClick={() => navigate("/member")}>My children</p>
                 <p>My children’s milestones</p>
                 <p>My membership plans</p>
                 <p>My requests</p>

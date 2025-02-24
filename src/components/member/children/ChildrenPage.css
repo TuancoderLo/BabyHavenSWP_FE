@@ -1,219 +1,306 @@
-/* 1) Sidebar container chung */
-.children-sidebar {
+/* ============ COMMON ============ */
+.children-page {
+  display: flex;
+  height: 100vh;
+  background: linear-gradient(135deg, #e2f1ff, #fff9fc 50%, #fff1f9 100%);
+  font-family: sans-serif;
+  box-sizing: border-box;
+}
+
+/* Dùng .card chung cho các khung (Child Info, Alerts, Growth...) */
+.card {
   background: #fff;
-  border-right: 1px solid #ddd;
-  transition: width 0.3s ease; /* hiệu ứng trượt mở/đóng */
-  overflow: hidden; /* ẩn phần text khi đóng */
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
 }
 
-/* Khi mở => sidebar rộng hơn, hiển thị cả text */
-.children-sidebar.open {
-  width: 200px; /* điều chỉnh tùy ý */
+/* ============ SIDEBAR ============ */
+.children-sidebar {
+  position: relative;
+  background-color: #fff;
+  width: 60px;
+  transition: width 0.3s ease;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+.children-sidebar:hover {
+  width: 200px;
 }
 
-/* Khi đóng => sidebar thu nhỏ, chỉ logo */
-.children-sidebar.closed {
-  width: 70px; /* điều chỉnh tùy ý */
-}
-
-/* 2) Header sidebar (chứa logo + text) */
 .children-sidebar-header {
   display: flex;
   align-items: center;
   height: 60px;
-  padding: 0 16px; /* khoảng cách trái/phải */
-  border-bottom: 1px solid #ddd;
-  cursor: pointer; /* click để toggle */
-  gap: 8px;        /* khoảng cách giữa logo và chữ */
-  transition: all 0.3s ease;
+  padding: 0 10px;
+  gap: 10px;
+  cursor: pointer;
 }
 
-/* Logo (avatar_LOGO.jpg) */
-.children-sidebar-logo {
+.sidebar-logo-icon {
   width: 40px;
   height: 40px;
-  object-fit: cover; /* hoặc contain, tùy logo */
-  border-radius: 8px; /* bo góc nhẹ nếu muốn */
+  object-fit: cover;
+  flex-shrink: 0;
+  border-radius: 50%;
 }
 
-/* Chữ “BabyHaven” (Name.png) */
-.children-sidebar-name {
-  height: 20px;         /* điều chỉnh cho phù hợp */
-  object-fit: contain;  /* tránh bị méo ảnh */
-  /* margin-left: auto;  nếu muốn đẩy chữ sang phải */
+.sidebar-logo-text {
+  width: 100px;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-/* 3) Menu */
+.children-sidebar:hover .sidebar-logo-text {
+  opacity: 1;
+}
+
 .children-sidebar-menu {
-  padding-top: 10px;
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+  width: 100%;
+  overflow: hidden;
 }
 
 .children-sidebar-menu ul {
   list-style: none;
-  margin: 0;
   padding: 0;
+  margin: 0;
 }
 
-.children-menu-item {
+.children-sidebar-menu li {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  padding: 10px;
   color: #333;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s;
 }
 
-.children-menu-item:hover {
-  background: #f7f7f7;
+.children-sidebar-menu li:hover {
+  background: rgba(0, 208, 188, 0.1);
 }
 
-.children-menu-item.active {
-  background: #e0f7fa;
-  color: #007bff;
-}
-
-.children-menu-item i {
+.children-sidebar-menu li i {
   font-size: 18px;
+  width: 30px;
+  text-align: center;
+  margin-right: 5px;
 }
 
-.children-menu-item span {
-  /* Khi sidebar đóng => text ẩn (overflow hidden) */
+.children-sidebar-menu li span {
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
-/* 4) Content bên phải */
-.children-content {
+.children-sidebar:hover li span {
+  opacity: 1;
+}
+
+.menu-item.active {
+  background-color: rgba(0, 208, 188, 0.1);
+  border-right: 3px solid #00d0bc;
+}
+
+/* ============ MAIN CONTENT ============ */
+.children-main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  background: #f0f2f5;
 }
 
-.children-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.children-page-title h1 {
-  margin: 0;
-}
-
-.children-header-actions {
+/* Topbar */
+.children-topbar {
   display: flex;
   align-items: center;
-  gap: 20px;
+  height: 60px;
+  padding: 0 1rem;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.children-search-container {
+  flex: 1;
 }
 
 .children-search-input {
-  padding: 8px;
+  width: 60%;
+  max-width: 300px;
+  padding: 8px 12px;
+  border-radius: 20px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  outline: none;
 }
 
 .children-user-info {
-  font-weight: 600;
+  margin-left: auto;
+  font-weight: 500;
+  color: #333;
 }
 
-/* 5) Danh sách con */
-.children-child-list {
+/* ============ BODY ============ */
+.children-body {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 20px;
+  flex: 1;
+  gap: 20px;
+  padding: 10px 20px;
+  box-sizing: border-box;
 }
 
-.children-child-card {
-  background: #fff;
-  border: 1px solid #ddd;
+/* ============ LEFT COLUMN: CHILD LIST ============ */
+.children-list-column {
+  width: 250px;
+  background-color: #ffffffcc;
   border-radius: 8px;
   padding: 1rem;
-  width: 120px;
-  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+}
+
+.children-list-title {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.child-card {
+  background: #fff;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: box-shadow 0.2s;
+  border: 1px solid #eee;
+  line-height: 1.5;
 }
 
-.children-child-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+.child-card:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.children-child-card.active {
-  border: 2px solid #00bfa6;
+.child-card.active {
+  border-left: 3px solid #00d0bc;
+  background: #f9fffe;
 }
 
-.children-child-name {
+.child-name {
+  display: block;
   font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
 }
 
-.children-child-date {
-  font-size: 0.8rem;
-  color: #777;
+.child-dob {
+  display: block;
+  font-size: 0.9rem;
+  color: #666;
 }
 
-.children-add-card {
+.add-card {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  font-weight: 600;
+  color: #00bfa6;
+}
+
+/* ============ RIGHT COLUMN: CHILD DETAIL ============ */
+.children-detail-column {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
 }
 
-.children-add-card i {
-  font-size: 24px;
-  margin-bottom: 6px;
+/* Child info card */
+.child-info-card h2 {
+  margin: 0 0 8px;
+  font-size: 1.4rem;
+  color: #333;
+}
+.child-info-card p {
+  margin: 4px 0;
+  font-size: 0.95rem;
+  color: #666;
 }
 
-/* 6) Thông tin chi tiết */
-.children-child-details {
+/* Alerts card */
+.child-alerts-card {
   display: flex;
-  gap: 2rem;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.children-child-info,
-.children-growth-info {
-  background: #fff;
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid #ddd;
+.alert-box {
+  background: #f8f9fa;
+  border-radius: 6px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px; /* icon + text + button */
 }
 
-.children-child-info {
-  flex: 0.4;
+.alert-box.medium {
+  border-left: 4px solid orange;
+}
+.alert-box.high {
+  border-left: 4px solid red;
 }
 
-.children-child-info h2 {
-  margin-top: 0;
+.alert-box i {
+  font-size: 1.2rem;
+  color: #666;
 }
 
-.children-child-info button {
-  margin-top: 10px;
-  padding: 0.5rem 1rem;
-  background: #00bfa6;
-  color: #fff;
+.alert-box button {
+  margin-left: auto;
+  background: #00d0bc;
   border: none;
-  border-radius: 20px;
+  border-radius: 4px;
+  padding: 6px 10px;
+  color: #fff;
   cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+.alert-box button:hover {
+  background: #00bfa6;
 }
 
-.children-growth-info {
-  flex: 0.6;
+/* Growth card */
+.growth-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.2rem;
+  color: #333;
 }
 
-.children-growth-info h3 {
-  margin-top: 0;
+/* Chart placeholder */
+.chart-container {
+  background: #f4fdfd;
+  border: 1px dashed #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 10px;
 }
 
-.children-chart-container {
-  margin-top: 1rem;
-  height: 200px;
-  background: #fafafa;
+/* Sub charts: Weight - Height */
+.sub-charts {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #aaa;
+  gap: 20px;
+}
+
+.weight-card,
+.height-card {
+  flex: 1;
+}
+
+.weight-card h4,
+.height-card h4 {
+  margin-bottom: 8px;
+  color: #333;
 }
