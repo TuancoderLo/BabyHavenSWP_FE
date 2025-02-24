@@ -8,7 +8,7 @@ import Register from "./components/register/Register";
 
 // HomePage (user)
 import Homepage from "./components/homepage/HomePage";
-
+import MemberRoutes from "./components/member/MemberRoutes";
 // Admin
 import Admin from "./components/admin/Admin";
 import ChartCard from "./components/admin/ChartCard/ChartCard";
@@ -23,7 +23,7 @@ import Settings from "./components/admin/Component_Sidebar/settings/settings";
 //Member
 import MemberPackages from "./components/packages/Packages";
 // ↑ đổi tên import (MamberPackages) để khác với AdminPackages
-import MemberRoutes from "./components/member/MemberRoutes";
+
 import GoogleCallback from "./components/login/GoogleCallback.jsx";
 
 function App() {
@@ -103,9 +103,15 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/member/*" element={<ProtectedRoute roles={["user"]}><MemberRoutes /></ProtectedRoute>} />
-
-
+              {/* Route con dành cho Member */}
+              <Route
+          path="/member/*"
+          element={
+            <ProtectedRoute roles={["1"]}>
+              <MemberRoutes />
+            </ProtectedRoute>
+          }
+        />
         {/* Protected route dành cho admin */}
         <Route
           path="/admin"
