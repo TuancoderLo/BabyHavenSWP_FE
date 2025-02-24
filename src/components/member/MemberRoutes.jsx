@@ -8,22 +8,24 @@ import Notifications from "./notifications/Notifications";
 import Settings from "./settings/Settings";
 function MemberRoutes() {
     return (
-        <div className="member-content">
-            <Routes>
-                {/* Khi vào /member, mặc định vào Children */}
-                <Route path="/" element={<Children />} />
-                <Route path="doctor-consultation" element={<DoctorConsultation />} />
-                <Route path="subscriptions" element={<Subscriptions />} />
-                <Route path="transactions" element={<Transactions />} />
-                <Route path="health-analyst" element={<HealthAnalyst />} />
-                <Route path="notifications" element={<Notifications />} />
-                <Route path="settings" element={<Settings />} />
-
-                {/* Nếu nhập sai đường dẫn, quay lại HomePage */}
-                <Route path="*" element={<Navigate to="/homepage" />} />
-            </Routes>
-        </div>
+      <div className="member-content">
+        <Routes>
+          {/* Khi vào /member => mặc định hiển thị ChildrenPage */}
+          <Route path="/" element={<Children />} />
+  
+          {/* Các path con => /member/doctor-consultation, /member/subscriptions,... */}
+          <Route path="doctor-consultation" element={<DoctorConsultation />} />
+          <Route path="subscriptions" element={<Subscriptions />} />
+          <Route path="transactions" element={<Transactions />} />
+          <Route path="health-analyst" element={<HealthAnalyst />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="settings" element={<Settings />} />
+  
+          {/* Nếu nhập sai => về /homepage */}
+          <Route path="*" element={<Navigate to="/homepage" />} />
+        </Routes>
+      </div>
     );
-}
-
-export default MemberRoutes;
+  }
+  
+  export default MemberRoutes;

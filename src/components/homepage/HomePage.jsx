@@ -74,6 +74,10 @@ function HomePage() {
     navigate("/");
   };
 
+  const handleMember = () => {
+    navigate("/member/");
+  }
+
   return (
     <div className="homepage">
       {/* Navigation */}
@@ -158,12 +162,12 @@ function HomePage() {
               <hr />
               <div className="sidebar-section">
                 <h4>Profile</h4>
-                <p>My children</p>
+                <p onClick={() => navigate("/member")}>My children</p>
                 <p>My children’s milestones</p>
                 <p>My membership plans</p>
                 <p>My requests</p>
               </div>
-              <hr />
+              <hr/>
               <div className="sidebar-section">
                 <h4>Setting</h4>
                 <p>Profile setting</p>
