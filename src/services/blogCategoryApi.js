@@ -2,39 +2,41 @@ import api from "../config/axios";
 
 const blogCategoryApi = {
   getAll: () => {
-    return api.get("/api/BlogCategories");
+    return api.get("BlogCategories");
   },
 
   getById: (id) => {
-    return api.get(`/api/BlogCategories/${id}`);
+    return api.get(`BlogCategories/${id}`);
   },
 
   create: (data) => {
     const formattedData = {
       categoryName: data.categoryName,
-      description: data.description,
-      isActive: data.isActive || false,
+      description: data.description || "",
+      isActive: data.isActive === undefined ? true : data.isActive,
       parentCategoryId: data.parentCategoryId || null,
     };
-    return api.post("/api/BlogCategories", formattedData);
+    console.log("POST Request Data:", formattedData);
+    return api.post("BlogCategories", formattedData);
   },
 
   update: (id, data) => {
     const formattedData = {
+      categoryId: id,
       categoryName: data.categoryName,
-      description: data.description,
-      isActive: data.isActive || false,
+      description: data.description || "",
+      isActive: data.isActive,
       parentCategoryId: data.parentCategoryId || null,
     };
-    return api.put(`/api/BlogCategories/${id}`, formattedData);
+    return api.put("BlogCategories", formattedData);
   },
 
   delete: (id) => {
-    return api.delete(`/api/BlogCategories/${id}`);
+    return api.delete(`BlogCategories/${id}`);
   },
 
   getParentCategories: (id) => {
-    return api.get(`/api/BlogCategories/parent-categories/${id}`);
+    return api.get(`BlogCategories/parent-categories/${id}`);
   },
 };
 

@@ -25,12 +25,20 @@ function Blog() {
     try {
       setLoading(true);
       const response = await blogCategoryApi.getAll();
-      if (response?.data) {
-        setCategories(response.data);
+      // Kiểm tra cấu trúc dữ liệu trả về
+      console.log("GET Response:", response.data); // Thêm log để debug
+      if (response?.data?.status === 1) {
+        const formattedData = response.data.data.map((item) => ({
+          ...item,
+          key: item.categoryId,
+        }));
+        setCategories(formattedData);
+      } else {
+        message.warning(response?.data?.message || "Không có dữ liệu");
       }
     } catch (error) {
       message.error("Không thể tải danh sách danh mục");
-      console.error(error);
+      console.error("GET Error:", error); // Thêm log để debug
     } finally {
       setLoading(false);
     }
@@ -40,8 +48,8 @@ function Blog() {
   const fetchParentCategories = async () => {
     try {
       const response = await blogCategoryApi.getAll();
-      if (response?.data) {
-        setParentCategories(response.data);
+      if (response?.data?.data) {
+        setParentCategories(response.data.data);
       }
     } catch (error) {
       message.error("Không thể tải danh sách danh mục cha");
@@ -58,19 +66,35 @@ function Blog() {
   const handleSubmit = async (values) => {
     try {
       setLoading(true);
+      const submitData = {
+        categoryName: values.categoryName,
+        description: values.description || "",
+        isActive: values.isActive,
+        parentCategoryId: values.parentCategoryId || null,
+      };
+      console.log("Form Submit Data:", submitData); // Thêm log để debug
+
+      let response;
       if (editingId) {
-        await blogCategoryApi.update(editingId, values);
-        message.success("Cập nhật danh mục thành công");
+        response = await blogCategoryApi.update(editingId, submitData);
       } else {
-        await blogCategoryApi.create(values);
-        message.success("Thêm danh mục thành công");
+        response = await blogCategoryApi.create(submitData);
       }
-      setIsModalVisible(false);
-      form.resetFields();
-      fetchCategories();
+      console.log("Submit Response:", response.data); // Thêm log để debug
+
+      if (response?.data?.status === 1) {
+        message.success(response.data.message);
+        setIsModalVisible(false);
+        form.resetFields();
+        fetchCategories();
+      } else {
+        message.error(response?.data?.message || "Có lỗi xảy ra");
+      }
     } catch (error) {
-      message.error("Có lỗi xảy ra: " + error.message);
-      console.error(error);
+      console.error("Submit Error:", error); // Thêm log để debug
+      message.error(
+        "Có lỗi xảy ra: " + (error.response?.data?.message || error.message)
+      );
     } finally {
       setLoading(false);
     }
@@ -102,6 +126,17 @@ function Blog() {
       dataIndex: "description",
       key: "description",
       ellipsis: true,
+    },
+    {
+      title: "Danh mục cha",
+      dataIndex: "parentCategoryId",
+      key: "parentCategoryId",
+      render: (parentId) => {
+        const parentCategory = parentCategories.find(
+          (cat) => cat.categoryId === parentId
+        );
+        return parentCategory ? parentCategory.categoryName : "Không có";
+      },
     },
     {
       title: "Trạng thái",
@@ -196,7 +231,10 @@ function Blog() {
           form={form}
           onFinish={handleSubmit}
           layout="vertical"
-          initialValues={{ isActive: true }}
+          initialValues={{
+            isActive: true,
+            parentCategoryId: null,
+          }}
         >
           <Form.Item
             name="categoryName"
