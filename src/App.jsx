@@ -103,8 +103,14 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/member/*" element={<ProtectedRoute roles={["user"]}><MemberRoutes /></ProtectedRoute>} />
-
+        <Route
+          path="/member/*"
+          element={
+            <ProtectedRoute roles={["user"]}>
+              <MemberRoutes />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Protected route dành cho admin */}
         <Route
