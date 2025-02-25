@@ -1,0 +1,28 @@
+.children-topbar {
+    display: flex;
+    align-items: center;
+    height: 60px;
+    padding: 0 1rem;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+  
+  .children-search-container {
+    flex: 1;
+  }
+  
+  .children-search-input {
+    width: 60%;
+    max-width: 300px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    outline: none;
+  }
+  
+  .children-user-info {
+    margin-left: auto;
+    font-weight: 500;
+    color: #333;
+  }
+  

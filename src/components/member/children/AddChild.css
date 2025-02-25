@@ -1,117 +1,115 @@
-/* Container for the AddChild form inside the overlay */
+/* Overlay nền mờ, giống Packages */
 .add-child-overlay {
     position: fixed;
-    top: 0;
+    top: 0; 
     left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.4);
-    z-index: 1000;
+    width: 100%; 
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000; 
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
 }
 
-/* The form content */
-.add-child-form {
-    background-color: #fff;
-    padding: 30px;
+/* Khung modal scale in */
+.add-child-modal {
+    background: #fff;
     border-radius: 12px;
-    width: 80%;
-    max-width: 1000px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-    position: relative; /* To position the close button */
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 columns for the form fields */
-    gap: 1rem; /* Gap between form elements */
+    padding: 2rem;
+    width: 800px;
+    max-width: 90%;
+    position: relative;
+    animation: modal-in 0.3s ease forwards;
+    transform: scale(0.8);
+    opacity: 0;
 }
 
-/* Close button styling */
+@keyframes modal-in {
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Nút đóng (X) ở góc trên bên phải */
 .add-child-close-btn {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    height: 40px;
-    background-color: #ff4747;
-    color: white;
+    top: 12px;
+    right: 12px;
+    background: transparent;
     border: none;
-    padding: 12px;
-    border-radius: 50%;
+    font-size: 1.8rem;
+    color: #333;
     cursor: pointer;
-    font-size: 1.5rem;
-    display: flex;
-    justify-content: center;
-    align-items: center; /* Centers the "X" inside the button */
-    transition: background-color 0.3s ease;
+    z-index: 10;
 }
 
 .add-child-close-btn:hover {
-    background-color: #e03333;
+    color: #e03333;
 }
 
-/* Heading styling */
+/* Tiêu đề */
 .add-child-heading {
-    grid-column: span 4; /* Make the heading span across all 4 columns */
     font-size: 1.8rem;
     text-align: center;
     margin-bottom: 1.5rem;
 }
 
-/* Label styling */
+/* Form 4 cột */
+.add-child-form {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+
+/* Mỗi khối field-group là 1 item trong grid */
+.field-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  
+.add-child-error {
+    color: #ff4747;
+    font-size: 0.875rem;
+    margin-bottom: 4px; /* 1 chút margin dưới error */
+  }
+/* Label */
 .add-child-label {
     font-weight: bold;
     font-size: 1rem;
     color: #333;
     display: block;
-    margin-bottom: 0.5rem; /* Space between label and input */
+    margin-bottom: 0.5rem;
 }
 
-/* Input and select field styling */
+/* Input */
 .add-child-input {
     padding: 0.8em;
     font-size: 1rem;
     border-radius: 8px;
     border: 1px solid #ccc;
     width: 100%;
-    position: relative; /* Required for absolute positioning of the error */
 }
 
-/* Input focus and hover effects */
+/* Hover, focus */
 .add-child-input:focus {
-    border-color: #ffd700;
+    border-color: #00bfa6;
+    box-shadow: 0 0 5px rgba(0, 191, 166, 0.3);
     outline: none;
-    box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
 }
 
-/* Error message styling */
-.add-child-error {
-    color: #ff4747;
-    font-size: 0.875rem;
-    margin-bottom: 0.5rem;
-    position: absolute;
-    top: -1.5rem; /* Position the error message above the field */
-    left: 0;
-    width: 100%;
-    text-align: left;
-}
-
-/* Highlight input fields with errors */
-.add-child-input.error-input {
+/* Input bị lỗi */
+.error-input {
     border-color: #ff4747;
     background-color: #ffe6e6;
 }
 
-/* Make error messages more prominent */
-.add-child-input:focus.error-input {
-    border-color: #ff4747;
-    background-color: #ffe6e6;
-    box-shadow: 0 0 5px rgba(255, 71, 71, 0.6);
-}
-
-/* Submit button styling */
+/* Button Add Child */
 .add-child-button {
-    background-color: #ff6f61;
+    grid-column: span 4; 
+    background-color: #00d0bc;
     color: white;
     border: none;
     padding: 1em;
@@ -120,11 +118,10 @@
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    grid-column: span 4; /* Make the button span across all columns */
 }
 
 .add-child-button:hover {
-    background-color: #f05a47;
+    background-color: #00bfa6;
 }
 
 .add-child-button:disabled {
