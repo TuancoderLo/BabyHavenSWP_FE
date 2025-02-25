@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./HomePage.css";
 import Logo from "../../assets/Logo.png";
@@ -13,6 +13,18 @@ import Packages from "../packages/Packages";
 function HomePage() {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Tạo state cho userName
+  const [userData, setUserData] = useState(null);
+
+  // Lấy dữ liệu từ localStorage khi HomePage mount
+  useEffect(() => {
+    const nameFromLocal = localStorage.getItem("name"); // "Thao" chẳng hạn
+    if (nameFromLocal) {
+      // Giả sử ta chỉ lưu name dạng string, ta set userData = { name: ... }
+      setUserData({ name: nameFromLocal });
+    }
+  }, []);
 
   // Định nghĩa dữ liệu carousel
   const carouselImages = [
@@ -42,10 +54,10 @@ function HomePage() {
   // State quản lý menu đóng/mở
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Toggle sidebar khi click avatar
-  const handleAvatarClick = () => {
-    setMenuOpen(!menuOpen);
-  };
+  // // Toggle sidebar khi click avatar
+  // const handleAvatarClick = () => {
+  //   setMenuOpen(!menuOpen);
+  // };
 
   // Bật/tắt sidebar khi hover
   const handleMouseEnter = () => {
@@ -74,9 +86,9 @@ function HomePage() {
     navigate("/");
   };
 
-  const handleMember = () => {
-    navigate("/member/");
-  }
+  // const handleMember = () => {
+  //   navigate("/member/");
+  // }
 
   return (
     <div className="homepage">
@@ -139,18 +151,20 @@ function HomePage() {
             onMouseLeave={handleMouseLeave}
           >
             <div className="avatar-chip-img">
-              <img src={avatar_LOGO} alt="User Avatar" />
+            <img src={userData?.profilePicture || avatar_LOGO} alt="User Avatar" />
             </div>
             {/* Text Name */}
-            <span className="avatar-chip-text">Name</span>
-            {/* Sidebar trượt từ phải */}
+            <span className="avatar-chip-text">
+              {userData ? userData.name : "Name"}
+            </span>
+                        {/* Sidebar trượt từ phải */}
             {menuOpen && (
               <div className="overlay" onClick={() => setMenuOpen(false)}></div>
             )}
             <div className={`sidebar-menu ${menuOpen ? "open" : ""}`}>
               <div className="sidebar-header">
                 <i className="fas fa-user-circle"></i>
-                <span>Name</span>
+                <span>{userData ? userData.name : "User"}</span>
               </div>
               <hr />
               <div className="sidebar-section">

@@ -1,0 +1,78 @@
+.children-sidebar {
+    background-color: #fff;
+    width: 60px;
+    transition: width 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 2;
+  }
+  .children-sidebar:hover {
+    width: 200px;
+  }
+  
+  .children-sidebar-header {
+    display: flex;
+    align-items: center;
+    height: 60px;
+    padding: 0 10px;
+    gap: 10px;
+    cursor: pointer;
+  }
+  
+  .sidebar-logo-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .sidebar-logo-text {
+    width: 100px;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .children-sidebar:hover .sidebar-logo-text {
+    opacity: 1;
+  }
+  
+  .children-sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+    width: 100%;
+    overflow: hidden;
+  }
+  .children-sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .children-sidebar-nav li {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    color: #333;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .children-sidebar-nav li:hover {
+    background: rgba(0, 208, 188, 0.1);
+  }
+  .children-sidebar-nav li i {
+    font-size: 18px;
+    width: 30px;
+    text-align: center;
+    margin-right: 5px;
+  }
+  .children-sidebar-nav li span {
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .children-sidebar:hover li span {
+    opacity: 1;
+  }
+  .menu-item.active {
+    background-color: rgba(0, 208, 188, 0.1);
+    border-right: 3px solid #00d0bc;
+  }
+  
