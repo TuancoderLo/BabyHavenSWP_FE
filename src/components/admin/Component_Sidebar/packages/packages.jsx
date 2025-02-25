@@ -111,47 +111,47 @@ function Packages() {
     let isValid = true;
 
     if (!formData.packageName.trim()) {
-      tempErrors.packageName = "Vui lòng nhập tên gói";
+      tempErrors.packageName = "Please enter package name";
       isValid = false;
     }
 
     if (!formData.description.trim()) {
-      tempErrors.description = "Vui lòng nhập mô tả";
+      tempErrors.description = "Please enter description";
       isValid = false;
     }
 
     if (!formData.price) {
-      tempErrors.price = "Vui lòng nhập giá";
+      tempErrors.price = "Please enter price";
       isValid = false;
     } else if (isNaN(formData.price) || Number(formData.price) < 0) {
-      tempErrors.price = "Giá phải là số dương";
+      tempErrors.price = "Price must be a positive number";
       isValid = false;
     }
 
     if (!formData.durationMonths) {
-      tempErrors.durationMonths = "Vui lòng nhập thời hạn";
+      tempErrors.durationMonths = "Please enter duration";
       isValid = false;
     } else if (
       isNaN(formData.durationMonths) ||
       Number(formData.durationMonths) <= 0
     ) {
-      tempErrors.durationMonths = "Thời hạn phải là số dương";
+      tempErrors.durationMonths = "Duration must be a positive number";
       isValid = false;
     }
 
     if (!formData.maxChildrenAllowed) {
-      tempErrors.maxChildrenAllowed = "Vui lòng nhập số trẻ tối đa";
+      tempErrors.maxChildrenAllowed = "Please enter max number of children";
       isValid = false;
     } else if (
       isNaN(formData.maxChildrenAllowed) ||
       Number(formData.maxChildrenAllowed) <= 0
     ) {
-      tempErrors.maxChildrenAllowed = "Số trẻ tối đa phải là số dương";
+      tempErrors.maxChildrenAllowed =
+        "Max number of children must be a positive number";
       isValid = false;
     }
 
-    setErrors(tempErrors);
-    return isValid;
+    return { isValid, tempErrors };
   };
 
   const handleSubmit = async () => {
@@ -253,13 +253,13 @@ function Packages() {
   return (
     <Box p={3}>
       <Box display="flex" justifyContent="space-between" mb={3}>
-        <Typography variant="h4">Quản lý Gói Thành viên</Typography>
+        <Typography variant="h4">Membership Package Management</Typography>
         <Button
           variant="contained"
           color="primary"
           onClick={() => handleOpen()}
         >
-          Thêm Gói Mới
+          Add New Package
         </Button>
       </Box>
 
@@ -267,13 +267,13 @@ function Packages() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Tên Gói</TableCell>
-              <TableCell>Mô tả</TableCell>
-              <TableCell>Giá</TableCell>
-              <TableCell>Thời hạn (tháng)</TableCell>
-              <TableCell>Số trẻ tối đa</TableCell>
-              <TableCell>Trạng thái</TableCell>
-              <TableCell>Thao tác</TableCell>
+              <TableCell>Package Name</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell>Price</TableCell>
+              <TableCell>Duration (Months)</TableCell>
+              <TableCell>Max Children Allowed</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -300,22 +300,28 @@ function Packages() {
       </TableContainer>
 
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{editMode ? "Chỉnh sửa Gói" : "Thêm Gói Mới"}</DialogTitle>
+        <DialogTitle>
+          {editMode ? "Edit Package" : "Add New Package"}
+        </DialogTitle>
         <DialogContent>
-          {renderTextField("packageName", "Tên Gói")}
-          {renderTextField("description", "Mô tả", "text", true, 3)}
-          {renderTextField("price", "Giá", "number")}
-          {renderTextField("currency", "Loại tiền")}
-          {renderTextField("durationMonths", "Thời hạn (tháng)", "number")}
-          {renderTextField("maxChildrenAllowed", "Số trẻ tối đa", "number")}
-          {renderTextField("trialPeriodDays", "Số ngày dùng thử", "number")}
-          {renderTextField("supportLevel", "Mức độ hỗ trợ")}
-          {renderTextField("status", "Trạng thái", "text")}
+          {renderTextField("packageName", "Package Name")}
+          {renderTextField("description", "Description", "text", true, 3)}
+          {renderTextField("price", "Price", "number")}
+          {renderTextField("currency", "Currency")}
+          {renderTextField("durationMonths", "Duration (Months)", "number")}
+          {renderTextField(
+            "maxChildrenAllowed",
+            "Max Children Allowed",
+            "number"
+          )}
+          {renderTextField("trialPeriodDays", "Trial Period (Days)", "number")}
+          {renderTextField("supportLevel", "Support Level")}
+          {renderTextField("status", "Status", "text")}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Hủy</Button>
+          <Button onClick={handleClose}>Cancel</Button>
           <Button onClick={handleSubmit} variant="contained" color="primary">
-            {editMode ? "Cập nhật" : "Thêm mới"}
+            {editMode ? "Update" : "Add"}
           </Button>
         </DialogActions>
       </Dialog>

@@ -45,7 +45,7 @@ function Blog() {
         message.warning(response?.data?.message || "Không có dữ liệu");
       }
     } catch (error) {
-      message.error("Không thể tải danh sách danh mục");
+      message.error("Unable to load category list");
       console.error("GET Error:", error); // Thêm log để debug
     } finally {
       setLoading(false);
@@ -60,7 +60,7 @@ function Blog() {
         setParentCategories(response.data.data);
       }
     } catch (error) {
-      message.error("Không thể tải danh sách danh mục cha");
+      message.error("Unable to load parent category list");
       console.error(error);
     }
   };
@@ -75,10 +75,10 @@ function Blog() {
           response.data.data.map((blog) => ({ ...blog, key: blog.blogId }))
         );
       } else {
-        message.warning(response?.data?.message || "Không có dữ liệu blog");
+        message.warning(response?.data?.message || "No blog data");
       }
     } catch (error) {
-      message.error("Không thể tải danh sách blog");
+      message.error("Unable to load blog list");
       console.error(error);
     } finally {
       setLoading(false);
@@ -120,12 +120,12 @@ function Blog() {
         form.resetFields();
         fetchCategories();
       } else {
-        message.error(response?.data?.message || "Có lỗi xảy ra");
+        message.error(response?.data?.message || "An error occurred");
       }
     } catch (error) {
       console.error("Submit Error:", error); // Thêm log để debug
       message.error(
-        "Có lỗi xảy ra: " + (error.response?.data?.message || error.message)
+        "An error occurred: " + (error.response?.data?.message || error.message)
       );
     } finally {
       setLoading(false);
@@ -137,10 +137,10 @@ function Blog() {
     try {
       setLoading(true);
       await blogCategoryApi.delete(id);
-      message.success("Xóa danh mục thành công");
+      message.success("Category deleted successfully");
       fetchCategories();
     } catch (error) {
-      message.error("Không thể xóa danh mục: " + error.message);
+      message.error("Unable to delete category: " + error.message);
       console.error(error);
     } finally {
       setLoading(false);
@@ -172,14 +172,14 @@ function Blog() {
       if (response?.data?.status === 1) {
         message.success(
           editingBlogId
-            ? "Cập nhật blog thành công"
-            : "Thêm blog mới thành công"
+            ? "Blog updated successfully"
+            : "New blog added successfully"
         );
         setBlogModalVisible(false);
         blogForm.resetFields();
         fetchBlogs();
       } else {
-        message.error(response?.data?.message || "Có lỗi xảy ra");
+        message.error(response?.data?.message || "An error occurred");
       }
     } catch (error) {
       message.error("Có lỗi xảy ra khi xử lý blog");
@@ -194,10 +194,10 @@ function Blog() {
       setLoading(true);
       const response = await blogApi.delete(blogId);
       if (response?.data?.status === 1) {
-        message.success("Xóa blog thành công");
+        message.success("Blog deleted successfully");
         fetchBlogs();
       } else {
-        message.error(response?.data?.message || "Có lỗi xảy ra khi xóa blog");
+        message.error(response?.data?.message || "Error deleting blog");
       }
     } catch (error) {
       message.error("Không thể xóa blog");
@@ -235,39 +235,39 @@ function Blog() {
 
   const columns = [
     {
-      title: "Tên danh mục",
+      title: "Name Category",
       dataIndex: "categoryName",
       key: "categoryName",
     },
     {
-      title: "Mô tả",
+      title: "Description",
       dataIndex: "description",
       key: "description",
       ellipsis: true,
     },
     {
-      title: "Danh mục cha",
+      title: "parentCategory",
       dataIndex: "parentCategoryId",
       key: "parentCategoryId",
       render: (parentId) => {
         const parentCategory = parentCategories.find(
           (cat) => cat.categoryId === parentId
         );
-        return parentCategory ? parentCategory.categoryName : "Không có";
+        return parentCategory ? parentCategory.categoryName : "No Data";
       },
     },
     {
-      title: "Trạng thái",
+      title: "Active?",
       dataIndex: "isActive",
       key: "isActive",
       render: (isActive) => (
         <span style={{ color: isActive ? "green" : "red" }}>
-          {isActive ? "Hoạt động" : "Không hoạt động"}
+          {isActive ? "Active" : "InActive"}
         </span>
       ),
     },
     {
-      title: "Thao tác",
+      title: "Action",
       key: "action",
       render: (_, record) => (
         <div style={{ display: "flex", gap: "8px" }}>
@@ -282,14 +282,14 @@ function Blog() {
               setIsModalVisible(true);
             }}
           >
-            Sửa
+            modify
           </Button>
           <Popconfirm
-            title="Xác nhận xóa"
-            description="Bạn có chắc chắn muốn xóa danh mục này?"
+            title="Delete ?"
+            description="Are you sure to delete this Data ?"
             onConfirm={() => handleDelete(record.categoryId)}
-            okText="Xóa"
-            cancelText="Hủy"
+            okText="Delete"
+            cancelText="Cancel"
           >
             <Button type="primary" danger>
               Xóa
@@ -302,18 +302,18 @@ function Blog() {
 
   const blogColumns = [
     {
-      title: "Tiêu đề",
+      title: "Title",
       dataIndex: "title",
       key: "title",
       ellipsis: true,
     },
     {
-      title: "Danh mục",
+      title: "Category Name",
       dataIndex: "categoryName",
       key: "categoryName",
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: (status) => {
@@ -343,13 +343,13 @@ function Blog() {
       ),
     },
     {
-      title: "Ngày tạo",
+      title: "CreatedAt",
       dataIndex: "createdAt",
       key: "createdAt",
       render: (date) => new Date(date).toLocaleDateString("vi-VN"),
     },
     {
-      title: "Thao tác",
+      title: "Action",
       key: "action",
       render: (_, record) => (
         <div style={{ display: "flex", gap: "8px" }}>
@@ -357,14 +357,14 @@ function Blog() {
             Sửa
           </Button>
           <Popconfirm
-            title="Xác nhận xóa"
-            description="Bạn có chắc chắn muốn xóa blog này?"
+            title="Confirm deletion"
+            description="Are you sure you want to delete this blog?"
             onConfirm={() => handleDeleteBlog(record.blogId)}
-            okText="Xóa"
-            cancelText="Hủy"
+            okText="Delete"
+            cancelText="Cancel"
           >
             <Button type="primary" danger>
-              Xóa
+              Delete
             </Button>
           </Popconfirm>
         </div>
@@ -379,8 +379,8 @@ function Blog() {
           value={activeTab}
           onChange={(e) => setActiveTab(e.target.value)}
         >
-          <Radio.Button value="categories">Quản lý danh mục</Radio.Button>
-          <Radio.Button value="blogs">Quản lý bài viết</Radio.Button>
+          <Radio.Button value="categories">Category Management</Radio.Button>
+          <Radio.Button value="blogs">Blog Management</Radio.Button>
         </Radio.Group>
       </div>
 
@@ -394,7 +394,7 @@ function Blog() {
               alignItems: "center",
             }}
           >
-            <h2>Quản lý danh mục blog</h2>
+            <h2>Manage blog categories</h2>
             <Button
               type="primary"
               onClick={() => {
@@ -403,7 +403,7 @@ function Blog() {
                 setIsModalVisible(true);
               }}
             >
-              Thêm danh mục mới
+              Add new category
             </Button>
           </div>
 
@@ -415,12 +415,12 @@ function Blog() {
             pagination={{
               defaultPageSize: 10,
               showSizeChanger: true,
-              showTotal: (total) => `Tổng số ${total} danh mục`,
+              showTotal: (total) => `Total ${total} categories`,
             }}
           />
 
           <Modal
-            title={editingId ? "Sửa danh mục" : "Thêm danh mục mới"}
+            title={editingId ? "Edit Category" : "Add New Category"}
             open={isModalVisible}
             onCancel={() => {
               setIsModalVisible(false);
@@ -440,22 +440,22 @@ function Blog() {
             >
               <Form.Item
                 name="categoryName"
-                label="Tên danh mục"
+                label="Category Name"
                 rules={[
-                  { required: true, message: "Vui lòng nhập tên danh mục" },
+                  { required: true, message: "Please enter the category name" },
                 ]}
               >
                 <Input />
               </Form.Item>
 
-              <Form.Item name="description" label="Mô tả">
+              <Form.Item name="description" label="Description">
                 <Input.TextArea rows={4} />
               </Form.Item>
 
-              <Form.Item name="parentCategoryId" label="Danh mục cha">
+              <Form.Item name="parentCategoryId" label="Parent Category">
                 <Select
                   allowClear
-                  placeholder="Chọn danh mục cha"
+                  placeholder="Select parent category"
                   options={parentCategories.map((category) => ({
                     value: category.categoryId,
                     label: category.categoryName,
@@ -464,15 +464,8 @@ function Blog() {
                 />
               </Form.Item>
 
-              <Form.Item
-                name="isActive"
-                label="Trạng thái"
-                valuePropName="checked"
-              >
-                <Switch
-                  checkedChildren="Hoạt động"
-                  unCheckedChildren="Không hoạt động"
-                />
+              <Form.Item name="isActive" label="Status" valuePropName="checked">
+                <Switch checkedChildren="Active" unCheckedChildren="InActive" />
               </Form.Item>
 
               <Form.Item>
@@ -489,10 +482,10 @@ function Blog() {
                       form.resetFields();
                     }}
                   >
-                    Hủy
+                    Cancel
                   </Button>
                   <Button type="primary" htmlType="submit" loading={loading}>
-                    {editingId ? "Cập nhật" : "Thêm mới"}
+                    {editingId ? "Update" : "Add new"}
                   </Button>
                 </div>
               </Form.Item>
@@ -509,7 +502,7 @@ function Blog() {
               alignItems: "center",
             }}
           >
-            <h2>Quản lý bài viết</h2>
+            <h2>Manage posts</h2>
             <Button
               type="primary"
               onClick={() => {
@@ -518,7 +511,7 @@ function Blog() {
                 setBlogModalVisible(true);
               }}
             >
-              Thêm bài viết mới
+              Add new post
             </Button>
           </div>
 
@@ -529,12 +522,12 @@ function Blog() {
             pagination={{
               defaultPageSize: 10,
               showSizeChanger: true,
-              showTotal: (total) => `Tổng số ${total} bài viết`,
+              showTotal: (total) => `Total ${total} posts`,
             }}
           />
 
           <Modal
-            title={editingBlogId ? "Sửa bài viết" : "Thêm bài viết mới"}
+            title={editingBlogId ? "Edit Blog Post" : "Add New Blog Post"}
             open={blogModalVisible}
             onCancel={() => {
               setBlogModalVisible(false);
@@ -546,24 +539,28 @@ function Blog() {
             <Form form={blogForm} onFinish={handleBlogSubmit} layout="vertical">
               <Form.Item
                 name="title"
-                label="Tiêu đề"
-                rules={[{ required: true, message: "Vui lòng nhập tiêu đề" }]}
+                label="Title"
+                rules={[{ required: true, message: "Please enter the title" }]}
               >
                 <Input />
               </Form.Item>
 
               <Form.Item
                 name="content"
-                label="Nội dung"
-                rules={[{ required: true, message: "Vui lòng nhập nội dung" }]}
+                label="Content"
+                rules={[
+                  { required: true, message: "Please enter the content" },
+                ]}
               >
                 <Input.TextArea rows={6} />
               </Form.Item>
 
               <Form.Item
                 name="categoryId"
-                label="Danh mục"
-                rules={[{ required: true, message: "Vui lòng chọn danh mục" }]}
+                label="Category"
+                rules={[
+                  { required: true, message: "Please select a category" },
+                ]}
               >
                 <Select>
                   {categories.map((category) => (
@@ -577,24 +574,26 @@ function Blog() {
                 </Select>
               </Form.Item>
 
-              <Form.Item name="imageBlog" label="URL Hình ảnh">
-                <Input placeholder="Nhập URL hình ảnh" />
+              <Form.Item name="imageBlog" label="Image URL">
+                <Input placeholder="Enter image URL" />
               </Form.Item>
 
               <Form.Item name="tags" label="Tags">
-                <Input placeholder="Nhập tags, phân cách bằng dấu phẩy (vd: React, JavaScript)" />
+                <Input placeholder="Enter tags, separated by commas (e.g., React, JavaScript)" />
               </Form.Item>
 
-              <Form.Item name="referenceSources" label="Nguồn tham khảo">
-                <Input placeholder="Nhập URL nguồn tham khảo" />
+              <Form.Item name="referenceSources" label="Reference Sources">
+                <Input placeholder="Enter reference source URL" />
               </Form.Item>
 
-              <Form.Item name="status" label="Trạng thái" initialValue="Draft">
+              <Form.Item name="status" label="Status" initialValue="Draft">
                 <Select>
-                  <Select.Option value="Draft">Bản nháp</Select.Option>
-                  <Select.Option value="Pending">Chờ duyệt</Select.Option>
-                  <Select.Option value="Approved">Đã duyệt</Select.Option>
-                  <Select.Option value="Rejected">Từ chối</Select.Option>
+                  <Select.Option value="Draft">Draft</Select.Option>
+                  <Select.Option value="Pending">
+                    Pending Approval
+                  </Select.Option>
+                  <Select.Option value="Approved">Approved</Select.Option>
+                  <Select.Option value="Rejected">Rejected</Select.Option>
                 </Select>
               </Form.Item>
 
@@ -606,7 +605,7 @@ function Blog() {
               >
                 {({ getFieldValue }) =>
                   getFieldValue("status") === "Rejected" ? (
-                    <Form.Item name="rejectionReason" label="Lý do từ chối">
+                    <Form.Item name="rejectionReason" label="Rejection Reason">
                       <Input.TextArea rows={3} />
                     </Form.Item>
                   ) : null
@@ -627,10 +626,10 @@ function Blog() {
                       blogForm.resetFields();
                     }}
                   >
-                    Hủy
+                    Cancel
                   </Button>
                   <Button type="primary" htmlType="submit" loading={loading}>
-                    {editingBlogId ? "Cập nhật" : "Thêm mới"}
+                    {editingId ? "Update" : "Add"}
                   </Button>
                 </div>
               </Form.Item>
