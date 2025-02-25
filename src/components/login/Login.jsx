@@ -95,6 +95,10 @@ function Login({ onLoginSuccess }) {
           };
           console.log("Role from token:", user.roleId);
 
+          const request = await api.get(`Member/${user.userId}`);
+          const member = request.data;
+          localStorage.setItem("memberId", member.id);
+          
           localStorage.setItem("role", user.roleId);
 
           // Lưu thông tin từ token payload

@@ -25,10 +25,14 @@ function ChildrenPage() {
     setShowAddChild(false);
   };
 
+  // Lấy memberId từ localStorage
+  const memberId =  localStorage.setItem("memberId", memberId); 
+  console.log("Member ID:", memberId);
+
    // Gọi API
    useEffect(() => {
     api
-      .get("/Children")
+      .get("/Children/member/{memberId}")
       .then((response) => {
         console.log("API response:", response.data);
         if (response.data && response.data.data) {
