@@ -1,0 +1,285 @@
+/* ============ COMMON ============ */
+.membership-page {
+    display: flex;
+    height: 100vh;
+    background: linear-gradient(135deg, #e2f1ff, #fff9fc 50%, #fff1f9 100%);
+    font-family: sans-serif;
+    box-sizing: border-box;
+  }
+  
+  /* Dùng .card chung cho các khung (Child Info, Alerts, Growth...) */
+  .card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+  }
+  
+  /* ============ SIDEBAR ============ */
+  .membership-sidebar {
+    position: relative;
+    background-color: #fff;
+    width: 60px;
+    transition: width 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 2;
+  }
+  .membership-sidebar:hover {
+    width: 200px;
+  }
+  
+  .membership-sidebar-header {
+    display: flex;
+    align-items: center;
+    height: 60px;
+    padding: 0 10px;
+    gap: 10px;
+    cursor: pointer;
+  }
+  
+  .sidebar-logo-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border-radius: 50%;
+  }
+  
+  .sidebar-logo-text {
+    width: 100px;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .membership-sidebar:hover .sidebar-logo-text {
+    opacity: 1;
+  }
+  
+  .membership-sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  .membership-sidebar-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .membership-sidebar-menu li {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    color: #333;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .membership-sidebar-menu li:hover {
+    background: rgba(0, 208, 188, 0.1);
+  }
+  
+  .membership-sidebar-menu li i {
+    font-size: 18px;
+    width: 30px;
+    text-align: center;
+    margin-right: 5px;
+  }
+  
+  .membership-sidebar-menu li span {
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .membership-sidebar:hover li span {
+    opacity: 1;
+  }
+  
+  .menu-item.active {
+    background-color: rgba(0, 208, 188, 0.1);
+    border-right: 3px solid #00d0bc;
+  }
+  
+  /* ============ MAIN CONTENT ============ */
+  .membership-main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Topbar */
+  .membership-topbar {
+    display: flex;
+    align-items: center;
+    height: 60px;
+    padding: 0 1rem;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+  
+  .membership-search-container {
+    flex: 1;
+  }
+  
+  .membership-search-input {
+    width: 60%;
+    max-width: 300px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    outline: none;
+  }
+  
+  .membership-user-info {
+    margin-left: auto;
+    font-weight: 500;
+    color: #333;
+  }
+  
+/* ============ BODY ============ */
+.membership-body {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+  gap: 20px;
+}
+
+/* Membership Details */
+.membership-details {
+  flex: 2;
+  min-height: 200px;
+}
+
+.membership-details h3 {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+.membership-details ul {
+  list-style-type: decimal;
+  padding-left: 20px;
+}
+
+/* Current Plan */
+.membership-plan {
+  flex: 1;
+  min-height: 200px;
+}
+
+.membership-plan h3 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.membership-button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.membership-button.standard {
+  background-color: #d3d3d3;
+  color: black;
+}
+
+.membership-button.premium {
+  background-color: #00bfa6;
+  color: white;
+}
+
+/* Upgrade Section */
+.membership-upgrade {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 15px;
+  margin: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.membership-upgrade p {
+  font-size: 1rem;
+}
+
+.premium-text {
+  color: #00bfa6;
+  font-weight: bold;
+}
+
+.membership-upgrade .membership-button {
+  width: auto;
+  padding: 10px 20px;
+}
+
+  
+  /* ============ LEFT COLUMN: CHILD LIST ============ */
+  .membership-list-column {
+    width: 250px;
+    background-color: #ffffffcc;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+  }
+  
+  .membership-list-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+  
+  .membership-card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+    border: 1px solid #eee;
+    line-height: 1.5;
+  }
+  
+  .membership-card:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .membership-card.active {
+    border-left: 3px solid #00d0bc;
+    background: #f9fffe;
+  }
+  
+  .membership-name {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+  }
+  
+  .membership-dob {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+  }
+  
+  .add-card {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+    font-weight: 600;
+    color: #00bfa6;
+  }
