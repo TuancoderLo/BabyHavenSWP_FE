@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import Member from "./member.jsx";
 import Children from "./children/ChildrenPage";
 import AddChild from "./children/AddChild";
 import DoctorConsultation from "./doctor/DoctorConsultation";
@@ -12,7 +13,8 @@ function MemberRoutes() {
       <div className="member-content">
         <Routes>
           {/* Khi vào /member => mặc định hiển thị ChildrenPage */}
-          <Route path="/" element={<Children />} />
+          <Route path="/" element={<Member/>} />
+          <Route path="children" element={<Children />} />
           <Route path="add-child" element={<AddChild />} />
           {/* Các path con => /member/doctor-consultation, /member/subscriptions,... */}
           <Route path="doctor-consultation" element={<DoctorConsultation />} />
