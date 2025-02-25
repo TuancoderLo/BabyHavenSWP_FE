@@ -16,7 +16,6 @@ const blogCategoryApi = {
       isActive: data.isActive === undefined ? true : data.isActive,
       parentCategoryId: data.parentCategoryId || null,
     };
-    console.log("POST Request Data:", formattedData);
     return api.post("BlogCategories", formattedData);
   },
 
@@ -24,11 +23,11 @@ const blogCategoryApi = {
     const formattedData = {
       categoryId: id,
       categoryName: data.categoryName,
-      description: data.description || "",
+      description: data.description,
       isActive: data.isActive,
       parentCategoryId: data.parentCategoryId || null,
     };
-    return api.put("BlogCategories", formattedData);
+    return api.put(`BlogCategories/${id}`, formattedData);
   },
 
   delete: (id) => {
