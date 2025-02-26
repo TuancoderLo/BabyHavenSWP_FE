@@ -16,37 +16,61 @@ import {
 } from "antd";
 
 function Blog() {
+  // States quản lý dữ liệu chính
+
   const [categories, setCategories] = useState([]);
-  const [parentCategories, setParentCategories] = useState([]);
+  // Mục đích: Lưu trữ thông tin các category cha để dùng trong dropdown select
+
+  const [parentCategories, setParentCategories] = useState({});
+  // Mục đích: Lưu trữ tên của các category cha để hiển thị trong cột Parent Category
+
   const [isModalVisible, setIsModalVisible] = useState(false);
+  // Mục đích: Điều khiển việc hiển thị/ẩn modal form
+
   const [loading, setLoading] = useState(false);
+  // Mục đích: Quản lý trạng thái loading khi gọi API, hiển thị loading spinner
+
   const [form] = Form.useForm();
+  // Mục đích: Quản lý form của Ant Design, dùng để control form values
   const [editingId, setEditingId] = useState(null);
   const [activeTab, setActiveTab] = useState("categories");
   const [blogs, setBlogs] = useState([]);
   const [blogModalVisible, setBlogModalVisible] = useState(false);
   const [blogForm] = Form.useForm();
   const [editingBlogId, setEditingBlogId] = useState(null);
+  // Mục đích: Lưu ID của category đang được edit, null khi tạo mới
+  // Dùng để phân biệt giữa thao tác create và update
+
+  const [parentNames, setParentNames] = useState({});
+
+  // Thêm useEffect để debug categories
+  useEffect(() => {
+    console.log("Categories State:", categories);
+  }, [categories]);
 
   // Fetch danh sách category
   const fetchCategories = async () => {
+    // Mục đích: Lấy danh sách categories từ API và cập nhật vào state
+    // Được gọi: Khi component mount và sau mỗi lần create/update/delete
     try {
       setLoading(true);
       const response = await blogCategoryApi.getAll();
-      // Kiểm tra cấu trúc dữ liệu trả về
-      console.log("GET Response:", response.data); // Thêm log để debug
       if (response?.data?.status === 1) {
         const formattedData = response.data.data.map((item) => ({
           ...item,
           key: item.categoryId,
+          level: item.parentCategoryId !== null ? 1 : 0,
         }));
         setCategories(formattedData);
+
+        // Fetch parent names sau khi có categories mới
+        await fetchParentNames(formattedData);
       } else {
         message.warning(response?.data?.message || "Không có dữ liệu");
       }
     } catch (error) {
       message.error("Unable to load category list");
-      console.error("GET Error:", error); // Thêm log để debug
+      console.error("GET Error:", error);
     } finally {
       setLoading(false);
     }
@@ -54,6 +78,8 @@ function Blog() {
 
   // Fetch danh sách parent categories
   const fetchParentCategories = async () => {
+    // Mục đích: Lấy danh sách category cha để dùng trong dropdown select
+    // Được gọi: Cùng với fetchCategories
     try {
       const response = await blogCategoryApi.getAll();
       if (response?.data?.data) {
@@ -96,36 +122,62 @@ function Blog() {
 
   // Xử lý thêm/sửa category
   const handleSubmit = async (values) => {
+    // Mục đích: Xử lý khi submit form (cả create và update)
+    // Được gọi: Khi click nút Submit trong form
+    // Flow:
+    // 1. Format dữ liệu
+    // 2. Kiểm tra editingId để quyết định gọi API create hay update
+    // 3. Gọi API tương ứng
+    // 4. Fetch lại data mới
+    // 5. Reset form và đóng modal
     try {
       setLoading(true);
+      console.log("Form values:", values);
+      console.log("Editing ID:", editingId); // Thêm log để debug
+
       const submitData = {
-        categoryName: values.categoryName,
-        description: values.description || "",
-        isActive: values.isActive,
+        categoryName: values.categoryName.trim(),
+        description: values.description?.trim() || "",
         parentCategoryId: values.parentCategoryId || null,
+        isActive: values.isActive === undefined ? true : values.isActive,
       };
-      console.log("Form Submit Data:", submitData); // Thêm log để debug
+
+      console.log("Data to submit:", submitData);
 
       let response;
       if (editingId) {
+        // Đang trong chế độ update
+        console.log("Updating category with ID:", editingId);
         response = await blogCategoryApi.update(editingId, submitData);
+        console.log("Update response:", response);
       } else {
+        // Đang trong chế độ create
         response = await blogCategoryApi.create(submitData);
       }
-      console.log("Submit Response:", response.data); // Thêm log để debug
 
       if (response?.data?.status === 1) {
-        message.success(response.data.message);
+        // Fetch lại dữ liệu ngay sau khi update thành công
+        await fetchCategories();
+
+        message.success(
+          editingId
+            ? "Category updated successfully"
+            : "Category created successfully"
+        );
+
+        // Reset form và đóng modal
         setIsModalVisible(false);
         form.resetFields();
-        fetchCategories();
+        setEditingId(null);
       } else {
-        message.error(response?.data?.message || "An error occurred");
+        throw new Error(response?.data?.message || "Operation failed");
       }
     } catch (error) {
-      console.error("Submit Error:", error); // Thêm log để debug
+      console.error("Submit Error:", error);
       message.error(
-        "An error occurred: " + (error.response?.data?.message || error.message)
+        `Failed to ${editingId ? "update" : "create"} category: ${
+          error.response?.data?.message || error.message
+        }`
       );
     } finally {
       setLoading(false);
@@ -134,6 +186,11 @@ function Blog() {
 
   // Xử lý xóa category
   const handleDelete = async (id) => {
+    // Mục đích: Xóa một category
+    // Được gọi: Khi confirm xóa trong Popconfirm
+    // Flow:
+    // 1. Gọi API delete
+    // 2. Fetch lại data mới
     try {
       setLoading(true);
       await blogCategoryApi.delete(id);
@@ -233,11 +290,103 @@ function Blog() {
     }
   };
 
+  const handleEdit = (record) => {
+    // Mục đích: Chuẩn bị form để edit category
+    // Được gọi: Khi click nút modify
+    // Flow:
+    // 1. Set editingId = categoryId của record
+    // 2. Fill form với dữ liệu của record
+    // 3. Hiển thị modal
+    console.log("Editing record:", record); // Thêm log để debug
+
+    setEditingId(record.categoryId);
+    form.setFieldsValue({
+      categoryName: record.categoryName,
+      description: record.description || "",
+      parentCategoryId: record.parentCategoryId || null,
+      isActive: record.isActive,
+    });
+    setIsModalVisible(true);
+  };
+
+  // Thêm hàm xử lý parent category
+  const getParentCategoryDisplay = async (record) => {
+    // Mục đích: Xử lý hiển thị thông tin category cha trong table
+    // Được gọi: Trong render của cột Parent Category
+    // Flow:
+    // 1. Kiểm tra nếu là category cha -> hiển thị tag "Parent Category"
+    // 2. Nếu là category con -> hiển thị tên của category cha
+    console.log("=== Debug Parent Category Logic ===");
+    console.log("Current record:", record);
+
+    if (!record) return "N/A";
+
+    // Nếu là category cha (parentCategoryId === null)
+    if (record.parentCategoryId === null) {
+      return <Tag color="green">Parent Category</Tag>;
+    }
+
+    try {
+      // Lấy thông tin category cha bằng cách gọi API với parentCategoryId
+      const parentResponse = await blogCategoryApi.getById(
+        record.parentCategoryId
+      );
+      console.log(
+        `Getting parent info for ID ${record.parentCategoryId}:`,
+        parentResponse.data
+      );
+
+      if (parentResponse?.data?.status === 1) {
+        const parentData = parentResponse.data.data;
+        return <span>{parentData.categoryName}</span>;
+      }
+    } catch (error) {
+      console.error(
+        `Error fetching parent category for ID ${record.parentCategoryId}:`,
+        error
+      );
+    }
+
+    return "N/A";
+  };
+
+  // Tách logic fetch parent names thành function riêng
+  const fetchParentNames = async (categoriesData) => {
+    // Mục đích: Lấy tên của các category cha để hiển thị trong table
+    // Được gọi: Sau khi fetchCategories thành công
+    const newParentNames = {};
+    for (const category of categoriesData) {
+      if (category.parentCategoryId !== null) {
+        try {
+          const response = await blogCategoryApi.getById(
+            category.parentCategoryId
+          );
+          if (response?.data?.status === 1) {
+            newParentNames[category.categoryId] =
+              response.data.data.categoryName;
+          }
+        } catch (error) {
+          console.error(
+            `Error fetching parent name for category ${category.categoryId}:`,
+            error
+          );
+        }
+      }
+    }
+    setParentNames(newParentNames);
+  };
+
   const columns = [
     {
-      title: "Name Category",
+      title: "Category Name",
       dataIndex: "categoryName",
       key: "categoryName",
+      render: (text, record) => (
+        <span style={{ marginLeft: record.level ? "40px" : "0" }}>
+          {record.level ? "└ " : ""}
+          {text}
+        </span>
+      ),
     },
     {
       title: "Description",
@@ -246,14 +395,17 @@ function Blog() {
       ellipsis: true,
     },
     {
-      title: "parentCategory",
+      title: "Parent Category",
       dataIndex: "parentCategoryId",
       key: "parentCategoryId",
-      render: (parentId) => {
-        const parentCategory = parentCategories.find(
-          (cat) => cat.categoryId === parentId
-        );
-        return parentCategory ? parentCategory.categoryName : "No Data";
+      render: (_, record) => {
+        if (record.parentCategoryId === null) {
+          return <Tag color="green">Parent Category</Tag>;
+        }
+
+        // Lấy parent name từ state
+        const parentName = parentNames[record.categoryId];
+        return <span>{parentName || "Loading..."}</span>;
       },
     },
     {
@@ -274,12 +426,7 @@ function Blog() {
           <Button
             type="primary"
             onClick={() => {
-              setEditingId(record.categoryId);
-              form.setFieldsValue({
-                ...record,
-                parentCategoryId: record.parentCategoryId || undefined,
-              });
-              setIsModalVisible(true);
+              handleEdit(record);
             }}
           >
             modify
@@ -372,6 +519,18 @@ function Blog() {
     },
   ];
 
+  const handleCancel = () => {
+    // Mục đích: Xử lý khi đóng modal
+    // Được gọi: Khi click Cancel hoặc nút X trên modal
+    // Flow:
+    // 1. Reset form
+    // 2. Reset editingId
+    // 3. Đóng modal
+    form.resetFields();
+    setEditingId(null);
+    setIsModalVisible(false);
+  };
+
   return (
     <div className="blog-container">
       <div style={{ marginBottom: 16 }}>
@@ -422,10 +581,7 @@ function Blog() {
           <Modal
             title={editingId ? "Edit Category" : "Add New Category"}
             open={isModalVisible}
-            onCancel={() => {
-              setIsModalVisible(false);
-              form.resetFields();
-            }}
+            onCancel={handleCancel}
             footer={null}
             confirmLoading={loading}
           >
@@ -442,26 +598,39 @@ function Blog() {
                 name="categoryName"
                 label="Category Name"
                 rules={[
-                  { required: true, message: "Please enter the category name" },
+                  { required: true, message: "Please enter category name" },
+                  {
+                    max: 100,
+                    message: "Category name cannot exceed 100 characters",
+                  },
                 ]}
               >
-                <Input />
+                <Input placeholder="Enter category name" />
               </Form.Item>
 
               <Form.Item name="description" label="Description">
-                <Input.TextArea rows={4} />
+                <Input.TextArea
+                  rows={4}
+                  placeholder="Enter description (optional)"
+                />
               </Form.Item>
 
               <Form.Item name="parentCategoryId" label="Parent Category">
                 <Select
                   allowClear
-                  placeholder="Select parent category"
-                  options={parentCategories.map((category) => ({
-                    value: category.categoryId,
-                    label: category.categoryName,
-                    disabled: category.categoryId === editingId,
-                  }))}
-                />
+                  placeholder="Select parent category (optional)"
+                >
+                  {categories
+                    .filter((cat) => cat.parentCategoryId === null)
+                    .map((cat) => (
+                      <Select.Option
+                        key={cat.categoryId}
+                        value={cat.categoryId}
+                      >
+                        {cat.categoryName}
+                      </Select.Option>
+                    ))}
+                </Select>
               </Form.Item>
 
               <Form.Item name="isActive" label="Status" valuePropName="checked">
@@ -476,14 +645,7 @@ function Blog() {
                     gap: "8px",
                   }}
                 >
-                  <Button
-                    onClick={() => {
-                      setIsModalVisible(false);
-                      form.resetFields();
-                    }}
-                  >
-                    Cancel
-                  </Button>
+                  <Button onClick={handleCancel}>Cancel</Button>
                   <Button type="primary" htmlType="submit" loading={loading}>
                     {editingId ? "Update" : "Add new"}
                   </Button>

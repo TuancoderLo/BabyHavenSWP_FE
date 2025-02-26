@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Tạo instance của axios với cấu hình mặc định
 const api = axios.create({
-  baseURL: "https://localhost:7279/api/",
+  baseURL: "https://localhost:7279/api",
   timeout: 10000, // Thêm timeout
   headers: {
     "Content-Type": "application/json",
