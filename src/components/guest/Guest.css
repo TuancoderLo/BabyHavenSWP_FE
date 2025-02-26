@@ -44,7 +44,7 @@ nav {
 /* Navigation Links */
 .nav-links {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   align-items: center;
 }
 
@@ -173,6 +173,7 @@ nav {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  margin-left: 1px;
   padding: 0.5rem 1.2rem;
   background-color: #FF74C7;
   color: #302e2e;
@@ -190,8 +191,16 @@ nav {
 }
 
 .join-btn {
-  font-weight: 700;
   margin-left: 1rem;
+  align-items: center;
+  padding: 1px;
+  background: transparent;
+  width: 60px;
+  height: 36px;
+}
+
+.join-btn div {
+  font-weight: 700;
 }
 
 /* Hero Section */
