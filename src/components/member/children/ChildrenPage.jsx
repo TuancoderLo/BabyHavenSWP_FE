@@ -24,7 +24,7 @@ function ChildrenPage() {
   useEffect(() => {
     if (!memberId) return;
 
-    api.get(`/Children/member/${memberId}`)
+    api.get("/Children/member/" + memberId)
       .then((response) => {
         console.log("API response:", response.data);
         if (response.data && response.data.data) {

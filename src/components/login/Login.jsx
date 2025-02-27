@@ -90,9 +90,10 @@ function Login({ onLoginSuccess }) {
                 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
               ],
           };
+
           if (user.roleId === "1") { //Nếu là role member thì lưu memberId vào localStorage
             const member = await api.get("Members/member/" + user.userId);
-            localStorage.setItem("memberId", member.data.memberId);
+            localStorage.setItem("memberId", member.data.data.memberId);
           }
           
           localStorage.setItem("role", user.roleId);
