@@ -1,17 +1,19 @@
-.children-topbar {
+.member-topbar {
     display: flex;
     align-items: center;
     height: 60px;
+    width: 100%;
     padding: 0 1rem;
-    background-color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   }
   
-  .children-search-container {
-    flex: 1;
-  }
+  .member-search-container {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    justify-content: space-between;  }
   
-  .children-search-input {
+  .member-search-input {
     width: 60%;
     max-width: 300px;
     padding: 8px 12px;
@@ -20,7 +22,7 @@
     outline: none;
   }
   
-  .children-user-info {
+  .member-user-info {
     margin-left: auto;
     font-weight: 500;
     color: #333;

@@ -8,7 +8,7 @@ import Register from "./components/register/Register";
 
 // HomePage (user)
 import Homepage from "./components/homepage/HomePage";
-import MemberRoutes from "./components/member/MemberRoutes";
+import Member from "./components/member/Member";
 // Admin
 import Admin from "./components/admin/Admin";
 import ChartCard from "./components/admin/ChartCard/ChartCard";
@@ -109,7 +109,7 @@ function App() {
           path="/member/*"
           element={
             <ProtectedRoute roles={["1"]}>
-              <MemberRoutes />
+              <Member />
             </ProtectedRoute>
           }
         />
