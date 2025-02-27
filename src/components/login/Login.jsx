@@ -92,8 +92,12 @@ function Login({ onLoginSuccess }) {
           };
 
           if (user.roleId === "1") { //Nếu là role member thì lưu memberId vào localStorage
+            try{           
             const member = await api.get("Members/member/" + user.userId);
             localStorage.setItem("memberId", member.data.data.memberId);
+          } catch (error) {
+            console.error("Error fetching member:", error);
+          }
           }
           
           localStorage.setItem("role", user.roleId);
