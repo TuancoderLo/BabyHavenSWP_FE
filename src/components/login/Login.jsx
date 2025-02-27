@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth } from "../../config/firebase";
 import api from "../../config/axios";
 import "react-toastify/dist/ReactToastify.css";
 import { jwtDecode } from "jwt-decode";
@@ -102,7 +100,10 @@ function Login({ onLoginSuccess }) {
           localStorage.setItem("userId", user.userId);
           localStorage.setItem("name", user.name);
 
-          // Cập nhật state trong App
+          // const request = await api.get(`Member/${user.userId}`);
+          // const member = request.data;
+          // localStorage.setItem("memberId", member.id);
+
           onLoginSuccess();
 
           // Chuyển hướng dựa vào role
