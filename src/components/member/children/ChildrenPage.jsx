@@ -20,22 +20,11 @@ function ChildrenPage() {
     }
   }, [memberId, navigate]);
 
-<<<<<<< HEAD
-  // Lấy memberId từ localStorage
-  const memberId =  localStorage.setItem("memberId", memberId); 
-  console.log("Member ID:", memberId);
-
-   // Gọi API
-   useEffect(() => {
-    api
-      .get("/Children/member/{memberId}")
-=======
   // Gọi API lấy danh sách trẻ em theo memberId
   useEffect(() => {
     if (!memberId) return;
 
     api.get(`/Children/member/${memberId}`)
->>>>>>> main
       .then((response) => {
         console.log("API response:", response.data);
         if (response.data && response.data.data) {

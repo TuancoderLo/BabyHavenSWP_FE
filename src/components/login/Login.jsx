@@ -94,10 +94,6 @@ function Login({ onLoginSuccess }) {
             const member = await api.get("Members/member/" + user.userId);
             localStorage.setItem("memberId", member.data.memberId);
           }
-
-          const request = await api.get(`Member/${user.userId}`);
-          const member = request.data;
-          localStorage.setItem("memberId", member.id);
           
           localStorage.setItem("role", user.roleId);
 
