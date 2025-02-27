@@ -1,12 +1,18 @@
-.children-page {
-    display: flex;
-    height: 100vh;
-    background: linear-gradient(135deg, #e2f1ff, #fff9fc 50%, #fff1f9 100%);
-    font-family: sans-serif;
-    box-sizing: border-box;
-  }
-  .children-main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
+.member-page {
+  display: flex;
+  height: 200vh;
+  background: linear-gradient(135deg, #e2f1ff, #fff9fc 50%, #fff1f9 100%);
+  font-family: "Roboto", sans-serif;
+  box-sizing: border-box;
+}
+.member-main {
+  flex: 1;
+  position: relative;
+}
+.member-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background: transparent;
+}

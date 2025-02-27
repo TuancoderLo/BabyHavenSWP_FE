@@ -3,15 +3,15 @@ import "./NavBar.css";
 
 function NavBar() {
   return (
-    <header className="children-topbar">
-      <div className="children-search-container">
+    <header className="member-topbar">
+      <div className="member-search-container">
         <input
           type="text"
           placeholder="Hinted search text"
           className="children-search-input"
         />
       </div>
-      <div className="children-user-info">Hello, ABC</div>
+      <div className="member-user-info">Hello, ABC</div>
     </header>
   );
 }
