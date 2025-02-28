@@ -18,6 +18,7 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    console.log("Request:", config);
     return config;
   },
   (error) => {
@@ -36,6 +37,11 @@ api.interceptors.response.use(
       localStorage.clear();
       window.location.href = "/login";
     }
+    console.error("API Error:", {
+      status: error.response?.status,
+      data: error.response?.data,
+      config: error.config,
+    });
     return Promise.reject(error);
   }
 );
