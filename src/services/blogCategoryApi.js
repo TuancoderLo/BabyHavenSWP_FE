@@ -12,17 +12,20 @@ const blogCategoryApi = {
   create: (data) => {
     console.log("Data before sending:", data);
 
-    // Format data theo đúng yêu cầu của API
     const formattedData = {
       categoryName: data.categoryName?.trim(),
       description: data.description?.trim() || "",
-      parentCategoryId: data.parentCategoryId || null,
+      parentCategoryId: data.parentCategoryId,
       isActive: true,
     };
 
     console.log("Formatted data:", formattedData);
 
-    return api.post("BlogCategories", formattedData);
+    return api.post("BlogCategories", formattedData, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   },
 
   update: (id, data) => {
