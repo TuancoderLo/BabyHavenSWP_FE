@@ -101,7 +101,7 @@ const Step1 = memo(
             />
           </div>
         </div>
-        <label>Relationship to member</label>
+        <label>Notes</label>
         <input
           type="text"
           placeholder="Any note..."

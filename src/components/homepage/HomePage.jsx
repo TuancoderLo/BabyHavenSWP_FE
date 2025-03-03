@@ -434,7 +434,7 @@ function HomePage() {
             </div>
 
             <div className="support-right">
-              <h2 id="tools-features">Tools & Features</h2>
+              <h2 id="tools-features">Services</h2>
               <div className="tools-grid">
                 {[
                   {
@@ -640,9 +640,7 @@ function HomePage() {
                 <i className="fas fa-envelope"></i> support@babyhaven.com
               </li>
               <li>
-                <i className="fas fa-map-marker-alt"></i> Lô E2a-7, Đường D1, Đ.
-                D1, Long Thạnh Mỹ, Thành Phố Thủ Đức, Hồ Chí Minh 700000,
-                Vietnam
+                <i className="fas fa-map-marker-alt"></i> Block E2a-7, D1 Street Saigon Hi-tech Park, Long Thanh My Ward, District 9, Ho Chi Minh City, Vietnam
               </li>
             </ul>
           </div>
