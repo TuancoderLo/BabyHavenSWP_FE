@@ -23,7 +23,7 @@ const blogApi = {
       referenceSources: data.referenceSources || "",
     };
     return api.post(url, blogData);
-  },
+  }, 
 
   update: (id, data) => {
     const url = `/Blog/${id}`;

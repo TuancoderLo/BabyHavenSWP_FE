@@ -1,241 +1,934 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from "../../../config/axios.js";
+import React, { useState, useEffect, useCallback, memo, useMemo } from "react";
+import addChildApi from "../../../services/addChildApi";
 import "./AddChild.css";
+import calculateBMI from "../../../services/bmiUtils";
+import PropTypes from "prop-types";
+import ReactDatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
-const AddChild = ({ closeOverlay }) => {
-    const [formData, setFormData] = useState({
-        name: "",
-        userId: localStorage.getItem("userId") || "", // từ localStorage
-        dateOfBirth: "",
-        gender: "",
-        birthWeight: "",
-        birthHeight: "",
-        bloodType: "",
-        allergies: "",
-        notes: "",
-        relationshipToMember: ""
-    });
+// ---------------------
+// Step components (memoized)
+// ---------------------
 
-    const storedUserId = localStorage.getItem("userId");
-
-if (storedUserId) {
-    console.log("User ID:", storedUserId);
-} else {
-    console.log("No user ID found in localStorage.");
-}
-
-
-    const [errors, setErrors] = useState({});
-    const [isLoading, setIsLoading] = useState(false);
-    const navigate = useNavigate();
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
-
-    const validateForm = () => {
-        const newErrors = {};
-        const { name, userId, gender, birthWeight, birthHeight, bloodType, dateOfBirth } = formData;
-
-        if (!name.trim()) newErrors.name = "Name is required!";
-        if (!userId) newErrors.userId = "User ID is required!"; 
-        if (!gender) newErrors.gender = "Gender is required!";
-        if (!birthWeight) newErrors.birthWeight = "Birth Weight is required!";
-        if (!birthHeight) newErrors.birthHeight = "Birth Height is required!";
-        if (!bloodType) newErrors.bloodType = "Blood Type is required!";
-        if (!dateOfBirth) newErrors.dateOfBirth = "Date of Birth is required!";
-
-        setErrors(newErrors);
-
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-
-        if (!validateForm()) {
-            setIsLoading(false);
-            return;
-        }
-
-        try {
-            console.log(formData);
-            const response = await api.post("Children", formData);
-            console.log(response);
-            console.log('Child added successfully:', response.data);
-            closeOverlay();
-            window.location.reload();
-            // Redirect to a list or other page after successful submission
-        } catch (error) {
-            
-            console.error('Error adding child:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // Đóng modal nếu click ra ngoài
-    const handleOverlayClick = (e) => {
-        if (e.target === e.currentTarget) {
-            closeOverlay();
-        }
-    };
+const Step1 = memo(
+  ({ childForm, setChildForm, errors, onConfirm, onAddRecord }) => {
     return (
-        <div className="add-child-overlay" onClick={handleOverlayClick}>
-            <div className="add-child-modal" onClick={(e) => e.stopPropagation()}>
-                <button
-                    type="button"
-                    className="add-child-close-btn"
-                    onClick={closeOverlay}
-                >
-                    ×
-                </button>
-
-                <h2 className="add-child-heading">Add Child</h2>
-
-                <form className="add-child-form" onSubmit={handleSubmit}>
-
-                    {/* Name */}
-                    <div className="field-group">
-                        <label className="add-child-label">Name</label>
-                        {errors.name && <div className="add-child-error">{errors.name}</div>}
-                        <input
-                            className={`add-child-input ${errors.name ? 'error-input' : ''}`}
-                            type="text"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    {/* Date of Birth */}
-                    <div className="field-group">
-                        <label className="add-child-label">Date of Birth</label>
-                        {errors.dateOfBirth && <div className="add-child-error">{errors.dateOfBirth}</div>}
-                        <input
-                            className={`add-child-input ${errors.dateOfBirth ? 'error-input' : ''}`}
-                            type="date"
-                            name="dateOfBirth"
-                            value={formData.dateOfBirth}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    {/* Gender */}
-                    <div className="field-group">
-                        <label className="add-child-label">Gender</label>
-                        {errors.gender && <div className="add-child-error">{errors.gender}</div>}
-                        <select
-                            className={`add-child-input ${errors.gender ? 'error-input' : ''}`}
-                            name="gender"
-                            value={formData.gender}
-                            onChange={handleChange}
-                            required
-                        >
-                            <option value="">--Select--</option>
-                            <option value="Female">Female</option>
-                            <option value="Male">Male</option>
-                        </select>
-                    </div>
-
-                    {/* Birth Weight */}
-                    <div className="field-group">
-                        <label className="add-child-label">Weight (kg)</label>
-                        {errors.birthWeight && <div className="add-child-error">{errors.birthWeight}</div>}
-                        <input
-                            className={`add-child-input ${errors.birthWeight ? 'error-input' : ''}`}
-                            type="number"
-                            name="birthWeight"
-                            value={formData.birthWeight}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    {/* Birth Height */}
-                    <div className="field-group">
-                        <label className="add-child-label">Height (cm)</label>
-                        {errors.birthHeight && <div className="add-child-error">{errors.birthHeight}</div>}
-                        <input
-                            className={`add-child-input ${errors.birthHeight ? 'error-input' : ''}`}
-                            type="number"
-                            name="birthHeight"
-                            value={formData.birthHeight}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    {/* Blood Type */}
-                    <div className="field-group">
-                        <label className="add-child-label">Blood Type</label>
-                        {errors.bloodType && <div className="add-child-error">{errors.bloodType}</div>}
-                        <input
-                            className={`add-child-input ${errors.bloodType ? 'error-input' : ''}`}
-                            type="text"
-                            name="bloodType"
-                            value={formData.bloodType}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    {/* Allergies */}
-                    <div className="field-group">
-                        <label className="add-child-label">Allergies</label>
-                        <input
-                            className="add-child-input"
-                            type="text"
-                            name="allergies"
-                            value={formData.allergies}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    {/* Notes */}
-                    <div className="field-group">
-                        <label className="add-child-label">Notes</label>
-                        <input
-                            className="add-child-input"
-                            type="text"
-                            name="notes"
-                            value={formData.notes}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    {/* Relationship to Member*/}
-                    <div className="field-group">
-                        <label className="add-child-label">Relationship</label>
-                        {errors.relationshipToMember && <div className="add-child-error">{errors.relationshipToMember}</div>}
-                        <input
-                            className={`add-child-input ${errors.relationshipToMember ? 'error-input' : ''}`}
-                            type="text"
-                            name="relationshipToMember"
-                            value={formData.relationshipToMember}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div> 
-
-                    {/* Submit Button */}
-                    <div className="field-group" style={{ gridColumn: "span 4" }}>
-                        <button className="add-child-button" type="submit" disabled={isLoading}>
-                            {isLoading ? "Adding Child..." : "Add Child"}
-                        </button>
-                    </div>
-                </form>
-            </div>
+      <div className="step-form">
+        <h2>Enter your baby's information</h2>
+        <label>Baby’s name</label>
+        <input
+          type="text"
+          placeholder="Enter baby's name"
+          value={childForm.name}
+          onChange={(e) =>
+            setChildForm((prev) => ({ ...prev, name: e.target.value }))
+          }
+          className={errors.name ? "error-input" : ""}
+        />
+        {errors.name && <p className="error-text">{errors.name}</p>}
+        <label>Gender of baby</label>
+        <div className="gender-buttons">
+          <button
+            type="button"
+            className={`btn-gender male-btn ${
+              childForm.gender === "Male" ? "active-gender" : ""
+            } ${errors.gender ? "error-input" : ""}`}
+            onClick={() =>
+              setChildForm((prev) => ({ ...prev, gender: "Male" }))
+            }
+          >
+            Male
+          </button>
+          <button
+            type="button"
+            className={`btn-gender female-btn ${
+              childForm.gender === "Female" ? "active-gender" : ""
+            } ${errors.gender ? "error-input" : ""}`}
+            onClick={() =>
+              setChildForm((prev) => ({ ...prev, gender: "Female" }))
+            }
+          >
+            Female
+          </button>
         </div>
+        {errors.gender && <p className="error-text">{errors.gender}</p>}
+        <label>Baby’s date of birth</label>
+        <ReactDatePicker
+          selected={childForm.dateOfBirth ? new Date(childForm.dateOfBirth) : null}
+          onChange={(date) =>
+            setChildForm((prev) => ({
+              ...prev,
+              dateOfBirth: date ? date.toISOString() : "",
+            }))
+          }
+          dateFormat="dd/MM/yyyy"
+          showMonthDropdown
+          showYearDropdown
+          dropdownMode="select"
+          className={errors.dateOfBirth ? "error-input" : ""}
+          placeholderText="Select date of birth"
+        />
+        {errors.dateOfBirth && (
+          <p className="error-text">{errors.dateOfBirth}</p>
+        )}
+        <div className="two-column-row">
+          <div>
+            <label>Birth weight (kg)</label>
+            <input
+              type="number"
+              placeholder="kg"
+              value={childForm.birthWeight}
+              onChange={(e) =>
+                setChildForm((prev) => ({
+                  ...prev,
+                  birthWeight: e.target.value,
+                }))
+              }
+            />
+          </div>
+          <div>
+            <label>Birth height (cm)</label>
+            <input
+              type="number"
+              placeholder="cm"
+              value={childForm.birthHeight}
+              onChange={(e) =>
+                setChildForm((prev) => ({
+                  ...prev,
+                  birthHeight: e.target.value,
+                }))
+              }
+            />
+          </div>
+        </div>
+        <label>Relationship to member</label>
+        <input
+          type="text"
+          placeholder="Any note..."
+          value={childForm.notes}
+          onChange={(e) =>
+            setChildForm((prev) => ({ ...prev, notes: e.target.value }))
+          }
+        />
+        <div className="step-buttons">
+          <button type="button" onClick={onConfirm}>
+            Confirm
+          </button>
+          <button type="button" onClick={onAddRecord}>
+            Add a record
+          </button>
+        </div>
+      </div>
     );
+  }
+);
+Step1.displayName = "Step1";
+
+Step1.propTypes = {
+    childForm: PropTypes.shape({
+      name: PropTypes.string,
+      gender: PropTypes.string,
+      dateOfBirth: PropTypes.string,
+      birthWeight: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      birthHeight: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      notes: PropTypes.string,
+    }).isRequired,
+    setChildForm: PropTypes.func.isRequired,
+    errors: PropTypes.object.isRequired,
+    onConfirm: PropTypes.func.isRequired,
+    onAddRecord: PropTypes.func.isRequired,
+  };
+  
+const Step2Page1 = memo(
+  ({ growthForm, setGrowthForm, errors, onConfirm, onOtherMeasure }) => {
+    const handleWeightChange = useCallback(
+      (e) => {
+        const newWeight = e.target.value;
+        const newBMI = calculateBMI(newWeight, growthForm.height);
+        setGrowthForm((prev) => ({
+          ...prev,
+          weight: newWeight,
+          bmi: newBMI,
+        }));
+        localStorage.setItem("bmi", newBMI);
+      },
+      [growthForm.height, setGrowthForm]
+    );
+    const handleHeightChange = useCallback(
+      (e) => {
+        const newHeight = e.target.value;
+        const newBMI = calculateBMI(growthForm.weight, newHeight);
+        setGrowthForm((prev) => ({
+          ...prev,
+          height: newHeight,
+          bmi: newBMI,
+        }));
+        localStorage.setItem("bmi", newBMI);
+      },
+      [growthForm.weight, setGrowthForm]
+    );
+
+    return (
+      <div className="step-form">
+        <h2>Enter a new growth record</h2>
+        <label>Date</label>
+        <ReactDatePicker
+          selected={
+            growthForm.createdAt ? new Date(growthForm.createdAt) : null
+          }
+          onChange={(date) =>
+            setGrowthForm((prev) => ({
+              ...prev,
+              createdAt: date ? date.toISOString() : "",
+            }))
+          }
+          dateFormat="dd/MM/yyyy"
+          showMonthDropdown
+          showYearDropdown
+          dropdownMode="select"
+          className={errors.createdAt ? "error-input" : ""} // You can also rename the error key if needed.
+          placeholderText="Select record date"
+        />
+        {errors.createdAt && (
+          <p className="error-text">{errors.createdAt}</p>
+        )}
+        <div className="two-column-row">
+          <div>
+            <label>Baby's weight (kg)</label>
+            <input
+              type="number"
+              value={growthForm.weight}
+              onChange={handleWeightChange}
+              className={errors.weight ? "error-input" : ""}
+            />
+            {errors.weight && <p className="error-text">{errors.weight}</p>}
+          </div>
+          <div>
+            <label>Baby's height (cm)</label>
+            <input
+              type="number"
+              value={growthForm.height}
+              onChange={handleHeightChange}
+              className={errors.height ? "error-input" : ""}
+            />
+            {errors.height && <p className="error-text">{errors.height}</p>}
+          </div>
+        </div>
+        <div className="two-column-row">
+          <div>
+            <label>Head circumference (cm)</label>
+            <input
+              type="number"
+              value={growthForm.headCircumference}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  headCircumference: e.target.value,
+                }))
+              }
+            />
+          </div>
+          <div>
+            <label>BMI (kg/m2)</label>
+            <input type="text" readOnly value={growthForm.bmi} />
+          </div>
+        </div>
+        <label>Notes</label>
+        <input
+          type="text"
+          value={growthForm.notes}
+          onChange={(e) =>
+            setGrowthForm((prev) => ({ ...prev, notes: e.target.value }))
+          }
+        />
+        <div className="step-buttons">
+          <button type="button" onClick={onConfirm}>
+            Confirm
+          </button>
+          <button type="button" onClick={onOtherMeasure}>
+            Other measure
+          </button>
+        </div>
+      </div>
+    );
+  }
+);
+Step2Page1.displayName = "Step2Page1";
+
+Step2Page1.propTypes = {
+  growthForm: PropTypes.shape({
+    createdAt: PropTypes.string,
+    weight: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    headCircumference: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    bmi: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    notes: PropTypes.string,
+  }).isRequired,
+  setGrowthForm: PropTypes.func.isRequired,
+  errors: PropTypes.object.isRequired,
+  onConfirm: PropTypes.func.isRequired,
+  onOtherMeasure: PropTypes.func.isRequired,
 };
 
-export default AddChild;
+const Step2Page2 = memo(
+  ({ growthForm, setGrowthForm, errors, onConfirm, onOtherMeasure }) => {
+    // Fields for chest, nutritional, and blood work measures
+    return (
+      <div className="step-form">
+        <h2>Enter additional growth record info (Part 2)</h2>
+        <div className="two-column-row">
+          <div>
+            <label>Chest circumference (cm)</label>
+            <input
+              type="number"
+              value={growthForm.chestCircumference}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  chestCircumference: e.target.value,
+                }))
+              }
+            />
+          </div>
+          <div>
+            <label>Nutritional status</label>
+            <input
+              type="text"
+              value={growthForm.nutritionalStatus}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  nutritionalStatus: e.target.value,
+                }))
+              }
+            />
+          </div>
+        </div>
+        <div className="two-column-row">
+          <div>
+            <label>Ferritin level</label>
+            <input
+              type="number"
+              value={growthForm.ferritinLevel}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  ferritinLevel: e.target.value,
+                }))
+              }
+            />
+          </div>
+          <div>
+            <label>Triglycerides</label>
+            <input
+              type="number"
+              value={growthForm.triglycerides}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  triglycerides: e.target.value,
+                }))
+              }
+            />
+          </div>
+        </div>
+        <div className="two-column-row">
+          <div>
+            <label>Blood sugar level</label>
+            <input
+              type="number"
+              value={growthForm.bloodSugarLevel}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  bloodSugarLevel: e.target.value,
+                }))
+              }
+            />
+          </div>
+          <div>
+            <label>Physical activity level</label>
+            <input
+              type="text"
+              value={growthForm.physicalActivityLevel}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  physicalActivityLevel: e.target.value,
+                }))
+              }
+            />
+          </div>
+        </div>
+        <div className="two-column-row">
+          <div>
+            <label>Heart rate</label>
+            <input
+              type="number"
+              value={growthForm.heartRate}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  heartRate: e.target.value,
+                }))
+              }
+            />
+          </div>
+          <div>
+            <label>Blood pressure</label>
+            <input
+              type="text"
+              value={growthForm.bloodPressure}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  bloodPressure: e.target.value,
+                }))
+              }
+            />
+          </div>
+        </div>
+        <div className="two-column-row">
+          <div>
+            <label>Body temperature (°C)</label>
+            <input
+              type="number"
+              value={growthForm.bodyTemperature}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  bodyTemperature: e.target.value,
+                }))
+              }
+            />
+          </div>
+          <div>
+            <label>Oxygen saturation (%)</label>
+            <input
+              type="number"
+              value={growthForm.oxygenSaturation}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  oxygenSaturation: e.target.value,
+                }))
+              }
+            />
+          </div>
+        </div>
+        <div className="step-buttons">
+          <button type="button" onClick={onConfirm}>
+            Confirm
+          </button>
+          <button type="button" onClick={onOtherMeasure}>
+            Other measure
+          </button>
+        </div>
+      </div>
+    );
+  }
+);
+Step2Page2.displayName = "Step2Page2";
+Step2Page2.propTypes = {
+  growthForm: PropTypes.shape({
+    chestCircumference: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    nutritionalStatus: PropTypes.string,
+    ferritinLevel: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    triglycerides: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    bloodSugarLevel: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    physicalActivityLevel: PropTypes.string,
+    heartRate: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    bloodPressure: PropTypes.string,
+    bodyTemperature: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    oxygenSaturation: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  }).isRequired,
+  setGrowthForm: PropTypes.func.isRequired,
+  errors: PropTypes.object.isRequired,
+  onConfirm: PropTypes.func.isRequired,
+  onOtherMeasure: PropTypes.func.isRequired,
+};
+
+const Step2Page3 = memo(
+  ({ growthForm, setGrowthForm, errors, onConfirm, onOtherMeasure }) => {
+    // Fields for sleep, vision, hearing, immunization, mental health & hormone levels
+    return (
+      <div className="step-form">
+        <h2>Enter additional growth record info (Part 3)</h2>
+        <div className="two-column-row">
+          <div>
+            <label>Sleep duration (hrs)</label>
+            <input
+              type="number"
+              value={growthForm.sleepDuration}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  sleepDuration: e.target.value,
+                }))
+              }
+            />
+          </div>
+          <div>
+            <label>Vision</label>
+            <input
+              type="text"
+              value={growthForm.vision}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  vision: e.target.value,
+                }))
+              }
+            />
+          </div>
+        </div>
+        <div className="two-column-row">
+          <div>
+            <label>Hearing</label>
+            <input
+              type="text"
+              value={growthForm.hearing}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  hearing: e.target.value,
+                }))
+              }
+            />
+          </div>
+          <div>
+            <label>Immunization status</label>
+            <input
+              type="text"
+              value={growthForm.immunizationStatus}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  immunizationStatus: e.target.value,
+                }))
+              }
+            />
+          </div>
+        </div>
+        <div className="two-column-row">
+          <div>
+            <label>Mental health status</label>
+            <input
+              type="text"
+              value={growthForm.mentalHealthStatus}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  mentalHealthStatus: e.target.value,
+                }))
+              }
+            />
+          </div>
+          <div>
+            <label>Growth hormone level</label>
+            <input
+              type="number"
+              value={growthForm.growthHormoneLevel}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  growthHormoneLevel: e.target.value,
+                }))
+              }
+            />
+          </div>
+        </div>
+        <div className="two-column-row">
+          <div>
+            <label>Attention span</label>
+            <input
+              type="text"
+              value={growthForm.attentionSpan}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  attentionSpan: e.target.value,
+                }))
+              }
+            />
+          </div>
+          <div>
+            <label>Neurological reflexes</label>
+            <input
+              type="text"
+              value={growthForm.neurologicalReflexes}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  neurologicalReflexes: e.target.value,
+                }))
+              }
+            />
+          </div>
+        </div>
+        <div className="step-buttons">
+          <button type="button" onClick={onConfirm}>
+            Confirm
+          </button>
+          {/* Optionally, you may remove or disable the "Other measure" here if 3 sub-steps is maximum */}
+          <button type="button" onClick={onOtherMeasure}>
+            Other measure
+          </button>
+        </div>
+      </div>
+    );
+  }
+);
+Step2Page3.displayName = "Step2Page3";
+Step2Page3.propTypes = {
+  growthForm: PropTypes.shape({
+    sleepDuration: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    vision: PropTypes.string,
+    hearing: PropTypes.string,
+    immunizationStatus: PropTypes.string,
+    mentalHealthStatus: PropTypes.string,
+    growthHormoneLevel: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    attentionSpan: PropTypes.string,
+    neurologicalReflexes: PropTypes.string,
+  }).isRequired,
+  setGrowthForm: PropTypes.func.isRequired,
+  errors: PropTypes.object.isRequired,
+  onConfirm: PropTypes.func.isRequired,
+  onOtherMeasure: PropTypes.func.isRequired,
+};
+
+const Step3 = memo(({ childForm, onClose }) => {
+  return (
+    <div className="step-form">
+      <h2>
+        Congratulation, welcome{" "}
+        <span style={{ color: "#00bfa6" }}>{childForm.name}</span> to BabyHaven
+      </h2>
+      <p>1. Enter information</p>
+      <p>2. Add a new growth record</p>
+      <p>3. Submit</p>
+      <div className="step-buttons">
+        <button type="button" onClick={onClose} style={{ marginLeft: "auto" }}>
+          Close
+        </button>
+      </div>
+    </div>
+  );
+});
+Step3.displayName = "Step3";
+Step3.propTypes = {
+  childForm: PropTypes.shape({
+    name: PropTypes.string,
+  }).isRequired,
+  onClose: PropTypes.func.isRequired,
+};
+
+// ---------------------
+// Main AddChild component
+// ---------------------
+const AddChild = ({ closeOverlay }) => {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [subStep2, setSubStep2] = useState(1);
+  const [didAddRecord, setDidAddRecord] = useState(false);
+
+  const [childForm, setChildForm] = useState({
+    name: "",
+    memberId: localStorage.getItem("memberId"),
+    dateOfBirth: "",
+    gender: "",
+    birthWeight: "",
+    birthHeight: "",
+    notes: "",
+  });
+
+  useEffect(() => {
+    const storedMemberId = localStorage.getItem("memberId");
+    if (storedMemberId) {
+      console.log("Member ID:", storedMemberId);
+    } else {
+      console.log("No user ID found in localStorage.");
+    }
+  }, []);
+
+  const [growthForm, setGrowthForm] = useState({
+    createdAt: "",
+    weight: "",
+    height: "",
+    headCircumference: "",
+    bmi: "",
+    notes: "",
+    muscleMass: "",
+    chestCircumference: "",
+    nutritionalStatus: "",
+    ferritinLevel: "",
+    triglycerides: "",
+    bloodSugarLevel: "",
+    physicalActivityLevel: "",
+    heartRate: "",
+    bloodPressure: "",
+    bodyTemperature: "",
+    oxygenSaturation: "",
+    sleepDuration: "",
+    vision: "",
+    hearing: "",
+    immunizationStatus: "",
+    mentalHealthStatus: "",
+    growthHormoneLevel: "",
+    attentionSpan: "",
+    neurologicalReflexes: "",
+    developmentalMilestones: "",
+  });
+
+  const [errors, setErrors] = useState({
+    name: "",
+    gender: "",
+    dateOfBirth: "",
+    recordDate: "",
+    weight: "",
+    height: "",
+  });
+
+  const validateStep1 = useCallback(() => {
+    const newErrors = {
+      name: "",
+      gender: "",
+      dateOfBirth: "",
+      recordDate: errors.recordDate,
+      weight: errors.weight,
+      height: errors.height,
+    };
+    let isValid = true;
+    if (!childForm.name.trim()) {
+      newErrors.name = "Please enter baby's name";
+      isValid = false;
+    }
+    if (!childForm.gender) {
+      newErrors.gender = "Please select gender";
+      isValid = false;
+    }
+    if (!childForm.dateOfBirth) {
+      newErrors.dateOfBirth = "Please select date of birth";
+      isValid = false;
+    }
+    setErrors(newErrors);
+    return isValid;
+  }, [childForm, errors.recordDate, errors.weight, errors.height]);
+
+  const validateStep2 = useCallback(() => {
+    const newErrors = { ...errors };
+    let isValid = true;
+    if (!growthForm.createdAt) {
+      newErrors.createdAt = "Please select date";
+      isValid = false;
+    } else {
+      newErrors.createdAt = "";
+    }
+    if (!growthForm.weight) {
+      newErrors.weight = "Please enter weight";
+      isValid = false;
+    } else {
+      newErrors.weight = "";
+    }
+    if (!growthForm.height) {
+      newErrors.height = "Please enter height";
+      isValid = false;
+    } else {
+      newErrors.height = "";
+    }
+    setErrors(newErrors);
+    return isValid;
+  }, [growthForm, errors]);
+
+  const handleConfirmStep1 = useCallback(() => {
+    if (!validateStep1()) return;
+    setCurrentStep(3);
+  }, [validateStep1]);
+
+  const handleAddRecordStep1 = useCallback(() => {
+    if (!validateStep1()) return;
+    setDidAddRecord(true);
+    setCurrentStep(2);
+    setSubStep2(1);
+  }, [validateStep1]);
+
+  const handleOtherMeasure = useCallback(() => {
+    if (!validateStep2()) return;
+    if (subStep2 < 3) {
+      setSubStep2((prev) => prev + 1);
+    }
+  }, [validateStep2, subStep2]);
+
+  const handleConfirmStep2 = useCallback(() => {
+    if (!validateStep2()) return;
+    setCurrentStep(3);
+  }, [validateStep2]);
+
+  const handleCloseStep3 = useCallback(async () => {
+    try {
+      console.log("handleCloseStep3 called. Child form:", childForm, "Growth form:", growthForm);
+      
+      // Prepare and send child payload (Step1 data)
+      const childPayload = {
+        name: childForm.name.trim(),
+        memberId: childForm.memberId,
+        dateOfBirth: new Date(childForm.dateOfBirth).toISOString().split("T")[0],
+        gender: childForm.gender,
+        birthWeight: childForm.birthWeight,
+        birthHeight: childForm.birthHeight,
+        notes: childForm.notes,
+      };
+      const childRes = await addChildApi.createChild(childPayload);
+      console.log("Child created:", childRes.data);
+      
+      // If a growth record was added (Step2), then send it as well.
+      if (didAddRecord) {
+        const childId = childRes.data?.data?.childId;
+        const growthPayload = {
+          childId,
+          recordedBy: childForm.memberId,
+          createdAt: growthForm.createdAt || new Date().toISOString(),
+          weight: growthForm.weight,
+          height: growthForm.height,
+          headCircumference: growthForm.headCircumference,
+          notes: growthForm.notes,
+          muscleMass: growthForm.muscleMass,
+          chestCircumference: growthForm.chestCircumference,
+          nutritionalStatus: growthForm.nutritionalStatus,
+          ferritinLevel: growthForm.ferritinLevel,
+          triglycerides: growthForm.triglycerides,
+          bloodSugarLevel: growthForm.bloodSugarLevel,
+          physicalActivityLevel: growthForm.physicalActivityLevel,
+          heartRate: growthForm.heartRate,
+          bloodPressure: growthForm.bloodPressure,
+          bodyTemperature: growthForm.bodyTemperature,
+          oxygenSaturation: growthForm.oxygenSaturation,
+          sleepDuration: growthForm.sleepDuration,
+          vision: growthForm.vision,
+          hearing: growthForm.hearing,
+          immunizationStatus: growthForm.immunizationStatus,
+          mentalHealthStatus: growthForm.mentalHealthStatus,
+          growthHormoneLevel: growthForm.growthHormoneLevel,
+          attentionSpan: growthForm.attentionSpan,
+          neurologicalReflexes: growthForm.neurologicalReflexes,
+          developmentalMilestones: growthForm.developmentalMilestones,
+        };
+        const growthRes = await addChildApi.createGrowthRecord(growthPayload);
+        console.log("Growth record created:", growthRes.data);
+      }
+      closeOverlay();
+//   window.location.reload();
+    } catch (err) {
+      console.error("Error saving data:", err);
+    //   window.location.reload();
+      closeOverlay();
+    }
+  }, [childForm, growthForm, didAddRecord, closeOverlay]);
+
+  const handleCloseWithoutSave = useCallback(() => {
+    closeOverlay();
+  }, [closeOverlay]);
+
+  const handleOverlayClick = useCallback((e) => {
+    if (e.target === e.currentTarget) {
+      closeOverlay();
+    }
+  }, [closeOverlay]);
+
+  // useMemo to render step content to avoid re-renders if props haven't changed
+  const renderStepContent = useMemo(() => {
+    if (currentStep === 1) {
+      return (
+        <Step1
+          childForm={childForm}
+          setChildForm={setChildForm}
+          errors={errors}
+          onConfirm={handleConfirmStep1}
+          onAddRecord={handleAddRecordStep1}
+        />
+      );
+    } else if (currentStep === 2) {
+      if (subStep2 === 1) {
+        return (
+          <Step2Page1
+            growthForm={growthForm}
+            setGrowthForm={setGrowthForm}
+            errors={errors}
+            onConfirm={handleConfirmStep2}
+            onOtherMeasure={handleOtherMeasure}
+          />
+        );
+      } else if (subStep2 === 2) {
+        return (
+          <Step2Page2
+            growthForm={growthForm}
+            setGrowthForm={setGrowthForm}
+            errors={errors}
+            onConfirm={handleConfirmStep2}
+            onOtherMeasure={handleOtherMeasure}
+          />
+        );
+      } else if (subStep2 === 3) {
+        return (
+          <Step2Page3
+            growthForm={growthForm}
+            setGrowthForm={setGrowthForm}
+            errors={errors}
+            onConfirm={handleConfirmStep2}
+            onOtherMeasure={handleOtherMeasure}
+          />
+        );
+      }
+    } else if (currentStep === 3) {
+      return <Step3 childForm={childForm} onClose={handleCloseStep3} />;
+    }
+    return null;
+  }, [
+    currentStep,
+    subStep2,
+    childForm,
+    growthForm,
+    errors,
+    handleConfirmStep1,
+    handleAddRecordStep1,
+    handleConfirmStep2,
+    handleOtherMeasure,
+    handleCloseStep3,
+  ]);
+
+    return (
+      <div className="add-child-overlay" onClick={handleOverlayClick}>
+        <div className="add-child-wizard" onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            className="close-btn"
+            onClick={handleCloseWithoutSave}
+          >
+            ×
+          </button>
+          <div className="wizard-left">
+            <div className="blue-bar"></div>
+            <div className="wizard-left-content">
+              <h1 className="main-title">
+                Enter a new growth record to track your baby's health automatically
+              </h1>
+              <div className="step-labels">
+                <div className={`step-label ${currentStep === 1 ? "active-step" : ""}`}>
+                  1. Enter information
+                </div>
+                <div className={`step-label ${currentStep === 2 ? "active-step" : ""}`}>
+                  2. Add a new growth record
+                </div>
+                <div className={`step-label ${currentStep === 3 ? "active-step" : ""}`}>
+                  3. Submit
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="wizard-right">
+            {renderStepContent}
+          </div>
+        </div>
+      </div>
+    );
+  };
+  export default AddChild;

@@ -1,10 +1,4 @@
-.member-topbar {
-    display: flex;
-    align-items: center;
-    height: 60px;
-    width: 100%;
-    padding: 0 1rem;
-  }
+
   
   .member-search-container {
     height: 60px;
@@ -13,18 +7,67 @@
     padding: 0 20px;
     justify-content: space-between;  }
   
-  .member-search-input {
-    width: 60%;
-    max-width: 300px;
-    padding: 8px 12px;
-    border-radius: 20px;
-    border: 1px solid #ccc;
-    outline: none;
-  }
-  
   .member-user-info {
     margin-left: auto;
     font-weight: 500;
     color: #333;
   }
-  
+.search-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  pointer-events: none;
+}
+
+.search-wrapper input {
+  padding-left: 35px;
+}
+
+/* Căn chỉnh toàn bộ thanh topbar */
+.member-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  /* Để search ở trái, name + avatar ở phải */
+  padding: 10px 20px;
+}
+
+/* Wrapper chứa member name và avatar */
+.member-info {
+  display: grid;
+  grid-template-columns: auto 40px;
+  /* Cột 1 tự co giãn, cột 2 cố định 40px */
+  align-items: center;
+  gap: 12px;
+  /* Khoảng cách giữa name và avatar */
+}
+
+/* Tên thành viên */
+.member-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #333;
+  white-space: nowrap;
+  /* Ngăn tên bị xuống dòng */
+}
+
+/* Avatar */
+.avatar-member {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.avatar-member img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

@@ -1,205 +1,300 @@
-/* Tổng thể wrapper chia 2 cột trái - phải */
-.children-page-wrapper {
+/* Đảm bảo trang nằm giữa, giới hạn max-width */
+.children-page-container {
   display: flex;
+      flex-direction: column;
+        gap: 20px;
+        margin: 20px;
+      }
+      
+      .topbar {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      
+      .topbar-title {
+        font-size: 1.5rem;
+        color: #333;
+      }
+      
+      .search-container {
+        flex: 1;
+        /* để ô search giãn rộng */
+      }
+      
+      .search-input {
   width: 100%;
-  min-height: 100vh; 
-  padding: 20px;
-  box-sizing: border-box;
+  max-width: 300px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+  }
+  
+  .user-info {
+    color: #666;
+    font-weight: 500;
+  }
+  
+  /**************************************************
+                                                                        CÁC NÚT FEATURE (Child Education, Analyze with AI)
+                                                                      **************************************************/
+  .feature-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: end;
+  }
+  
+  .feature-btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background-color: #00d0bc;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  .feature-btn:hover {
+    background-color: #00bfa6;
+  }
+  
+  /**************************************************
+                                                                        MAIN CONTENT: 3 box (children, detail, chart)
+                                                                      **************************************************/
+  .main-content {
+    display: grid;
+    grid-template-columns: 230px 1fr 3fr;
+    grid-template-rows: auto auto;
+    /* 2 hàng => box 1,2,3,4 */
   gap: 20px;
+  margin-bottom: 20px;
+    align-items: start;
 }
 
-/* CỘT TRÁI: Danh sách trẻ + nút Add */
-.left-section {
-  width: 280px; /* Tuỳ chỉnh chiều rộng */
+/* Card chung */
+.card {
+  background: #fff;
   border-radius: 8px;
   padding: 16px;
-  display: flex;
-  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+  
+  /**************************************************
+                                                                                BOX 1: Danh sách Children
+                                                                              **************************************************/
+  .children-box {
+    grid-column: 1 / 2;
+    /* cột 1 */
+    grid-row: 1 / 2;
+    /* hàng 1 */
 }
 
 .section-title {
-  margin: 0 0 16px;
   font-size: 1.2rem;
-}
-
-.children-list {
-  flex: 1; /* để danh sách kéo dài */
-  overflow-y: auto;
-  margin-bottom: 16px;
-}
-
-/* Card của từng đứa trẻ */
-.child-card {
-  background: #f9f9f9;
-  border-radius: 6px;
-  padding: 12px;
   margin-bottom: 10px;
+}
+
+.child-item {
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  background: #f9f9f9;
   cursor: pointer;
   transition: box-shadow 0.2s;
   border: 1px solid #eee;
 }
-.child-card:hover {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-.child-card.active {
+.child-item.active {
   border-left: 4px solid #00d0bc;
-  background: #f9fffe;
+  background: #f4fdfd;
 }
 
-.child-card-name {
+.child-item:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.child-name {
   font-weight: 600;
   margin-bottom: 4px;
 }
-.child-card-dob {
+.child-dob {
   font-size: 0.9rem;
   color: #666;
 }
 
-/* Nút Add Child */
-.add-child-btn {
-  padding: 10px;
-  background: #00d0bc;
+.add-child-btn,
+
+.add-milestones-btn {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 0;
   border: none;
   border-radius: 6px;
   color: #fff;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s;
+  text-align: center;
+  }
+  
+  .add-milestones card {
+    padding: 12px;
+    border-radius: 6px;
+    background: #f9f9f9;
+    border: 1px solid #eee;
+  }
+  
+  .add-child-btn {
+    background: #00d0bc;
 }
 .add-child-btn:hover {
   background: #00bfa6;
 }
 
-/* CỘT PHẢI: Chi tiết */
-.right-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Khối thông tin chi tiết của child */
-.child-detail {
-  background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  display: flex;
-  flex-direction: column;
-  gap: 20px; /* Khoảng cách giữa các khối: info, alert, chart... */
-}
-
-/* Thông tin cơ bản */
-.child-info h1 {
-  margin: 0;
-  font-size: 1.5rem;
-  margin-bottom: 10px;
-}
-
-.child-info-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px 20px;
-}
-
-.info-item {
-  display: flex;
-  flex-direction: column;
-}
-.info-item .label {
-  font-weight: 600;
+.add-milestones-btn {
+  background: #ffd500;
+  margin-top: 4px;
   color: #333;
 }
-.info-item span {
-  margin-top: 4px;
-  color: #666;
+
+.add-milestones-btn:hover {
+  background: #ffbf00;
 }
 
-/* Alert */
-.alert-section {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+/**************************************************
+  BOX 2: Chi tiết child
+**************************************************/
+.child-detail-box {
+  grid-column: 2 / 3;
+  /* cột 2 */
+  grid-row: 1 / 2;
+  /* hàng 1 */
 }
+
+.child-title {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+    color: #333;
+}
+
+/**************************************************
+  ALERT BOX
+**************************************************/
 .alert-box {
-  background: #f8f9fa;
+  margin-top: 10px;
+  padding: 10px 12px;
   border-radius: 6px;
-  padding: 10px 16px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.alert-low {
+  background: #4caf50;
+}
+.alert-medium {
+  background: #ffc107;
+  color: #333;
+  /* text cho màu vàng */
+}
+.alert-high {
+  background: #f44336;
+}
+
+/**************************************************
+  BOX 3: Growth chart
+**************************************************/
+.growth-chart-box {
+  grid-column: 3 / 4;
+  /* cột 3 */
+  grid-row: 1 / 2;
+  /* hàng 1 */
+}
+
+.chart-header {
   display: flex;
   align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+.chart-area {
+  height: 180px;
+  border: 1px dashed #ccc;
+  border-radius: 6px;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+    color: #999;
+  }
+  
+  /* Toolbar bên phải chart */
+  .chart-toolbar {
+    display: flex;
+    flex-direction: row;
   gap: 8px;
-  border-left: 4px solid #ccc;
 }
-.alert-box.low {
-  border-left-color: green;
-}
-.alert-box.medium {
-  border-left-color: orange;
-}
-.alert-box.high {
-  border-left-color: red;
-}
-.alert-box button {
-  margin-left: auto;
-  background: #00d0bc;
-  border: none;
+.toolbar-select {
+  font-size: 0.8rem;
+  padding: 4px 8px;
   border-radius: 4px;
-  padding: 6px 10px;
-  color: #fff;
+  border: 1px solid #ccc;
+    background-color: #fff;
   cursor: pointer;
-  font-size: 0.85rem;
-  transition: background 0.2s;
-}
-.alert-box button:hover {
-  background: #00bfa6;
 }
 
-/* Growth chart */
-.growth-section {
+/**************************************************
+  BOX 4: Thông tin Weight, Height, Connect to doctor
+**************************************************/
+.growth-info-box {
+  grid-column: 4 / 5;
+  /* cột 4 */
+  grid-row: 1 / 2;
+  /* hàng 1 */
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-direction: row;
+    align-items: center;
+    gap: 16px;
 }
-.growth-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #333;
-}
-.growth-chart {
-  background: #f4fdfd;
-  border: 1px dashed #ddd;
-  border-radius: 8px;
-  padding: 20px;
-  text-align: center;
+growth-chart-box card {
+  padding: 12px;
+  border-radius: 6px;
+  background: #f9f9f9;
+  border: 1px solid #eee;
 }
 
-/* Nút hành động */
-.actions-row {
+.action-buttons {
+  margin-left: auto;
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
-.actions-row .btn {
-  background: #00d0bc;
+.action-buttons button {
+  flex: 1;
+  padding: 8px;
   border: none;
   border-radius: 6px;
-  padding: 10px 16px;
+  background: #00d0bc;
   color: #fff;
   cursor: pointer;
   transition: background 0.2s;
 }
-.actions-row .btn:hover {
+.action-buttons button:hover {
   background: #00bfa6;
 }
 
-/* Activities */
-.activities-section {
-  border-top: 1px solid #eee;
-  padding-top: 16px;
+/**************************************************
+  BOX 5: Activities (hàng 2, full width)
+**************************************************/
+.activities-box {
+  grid-column: 1 / 5;
+  /* spanning hết 4 cột */
+  grid-row: 2 / 3;
+  /* hàng 2 */
 }
 
-/* Nếu chưa chọn đứa nào */
-.no-child-selected {
-  background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+.activities-box h2 {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+  color: #333;
 }
