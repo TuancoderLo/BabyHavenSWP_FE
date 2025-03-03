@@ -2,46 +2,50 @@ import api from "../config/axios";
 
 const blogApi = {
   getAll: () => {
-    const url = "/Blog";
-    return api.get(url);
+    return api.get("Blog");
   },
 
   getById: (id) => {
-    const url = `/Blog/${id}`;
-    return api.get(url);
+    return api.get(`Blog/${id}`);
   },
 
   create: (data) => {
-    const url = "/Blog";
+    console.log("Creating blog with data:", data);
     const blogData = {
-      title: data.title,
-      content: data.content,
+      title: data.title?.trim(),
+      content: data.content?.trim(),
+      categoryId: data.categoryId,
+      categoryName: data.categoryName?.trim(),
       authorName: data.authorName || "Admin",
-      categoryName: data.categoryName,
-      imageBlog: data.imageBlog || "",
-      tags: data.tags || "",
-      referenceSources: data.referenceSources || "",
+      imageBlog: data.imageBlog?.trim() || "",
+      tags: data.tags?.trim() || "",
+      referenceSources: data.referenceSources?.trim() || "",
+      status: data.status || "Draft",
     };
-    return api.post(url, blogData);
-  }, 
+    console.log("Formatted create blog data:", blogData);
+    return api.post("Blog", blogData);
+  },
 
   update: (id, data) => {
-    const url = `/Blog/${id}`;
+    console.log("Updating blog with data:", { id, data });
     const blogData = {
-      title: data.title,
-      content: data.content,
+      blogId: id,
+      title: data.title?.trim(),
+      content: data.content?.trim(),
+      categoryId: data.categoryId,
+      categoryName: data.categoryName?.trim(),
       authorName: data.authorName || "Admin",
-      categoryName: data.categoryName,
-      imageBlog: data.imageBlog || "",
-      tags: data.tags || "",
-      referenceSources: data.referenceSources || "",
+      imageBlog: data.imageBlog?.trim() || "",
+      tags: data.tags?.trim() || "",
+      referenceSources: data.referenceSources?.trim() || "",
+      status: data.status || "Draft",
     };
-    return api.put(url, blogData);
+    console.log("Formatted update blog data:", blogData);
+    return api.put(`Blog/${id}`, blogData);
   },
 
   delete: (id) => {
-    const url = `/Blog/${id}`;
-    return api.delete(url);
+    return api.delete(`Blog/${id}`);
   },
 };
 

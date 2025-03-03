@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import blogCategoryApi from "../../../../services/blogCategoryApi";
 import blogApi from "../../../../services/blogApi";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import {
   Table,
   Button,
@@ -122,18 +124,9 @@ function Blog() {
 
   // Xử lý thêm/sửa category
   const handleSubmit = async (values) => {
-    // Mục đích: Xử lý khi submit form (cả create và update)
-    // Được gọi: Khi click nút Submit trong form
-    // Flow:
-    // 1. Format dữ liệu
-    // 2. Kiểm tra editingId để quyết định gọi API create hay update
-    // 3. Gọi API tương ứng
-    // 4. Fetch lại data mới
-    // 5. Reset form và đóng modal
     try {
       setLoading(true);
       console.log("Form values:", values);
-      console.log("Editing ID:", editingId); // Thêm log để debug
 
       const submitData = {
         categoryName: values.categoryName.trim(),
@@ -146,39 +139,30 @@ function Blog() {
 
       let response;
       if (editingId) {
-        // Đang trong chế độ update
-        console.log("Updating category with ID:", editingId);
+        // Nếu đang edit (có editingId) thì gọi API update
         response = await blogCategoryApi.update(editingId, submitData);
         console.log("Update response:", response);
       } else {
-        // Đang trong chế độ create
+        // Nếu không có editingId thì gọi API create
         response = await blogCategoryApi.create(submitData);
+        console.log("Create response:", response);
       }
 
       if (response?.data?.status === 1) {
-        // Fetch lại dữ liệu ngay sau khi update thành công
-        await fetchCategories();
-
         message.success(
           editingId
             ? "Category updated successfully"
             : "Category created successfully"
         );
-
-        // Reset form và đóng modal
         setIsModalVisible(false);
         form.resetFields();
-        setEditingId(null);
+        await fetchCategories();
       } else {
         throw new Error(response?.data?.message || "Operation failed");
       }
     } catch (error) {
       console.error("Submit Error:", error);
-      message.error(
-        `Failed to ${editingId ? "update" : "create"} category: ${
-          error.response?.data?.message || error.message
-        }`
-      );
+      message.error(`Operation failed: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -210,37 +194,44 @@ function Blog() {
       const submitData = {
         title: values.title,
         content: values.content,
+        categoryId: values.categoryId,
         categoryName:
           categories.find((cat) => cat.categoryId === values.categoryId)
             ?.categoryName || "",
-        imageBlog: values.imageBlog,
-        tags: values.tags,
-        referenceSources: values.referenceSources,
-        authorName: "Admin", // Tạm thời hardcode authorName
+        imageBlog: values.imageBlog || "",
+        tags: values.tags || "",
+        referenceSources: values.referenceSources || "",
+        status: values.status || "Draft",
+        authorName: "Admin",
       };
+
+      console.log("Blog data to submit:", submitData);
 
       let response;
       if (editingBlogId) {
         response = await blogApi.update(editingBlogId, submitData);
+        console.log("Update blog response:", response);
       } else {
         response = await blogApi.create(submitData);
+        console.log("Create blog response:", response);
       }
 
       if (response?.data?.status === 1) {
         message.success(
           editingBlogId
             ? "Blog updated successfully"
-            : "New blog added successfully"
+            : "Blog created successfully"
         );
         setBlogModalVisible(false);
         blogForm.resetFields();
-        fetchBlogs();
+        setEditingBlogId(null);
+        await fetchBlogs();
       } else {
-        message.error(response?.data?.message || "An error occurred");
+        throw new Error(response?.data?.message || "Operation failed");
       }
     } catch (error) {
-      message.error("Có lỗi xảy ra khi xử lý blog");
-      console.error(error);
+      console.error("Blog Submit Error:", error);
+      message.error(`Operation failed: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -571,6 +562,12 @@ function Blog() {
             dataSource={categories}
             rowKey="categoryId"
             loading={loading}
+            onChange={(pagination, filters, sorter) => {
+              console.log("Table data hiện tại:", categories);
+              console.log("Pagination:", pagination);
+              console.log("Filters:", filters);
+              console.log("Sorter:", sorter);
+            }}
             pagination={{
               defaultPageSize: 10,
               showSizeChanger: true,
@@ -714,7 +711,36 @@ function Blog() {
                   { required: true, message: "Please enter the content" },
                 ]}
               >
-                <Input.TextArea rows={6} />
+                <CKEditor
+                  editor={ClassicEditor}
+                  config={{
+                    licenseKey:
+                      "eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3NDE5OTY3OTksImp0aSI6IjI2Yzc2ZmYwLTA1M2EtNGFiYi05MzE1LTJkMTJmOGI1MDEzYyIsInVzYWdlRW5kcG9pbnQiOiJodHRwczovL3Byb3h5LWV2ZW50LmNrZWRpdG9yLmNvbSIsImRpc3RyaWJ1dGlvbkNoYW5uZWwiOlsiY2xvdWQiLCJkcnVwYWwiLCJzaCJdLCJ3aGl0ZUxhYmVsIjp0cnVlLCJsaWNlbnNlVHlwZSI6InRyaWFsIiwiZmVhdHVyZXMiOlsiKiJdLCJ2YyI6ImI3MTUxOGY4In0.vICfmtINjCekKGTm_NVhjNHnL3-r5jROjdzpHuhYSKCBXc5nA_-xPV7WeViN36BggwgnprQ-EIFANTbAbTOP4Q",
+                    toolbar: [
+                      "heading",
+                      "|",
+                      "bold",
+                      "italic",
+                      "link",
+                      "bulletedList",
+                      "numberedList",
+                      "|",
+                      "outdent",
+                      "indent",
+                      "|",
+                      "blockQuote",
+                      "insertTable",
+                      "mediaEmbed",
+                      "undo",
+                      "redo",
+                    ],
+                  }}
+                  data={form.getFieldValue("content") || ""}
+                  onChange={(event, editor) => {
+                    const data = editor.getData();
+                    form.setFieldsValue({ content: data });
+                  }}
+                />
               </Form.Item>
 
               <Form.Item
