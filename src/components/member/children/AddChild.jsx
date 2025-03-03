@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, memo, useMemo } from "react";
-import addChildApi from "../../../services/addChildApi";
+import childApi from "../../../services/childApi";
 import "./AddChild.css";
 import calculateBMI from "../../../services/bmiUtils";
 import PropTypes from "prop-types";
@@ -751,7 +751,7 @@ const handleConfirmStep1 = useCallback(async () => {
       birthHeight: childForm.birthHeight,
       notes: childForm.notes,
     };
-    const childRes = await addChildApi.createChild(childPayload);
+    const childRes = await childApi.createChild(childPayload);
     console.log("Child created:", childRes.data);
     // Save childId for later use:
     setChildId(childRes.data?.data?.childId || "");
@@ -774,7 +774,7 @@ const handleAddRecordStep1 = useCallback(async () => {
       birthHeight: childForm.birthHeight,
       notes: childForm.notes,
     };
-    const childRes = await addChildApi.createChild(childPayload);
+    const childRes = await childApi.createChild(childPayload);
     console.log("Child created:", childRes.data);
     setChildId(childRes.data?.data?.childId || "");
     setCurrentStep(2);
@@ -825,7 +825,7 @@ const handleConfirmStep2 = useCallback(async () => {
       neurologicalReflexes: growthForm.neurologicalReflexes,
       developmentalMilestones: growthForm.developmentalMilestones,
     };
-    const growthRes = await addChildApi.createGrowthRecord(growthPayload);
+    const growthRes = await childApi.createGrowthRecord(growthPayload);
     console.log("Growth record created:", growthRes.data);
     setCurrentStep(3);
   } catch (err) {
@@ -835,7 +835,7 @@ const handleConfirmStep2 = useCallback(async () => {
 
   const handleCloseStep3 = useCallback(() => {
       closeOverlay();
-//   window.location.reload();
+  window.location.reload();
 }, [closeOverlay]);
 
   const handleCloseWithoutSave = useCallback(() => {
