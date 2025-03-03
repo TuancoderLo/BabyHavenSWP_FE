@@ -123,9 +123,9 @@ function Guest() {
             </a>
           </div>
           <div className="user-actions">
-            <div className="join-btn" onClick={() => navigate("/register")}>
+            <NavLink className="join-btn" to={"/register"}>
               Join
-            </div>
+            </NavLink>
             <button className="logout-btn" onClick={() => navigate("/login")}>
               {/* <i className="fas fa-sign-in-alt"></i> */}
               Sign Up
