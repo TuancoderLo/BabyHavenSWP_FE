@@ -601,12 +601,9 @@ const Step3 = memo(({ childForm, onClose }) => {
   return (
     <div className="step-form">
       <h2>
-        Congratulation, welcome{" "}
-        <span style={{ color: "#00bfa6" }}>{childForm.name}</span> to BabyHaven
+        Congratulations, <span style={{ color: "#00bfa6" }}>{childForm.name}</span>!
       </h2>
-      <p>1. Enter information</p>
-      <p>2. Add a new growth record</p>
-      <p>3. Submit</p>
+      <p>Your information has been saved successfully.</p>
       <div className="step-buttons">
         <button type="button" onClick={onClose} style={{ marginLeft: "auto" }}>
           Close
@@ -616,6 +613,7 @@ const Step3 = memo(({ childForm, onClose }) => {
   );
 });
 Step3.displayName = "Step3";
+
 Step3.propTypes = {
   childForm: PropTypes.shape({
     name: PropTypes.string,
@@ -629,7 +627,6 @@ Step3.propTypes = {
 const AddChild = ({ closeOverlay }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [subStep2, setSubStep2] = useState(1);
-  const [didAddRecord, setDidAddRecord] = useState(false);
 
   const [childForm, setChildForm] = useState({
     name: "",
@@ -739,17 +736,53 @@ const AddChild = ({ closeOverlay }) => {
     return isValid;
   }, [growthForm, errors]);
 
-  const handleConfirmStep1 = useCallback(() => {
-    if (!validateStep1()) return;
-    setCurrentStep(3);
-  }, [validateStep1]);
+  const [childId, setChildId] = useState("");
 
-  const handleAddRecordStep1 = useCallback(() => {
-    if (!validateStep1()) return;
-    setDidAddRecord(true);
+
+const handleConfirmStep1 = useCallback(async () => {
+  if (!validateStep1()) return;
+  try {
+    const childPayload = {
+      name: childForm.name.trim(),
+      memberId: childForm.memberId,
+      dateOfBirth: new Date(childForm.dateOfBirth).toISOString().split("T")[0],
+      gender: childForm.gender,
+      birthWeight: childForm.birthWeight,
+      birthHeight: childForm.birthHeight,
+      notes: childForm.notes,
+    };
+    const childRes = await addChildApi.createChild(childPayload);
+    console.log("Child created:", childRes.data);
+    // Save childId for later use:
+    setChildId(childRes.data?.data?.childId || "");
+    // Automatically move to Step3 or prompt user as desired:
+    setCurrentStep(3);
+  } catch (err) {
+    console.error("Error saving child data:", err);
+  }
+}, [childForm, validateStep1]);
+
+const handleAddRecordStep1 = useCallback(async () => {
+  if (!validateStep1()) return;
+  try {
+    const childPayload = {
+      name: childForm.name.trim(),
+      memberId: childForm.memberId,
+      dateOfBirth: new Date(childForm.dateOfBirth).toISOString().split("T")[0],
+      gender: childForm.gender,
+      birthWeight: childForm.birthWeight,
+      birthHeight: childForm.birthHeight,
+      notes: childForm.notes,
+    };
+    const childRes = await addChildApi.createChild(childPayload);
+    console.log("Child created:", childRes.data);
+    setChildId(childRes.data?.data?.childId || "");
     setCurrentStep(2);
     setSubStep2(1);
-  }, [validateStep1]);
+  } catch (err) {
+    console.error("Error saving child data:", err);
+  }
+}, [validateStep1, childForm]);
 
   const handleOtherMeasure = useCallback(() => {
     if (!validateStep2()) return;
@@ -758,71 +791,55 @@ const AddChild = ({ closeOverlay }) => {
     }
   }, [validateStep2, subStep2]);
 
-  const handleConfirmStep2 = useCallback(() => {
-    if (!validateStep2()) return;
+// Replace your existing handleConfirmStep2 with:
+const handleConfirmStep2 = useCallback(async () => {
+  if (!validateStep2()) return;
+  try {
+    if (!childId) {
+      console.error("Child ID missing. Please save step 1 first.");
+      return;
+    }
+    const growthPayload = {
+      childId,
+      recordedBy: childForm.memberId,
+      createdAt: growthForm.createdAt || new Date().toISOString(),
+      weight: growthForm.weight,
+      height: growthForm.height,
+      headCircumference: growthForm.headCircumference,
+      notes: growthForm.notes,
+      muscleMass: growthForm.muscleMass,
+      chestCircumference: growthForm.chestCircumference,
+      nutritionalStatus: growthForm.nutritionalStatus,
+      ferritinLevel: growthForm.ferritinLevel,
+      triglycerides: growthForm.triglycerides,
+      bloodSugarLevel: growthForm.bloodSugarLevel,
+      physicalActivityLevel: growthForm.physicalActivityLevel,
+      heartRate: growthForm.heartRate,
+      bloodPressure: growthForm.bloodPressure,
+      bodyTemperature: growthForm.bodyTemperature,
+      oxygenSaturation: growthForm.oxygenSaturation,
+      sleepDuration: growthForm.sleepDuration,
+      vision: growthForm.vision,
+      hearing: growthForm.hearing,
+      immunizationStatus: growthForm.immunizationStatus,
+      mentalHealthStatus: growthForm.mentalHealthStatus,
+      growthHormoneLevel: growthForm.growthHormoneLevel,
+      attentionSpan: growthForm.attentionSpan,
+      neurologicalReflexes: growthForm.neurologicalReflexes,
+      developmentalMilestones: growthForm.developmentalMilestones,
+    };
+    const growthRes = await addChildApi.createGrowthRecord(growthPayload);
+    console.log("Growth record created:", growthRes.data);
     setCurrentStep(3);
-  }, [validateStep2]);
+  } catch (err) {
+    console.error("Error saving growth record:", err);
+  }
+}, [growthForm, validateStep2, childId, childForm.memberId]);
 
-  const handleCloseStep3 = useCallback(async () => {
-    try {
-      console.log("handleCloseStep3 called. Child form:", childForm, "Growth form:", growthForm);
-      
-      // Prepare and send child payload (Step1 data)
-      const childPayload = {
-        name: childForm.name.trim(),
-        memberId: childForm.memberId,
-        dateOfBirth: new Date(childForm.dateOfBirth).toISOString().split("T")[0],
-        gender: childForm.gender,
-        birthWeight: childForm.birthWeight,
-        birthHeight: childForm.birthHeight,
-        notes: childForm.notes,
-      };
-      const childRes = await addChildApi.createChild(childPayload);
-      console.log("Child created:", childRes.data);
-      
-      // If a growth record was added (Step2), then send it as well.
-      if (didAddRecord) {
-        const childId = childRes.data?.data?.childId;
-        const growthPayload = {
-          childId,
-          recordedBy: childForm.memberId,
-          createdAt: growthForm.createdAt || new Date().toISOString(),
-          weight: growthForm.weight,
-          height: growthForm.height,
-          headCircumference: growthForm.headCircumference,
-          notes: growthForm.notes,
-          muscleMass: growthForm.muscleMass,
-          chestCircumference: growthForm.chestCircumference,
-          nutritionalStatus: growthForm.nutritionalStatus,
-          ferritinLevel: growthForm.ferritinLevel,
-          triglycerides: growthForm.triglycerides,
-          bloodSugarLevel: growthForm.bloodSugarLevel,
-          physicalActivityLevel: growthForm.physicalActivityLevel,
-          heartRate: growthForm.heartRate,
-          bloodPressure: growthForm.bloodPressure,
-          bodyTemperature: growthForm.bodyTemperature,
-          oxygenSaturation: growthForm.oxygenSaturation,
-          sleepDuration: growthForm.sleepDuration,
-          vision: growthForm.vision,
-          hearing: growthForm.hearing,
-          immunizationStatus: growthForm.immunizationStatus,
-          mentalHealthStatus: growthForm.mentalHealthStatus,
-          growthHormoneLevel: growthForm.growthHormoneLevel,
-          attentionSpan: growthForm.attentionSpan,
-          neurologicalReflexes: growthForm.neurologicalReflexes,
-          developmentalMilestones: growthForm.developmentalMilestones,
-        };
-        const growthRes = await addChildApi.createGrowthRecord(growthPayload);
-        console.log("Growth record created:", growthRes.data);
-      }
+  const handleCloseStep3 = useCallback(() => {
       closeOverlay();
 //   window.location.reload();
-    } catch (err) {
-      console.error("Error saving data:", err);
-    //   window.location.reload();
-      closeOverlay();
-    }
-  }, [childForm, growthForm, didAddRecord, closeOverlay]);
+}, [closeOverlay]);
 
   const handleCloseWithoutSave = useCallback(() => {
     closeOverlay();
