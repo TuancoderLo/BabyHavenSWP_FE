@@ -104,8 +104,8 @@ function App() {
           }
         />
 
-              {/* Route con dành cho Member */}
-              <Route
+        {/* Route con dành cho Member */}
+        <Route
           path="/member/*"
           element={
             <ProtectedRoute roles={["1"]}>

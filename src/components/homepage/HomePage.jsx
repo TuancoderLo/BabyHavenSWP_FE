@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./HomePage.css";
+import Header from "../common/Header";
+import Footer from "../common/Footer";
 import Logo from "../../assets/Logo.png";
 import avatar_LOGO from "../../assets/avatar_LOGO.jpg";
 import PregnancySection from "../topics/PregnancySection";
@@ -118,108 +120,7 @@ function HomePage() {
 
   return (
     <div className="homepage">
-      {/* Navigation */}
-      <header className="homepage-header">
-        <nav>
-          <div className="logo">
-            <img src={Logo} />
-            <img src={Name} />
-          </div>
-
-          <div className="nav-links">
-            <div className="dropdown">
-              <a href="#getting-pregnant">Getting Pregnant</a>
-              <div className="dropdown-content">
-                <a href="#fertility">Fertility</a>
-                <a href="#ovulation">Ovulation</a>
-                <a href="#preparation">Preparation</a>
-              </div>
-            </div>
-            <div className="dropdown">
-              <a href="#pregnancy">Pregnancy</a>
-              <div className="dropdown-content">
-                <a href="#first-trimester">First Trimester</a>
-                <a href="#second-trimester">Second Trimester</a>
-                <a href="#third-trimester">Third Trimester</a>
-              </div>
-            </div>
-            <div className="dropdown">
-              <a href="#baby">Baby</a>
-              <div className="dropdown-content">
-                <a href="#newborn">Newborn</a>
-                <a href="#development">Development</a>
-                <a href="#care">Baby Care</a>
-              </div>
-            </div>
-            <div className="dropdown">
-              <a href="#toddler">Toddler</a>
-              <div className="dropdown-content">
-                <a href="#development">Development</a>
-                <a href="#nutrition">Nutrition</a>
-                <a href="#activities">Activities</a>
-              </div>
-            </div>
-            <div className="dropdown">
-              <a href="#child">Child</a>
-              <div className="dropdown-content">
-                <a href="#education">Education</a>
-                <a href="#health">Health</a>
-                <a href="#activities">Activities</a>
-              </div>
-            </div>
-            <a href="#community">Community</a>
-            <a href="#tools-features">Features</a>
-          </div>
-          {/* Container bọc avatar + sidebar, dùng hover */}
-          <div
-            className="avatar-sidebar-container"
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
-            <div className="avatar-chip-img">
-              <img
-                src={userData?.profilePicture || avatar_LOGO}
-                alt="User Avatar"
-              />
-            </div>
-            {/* Text Name */}
-            <span className="avatar-chip-text">
-              {userData ? userData.name : "Name"}
-            </span>
-            {/* Sidebar trượt từ phải */}
-            {menuOpen && (
-              <div className="overlay" onClick={() => setMenuOpen(false)}></div>
-            )}
-            <div className={`sidebar-menu ${menuOpen ? "open" : ""}`}>
-              <div className="sidebar-header">
-                <i className="fas fa-user-circle"></i>
-                <span>{userData ? userData.name : "User"}</span>
-              </div>
-              <hr />
-              <div className="sidebar-section">
-                <h4>Activity</h4>
-                <p>Growth tracker</p>
-                <p>Doctor consultation</p>
-                <p>Health Analysis</p>
-              </div>
-              <hr />
-              <div className="sidebar-section">
-                <h4>Profile</h4>
-                <p onClick={() => navigate("/member/children")}>My children</p>
-                <p>My children's milestones</p>
-                <p>My membership plans</p>
-                <p>My requests</p>
-              </div>
-              <hr />
-              <div className="sidebar-section">
-                <h4>Setting</h4>
-                <p>Profile setting</p>
-                <p onClick={handleLogout}>Log out</p>
-              </div>
-            </div>
-          </div>
-        </nav>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="hero-section">
@@ -636,70 +537,7 @@ function HomePage() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="homepage-footer">
-        <div className="footer-content">
-          <div className="footer-section">
-            <h3>About BabyHaven</h3>
-            <p>
-              We are committed to providing high-quality, research-backed
-              products and resources to support your parenting journey.
-            </p>
-          </div>
-
-          <div className="footer-section">
-            <h3>Quick Links</h3>
-            <ul>
-              <li>
-                <a href="#about">About Us</a>
-              </li>
-              <li>
-                <a href="#products">Our Products</a>
-              </li>
-              <li>
-                <a href="#contact">Contact Us</a>
-              </li>
-              <li>
-                <a href="#policy">Privacy Policy</a>
-              </li>
-            </ul>
-          </div>
-
-          <div className="footer-section">
-            <h3>Contact</h3>
-            <ul>
-              <li>
-                <i className="fas fa-phone"></i> +84 832909890
-              </li>
-              <li>
-                <i className="fas fa-envelope"></i> support@babyhaven.com
-              </li>
-              <li>
-                <i className="fas fa-map-marker-alt"></i> Block E2a-7, D1 Street Saigon Hi-tech Park, Long Thanh My Ward, District 9, Ho Chi Minh City, Vietnam
-              </li>
-            </ul>
-          </div>
-
-          <div className="footer-section">
-            <h3>Follow Us</h3>
-            <div className="social-links">
-              <a href="#">
-                <i className="fab fa-facebook"></i>
-              </a>
-              <a href="#">
-                <i className="fab fa-instagram"></i>
-              </a>
-              <a href="#">
-                <i className="fab fa-youtube"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <p>&copy; 2025 BabyHaven. All rights reserved.</p>
-        </div>
-      </footer>
-      {/* Packages (icon + bảng gói) */}
+      <Footer />
       <Packages />
     </div>
   );

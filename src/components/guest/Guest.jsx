@@ -584,7 +584,9 @@ function Guest() {
                 <i className="fas fa-envelope"></i> support@babyhaven.com
               </li>
               <li>
-                <i className="fas fa-map-marker-alt"></i> Block E2a-7, D1 Street Saigon Hi-tech Park, Long Thanh My Ward, District 9, Ho Chi Minh City, Vietnam
+                <i className="fas fa-map-marker-alt"></i> Block E2a-7, D1 Street
+                Saigon Hi-tech Park, Long Thanh My Ward, District 9, Ho Chi Minh
+                City, Vietnam
               </li>
             </ul>
           </div>
