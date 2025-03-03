@@ -96,9 +96,9 @@ function ChildrenPage() {
           <h2 className="section-title">Children</h2>
           {childrenList.map((child) => (
             <div
-              key={child.id}
+              key={child.name}
               className={`child-item ${
-                selectedChild && selectedChild.id === child.id ? "active" : ""
+                selectedChild && selectedChild.name === child.name ? "active" : ""
               }`}
               onClick={() => handleSelectChild(child)}
             >
