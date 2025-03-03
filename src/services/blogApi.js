@@ -47,6 +47,10 @@ const blogApi = {
   delete: (id) => {
     return api.delete(`Blog/${id}`);
   },
+
+  getByCategoryId: (categoryId) => {
+    return api.get(`Blog/blogs/${categoryId}`);
+  },
 };
 
 export default blogApi;

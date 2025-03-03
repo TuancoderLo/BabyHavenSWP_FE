@@ -9,10 +9,14 @@ import ToddleSection from "../topics/ToddleSection";
 import ChildSection from "../topics/ChildSection";
 import Name from "../../assets/Name.png";
 import Packages from "../packages/Packages";
+import blogCategoryApi from "../../services/blogCategoryApi";
+import BlogSection from "../topics/BlogSection";
 
 function HomePage() {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [parentCategories, setParentCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Tạo state cho userName
   const [userData, setUserData] = useState(null);
@@ -90,6 +94,28 @@ function HomePage() {
   //   navigate("/member/");
   // }
 
+  // Fetch tất cả category cha (parentCategoryId = null)
+  useEffect(() => {
+    const fetchParentCategories = async () => {
+      try {
+        const response = await blogCategoryApi.getAll();
+        if (response?.data?.status === 1) {
+          // Lọc ra các category cha (parentCategoryId = null)
+          const parentCats = response.data.data.filter(
+            (category) => category.parentCategoryId === null
+          );
+          setParentCategories(parentCats);
+        }
+      } catch (error) {
+        console.error("Error fetching parent categories:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchParentCategories();
+  }, []);
+
   return (
     <div className="homepage">
       {/* Navigation */}
@@ -151,13 +177,16 @@ function HomePage() {
             onMouseLeave={handleMouseLeave}
           >
             <div className="avatar-chip-img">
-            <img src={userData?.profilePicture || avatar_LOGO} alt="User Avatar" />
+              <img
+                src={userData?.profilePicture || avatar_LOGO}
+                alt="User Avatar"
+              />
             </div>
             {/* Text Name */}
             <span className="avatar-chip-text">
               {userData ? userData.name : "Name"}
             </span>
-                        {/* Sidebar trượt từ phải */}
+            {/* Sidebar trượt từ phải */}
             {menuOpen && (
               <div className="overlay" onClick={() => setMenuOpen(false)}></div>
             )}
@@ -177,11 +206,11 @@ function HomePage() {
               <div className="sidebar-section">
                 <h4>Profile</h4>
                 <p onClick={() => navigate("/member/children")}>My children</p>
-                <p>My children’s milestones</p>
+                <p>My children's milestones</p>
                 <p>My membership plans</p>
                 <p>My requests</p>
               </div>
-              <hr/>
+              <hr />
               <div className="sidebar-section">
                 <h4>Setting</h4>
                 <p>Profile setting</p>
@@ -380,7 +409,7 @@ function HomePage() {
 
             <div className="feature-cards">
               <div className="feature-highlight-card">
-                <h3>Track Your Child’s Growth with Confidence</h3>
+                <h3>Track Your Child's Growth with Confidence</h3>
                 <p>
                   Monitor and analyze your child's development using
                   internationally recognized standards, ensuring they are on the
@@ -400,7 +429,7 @@ function HomePage() {
                 <h3>Personalized Insights & Smart Alerts</h3>
                 <p>
                   Stay informed with customized recommendations and real-time
-                  alerts to address your child’s unique health and developmental
+                  alerts to address your child's unique health and developmental
                   needs.
                 </p>
               </div>
@@ -425,7 +454,7 @@ function HomePage() {
               <div className="support-buttons">
                 <h3>How can we support you?</h3>
                 <div className="button-grid">
-                  <button className="support-btn">I’m expecting</button>
+                  <button className="support-btn">I'm expecting</button>
                   <button className="support-btn">I have a baby</button>
                   <button className="support-btn">I have a toddler</button>
                   <button className="support-btn">I have a child</button>
@@ -493,10 +522,16 @@ function HomePage() {
         {/* Popular Topics Section */}
         <section className="popular-topics">
           <h2>Blogs</h2>
-          <PregnancySection />
-          <BabySection />
-          <ToddleSection />
-          <ChildSection />
+          {loading ? (
+            <div>Loading categories...</div>
+          ) : (
+            parentCategories.map((category) => (
+              <BlogSection
+                key={category.categoryId}
+                parentCategoryId={category.categoryId}
+              />
+            ))
+          )}
         </section>
 
         {/* Medical Advisory Board Section */}
