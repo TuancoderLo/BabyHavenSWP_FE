@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import blogCategoryApi from "../../../../services/blogCategoryApi";
 import blogApi from "../../../../services/blogApi";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import TextEditor from "./textEditor.jsx";
 import {
   Table,
   Button,
@@ -705,42 +704,15 @@ function Blog() {
               </Form.Item>
 
               <Form.Item
-                name="content"
-                label="Content"
-                rules={[
-                  { required: true, message: "Please enter the content" },
-                ]}
+                  name="content"
+                  label="Content"
+                  rules={[{ required: true, message: "Please enter the content" }]}
+                  valuePropName="data"
+                  getValueFromEvent={(event, editor) => {
+                    return editor.getData(); // Lấy dữ liệu từ CKEditor
+                  }}
               >
-                <CKEditor
-                  editor={ClassicEditor}
-                  config={{
-                    licenseKey:
-                      "eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3NDE5OTY3OTksImp0aSI6IjI2Yzc2ZmYwLTA1M2EtNGFiYi05MzE1LTJkMTJmOGI1MDEzYyIsInVzYWdlRW5kcG9pbnQiOiJodHRwczovL3Byb3h5LWV2ZW50LmNrZWRpdG9yLmNvbSIsImRpc3RyaWJ1dGlvbkNoYW5uZWwiOlsiY2xvdWQiLCJkcnVwYWwiLCJzaCJdLCJ3aGl0ZUxhYmVsIjp0cnVlLCJsaWNlbnNlVHlwZSI6InRyaWFsIiwiZmVhdHVyZXMiOlsiKiJdLCJ2YyI6ImI3MTUxOGY4In0.vICfmtINjCekKGTm_NVhjNHnL3-r5jROjdzpHuhYSKCBXc5nA_-xPV7WeViN36BggwgnprQ-EIFANTbAbTOP4Q",
-                    toolbar: [
-                      "heading",
-                      "|",
-                      "bold",
-                      "italic",
-                      "link",
-                      "bulletedList",
-                      "numberedList",
-                      "|",
-                      "outdent",
-                      "indent",
-                      "|",
-                      "blockQuote",
-                      "insertTable",
-                      "mediaEmbed",
-                      "undo",
-                      "redo",
-                    ],
-                  }}
-                  data={form.getFieldValue("content") || ""}
-                  onChange={(event, editor) => {
-                    const data = editor.getData();
-                    form.setFieldsValue({ content: data });
-                  }}
-                />
+                <TextEditor />
               </Form.Item>
 
               <Form.Item
