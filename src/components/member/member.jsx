@@ -3,12 +3,11 @@ import Sidebar from "./sidebar/Sidebar.jsx";
 import NavBar from "./navbar/NavBar.jsx";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Children from "./children/ChildrenPage";
-import DoctorConsultation from "./doctor/DoctorConsultation";
-import Subscriptions from "./subscriptions/Subscriptions";
-import Transactions from "./transactions/Transactions";
-import HealthAnalyst from "./health/HealthAnalyst";
+import Consultation from "./consulation/DoctorConsultation";
+import Membership from "./membership/MemberShipPage";
+import TransactionsMember from "./transactionsMember/transactionsMember";
 import Notifications from "./notifications/Notifications";
-import Settings from "./settings/Settings";
+import Account from "./account/Account";
 
 function Member() {
   return (
@@ -27,12 +26,11 @@ function Member() {
         <Routes>
           <Route index element={<Children />} />
           <Route path="children" element={<Children />} />
-          <Route path="doctor-consultation" element={<DoctorConsultation />} />
-          <Route path="subscriptions" element={<Subscriptions />} />
-          <Route path="transactions" element={<Transactions />} />
-          <Route path="health-analyst" element={<HealthAnalyst />} />
+          <Route path="doctor-consultation" element={<Consultation />} />
+          <Route path="transactions" element={<TransactionsMember />} />
+          <Route path="membership" element={<Membership />} />
           <Route path="notifications" element={<Notifications />} />
-          <Route path="settings" element={<Settings />} />
+          <Route path="account" element={<Account />} />
           <Route path="*" element={<Navigate to="/homepage" />} />
         </Routes>
       </div>

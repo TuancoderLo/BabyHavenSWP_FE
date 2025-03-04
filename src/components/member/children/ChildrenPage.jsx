@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ChildrenPage.css";
 import api from "../../../config/axios.js";
-import calculateBMI from "../../../services/bmiUtils.js";
+import GrowthChart from "./GrowthChart.jsx";
 import childApi from "../../../services/childApi";
 import AddChild from "./AddChild";
+import AddRecord from "./AddRecord"; // Import the AddRecord component at the top
+
 function ChildrenPage() {
   const navigate = useNavigate();
 
@@ -42,9 +44,25 @@ function ChildrenPage() {
       });
   }, [memberId]);
 
-  const handleSelectChild = (child) => {
-    setSelectedChild(child);
+  const handleSelectChild = async (child) => {
+    // Giả sử backend yêu cầu GUID và trường đúng là child.childId
+    // const childId = child.childId || child.id || child._id;
+    // console.log("Child ID được chọn:", childId);
+    // if (!childId) {
+    //   console.warn("Không tìm thấy childId hợp lệ cho đối tượng:", child);
+    //   return;
+    // }
+    try {
+      const response = await childApi.getChildByName(child, memberId);
+      console.log("Child: " + response)
+      console.log("Lấy thông tin chi tiết của trẻ:", response.data);
+      setSelectedChild(response.data.data);
+    } catch (error) {
+      console.error("Lỗi khi lấy thông tin trẻ:", error);
+      setSelectedChild(child);
+    }
   };
+  
   // Hàm render Alert theo level
   const renderAlertBox = (level) => {
     const levels = {
@@ -87,6 +105,21 @@ function ChildrenPage() {
     setSelectedTool(e.target.value);
   };
 
+  // State to control the AddRecord overlay
+const [showAddRecordModal, setShowAddRecordModal] = useState(false);
+
+const handleAddRecord = () => {
+  if (!selectedChild) {
+    console.error("Please select a child first.");
+    return;
+  }
+  setShowAddRecordModal(true);
+};
+
+const closeRecordOverlay = () => {
+  setShowAddRecordModal(false);
+};
+
   return (
     <div className="children-page-container">
       {/* Khối chính: gồm cột bên trái (Children) và phần còn lại */}
@@ -98,8 +131,8 @@ function ChildrenPage() {
             <div
               key={child.name}
               className={`child-item ${
-                selectedChild && selectedChild.name === child.name ? "active" : ""
-              }`}
+                selectedChild && selectedChild.name === child.name ? "active" : "" 
+              }`} 
               onClick={() => handleSelectChild(child)}
             >
               <span className="child-name">{child.name}</span>
@@ -158,7 +191,11 @@ function ChildrenPage() {
           </select>
               </div>
               </div>
-            <div className="chart-area">[ Chart placeholder ]</div>
+              <div className="chart-area">
+  {selectedChild && selectedChild.childId && (
+    <GrowthChart childId={selectedChild.childId} selectedTool={selectedTool} />
+  )}
+</div>
             </div>
                   {/* Box 4: Thông tin Weight, Height, Connect to doctor, Add a record */}
         <div className="growth-info-box card">
@@ -167,7 +204,7 @@ function ChildrenPage() {
             <p>Feb 15, 2025</p>
             <div className="action-buttons">
             <button>Connect to doctor</button>
-            <button>Add a record</button>
+            <button onClick={handleAddRecord}>Add a record</button>
           </div>
           </div>
            
@@ -180,6 +217,13 @@ function ChildrenPage() {
         <p>List of activities or records here...</p>
       </div>
       {showAddChildModal && <AddChild closeOverlay={closeOverlay} />}
+      {showAddRecordModal && (
+  <AddRecord 
+    child={selectedChild}
+    memberId={memberId} 
+    closeOverlay={closeRecordOverlay} 
+  /> //t quen :))) sua điiii/ hay
+)}
     </div>
   );
 }

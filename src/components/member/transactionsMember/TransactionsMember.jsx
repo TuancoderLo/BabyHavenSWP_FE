@@ -1,6 +1,6 @@
 import React from "react";
 
-function HealthAnalyst() {
+function TransactionsMember() {
     return (
         <div>
             <h1>Health Analyst</h1>
@@ -9,4 +9,4 @@ function HealthAnalyst() {
     );
 }
 
-export default HealthAnalyst;
+export default TransactionsMember;

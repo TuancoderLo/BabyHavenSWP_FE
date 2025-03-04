@@ -91,15 +91,16 @@ function Login({ onLoginSuccess }) {
               ],
           };
 
-          if (user.roleId === "1") { //Nếu là role member thì lưu memberId vào localStorage
-            try{           
-            const member = await api.get("Members/member/" + user.userId);
-            localStorage.setItem("memberId", member.data.data.memberId);
-          } catch (error) {
-            console.error("Error fetching member:", error);
+          if (user.roleId === "1") {
+            //Nếu là role member thì lưu memberId vào localStorage
+            try {
+              const member = await api.get("Members/member/" + user.userId);
+              localStorage.setItem("memberId", member.data.data.memberId);
+            } catch (error) {
+              console.error("Error fetching member:", error);
+            }
           }
-          }
-          
+
           localStorage.setItem("role", user.roleId);
 
           // Lưu thông tin từ token payload
@@ -163,8 +164,8 @@ function Login({ onLoginSuccess }) {
     try {
       // Gửi yêu cầu đến backend để lấy URL Google login
       // Redirect người dùng đến Google login
-      window.location.href = "https://localhost:7279/api/GoogleAuth/signin-google";
-
+      window.location.href =
+        "https://localhost:7279/api/GoogleAuth/signin-google";
     } catch (error) {
       // Xử lý lỗi nếu có
       if (error.response) {
@@ -175,8 +176,6 @@ function Login({ onLoginSuccess }) {
       setIsLoading(false);
     }
   };
-
-
 
   return (
     <div className="auth-container">

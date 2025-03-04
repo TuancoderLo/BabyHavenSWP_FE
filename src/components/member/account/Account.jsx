@@ -1,12 +1,12 @@
 import React from "react";
 
-function Settings() {
+function Account() {
     return (
         <div>
-            <h1>Settings</h1>
+            <h1>Account</h1>
             {/* Cài đặt tài khoản, cấu hình */}
         </div>
     );
 }
 
-export default Settings;
+export default Account;
