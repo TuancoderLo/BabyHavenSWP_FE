@@ -123,10 +123,22 @@ const closeRecordOverlay = () => {
   return (
     <div className="children-page-container">
       {/* Khối chính: gồm cột bên trái (Children) và phần còn lại */}
+      <div className="top-bar-member">
+  <h2 className="section-title">Children</h2>
+  <div className="feature-buttons">
+    <div className="child-education">
+    <button>Child Education</button>
+    </div>
+    <div className="analyze-AI">
+    <button>Analyze with AI</button>
+    </div>
+  </div>
+</div>
+
       <div className="main-content">
         {/* Box 1: Danh sách Children */}
-        <div className="children-box card">
-          <h2 className="section-title">Children</h2>
+        
+        <div className="children-box-card">
           {childrenList.map((child) => (
             <div
               key={child.name}
@@ -136,16 +148,17 @@ const closeRecordOverlay = () => {
               onClick={() => handleSelectChild(child)}
             >
               <span className="child-name">{child.name}</span>
-              <span className="child-dob">DOB: {child.dateOfBirth}</span>
+              {/* <span className="child-dob">DOB: {child.dateOfBirth}</span> */}
             </div>
           ))}
-          <button className="add-child-btn" onClick={handleAddChild}>
-            + Add Child</button>
+<button className="add-child-btn" onClick={handleAddChild} title="Add Child">
+  <i className="fas fa-plus"></i>
+</button>
         </div>
 
         {/* Box 2: Chi tiết Child + Alert */}
-<div className="child-detail-box-card">
-        <div className="child-detail-box card">
+<div className="child-detail-box-around">
+        <div className="child-detail-box-card">
           {selectedChild ? (
             <>
               <h3 className="child-title">{selectedChild.name}</h3>
@@ -163,19 +176,20 @@ const closeRecordOverlay = () => {
             <p>Please select a child.</p>
           )}
           </div>
-        <div className="add-milestones card">
+        <div className="add-milestones-card">
         <button className="add-milestones-btn">Add Milestones</button>
         </div>
         </div>
 
+
         {/* Box 3: Growth chart */}
-        <div className="growth-chart-box card">
-           {/* Nút Child Education + Analyze with AI */}
+        <div className="growth-chart-box-around">
+           {/* Nút Child Education + Analyze with AI
       <div className="feature-buttons">
         <button className="feature-btn">Child Education</button>
         <button className="feature-btn">Analyze with AI</button>
-          </div>
-          <div className="growth-chart-box card">
+          </div> */}
+          <div className="growth-chart-box-card">
             <div className ="chart-header">
           <h3>Growth chart</h3>
             <div className="chart-toolbar">
@@ -191,20 +205,26 @@ const closeRecordOverlay = () => {
           </select>
               </div>
               </div>
+              <div className="chart-box">
               <div className="chart-area">
   {selectedChild && selectedChild.childId && (
     <GrowthChart childId={selectedChild.childId} selectedTool={selectedTool} />
   )}
 </div>
+</div>
             </div>
                   {/* Box 4: Thông tin Weight, Height, Connect to doctor, Add a record */}
-        <div className="growth-info-box card">
+        <div className="growth-info-box-card">
           <p>Height: 80 cm</p>
           <p>Weight: 30 kg</p>
             <p>Feb 15, 2025</p>
             <div className="action-buttons">
-            <button>Connect to doctor</button>
+            <div className="connect-doctor">
+             <button>Connect to doctor</button>
+            </div>
+            <div className="add-record">
             <button onClick={handleAddRecord}>Add a record</button>
+            </div>
           </div>
           </div>
            
