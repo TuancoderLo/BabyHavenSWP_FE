@@ -288,7 +288,9 @@ const Step2Page2 = memo(
                   chestCircumference: e.target.value,
                 }))
               }
+              className={errors.chestCircumference ? "error-input" : ""}
             />
+            {errors.chestCircumference && <p className="error-text">{errors.chestCircumference}</p>}
           </div>
           <div>
             <label>Nutritional status</label>
@@ -316,7 +318,9 @@ const Step2Page2 = memo(
                   ferritinLevel: e.target.value,
                 }))
               }
+              className={errors.ferritinLevel ? "error-input" : ""}
             />
+            {errors.ferritinLevel && <p className="error-text">{errors.ferritinLevel}</p>}
           </div>
           <div>
             <label>Triglycerides</label>
@@ -329,7 +333,9 @@ const Step2Page2 = memo(
                   triglycerides: e.target.value,
                 }))
               }
+              className={errors.triglycerides ? "error-input" : ""}
             />
+            {errors.triglycerides && <p className="error-text">{errors.triglycerides}</p>}
           </div>
         </div>
         <div className="two-column-row">
@@ -344,7 +350,9 @@ const Step2Page2 = memo(
                   bloodSugarLevel: e.target.value,
                 }))
               }
+              className={errors.bloodSugarLevel ? "error-input" : ""}
             />
+            {errors.bloodSugarLevel && <p className="error-text">{errors.bloodSugarLevel}</p>}
           </div>
           <div>
             <label>Physical activity level</label>
@@ -372,7 +380,9 @@ const Step2Page2 = memo(
                   heartRate: e.target.value,
                 }))
               }
+              className={errors.heartRate ? "error-input" : ""}
             />
+            {errors.heartRate && <p className="error-text">{errors.heartRate}</p>}
           </div>
           <div>
             <label>Blood pressure</label>
@@ -400,7 +410,9 @@ const Step2Page2 = memo(
                   bodyTemperature: e.target.value,
                 }))
               }
+              className={errors.bodyTemperature ? "error-input" : ""}
             />
+            {errors.bodyTemperature && <p className="error-text">{errors.bodyTemperature}</p>}
           </div>
           <div>
             <label>Oxygen saturation (%)</label>
@@ -413,7 +425,9 @@ const Step2Page2 = memo(
                   oxygenSaturation: e.target.value,
                 }))
               }
+              className={errors.oxygenSaturation ? "error-input" : ""}
             />
+            {errors.oxygenSaturation && <p className="error-text">{errors.oxygenSaturation}</p>}
           </div>
         </div>
         <div className="step-buttons">
@@ -466,7 +480,9 @@ const Step2Page3 = memo(
                   sleepDuration: e.target.value,
                 }))
               }
+              className={errors.sleepDuration ? "error-input" : ""}
             />
+            {errors.sleepDuration && <p className="error-text">{errors.sleepDuration}</p>}
           </div>
           <div>
             <label>Vision</label>
@@ -479,7 +495,9 @@ const Step2Page3 = memo(
                   vision: e.target.value,
                 }))
               }
+              className={errors.vision ? "error-input" : ""}
             />
+            {errors.vision && <p className="error-text">{errors.vision}</p>}
           </div>
         </div>
         <div className="two-column-row">
@@ -535,7 +553,9 @@ const Step2Page3 = memo(
                   growthHormoneLevel: e.target.value,
                 }))
               }
+              className={errors.growthHormoneLevel ? "error-input" : ""}
             />
+            {errors.growthHormoneLevel && <p className="error-text">{errors.growthHormoneLevel}</p>}
           </div>
         </div>
         <div className="two-column-row">
@@ -570,7 +590,6 @@ const Step2Page3 = memo(
           <button type="button" onClick={onConfirm}>
             Confirm
           </button>
-          {/* Optionally, you may remove or disable the "Other measure" here if 3 sub-steps is maximum */}
           <button type="button" onClick={onOtherMeasure}>
             Other measure
           </button>
@@ -676,6 +695,7 @@ const AddChild = ({ closeOverlay }) => {
       console.log("No user ID found in localStorage.");
     }
   }, []);
+ 
 
   const [growthForm, setGrowthForm] = useState({
     createdAt: "",
@@ -705,6 +725,109 @@ const AddChild = ({ closeOverlay }) => {
     neurologicalReflexes: "",
     developmentalMilestones: "",
   });
+
+  useEffect(() => {
+    setErrors((prevErrors) => {
+      const newErrors = { ...prevErrors };
+      // Validate createdAt
+      if (growthForm.createdAt) {
+        const recordDate = new Date(growthForm.createdAt);
+        const today = new Date();
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(today.getMonth() - 6);
+        if (recordDate > today) {
+          newErrors.createdAt = "Record date cannot be in the future";
+        } else if (recordDate < sixMonthsAgo) {
+          newErrors.createdAt = "Record date cannot be older than 6 months";
+        } else {
+          newErrors.createdAt = "";
+        }
+      }
+
+      // Validate numeric fields (nếu có dữ liệu, chuyển sang số và kiểm tra)
+      if (growthForm.weight !== "" && parseFloat(growthForm.weight) < 0) {
+        newErrors.weight = "Weight must not be less than 0";
+      }
+      if (growthForm.height !== "" && parseFloat(growthForm.height) < 0) {
+        newErrors.height = "Height must not be less than 0";
+      }
+      if (growthForm.headCircumference !== "" && parseFloat(growthForm.headCircumference) < 0) {
+        newErrors.headCircumference = "Head circumference must not be less than 0";
+      }
+      if (growthForm.muscleMass !== "" && parseFloat(growthForm.muscleMass) < 0) {
+        // Nếu cần validation, thêm tương tự
+      }
+      if (growthForm.chestCircumference !== "" && parseFloat(growthForm.chestCircumference) < 0) {
+        newErrors.chestCircumference = "Chest circumference must not be less than 0";
+      }
+      if (growthForm.ferritinLevel !== "" && parseFloat(growthForm.ferritinLevel) < 0) {
+        newErrors.ferritinLevel = "Ferritin level must not be less than 0";
+      }
+      if (growthForm.triglycerides !== "" && parseFloat(growthForm.triglycerides) < 0) {
+        newErrors.triglycerides = "Triglycerides must not be less than 0";
+      }
+      if (growthForm.bloodSugarLevel !== "" && parseFloat(growthForm.bloodSugarLevel) < 0) {
+        newErrors.bloodSugarLevel = "Blood sugar level must not be less than 0";
+      }
+      if (growthForm.heartRate !== "" && parseFloat(growthForm.heartRate) < 0) {
+        newErrors.heartRate = "Heart rate must not be less than 0";
+      }
+      if (growthForm.growthHormoneLevel !== "" && parseFloat(growthForm.growthHormoneLevel) < 0) {
+        newErrors.growthHormoneLevel = "Growth hormone level must not be less than 0";
+      }
+
+      // Validate bodyTemperature
+      if (growthForm.bodyTemperature !== "") {
+        const bt = parseFloat(growthForm.bodyTemperature);
+        if (bt < 0) {
+          newErrors.bodyTemperature = "Body temperature must not be less than 0";
+        } else if (bt >= 45) {
+          newErrors.bodyTemperature = "Body temperature must be below 45°C";
+        } else {
+          newErrors.bodyTemperature = "";
+        }
+      }
+
+      // Validate oxygenSaturation
+      if (growthForm.oxygenSaturation !== "") {
+        const ox = parseFloat(growthForm.oxygenSaturation);
+        if (ox < 0) {
+          newErrors.oxygenSaturation = "Oxygen saturation must not be less than 0";
+        } else if (ox > 100) {
+          newErrors.oxygenSaturation = "Oxygen saturation must be at most 100";
+        } else {
+          newErrors.oxygenSaturation = "";
+        }
+      }
+
+      // Validate sleepDuration
+      if (growthForm.sleepDuration !== "") {
+        const sd = parseFloat(growthForm.sleepDuration);
+        if (sd < 0) {
+          newErrors.sleepDuration = "Sleep duration must not be less than 0";
+        } else if (sd >= 24) {
+          newErrors.sleepDuration = "Sleep duration must be less than 24 hours";
+        } else {
+          newErrors.sleepDuration = "";
+        }
+      }
+
+      // Validate vision (nếu nhập dạng số thì phải dưới 10)
+      if (growthForm.vision) {
+        const visionNumber = parseFloat(growthForm.vision);
+        if (!isNaN(visionNumber)) {
+          if (visionNumber >= 10) {
+            newErrors.vision = "Vision must be below 10";
+          } else {
+            newErrors.vision = "";
+          }
+        } else {
+          newErrors.vision = "";
+        }
+      }
+      return newErrors;
+    });
+  }, [growthForm]);
 
   const validateStep1 = useCallback(() => {
     const newErrors = {
