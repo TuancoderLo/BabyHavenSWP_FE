@@ -25,27 +25,10 @@ function Header() {
     try {
       const response = await api.get("BlogCategories");
       console.log("=== API Response Full Data ===", response);
-      console.log("=== Response Data Type ===", typeof response.data);
-      console.log(
-        "=== Response Data Structure ===",
-        JSON.stringify(response.data, null, 2)
-      );
 
-      // Đảm bảo response.data là một mảng
       const allCategories = Array.isArray(response.data)
         ? response.data
         : response.data.data || [];
-
-      console.log("=== All Categories Structure ===");
-      allCategories.forEach((cat) => {
-        console.log({
-          id: cat.categoryId,
-          name: cat.name,
-          categoryName: cat.categoryName, // Kiểm tra xem có phải là categoryName thay vì name
-          parentId: cat.parentCategoryId,
-          fullObject: cat, // In ra toàn bộ object để xem cấu trúc
-        });
-      });
 
       // Lọc ra các category cha
       const parentCats = allCategories.filter(
@@ -55,42 +38,24 @@ function Header() {
           cat.parentCategoryId === null
       );
 
-      console.log("=== Parent Categories Detail ===");
-      parentCats.forEach((cat) => {
-        console.log({
-          id: cat.categoryId,
-          name: cat.name,
-          categoryName: cat.categoryName,
-          allProps: Object.keys(cat), // Liệt kê tất cả properties của object
-        });
-      });
+      // Giới hạn chỉ lấy 5 category cha đầu tiên
+      const limitedParentCats = parentCats.slice(0, 5);
+      console.log("=== Limited Parent Categories (5) ===", limitedParentCats);
 
-      setParentCategories(parentCats);
+      setParentCategories(limitedParentCats);
 
-      // Tìm các category con
+      // Xử lý category con cho 5 category cha được chọn
       const childCatsMap = {};
-      parentCats.forEach((parent) => {
+      limitedParentCats.forEach((parent) => {
         const childCats = allCategories.filter(
           (cat) => cat.parentCategoryId === parent.categoryId
         );
-        console.log(`=== Child Categories for Parent ${parent.categoryId} ===`);
-        childCats.forEach((child) => {
-          console.log({
-            childId: child.categoryId,
-            childName: child.name,
-            childCategoryName: child.categoryName,
-            parentId: child.parentCategoryId,
-          });
-        });
         childCatsMap[parent.categoryId] = childCats;
       });
 
       setChildCategories(childCatsMap);
     } catch (error) {
-      console.error("=== Error Details ===");
-      console.error("Error Message:", error.message);
-      console.error("Error Response:", error.response?.data);
-      console.error("Full Error:", error);
+      console.error("=== Error Details ===", error);
     }
   };
 
