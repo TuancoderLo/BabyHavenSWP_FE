@@ -40,27 +40,44 @@
                                                                         CÁC NÚT FEATURE (Child Education, Analyze with AI)
                                                                       **************************************************/
   .feature-buttons {
+    width: 40%;
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    justify-content: end;
+    gap: 8px;
+    margin-left: auto;
+    justify-content: flex-end;
   }
-  
-  .feature-btn {
-    padding: 10px 16px;
-    border: none;
-    border-radius: 8px;
-    background-color: #00d0bc;
-    color: #fff;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-  
-  .feature-btn:hover {
-    background-color: #00bfa6;
-  }
-  
+
+
+  .child-education,
+.analyze-AI {
+  flex: 1;         
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.child-education button {
+  width: 100%;                  /* Nút chiếm hết chiều ngang div */
+  text-align: center;  
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 25px;
+  background: #064F83;
+  color: #fff;
+  cursor: pointer;
+}
+
+.analyze-AI button {
+  width: 100%;                  /* Nút chiếm hết chiều ngang div */
+  text-align: center;  
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 25px;
+  background: #699BF7;
+  color: #fff;
+  cursor: pointer;
+}
   /**************************************************
                                                                         MAIN CONTENT: 3 box (children, detail, chart)
                                                                       **************************************************/
@@ -85,25 +102,37 @@
   /**************************************************
                                                                                 BOX 1: Danh sách Children
                                                                               **************************************************/
-  .children-box {
+  .children-box-card {
     grid-column: 1 / 2;
     /* cột 1 */
     grid-row: 1 / 2;
     /* hàng 1 */
 }
 
-.section-title {
-  font-size: 1.2rem;
-  margin-bottom: 10px;
+.top-bar-member {
+  display: flex;
+  align-items: center; /* canh giữa theo chiều dọc */
+  justify-content: space-between; /* feature-buttons bên trái, Children bên phải */
+  margin-bottom: 16px;
 }
-
+.top-bar-member .section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0; 
+  /* margin-right: auto; // không cần nếu đã dùng space-between */
+}
+.child-detail-box-card {
+  border-radius: 22px;
+  padding: 16px;
+  background-color: #4399FF;
+  flex: 1;
+}
 .child-item {
-  padding: 8px 12px;
+  padding: 20px 16px;
   border-radius: 6px;
-  margin-bottom: 8px;
+  margin-bottom: 20px;
   background: #f9f9f9;
   cursor: pointer;
-  transition: box-shadow 0.2s;
   border: 1px solid #eee;
 }
 .child-item.active {
@@ -139,28 +168,29 @@
   text-align: center;
   }
   
-  .add-milestones card {
+  /* .add-milestones-card {
     padding: 12px;
     border-radius: 6px;
-    background: #f9f9f9;
-    border: 1px solid #eee;
-  }
-  
+  } */
+
   .add-child-btn {
-    background: #00d0bc;
+    background: #f8fafa;
+    box-shadow: #333;
+    color: #999;
+    padding: 20px 16px;
+    box-shadow: 0 0 8px rgba(21, 22, 22, 0.3); 
+    transition: box-shadow 0.3s, background 0.3s;
+    
 }
 .add-child-btn:hover {
   background: #00bfa6;
 }
 
 .add-milestones-btn {
-  background: #ffd500;
-  margin-top: 4px;
-  color: #333;
-}
-
-.add-milestones-btn:hover {
-  background: #ffbf00;
+  border-radius: 25px;
+  background: #064F83;
+  margin-top: 10px;
+  color: #fff;
 }
 
 /**************************************************
@@ -172,11 +202,15 @@
   grid-row: 1 / 2;
   /* hàng 1 */
 }
-
+.child-detail-box-card p{
+  margin-bottom: 10px;
+  font-size: 0,5rem;
+    color: #ffffff;
+}
 .child-title {
   margin-bottom: 10px;
   font-size: 1.2rem;
-    color: #333;
+    color: #ffffff;
 }
 
 /**************************************************
@@ -205,7 +239,11 @@
 /**************************************************
   BOX 3: Growth chart
 **************************************************/
-.growth-chart-box {
+.growth-chart-box-card { 
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #00D0BC;
+  border-radius: 22px;   
   grid-column: 3 / 4;
   /* cột 3 */
   grid-row: 1 / 2;
@@ -218,9 +256,14 @@
     justify-content: space-between;
     margin-bottom: 8px;
 }
+.chart-box {
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  
+}
 .chart-area {
   height: 180px;
-  border: 1px dashed #ccc;
+  border: 2px dashed #0b0b0b;
   border-radius: 6px;
   margin-top: 8px;
   display: flex;
@@ -247,7 +290,9 @@
 /**************************************************
   BOX 4: Thông tin Weight, Height, Connect to doctor
 **************************************************/
-.growth-info-box {
+
+.growth-info-box-card {
+
   grid-column: 4 / 5;
   /* cột 4 */
   grid-row: 1 / 2;
@@ -256,6 +301,7 @@
   flex-direction: row;
     align-items: center;
     gap: 16px;
+    padding: 14px;
 }
 growth-chart-box card {
   padding: 12px;
@@ -265,23 +311,45 @@ growth-chart-box card {
 }
 
 .action-buttons {
-  margin-left: auto;
+  width: 40%;
   display: flex;
   gap: 8px;
+  margin-left: auto;
+  justify-content: flex-end;
 }
-.action-buttons button {
+.connect-doctor,
+.add-record {
+  flex: 1;         
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.connect-doctor button {
+  width: 100%;                  /* Nút chiếm hết chiều ngang div */
+  text-align: center;  
   flex: 1;
   padding: 8px;
   border: none;
-  border-radius: 6px;
-  background: #00d0bc;
+  border-radius: 25px;
+  background: #0682FF;
+  /* box-shadow: 0 0 8px rgba(0, 229, 255, 0.3); */
   color: #fff;
   cursor: pointer;
-  transition: background 0.2s;
 }
-.action-buttons button:hover {
-  background: #00bfa6;
+
+.add-record button {
+  width: 100%;                  /* Nút chiếm hết chiều ngang div */
+  text-align: center;  
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 25px;
+  background: #699BF7;
+  /* box-shadow: 0 0 8px #00D0BC; */
+  color: #fff;
+  cursor: pointer;
 }
+
 
 /**************************************************
   BOX 5: Activities (hàng 2, full width)
@@ -297,4 +365,17 @@ growth-chart-box card {
   margin-bottom: 10px;
   font-size: 1.2rem;
   color: #333;
+}
+
+/********************TEXT****************/
+.chart-header h3 {
+    display: block;
+    color: #fff;
+    font-size: 1.17em;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    unicode-bidi: isolate;
 }

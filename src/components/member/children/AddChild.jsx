@@ -633,10 +633,40 @@ const AddChild = ({ closeOverlay }) => {
     memberId: localStorage.getItem("memberId"),
     dateOfBirth: "",
     gender: "",
-    birthWeight: "",
-    birthHeight: "",
+    birthWeight: 0,
+    birthHeight: 0,
     notes: "",
   });
+
+  const [errors, setErrors] = useState({
+    name: "",
+    gender: "",
+    dateOfBirth: "",
+    recordDate: "",
+    weight: "",
+    height: "",
+  });
+
+  // Immediately validate dateOfBirth when it changes
+  useEffect(() => {
+    if (childForm.dateOfBirth) {
+      const birthDate = new Date(childForm.dateOfBirth);
+      const today = new Date();
+      let error = "";
+      // Check if birthDate is in the future.
+      if (birthDate > today) {
+        error = "Date of birth cannot be in the future";
+      } else {
+        // Check if child is under 18 years old.
+        const eighteenYearsAgo = new Date();
+        eighteenYearsAgo.setFullYear(today.getFullYear() - 18);
+        if (birthDate < eighteenYearsAgo) {
+          error = "Child must be under 18 years old";
+        }
+      }
+      setErrors((prev) => ({ ...prev, dateOfBirth: error }));
+    }
+  }, [childForm.dateOfBirth]);
 
   useEffect(() => {
     const storedMemberId = localStorage.getItem("memberId");
@@ -674,15 +704,6 @@ const AddChild = ({ closeOverlay }) => {
     attentionSpan: "",
     neurologicalReflexes: "",
     developmentalMilestones: "",
-  });
-
-  const [errors, setErrors] = useState({
-    name: "",
-    gender: "",
-    dateOfBirth: "",
-    recordDate: "",
-    weight: "",
-    height: "",
   });
 
   const validateStep1 = useCallback(() => {
