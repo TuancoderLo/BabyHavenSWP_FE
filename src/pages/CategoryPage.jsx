@@ -7,42 +7,75 @@ import "./CategoryPage.css";
 
 function CategoryPage() {
   const { categoryId } = useParams();
-  const [blogs, setBlogs] = useState([]);
+  const [blogs, setBlogs] = useState([]); // Khởi tạo là mảng rỗng
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Thêm state cho phân trang
+  const [categoryName, setCategoryName] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [blogsPerPage] = useState(5); // Số blogs mỗi trang
+  const [blogsPerPage] = useState(6);
 
   useEffect(() => {
-    fetchBlogsByCategory();
+    if (categoryId) {
+      console.log("Loading category:", categoryId);
+      fetchCategoryDetails();
+      fetchBlogsByCategory();
+    }
   }, [categoryId]);
+
+  const fetchCategoryDetails = async () => {
+    try {
+      const response = await api.get(`BlogCategories/${categoryId}`);
+      console.log("Category details:", response.data);
+      if (response.data) {
+        setCategoryName(response.data.categoryName || "");
+      }
+    } catch (error) {
+      console.error("Error fetching category details:", error);
+      setCategoryName("");
+    }
+  };
 
   const fetchBlogsByCategory = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`Blog/blogs/${categoryId}`);
-      setBlogs(response.data);
       setError(null);
+
+      const response = await api.get(`Blog/blogs/${categoryId}`);
+      console.log("Blogs data:", response.data);
+
+      // Đảm bảo response.data là một mảng
+      const blogsData = Array.isArray(response.data) ? response.data : [];
+
+      if (blogsData.length === 0) {
+        setError("Không có bài viết nào trong danh mục này");
+      }
+
+      setBlogs(blogsData);
     } catch (error) {
       console.error("Error fetching blogs:", error);
-      setError("Không thể tải bài viết. Vui lòng thử lại sau.");
+      setError("Có lỗi xảy ra khi tải bài viết. Vui lòng thử lại sau.");
+      setBlogs([]); // Reset về mảng rỗng khi có lỗi
     } finally {
       setLoading(false);
     }
   };
 
   // Tính toán blogs cho trang hiện tại
-  const indexOfLastBlog = currentPage * blogsPerPage;
-  const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
-  const currentBlogs = blogs.slice(indexOfFirstBlog, indexOfLastBlog);
-  const totalPages = Math.ceil(blogs.length / blogsPerPage);
+  const getCurrentBlogs = () => {
+    const indexOfLastBlog = currentPage * blogsPerPage;
+    const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
+    return Array.isArray(blogs)
+      ? blogs.slice(indexOfFirstBlog, indexOfLastBlog)
+      : [];
+  };
 
-  // Xử lý chuyển trang
+  const totalPages = Math.ceil(
+    (Array.isArray(blogs) ? blogs.length : 0) / blogsPerPage
+  );
+
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
-    window.scrollTo(0, 0); // Cuộn lên đầu trang khi chuyển trang
+    window.scrollTo(0, 0);
   };
 
   return (
@@ -50,35 +83,34 @@ function CategoryPage() {
       <Header />
 
       <main className="category-content">
+        {categoryName && <h1 className="category-title">{categoryName}</h1>}
+
         {loading ? (
-          <div className="loading">Đang tải...</div>
+          <div className="loading">Đang tải bài viết...</div>
         ) : error ? (
           <div className="error">{error}</div>
         ) : (
           <>
             <div className="blogs-container">
-              {currentBlogs.map((blog) => (
+              {getCurrentBlogs().map((blog) => (
                 <div key={blog.blogId} className="blog-card">
                   <div className="blog-image">
                     <img
-                      src={blog.imageBlog || "/images/placeholder.jpg"}
+                      src={blog.imageBlog || "/placeholder-image.jpg"}
                       alt={blog.title}
                       onError={(e) => {
-                        e.target.src = "/images/placeholder.jpg";
+                        e.target.src = "/placeholder-image.jpg";
                       }}
                     />
                   </div>
                   <div className="blog-content">
                     <h2 className="blog-title">{blog.title}</h2>
                     <p className="blog-author">
-                      {blog.authorName
-                        ? `Tác giả: ${blog.authorName}`
-                        : "Tác giả: Ẩn danh"}
+                      {blog.authorName || "Ẩn danh"}
                     </p>
-                    <p className="blog-category">
-                      Danh mục: {blog.categoryName}
+                    <p className="blog-excerpt">
+                      {blog.content?.substring(0, 150)}...
                     </p>
-                    <p className="blog-excerpt">{blog.content}</p>
                     {blog.status === "Approved" && (
                       <button className="read-more-btn">Đọc thêm</button>
                     )}
@@ -87,7 +119,6 @@ function CategoryPage() {
               ))}
             </div>
 
-            {/* Phân trang */}
             {totalPages > 1 && (
               <div className="pagination">
                 <button

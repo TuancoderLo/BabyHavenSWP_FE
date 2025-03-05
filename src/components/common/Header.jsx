@@ -12,6 +12,7 @@ function Header() {
   const [userData, setUserData] = useState(null);
   const [parentCategories, setParentCategories] = useState([]);
   const [childCategories, setChildCategories] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const nameFromLocal = localStorage.getItem("name");
@@ -23,8 +24,9 @@ function Header() {
 
   const fetchParentCategories = async () => {
     try {
+      setIsLoading(true);
       const response = await api.get("BlogCategories");
-      console.log("=== API Response Full Data ===", response);
+      console.log("API Response:", response);
 
       const allCategories = Array.isArray(response.data)
         ? response.data
@@ -40,7 +42,7 @@ function Header() {
 
       // Giới hạn chỉ lấy 5 category cha đầu tiên
       const limitedParentCats = parentCats.slice(0, 5);
-      console.log("=== Limited Parent Categories (5) ===", limitedParentCats);
+      console.log("Parent Categories (Limited to 5):", limitedParentCats);
 
       setParentCategories(limitedParentCats);
 
@@ -50,21 +52,27 @@ function Header() {
         const childCats = allCategories.filter(
           (cat) => cat.parentCategoryId === parent.categoryId
         );
+        console.log(`Child Categories for ${parent.categoryName}:`, childCats);
         childCatsMap[parent.categoryId] = childCats;
       });
 
       setChildCategories(childCatsMap);
     } catch (error) {
-      console.error("=== Error Details ===", error);
+      console.error("Error fetching categories:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleCategoryClick = async (categoryId) => {
     try {
-      // Chuyển hướng đến trang category
+      setIsLoading(true);
+      // Chuyển hướng đến trang category với categoryId
       navigate(`/category/${categoryId}`);
     } catch (error) {
-      console.error("Error handling category click:", error);
+      console.error("Error navigating to category:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
