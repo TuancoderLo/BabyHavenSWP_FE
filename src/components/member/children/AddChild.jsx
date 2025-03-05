@@ -5,7 +5,7 @@ import calculateBMI from "../../../services/bmiUtils";
 import PropTypes from "prop-types";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-
+import baby from "../../../assets/baby.jpg";
 // ---------------------
 // Step components (memoized)
 // ---------------------
@@ -14,7 +14,6 @@ const Step1 = memo(
   ({ childForm, setChildForm, errors, onConfirm, onAddRecord }) => {
     return (
       <div className="step-form">
-        <h2>Enter your baby's information</h2>
         <label>Baby’s name</label>
         <input
           type="text"
@@ -111,12 +110,16 @@ const Step1 = memo(
           }
         />
         <div className="step-buttons">
-          <button type="button" onClick={onConfirm}>
+          <div className="button-cofirm">
+          <button onClick={onConfirm}>
             Confirm
           </button>
-          <button type="button" onClick={onAddRecord}>
+          </div>
+         <div className="button-add-record">
+         <button onClick={onAddRecord}>
             Add a record
           </button>
+         </div>
         </div>
       </div>
     );
@@ -170,7 +173,6 @@ const Step2Page1 = memo(
 
     return (
       <div className="step-form">
-        <h2>Enter a new growth record</h2>
         <label>Date</label>
         <ReactDatePicker
           selected={
@@ -230,7 +232,7 @@ const Step2Page1 = memo(
           </div>
           <div>
             <label>BMI (kg/m2)</label>
-            <input type="text" readOnly value={growthForm.bmi} />
+            <input type="number" readOnly value={growthForm.bmi} />
           </div>
         </div>
         <label>Notes</label>
@@ -242,12 +244,16 @@ const Step2Page1 = memo(
           }
         />
         <div className="step-buttons">
-          <button type="button" onClick={onConfirm}>
+        <div className="button-cofirm">
+          <button onClick={onConfirm}>
             Confirm
           </button>
+          </div>
+          <div className="button-add-record">
           <button type="button" onClick={onOtherMeasure}>
             Other measure
           </button>
+          </div>
         </div>
       </div>
     );
@@ -275,22 +281,19 @@ const Step2Page2 = memo(
     // Fields for chest, nutritional, and blood work measures
     return (
       <div className="step-form">
-        <h2>Enter additional growth record info (Part 2)</h2>
         <div className="two-column-row">
-          <div>
-            <label>Chest circumference (cm)</label>
+        <div>
+            <label>Physical activity level</label>
             <input
-              type="number"
-              value={growthForm.chestCircumference}
+              type="text"
+              value={growthForm.physicalActivityLevel}
               onChange={(e) =>
                 setGrowthForm((prev) => ({
                   ...prev,
-                  chestCircumference: e.target.value,
+                  physicalActivityLevel: e.target.value,
                 }))
               }
-              className={errors.chestCircumference ? "error-input" : ""}
             />
-            {errors.chestCircumference && <p className="error-text">{errors.chestCircumference}</p>}
           </div>
           <div>
             <label>Nutritional status</label>
@@ -355,17 +358,19 @@ const Step2Page2 = memo(
             {errors.bloodSugarLevel && <p className="error-text">{errors.bloodSugarLevel}</p>}
           </div>
           <div>
-            <label>Physical activity level</label>
+            <label>Chest circumference (cm)</label>
             <input
-              type="text"
-              value={growthForm.physicalActivityLevel}
+              type="number"
+              value={growthForm.chestCircumference}
               onChange={(e) =>
                 setGrowthForm((prev) => ({
                   ...prev,
-                  physicalActivityLevel: e.target.value,
+                  chestCircumference: e.target.value,
                 }))
               }
+              className={errors.chestCircumference ? "error-input" : ""}
             />
+            {errors.chestCircumference && <p className="error-text">{errors.chestCircumference}</p>}
           </div>
         </div>
         <div className="two-column-row">
@@ -387,7 +392,7 @@ const Step2Page2 = memo(
           <div>
             <label>Blood pressure</label>
             <input
-              type="text"
+              type="number"
               value={growthForm.bloodPressure}
               onChange={(e) =>
                 setGrowthForm((prev) => ({
@@ -431,12 +436,16 @@ const Step2Page2 = memo(
           </div>
         </div>
         <div className="step-buttons">
-          <button type="button" onClick={onConfirm}>
+        <div className="button-cofirm">
+          <button onClick={onConfirm}>
             Confirm
           </button>
+          </div>
+          <div className="button-add-record">
           <button type="button" onClick={onOtherMeasure}>
             Other measure
           </button>
+          </div>
         </div>
       </div>
     );
@@ -467,7 +476,6 @@ const Step2Page3 = memo(
     // Fields for sleep, vision, hearing, immunization, mental health & hormone levels
     return (
       <div className="step-form">
-        <h2>Enter additional growth record info (Part 3)</h2>
         <div className="two-column-row">
           <div>
             <label>Sleep duration (hrs)</label>
@@ -483,6 +491,36 @@ const Step2Page3 = memo(
               className={errors.sleepDuration ? "error-input" : ""}
             />
             {errors.sleepDuration && <p className="error-text">{errors.sleepDuration}</p>}
+          </div>
+          <div>
+            <label>Growth hormone level</label>
+            <input
+              type="number"
+              value={growthForm.growthHormoneLevel}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  growthHormoneLevel: e.target.value,
+                }))
+              }
+              className={errors.growthHormoneLevel ? "error-input" : ""}
+            />
+            {errors.growthHormoneLevel && <p className="error-text">{errors.growthHormoneLevel}</p>}
+          </div>
+        </div>
+        <div className="two-column-row">
+          <div>
+            <label>Hearing</label>
+            <input
+              type="text"
+              value={growthForm.hearing}
+              onChange={(e) =>
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  hearing: e.target.value,
+                }))
+              }
+            />
           </div>
           <div>
             <label>Vision</label>
@@ -502,14 +540,14 @@ const Step2Page3 = memo(
         </div>
         <div className="two-column-row">
           <div>
-            <label>Hearing</label>
+            <label>Mental health status</label>
             <input
               type="text"
-              value={growthForm.hearing}
+              value={growthForm.mentalHealthStatus}
               onChange={(e) =>
                 setGrowthForm((prev) => ({
                   ...prev,
-                  hearing: e.target.value,
+                  mentalHealthStatus: e.target.value,
                 }))
               }
             />
@@ -526,36 +564,6 @@ const Step2Page3 = memo(
                 }))
               }
             />
-          </div>
-        </div>
-        <div className="two-column-row">
-          <div>
-            <label>Mental health status</label>
-            <input
-              type="text"
-              value={growthForm.mentalHealthStatus}
-              onChange={(e) =>
-                setGrowthForm((prev) => ({
-                  ...prev,
-                  mentalHealthStatus: e.target.value,
-                }))
-              }
-            />
-          </div>
-          <div>
-            <label>Growth hormone level</label>
-            <input
-              type="number"
-              value={growthForm.growthHormoneLevel}
-              onChange={(e) =>
-                setGrowthForm((prev) => ({
-                  ...prev,
-                  growthHormoneLevel: e.target.value,
-                }))
-              }
-              className={errors.growthHormoneLevel ? "error-input" : ""}
-            />
-            {errors.growthHormoneLevel && <p className="error-text">{errors.growthHormoneLevel}</p>}
           </div>
         </div>
         <div className="two-column-row">
@@ -587,12 +595,11 @@ const Step2Page3 = memo(
           </div>
         </div>
         <div className="step-buttons">
-          <button type="button" onClick={onConfirm}>
+        <div className="button-cofirm">
+          <button onClick={onConfirm}>
             Confirm
           </button>
-          <button type="button" onClick={onOtherMeasure}>
-            Other measure
-          </button>
+          </div>
         </div>
       </div>
     );
@@ -615,30 +622,37 @@ Step2Page3.propTypes = {
   onConfirm: PropTypes.func.isRequired,
   onOtherMeasure: PropTypes.func.isRequired,
 };
+// const Step3 = memo(({ childForm, onClose }) => {
+//   return (
+//     <div className="step3-container">
+//       <div className="step3-content">
+//         <h2>
+//           Congratulation, welcome <span className="baby-name">{childForm.name}</span> to <span className="babyhaven">BabyHaven</span>
+//         </h2>
+//       </div>
 
-const Step3 = memo(({ childForm, onClose }) => {
-  return (
-    <div className="step-form">
-      <h2>
-        Congratulations, <span style={{ color: "#00bfa6" }}>{childForm.name}</span>!
-      </h2>
-      <p>Your information has been saved successfully.</p>
-      <div className="step-buttons">
-        <button type="button" onClick={onClose} style={{ marginLeft: "auto" }}>
-          Close
-        </button>
-      </div>
-    </div>
-  );
-});
-Step3.displayName = "Step3";
+//       <div className="step3-image">
+//         <img src={baby} alt="Baby" className="baby-image" />
+//       </div>
+//       <div className="step-buttons">
+//           <button type="button" onClick={onClose}>
+//             Close
+//           </button>
+//           </div>
+//     </div>
+    
+//   );
+// });
 
-Step3.propTypes = {
-  childForm: PropTypes.shape({
-    name: PropTypes.string,
-  }).isRequired,
-  onClose: PropTypes.func.isRequired,
-};
+
+// Step3.displayName = "Step3";
+
+// Step3.propTypes = {
+//   childForm: PropTypes.shape({
+//     name: PropTypes.string,
+//   }).isRequired,
+//   onClose: PropTypes.func.isRequired,
+// };
 
 // ---------------------
 // Main AddChild component
@@ -977,14 +991,12 @@ const handleConfirmStep2 = useCallback(async () => {
   }
 }, [growthForm, validateStep2, childId, childForm.memberId]);
 
-  const handleCloseStep3 = useCallback(() => {
-      closeOverlay();
-  window.location.reload();
+const handleCloseStep3 = useCallback(() => {
+  closeOverlay();
+  setTimeout(() => {
+      window.location.reload();
+  }, 100);
 }, [closeOverlay]);
-
-  const handleCloseWithoutSave = useCallback(() => {
-    closeOverlay();
-  }, [closeOverlay]);
 
   const handleOverlayClick = useCallback((e) => {
     if (e.target === e.currentTarget) {
@@ -993,6 +1005,23 @@ const handleConfirmStep2 = useCallback(async () => {
   }, [closeOverlay]);
 
   // useMemo to render step content to avoid re-renders if props haven't changed
+  const getStepTitle = useMemo(() => {
+    if (currentStep === 1) {
+      return "Enter your baby’s information to let us follow every tiny angel’s step";
+    } else if (currentStep === 2) {
+      if (subStep2 === 1) return "Enter a new growth record to track your baby's health automatically";
+      if (subStep2 === 2) return "Recommendations for your baby";
+      if (subStep2 === 3) return "Others";
+    }
+    return "";
+  }, [currentStep, subStep2]);
+
+  const handlePrevious = () => {
+    if (subStep2 > 1) {
+      setSubStep2((prev) => prev - 1);
+    }
+  };
+
   const renderStepContent = useMemo(() => {
     if (currentStep === 1) {
       return (
@@ -1032,61 +1061,91 @@ const handleConfirmStep2 = useCallback(async () => {
             setGrowthForm={setGrowthForm}
             errors={errors}
             onConfirm={handleConfirmStep2}
-            onOtherMeasure={handleOtherMeasure}
           />
         );
       }
-    } else if (currentStep === 3) {
-      return <Step3 childForm={childForm} onClose={handleCloseStep3} />;
     }
     return null;
-  }, [
-    currentStep,
-    subStep2,
-    childForm,
-    growthForm,
-    errors,
-    handleConfirmStep1,
-    handleAddRecordStep1,
-    handleConfirmStep2,
-    handleOtherMeasure,
-    handleCloseStep3,
-  ]);
+  }, [currentStep, subStep2, childForm, growthForm, errors, handleConfirmStep1, handleAddRecordStep1, handleConfirmStep2, handleOtherMeasure]);
 
-    return (
-      <div className="add-child-overlay" onClick={handleOverlayClick}>
-        <div className="add-child-wizard" onClick={(e) => e.stopPropagation()}>
-          <button
-            type="button"
-            className="close-btn"
-            onClick={handleCloseWithoutSave}
-          >
+  return (
+    <div className="add-child-overlay" onClick={handleOverlayClick}>
+      <div className="add-child-wizard" onClick={(e) => e.stopPropagation()}>
+        {/* Nếu vẫn muốn nút X ở góc trên bên phải khi bước 3, bạn có thể ẩn/hiện theo ý muốn */}
+        {currentStep !== 3 && (
+          <button type="button" className="close-btn" onClick={closeOverlay}>
             ×
           </button>
-          <div className="wizard-left">
-            <div className="blue-bar"></div>
-            <div className="wizard-left-content">
-              <h1 className="main-title">
-                Enter a new growth record to track your baby's health automatically
-              </h1>
-              <div className="step-labels">
-                <div className={`step-label ${currentStep === 1 ? "active-step" : ""}`}>
-                  1. Enter information
+        )}
+  
+        {/* CỘT TRÁI */}
+        <div className="wizard-left">
+          <div className="blue-bar"></div>
+          <div className="wizard-left-content">
+            {currentStep === 3 ? (
+              // Bước 3: hiển thị dòng chúc mừng ở cột trái
+              <h2 className="congrats-text" style={{ color: "#000" }}>
+  Congratulation
+  <span style={{ color: "#D970FF" }}>,</span>
+  welcome to <span style={{ color: "#FF00CC" }}>{childForm.name}</span>{" "}
+  <span style={{ color: "#00D0BC" }}>BabyHaven</span>
+</h2>
+
+            ) : (
+              // Bước 1 & 2: hiển thị tiêu đề và step labels như cũ
+              <>
+                <h1 className="main-title">{getStepTitle}</h1>
+                <div className="step-labels">
+                  <div className={`step-label ${currentStep === 1 ? "active-step" : ""}`}>
+                    1. Enter information
+                  </div>
+                  <div className={`step-label ${currentStep === 2 ? "active-step" : ""}`}>
+                    2. Add a new growth record
+                  </div>
+                  <div className={`step-label ${currentStep === 3 ? "active-step" : ""}`}>
+                    3. Submit
+                  </div>
                 </div>
-                <div className={`step-label ${currentStep === 2 ? "active-step" : ""}`}>
-                  2. Add a new growth record
-                </div>
-                <div className={`step-label ${currentStep === 3 ? "active-step" : ""}`}>
-                  3. Submit
+              </>
+            )}
+          </div>
+        </div>
+  
+        {/* CỘT PHẢI */}
+        <div className="wizard-right">
+          {currentStep === 3 ? (
+            // Bước 3: render ảnh bé to + nút Close ở đây
+            <div className="step3-wrapper">
+              <img src={baby} alt="Baby" className="baby-image" />
+  
+              <div className="step-buttons">
+              <div className="button-cofirm">
+                <button type="button" onClick={handleCloseStep3}>
+                  Close
+                </button>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="wizard-right">
-            {renderStepContent}
-          </div>
+          ) : (
+            // Bước 1 & 2: vẫn dùng renderStepContent như cũ
+            <>
+              {renderStepContent}
+              {currentStep === 2 && subStep2 > 1 && (
+                <div className="step-buttons">
+                  <button
+                    type="button"
+                    className="previous-btn"
+                    onClick={handlePrevious}
+                  >
+                    Previous
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
-    );
-  };
-  export default AddChild;
+    </div>
+  );
+};
+export default AddChild;

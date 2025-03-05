@@ -49,8 +49,6 @@
 .wizard-left {
   position: relative;
   width: 40%;
-  background: #f8f9fa;
-  border-radius: 12px 0 0 12px;
 }
 
 .blue-bar {
@@ -72,10 +70,11 @@
 }
 
 .main-title {
-  font-size: 1.4rem;
-  color: #7e52ff;
+  font-size: 1.8rem;
+  color: #D970FF;
   line-height: 1.3;
   margin: 0;
+  margin-bottom: 200px;
 }
 
 .step-labels {
@@ -86,7 +85,7 @@
 
 .step-label {
   font-size: 1rem;
-  color: #777;
+  color: #141414;
   transition: color 0.2s, font-weight 0.2s;
 }
 
@@ -111,14 +110,9 @@
   gap: 0.8rem;
 }
 
-.step-form h2 {
-  margin-bottom: 0.5rem;
-  color: #333;
-}
-
 /* Label + input */
 .step-form label {
-  font-weight: 600;
+  font-weight: 650;
   color: #333;
 }
 
@@ -130,15 +124,31 @@
   border-radius: 6px;
   width: 100%;
 }
-
+.step-form input[type="number"] {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+  margin-top: 5px;
+}
 /* Nút chung */
 .step-buttons {
   display: flex;
   gap: 1rem;
   margin-top: 1rem;
+  justify-content:flex-end;
+}
+.button-cofirm button {
+  background: #0682FF ;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.9rem;
 }
 
-.step-buttons button {
+.button-add-record button {
   background: #00d0bc;
   border: none;
   border-radius: 6px;
@@ -146,11 +156,15 @@
   padding: 8px 16px;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background 0.2s;
 }
-
-.step-buttons button:hover {
-  background: #00bfa6;
+.previous-btn {
+  background: #064F83;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.9rem;
 }
 
 /* Khu Gender */
@@ -221,4 +235,36 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
+}
+.congrats-text{
+  font-size: 2rem;
+  line-height: 1.3;
+  margin: 0;
+  margin-top: 120px;
+}
+.step3-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 2rem;
+}
+
+/* Nội dung text */
+.step3-content {
+  flex: 1;
+}
+
+.step3-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.step3-wrapper .baby-image {
+  width: 80%; /* to tuỳ ý */
+  max-width: 400px;
+  height: auto;
 }
