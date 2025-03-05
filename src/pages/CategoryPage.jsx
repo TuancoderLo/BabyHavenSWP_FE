@@ -7,7 +7,7 @@ import "./CategoryPage.css";
 
 function CategoryPage() {
   const { categoryId } = useParams();
-  const [blogs, setBlogs] = useState([]); // Khởi tạo là mảng rỗng
+  const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [categoryName, setCategoryName] = useState("");
@@ -41,10 +41,29 @@ function CategoryPage() {
       setError(null);
 
       const response = await api.get(`Blog/blogs/${categoryId}`);
-      console.log("Blogs data:", response.data);
+      console.log("Raw API Response:", response);
+      console.log("Response data structure:", {
+        hasData: !!response.data,
+        type: typeof response.data,
+        isArray: Array.isArray(response.data),
+        data: response.data,
+      });
 
-      // Đảm bảo response.data là một mảng
-      const blogsData = Array.isArray(response.data) ? response.data : [];
+      // Kiểm tra cấu trúc response
+      let blogsData = [];
+      if (response.data) {
+        if (response.data.data) {
+          // Nếu data nằm trong property 'data'
+          blogsData = Array.isArray(response.data.data)
+            ? response.data.data
+            : [];
+        } else {
+          // Nếu data nằm trực tiếp trong response.data
+          blogsData = Array.isArray(response.data) ? response.data : [];
+        }
+      }
+
+      console.log("Processed blogs data:", blogsData);
 
       if (blogsData.length === 0) {
         setError("Không có bài viết nào trong danh mục này");
@@ -53,14 +72,17 @@ function CategoryPage() {
       setBlogs(blogsData);
     } catch (error) {
       console.error("Error fetching blogs:", error);
+      console.error("Error details:", {
+        message: error.message,
+        response: error.response?.data,
+      });
       setError("Có lỗi xảy ra khi tải bài viết. Vui lòng thử lại sau.");
-      setBlogs([]); // Reset về mảng rỗng khi có lỗi
+      setBlogs([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Tính toán blogs cho trang hiện tại
   const getCurrentBlogs = () => {
     const indexOfLastBlog = currentPage * blogsPerPage;
     const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
@@ -78,12 +100,20 @@ function CategoryPage() {
     window.scrollTo(0, 0);
   };
 
+  // Hàm xử lý tags
+  const renderTags = (tags) => {
+    if (!tags) return null;
+    return tags.split(",").map((tag) => tag.trim());
+  };
+
   return (
     <div className="category-page">
       <Header />
 
       <main className="category-content">
-        {categoryName && <h1 className="category-title">{categoryName}</h1>}
+        {categoryName && (
+          <h1 className="category-title">Danh mục: {categoryName}</h1>
+        )}
 
         {loading ? (
           <div className="loading">Đang tải bài viết...</div>
@@ -93,7 +123,7 @@ function CategoryPage() {
           <>
             <div className="blogs-container">
               {getCurrentBlogs().map((blog) => (
-                <div key={blog.blogId} className="blog-card">
+                <div key={blog.title} className="blog-card">
                   <div className="blog-image">
                     <img
                       src={blog.imageBlog || "/placeholder-image.jpg"}
@@ -105,12 +135,32 @@ function CategoryPage() {
                   </div>
                   <div className="blog-content">
                     <h2 className="blog-title">{blog.title}</h2>
-                    <p className="blog-author">
-                      {blog.authorName || "Ẩn danh"}
-                    </p>
+
+                    <div className="blog-metadata">
+                      <p className="blog-author">
+                        {blog.authorName
+                          ? `Tác giả: ${blog.authorName}`
+                          : "Tác giả: Ẩn danh"}
+                      </p>
+                      <p className="blog-category">
+                        Danh mục: {blog.categoryName}
+                      </p>
+                    </div>
+
+                    <div className="blog-tags">
+                      {renderTags(blog.tags)?.map((tag, index) => (
+                        <span key={index} className="tag">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+
                     <p className="blog-excerpt">
-                      {blog.content?.substring(0, 150)}...
+                      {blog.content?.length > 200
+                        ? `${blog.content.substring(0, 200)}...`
+                        : blog.content}
                     </p>
+
                     {blog.status === "Approved" && (
                       <button className="read-more-btn">Đọc thêm</button>
                     )}
