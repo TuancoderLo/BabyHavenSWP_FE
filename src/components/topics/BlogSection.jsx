@@ -100,9 +100,24 @@ const BlogSection = ({ parentCategoryId }) => {
           blogs.map((blog) => (
             <div key={blog.blogId} className="blog-card">
               <div className="blog-image">
-                <div className="image-placeholder"></div>
+                <img
+                  src={blog.imageBlog || "/placeholder-image.jpg"}
+                  alt={blog.title}
+                  onError={(e) => {
+                    e.target.src = "/placeholder-image.jpg";
+                  }}
+                />
               </div>
-              <h3 className="blog-title">{blog.title}</h3>
+              <div className="blog-content">
+                <h3 className="blog-title">{blog.title}</h3>
+                <div className="blog-metadata">
+                  <p className="blog-author">
+                    {blog.authorName
+                      ? `Tác giả: ${blog.authorName}`
+                      : "Tác giả: Ẩn danh"}
+                  </p>
+                </div>
+              </div>
             </div>
           ))
         )}

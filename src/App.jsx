@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Guest from "./components/guest/Guest";
 import Login from "./components/login/Login";
 import Register from "./components/register/Register";
+import CategoryPage from "./pages/CategoryPage";
 
 // HomePage (user)
 import Homepage from "./components/homepage/HomePage";
@@ -85,6 +86,7 @@ function App() {
         <Route path="/google-callback" element={<GoogleCallback />} />
         <Route path="/register" element={<Register />} />
         <Route path="/packages" element={<MemberPackages />} />
+        <Route path="/category/:categoryId" element={<CategoryPage />} />
 
         {/* Protected routes */}
         <Route
