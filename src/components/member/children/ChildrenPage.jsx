@@ -34,8 +34,11 @@ function ChildrenPage() {
         if (response.data && response.data.data) {
           const list = response.data.data;
           setChildrenList(list);
-          if (list.length > 0) {
-            setSelectedChild(list[0]);
+          // if (list.length > 0) {
+          //   setSelectedChild(list[0]);
+          // }
+          if (list.length === 0) {
+            handleAddChild()
           }
         }
       })
