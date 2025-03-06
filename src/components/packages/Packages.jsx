@@ -8,13 +8,17 @@ function Packages() {
     const [open, setOpen] = useState(false);
     const [packagesData, setPackagesData] = useState([]);
     const navigate = useNavigate();
- // Hàm hỗ trợ hiển thị nút bấm cho từng gói
-    const getButtonLabel = (packagesName) => {
-      if (packagesName === "Free") return "Try Now";
-      if (packagesName === "Standard") return "Try Standard";
-      if (packagesName === "Premium") return "Try Premium";
-      return "Buy Now";
-    };
+
+  const [currentStep, setCurrentStep] = useState(1);
+  const [selectedPackage, setSelectedPackage] = useState(null);
+
+  // Hàm hỗ trợ hiển thị nút bấm cho từng gói
+  const getButtonLabel = (packagesName) => {
+    if (packagesName === "Free") return "Try Now";
+    if (packagesName === "Standard") return "Go Standard";
+    if (packagesName === "Premium") return "Go Premium";
+    return "Buy Now";
+  };
   
     // Gọi API khi component mount
     useEffect(() => {
@@ -35,48 +39,56 @@ function Packages() {
     // Mở modal
     const handleOpen = () => {
       setOpen(true);
+      setCurrentStep(1);
     };
   
     // Đóng modal
     const handleClose = () => {
       setOpen(false);
+      setSelectedPackage(null)
     };
 
   // Xử lý khi bấm vào nút mua
   const handleBuyPackage = (packageName) => {
-    if (!isAuthenticated) {
-      console.log("User not logged in, redirecting to login...");
-      navigate("/login"); // Điều hướng về trang đăng nhập nếu chưa đăng nhập
-      return;
-    }
+    // // if (!isAuthenticated) {
+    // //   console.log("User not logged in, redirecting to login...");
+    // //   navigate("/login"); // Điều hướng về trang đăng nhập nếu chưa đăng nhập
+    // //   return;
+    // }
 
-    console.log(`User bought package: ${packageName}`);
-    navigate("/packages"); // Điều hướng đến trang Packages
-};
+    console.log(`User clicked: ${packageName}`);
+    setSelectedPackage(packageName);
+
+    // Nếu là Standard hoặc Premium => chuyển sang step 2 (màn hình thanh toán)
+    if (packageName === "Standard" || packageName === "Premium") {
+      setCurrentStep(2);
+    } else {
+      // Trường hợp Free hay gói khác => tuỳ bạn xử lý
+      console.log("Handle other packages logic...");
+    }
+  };
 
   
-    return (
-        <>
-          {/* Icon Packages nổi ở góc */}
-          <div className="floating-icon" onClick={handleOpen}>
-            <img src={packages} alt="Packages Icon" />
-          </div>
-    
-          {/* Nếu open = true => hiển thị overlay + modal */}
-          {open && (
-            <div className="packages-overlay" onClick={handleClose}>
-              <div className="packages-modal" onClick={(e) => e.stopPropagation()}>
-                {/* Nút đóng (X) */}
-                <button className="close-btn" onClick={handleClose}>
-                  &times;
-                </button>
-    
+  return (
+    <>
+      <div className="floating-icon" onClick={handleOpen}>
+        <img src={packages} alt="Packages Icon" />
+      </div>
+
+      {open && (
+        <div className="packages-overlay" onClick={handleClose}>
+          <div className="packages-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="close-btn" onClick={handleClose}>
+              &times;
+            </button>
+
+            {currentStep === 1 && (
+              <>
                 <h2 className="modal-title">Explore the different</h2>
                 <p className="modal-subtitle">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                  eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                  Lorem ipsum dolor sit amet...
                 </p>
-    
+
                 <div className="packages-row">
                   {packagesData.length > 0 ? (
                     packagesData.map((pkg, index) => {
@@ -88,18 +100,14 @@ function Packages() {
                         durationMonths,
                         maxChildrenAllowed,
                       } = pkg;
-    
-                      // Kiểm tra gói Premium
                       const isPremium = packageName === "Premium";
-                      // Tạo label nút bấm
                       const buttonLabel = getButtonLabel(packageName);
-    
+
                       return (
                         <div
                           key={index}
                           className={`package-card ${isPremium ? "premium" : ""}`}
                         >
-                          {/* Nếu là Premium => gắn icon */}
                           {isPremium && (
                             <img
                               src={packages}
@@ -107,15 +115,13 @@ function Packages() {
                               className="premium-badge"
                             />
                           )}
-    
+
                           <h3>{packageName}</h3>
-    
-                          {/* Mô tả gói */}
-                          <p style={{ minHeight: "40px", color: "#666" }}>
+                          {/* Dùng class thay inline */}
+                          <p className="package-description">
                             {description}
                           </p>
-    
-                          {/* Khu vực giá */}
+
                           <div className="package-price">
                             <span className="price-amount">
                               {price.toLocaleString()} {currency}
@@ -125,22 +131,17 @@ function Packages() {
                               / {durationMonths} months
                             </span>
                           </div>
-    
-                          {/* Hiển thị số lượng con tối đa */}
-                          <div
-                            style={{
-                              marginBottom: "1rem",
-                              fontSize: "0.85rem",
-                              color: "#666",
-                            }}
-                          >
+
+                          <div className="max-children-info">
                             Max children: {maxChildrenAllowed}
                           </div>
-    
-                          {/* Nút mua */}
-                    <button className="package-btn" onClick={() => handleBuyPackage(packageName)}>
-                      {buttonLabel}
-                    </button>
+
+                          <button
+                            className="package-btn"
+                            onClick={() => handleBuyPackage(packageName)}
+                          >
+                            {buttonLabel}
+                          </button>
                         </div>
                       );
                     })
@@ -148,11 +149,55 @@ function Packages() {
                     <p className="no-packages">No available packages</p>
                   )}
                 </div>
+              </>
+            )}
+
+            {currentStep === 2 && (
+              <div className="step2-center">
+                <h2 className="step2-heading">CHOOSE HOW TO PAY</h2>
+                <p className="step2-subtitle">
+                  Secure for peace of mind.
+                  <br />
+                  Cancel easily online.
+                </p>
+
+                <p className="step2-note">
+                  You selected: <b>{selectedPackage}</b> Package
+                </p>
+
+                <div className="credit-card-option">
+                  <span>Credit or Debit Card</span>
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.png"
+                    alt="Visa"
+                  />
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/c/c5/Mastercard-logo.png"
+                    alt="MasterCard"
+                  />
+                </div>
+
+                <div className="step-buttons step-buttons-centered">
+                  <button
+                    className="previous-btn"
+                    onClick={() => setCurrentStep(1)}
+                  >
+                    Back
+                  </button>
+
+                  <div className="button-cofirm">
+                    <button type="button" onClick={handleClose}>
+                      Close
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
-        </>
-      );
-    }
- 
-    export default Packages;
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+export default Packages;

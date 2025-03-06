@@ -1086,8 +1086,11 @@ const handleCloseStep3 = useCallback(() => {
               // Bước 3: hiển thị dòng chúc mừng ở cột trái
               <h2 className="congrats-text" style={{ color: "#000" }}>
   Congratulation
-  <span style={{ color: "#D970FF" }}>,</span>
-  welcome to <span style={{ color: "#FF00CC" }}>{childForm.name}</span>{" "}
+  <span style={{ color: "#D970FF" }}>! </span>
+  <br />
+  <span>Welcome</span>
+  <br />
+  <span style={{ color: "#FF00CC" }}>{childForm.name}</span> to{" "}
   <span style={{ color: "#00D0BC" }}>BabyHaven</span>
 </h2>
 
