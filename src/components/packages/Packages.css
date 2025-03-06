@@ -164,3 +164,67 @@
   height: 40px;
   object-fit: contain;
 }
+
+/* Mô tả gói */
+.package-description {
+  min-height: 40px;
+  color: #666;
+}
+
+/* Hiển thị số max children */
+.max-children-info {
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* ========== STEP 2 (Thanh toán) ========== */
+/* Bọc toàn bộ step2 để canh giữa */
+.step2-center {
+  text-align: center;
+}
+
+/* Tiêu đề CHOOSE HOW TO PAY */
+.step2-heading {
+  margin-bottom: 1rem;
+}
+
+/* Phần subtext Secure for peace of mind... */
+.step2-subtitle {
+  margin-bottom: 2rem;
+  color: #555;
+}
+
+/* Đoạn note "You selected: Premium..." */
+.step2-note {
+  font-style: italic;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+/* Khung "Credit or Debit Card" */
+.credit-card-option {
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  padding: 1rem 2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+/* Bôi đậm "Credit or Debit Card" */
+.credit-card-option span {
+  font-weight: 600;
+}
+
+/* Logo Visa, MasterCard */
+.credit-card-option img {
+  height: 24px;
+}
+
+/* Khu nút step2, canh giữa, margin-top */
+.step-buttons-centered {
+  margin-top: 2rem;
+  justify-content: center;
+}

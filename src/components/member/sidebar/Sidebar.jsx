@@ -89,7 +89,7 @@ function Sidebar() {
     className={activePath === "/member/account" ? "active" : ""}
     onClick={() => setActivePath("/member/account")}
   >
-    <Link to="/member/settings" className="menu-item">
+    <Link to="/member/account" className="menu-item">
       <i className="fas fa-user-cog"></i>
       <span>Account</span>
     </Link>

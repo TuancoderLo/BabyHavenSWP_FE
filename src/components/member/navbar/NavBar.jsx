@@ -2,7 +2,7 @@ import { React, useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import "./NavBar.css";
 import avatar_LOGO from "../../../assets/avatar_LOGO.jpg";
-
+import NotificationDropdown from "../notifications/NotificationDropdown";
 function NavBar() {
   // Tạo state cho userName
   const [userData, setUserData] = useState(null);
@@ -29,7 +29,10 @@ function NavBar() {
         <img src={userData?.profilePicture || avatar_LOGO} alt="User Avatar" />
       </div>
     </div>
-
+    <div className="navbar-right">
+  <NotificationDropdown />
+  {/* Các thông tin khác như tên, avatar... */}
+</div>
     </header>
   );
 }

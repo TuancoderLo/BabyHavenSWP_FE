@@ -1,0 +1,69 @@
+/* Notifications.css */
+.notifications-page {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    font-family: sans-serif;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .filter-container {
+    margin-bottom: 20px;
+  }
+  
+  .filter-container select {
+    margin-left: 10px;
+    padding: 5px;
+  }
+  
+  .notifications-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .notification-item {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding: 10px 0;
+  }
+  
+  .notification-item:last-child {
+    border-bottom: none;
+  }
+  
+  .notification-icon {
+    font-size: 24px;
+    margin-right: 10px;
+  }
+  
+  .notification-content {
+    flex: 1;
+  }
+  
+  .notification-message {
+    margin: 0;
+    font-size: 16px;
+  }
+  
+  .notification-timestamp {
+    font-size: 12px;
+    color: #888;
+  }
+  
+  .mark-read-btn {
+    background: #28a745;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .notification-item.unread .notification-icon::after {
+    content: ' 🔵';
+    font-size: 14px;
+  }
+  
