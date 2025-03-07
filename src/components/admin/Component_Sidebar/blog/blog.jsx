@@ -40,6 +40,8 @@ function Blog() {
   const [blogModalVisible, setBlogModalVisible] = useState(false);
   const [blogForm] = Form.useForm();
   const [editingBlogId, setEditingBlogId] = useState(null);
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [blogFilter, setBlogFilter] = useState("all");
   // Mục đích: Lưu ID của category đang được edit, null khi tạo mới
   // Dùng để phân biệt giữa thao tác create và update
 
@@ -522,6 +524,32 @@ function Blog() {
     setIsModalVisible(false);
   };
 
+  const getFilteredCategories = () => {
+    switch (categoryFilter) {
+      case "parent":
+        return categories.filter((cat) => cat.parentCategoryId === null);
+      case "child":
+        return categories.filter((cat) => cat.parentCategoryId !== null);
+      default:
+        return categories;
+    }
+  };
+
+  const getFilteredBlogs = () => {
+    switch (blogFilter) {
+      case "approved-rejected":
+        return blogs.filter(
+          (blog) => blog.status === "Approved" || blog.status === "Rejected"
+        );
+      case "pending":
+        return blogs.filter((blog) => blog.status === "Pending");
+      case "draft":
+        return blogs.filter((blog) => blog.status === "Draft");
+      default:
+        return blogs;
+    }
+  };
+
   return (
     <div className="blog-container">
       <div style={{ marginBottom: 16 }}>
@@ -544,7 +572,18 @@ function Blog() {
               alignItems: "center",
             }}
           >
-            <h2>Manage blog categories</h2>
+            <div>
+              <h2>Manage blog categories</h2>
+              <Radio.Group
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                style={{ marginTop: 8 }}
+              >
+                <Radio.Button value="all">All Categories</Radio.Button>
+                <Radio.Button value="parent">Parent Categories</Radio.Button>
+                <Radio.Button value="child">Child Categories</Radio.Button>
+              </Radio.Group>
+            </div>
             <Button
               type="primary"
               onClick={() => {
@@ -559,7 +598,7 @@ function Blog() {
 
           <Table
             columns={columns}
-            dataSource={categories}
+            dataSource={getFilteredCategories()}
             rowKey="categoryId"
             loading={loading}
             onChange={(pagination, filters, sorter) => {
@@ -661,7 +700,21 @@ function Blog() {
               alignItems: "center",
             }}
           >
-            <h2>Manage posts</h2>
+            <div>
+              <h2>Manage posts</h2>
+              <Radio.Group
+                value={blogFilter}
+                onChange={(e) => setBlogFilter(e.target.value)}
+                style={{ marginTop: 8 }}
+              >
+                <Radio.Button value="all">All Blogs</Radio.Button>
+                <Radio.Button value="approved-rejected">
+                  Approved/Rejected
+                </Radio.Button>
+                <Radio.Button value="pending">Pending Approval</Radio.Button>
+                <Radio.Button value="draft">Draft</Radio.Button>
+              </Radio.Group>
+            </div>
             <Button
               type="primary"
               onClick={() => {
@@ -676,7 +729,7 @@ function Blog() {
 
           <Table
             columns={blogColumns}
-            dataSource={blogs}
+            dataSource={getFilteredBlogs()}
             loading={loading}
             pagination={{
               defaultPageSize: 10,
