@@ -1,14 +1,3 @@
-/* Overlay */
-.add-child-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.4);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
 /* Rename overlay and wizard classes for AddRecord */
 .add-record-overlay {
@@ -22,72 +11,35 @@ align-items: center;
 justify-content: center;
 }
 
-/* Khung wizard */
-.add-child-wizard {
+.add-record-wizard {
   background: #fff;
   width: 80%;
   max-width: 1000px;
   min-height: 500px;
   border-radius: 12px;
   position: relative;
-  display: flex; /* 2 cột */
+  display: flex; /* Cho phép hiển thị 2 cột */
   overflow: hidden;
-}
-
-.add-record-wizard {
-background: #fff;
-width: 80%;
-max-width: 1000px;
-min-height: 500px;
-border-radius: 12px;
-position: relative;
-/* Removed display: flex for 2 columns since only one column is needed */
-overflow: hidden;
-padding: 2rem;
-}
-
-/* Nút X */
-.close-btn {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 36px; height: 36px;
-  background: #fff;
-  color: #fa0202;
-  border: 2px solid #fa0202;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 1.2rem;
-  font-weight: bold;
-  display: flex; align-items: center; justify-content: center;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-}
-
-.close-btn:hover {
-  background-color: #fa0202;
-  color: #fff;
-  border-color: #fff;
 }
 
 /* Cột trái */
 .wizard-left {
+  width: 40%; /* Cột trái chiếm 40% */
   position: relative;
-  width: 40%;
 }
 
 .blue-bar {
   position: absolute;
-  left: 20px; top: 20px; bottom: 20px;
+  left: 20px;
+  top: 20px;
+  bottom: 20px;
   width: 10px;
   background: #42a5f5;
   border-radius: 10px;
 }
 
 .wizard-left-content {
-  margin-left: 50px;
-  margin-right: 20px;
-  margin-top: 20px;
-  margin-bottom: 20px;
+  margin: 20px 20px 20px 50px;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -96,7 +48,6 @@ padding: 2rem;
 .main-title {
   font-size: 1.4rem;
   color: #7e52ff;
-  line-height: 1.3;
   margin: 0;
 }
 
@@ -118,233 +69,7 @@ padding: 2rem;
 }
 
 /* Cột phải */
-.wizard-right {
-  flex: 1;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
 .wizard-content {
-width: 100%;
-/* padding already added in the wizard container */
-}
-
-/* step-form chung */
-.step-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-}
-
-.step-form {
-display: flex;
-flex-direction: column;
-gap: 0.8rem;
-}
-
-.step-form h2 {
-  margin-bottom: 0.5rem;
-  color: #333;
-}
-
-.step-form h2 {
-margin-bottom: 0.5rem;
-color: #333;
-}
-
-/* Label + input */
-.step-form label {
-  font-weight: 600;
-  color: #333;
-}
-
-.step-form label {
-font-weight: 600;
-color: #333;
-}
-
-.step-form input[type="text"],
-.step-form input[type="number"],
-.step-form input[type="date"] {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  width: 100%;
-}
-
-.step-form input[type="text"],
-.step-form input[type="number"],
-.step-form input[type="date"] {
-padding: 8px;
-border: 1px solid #ccc;
-border-radius: 6px;
-width: 100%;
-}
-
-/* Nút chung */
-.step-buttons {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.step-buttons {
-display: flex;
-gap: 1rem;
-margin-top: 1rem;
-}
-.button-cofirm button {
-background: #0682FF ;
-border: none;
-border-radius: 6px;
-color: #fff;
-padding: 8px 16px;
-cursor: pointer;
-font-size: 0.9rem;
-}
-
-.button-add-record button {
-background: #00d0bc;
-border: none;
-border-radius: 6px;
-color: #fff;
-padding: 8px 16px;
-cursor: pointer;
-font-size: 0.9rem;
-}
-/* Khu Gender */
-.gender-buttons {
-  display: flex;
-  gap: 1rem;
-}
-
-.gender-buttons {
-display: flex;
-gap: 1rem;
-}
-
-/* Thêm class male-btn & female-btn để dễ set màu border */
-.btn-gender {
-  flex: 1;
-  border: 2px solid #ccc;
-  border-radius: 6px;
-  background: #fff;
-  padding: 8px 0;
-  cursor: pointer;
-  font-weight: 600;
-  text-align: center;
-  transition: all 0.2s;
-}
-
-.btn-gender {
-flex: 1;
-border: 2px solid #ccc;
-border-radius: 6px;
-background: #fff;
-padding: 8px 0;
-cursor: pointer;
-font-weight: 600;
-text-align: center;
-transition: all 0.2s;
-}
-
-.btn-gender:hover {
-  background: #f5f5f5;
-}
-
-.btn-gender:hover {
-background: #f5f5f5;
-}
-
-.male-btn {
-  border-color: #42a5f5;
-  color: #42a5f5;
-}
-
-.male-btn {
-border-color: #42a5f5;
-color: #42a5f5;
-}
-
-.male-btn.active-gender {
-  background: #e3f2fd;
-  color: #1e88e5;
-  border-color: #1e88e5;
-}
-
-.male-btn.active-gender {
-background: #e3f2fd;
-color: #1e88e5;
-border-color: #1e88e5;
-}
-
-.female-btn {
-  border-color: #ff74c7;
-  color: #ff74c7;
-}
-
-.female-btn {
-border-color: #ff74c7;
-color: #ff74c7;
-}
-
-.female-btn.active-gender {
-  background: #ffe2f0;
-  color: #ff409e;
-  border-color: #ff409e;
-}
-
-.female-btn.active-gender {
-background: #ffe2f0;
-color: #ff409e;
-border-color: #ff409e;
-}
-
-/* Lỗi */
-.error-input {
-  border: 1px solid #ff4747 !important;
-  background-color: #fff;
-}
-
-.error-input {
-border: 1px solid #ff4747 !important;
-background-color: #fff;
-}
-
-.error-text {
-  color: #ff4747;
-  font-size: 0.85rem;
-  margin: -2px 0 6px;
-}
-
-.error-text {
-color: #ff4747;
-font-size: 0.85rem;
-margin: -2px 0 6px;
-}
-
-/* Row 2 cột (Step1 weight-height, Step2 weight-height, headCircumference-BMI) */
-.two-column-row {
-  display: flex;
-  gap: 1rem;
-}
-
-.two-column-row {
-display: flex;
-gap: 1rem;
-}
-
-/* 3 cột (Step2 Page2, Page2 Page3) */
-.fields-grid-3col {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-}
-
-.fields-grid-3col {
-display: grid;
-grid-template-columns: repeat(3, 1fr);
-gap: 1rem;
+  width: 60%; /* Cột phải chiếm phần còn lại */
+  padding: 2rem; /* Nếu cần padding riêng */
 }

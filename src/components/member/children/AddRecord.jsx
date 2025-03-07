@@ -8,11 +8,11 @@ import "./AddRecord.css";
 const AddRecord = ({ child, memberId, closeOverlay }) => {
   if (!child) {
     return (
-      <div className="add-record-overlay" onClick={closeOverlay}>
+      <div className="add-record-overlay" onClick={handleOverlayClick}>
         <div className="add-record-wizard" onClick={(e) => e.stopPropagation()}>
-          <button type="button" className="close-btn" onClick={closeOverlay}>
+          {/* <button type="button" className="close-btn" onClick={closeOverlay}>
             ×
-          </button>
+          </button> */}
           <div className="notification-board">
             <h2>No Child Selected</h2>
             <p>Please select a child or add a new child to continue.</p>
@@ -74,6 +74,11 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     height: "",
   });
 
+    const handleOverlayClick = useCallback((e) => {
+      if (e.target === e.currentTarget) {
+        closeOverlay();
+      }
+    }, [closeOverlay]);
   // Step management: 1 = record entry (split in 3 substeps), 2 = success message
   const [currentStep, setCurrentStep] = useState(1);
   // subStep2: 1, 2, or 3 corresponding to the multi-page form
@@ -657,15 +662,29 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
 
   return (
     <div className="add-record-overlay" onClick={handleClose}>
-      <div className="add-record-wizard" onClick={(e) => e.stopPropagation()}>
-        <button type="button" className="close-btn" onClick={handleClose}>
-          ×
-        </button>
-        {/* Chỉ 1 cột, không có wizard-left, step-label */}
-        <div className="wizard-content">{renderStepContent}</div>
+    <div className="add-record-wizard" onClick={(e) => e.stopPropagation()}>
+      {/* Cột trái: Hiển thị thông tin các bước */}
+      <div className="wizard-left">
+        <div className="blue-bar"></div>
+        <div className="wizard-left-content">
+          <h1 className="main-title">Add New Growth Record</h1>
+          <div className="step-labels">
+            <div className={`step-label ${currentStep === 1 ? "active-step" : ""}`}>
+              1. Add Record
+            </div>
+            <div className={`step-label ${currentStep === 2 ? "active-step" : ""}`}>
+              2. Submit
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Cột phải: Hiển thị nội dung form */}
+      <div className="wizard-content">
+        {renderStepContent}
       </div>
     </div>
-  );
+  </div>
+  );  
 };
 
 AddRecord.propTypes = {

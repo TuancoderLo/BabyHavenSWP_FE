@@ -1069,12 +1069,12 @@ const handleCloseStep3 = useCallback(() => {
   return (
     <div className="add-child-overlay" onClick={handleOverlayClick}>
       <div className="add-child-wizard" onClick={(e) => e.stopPropagation()}>
-        {/* Nếu vẫn muốn nút X ở góc trên bên phải khi bước 3, bạn có thể ẩn/hiện theo ý muốn */}
+        {/* Nếu vẫn muốn nút X ở góc trên bên phải khi bước 3, bạn có thể ẩn/hiện theo ý muốn
         {currentStep !== 3 && (
           <button type="button" className="close-btn" onClick={closeOverlay}>
             ×
           </button>
-        )}
+        )} */}
   
         {/* CỘT TRÁI */}
         <div className="wizard-left">
