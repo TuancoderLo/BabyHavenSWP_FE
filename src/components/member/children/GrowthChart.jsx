@@ -3,7 +3,8 @@ import calculateBMI from "../../../services/bmiUtils";
 import childApi from "../../../services/childApi";
 import Chart from "chart.js/auto"; // Đảm bảo Chart.js đã được cài đặt
 
-const GrowthChart = ({ childId, selectedTool, startDate, endDate }) => {
+// const GrowthChart = ({ childId, selectedTool, startDate, endDate }) => {
+const GrowthChart = ({ childName, selectedTool}) => {
   const [records, setRecords] = useState([]);
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
@@ -12,8 +13,17 @@ const GrowthChart = ({ childId, selectedTool, startDate, endDate }) => {
   useEffect(() => {
     const fetchGrowthRecordsRange = async () => {
       try {
+      //   // Gọi API với childId, startDate và endDate (nếu có)
+      //   const response = await childApi.getGrowthRecordsRange(childId, startDate, endDate);
+      //   const fetchedRecords = response.data.data;
+      //   // Nếu API trả về null hoặc mảng rỗng, vẫn giữ records là mảng rỗng
+      //   setRecords(fetchedRecords || []);
+      // } catch (error) {
+      //   console.error("Error fetching growth records:", error);
+      //   setRecords([]);
+      // }
         // Gọi API với childId, startDate và endDate (nếu có)
-        const response = await childApi.getGrowthRecordsRange(childId, startDate, endDate);
+        const response = await childApi.getGrowthRecords(childName, localStorage.getItem("name"));
         const fetchedRecords = response.data.data;
         // Nếu API trả về null hoặc mảng rỗng, vẫn giữ records là mảng rỗng
         setRecords(fetchedRecords || []);

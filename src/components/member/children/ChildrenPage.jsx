@@ -203,13 +203,18 @@ const closeRecordOverlay = () => {
               </div>
               <div className="chart-box">
               <div className="chart-area">
-              {selectedChild && selectedChild.childId && (
-  <GrowthChart
-    childId={selectedChild.childId}
-    selectedTool={selectedTool}
-    startDate="2025-01-01"  // ví dụ: truyền ngày bắt đầu
-    endDate="2025-03-07"    // ví dụ: truyền ngày kết thúc
-  />
+              {selectedChild && selectedChild.name && (
+                  <GrowthChart
+                      childName={selectedChild.name}
+                      selectedTool={selectedTool}
+                  />
+  // <GrowthChart
+  //   childId={selectedChild.childId}
+  //   selectedTool={selectedTool}
+  //   startDate="2025-01-01"  // ví dụ: truyền ngày bắt đầu
+  //   endDate="2025-03-07"    // ví dụ: truyền ngày kết thúc
+  // />
+
 )}
 </div>
 </div>
