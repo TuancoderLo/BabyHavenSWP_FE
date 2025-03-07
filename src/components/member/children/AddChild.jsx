@@ -992,10 +992,8 @@ const handleConfirmStep2 = useCallback(async () => {
 }, [growthForm, validateStep2, childId, childForm.memberId]);
 
 const handleCloseStep3 = useCallback(() => {
+  window.location.reload();
   closeOverlay();
-  setTimeout(() => {
-      window.location.reload();
-  }, 100);
 }, [closeOverlay]);
 
   const handleOverlayClick = useCallback((e) => {

@@ -48,13 +48,6 @@ function ChildrenPage() {
   }, [memberId]);
 
   const handleSelectChild = async (child) => {
-    // Giả sử backend yêu cầu GUID và trường đúng là child.childId
-    // const childId = child.childId || child.id || child._id;
-    // console.log("Child ID được chọn:", childId);
-    // if (!childId) {
-    //   console.warn("Không tìm thấy childId hợp lệ cho đối tượng:", child);
-    //   return;
-    // }
     try {
       const response = await childApi.getChildByName(child, memberId);
       console.log("Child: " + response)
@@ -210,9 +203,14 @@ const closeRecordOverlay = () => {
               </div>
               <div className="chart-box">
               <div className="chart-area">
-  {selectedChild && selectedChild.childId && (
-    <GrowthChart childId={selectedChild.childId} selectedTool={selectedTool} />
-  )}
+              {selectedChild && selectedChild.childId && (
+  <GrowthChart
+    childId={selectedChild.childId}
+    selectedTool={selectedTool}
+    startDate="2025-01-01"  // ví dụ: truyền ngày bắt đầu
+    endDate="2025-03-07"    // ví dụ: truyền ngày kết thúc
+  />
+)}
 </div>
 </div>
             </div>

@@ -9,7 +9,15 @@ const childApi = {
   createGrowthRecord: (growthData) => api.post("/GrowthRecord", growthData),
   
   getChildByName: (child, memberId) => api.get(`Children/${child.name}/${child.dateOfBirth}/${memberId}`),
-  getGrowthRecords: (childId) => api.get(`GrowthRecord/child/${childId}`),
+
+  getGrowthRecords: (odataParams) => api.get(`GrowthRecord/odata`, { params: odataParams }),
+  getGrowthRecordsRange:(childId, startDate, endDate) => api.get(`GrowthRecord/child/${childId}/date-range`, {
+    params: {
+      startDate,
+      endDate,
+    },
+  }),
+
 };
 
 export default childApi;
