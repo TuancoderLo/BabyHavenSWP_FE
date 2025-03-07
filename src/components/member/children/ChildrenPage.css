@@ -261,16 +261,28 @@
   border-radius: 6px;
   
 }
+/* Container cho vùng biểu đồ */
 .chart-area {
-  height: 180px;
-  border: 2px dashed #0b0b0b;
-  border-radius: 6px;
-  margin-top: 8px;
+  position: relative;
+  width: 100%;
+  height: 300px; /* Tăng chiều cao để biểu đồ hiển thị rõ hơn */
+  background-color: #fff;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
   display: flex;
-  align-items: center;
   justify-content: center;
-    color: #999;
-  }
+  align-items: center;
+  overflow: hidden; /* Ẩn phần thừa nếu canvas vượt quá */
+}
+
+/* Đảm bảo canvas chart chiếm đầy vùng container */
+.chart-area canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
   
   /* Toolbar bên phải chart */
   .chart-toolbar {
