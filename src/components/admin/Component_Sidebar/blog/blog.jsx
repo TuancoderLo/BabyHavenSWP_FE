@@ -460,15 +460,40 @@ function Blog() {
     }
   };
 
-  // Xử lý chỉnh sửa blog
+  // Thêm hàm để lấy tags dựa trên category được chọn
+  const getTagsFromCategory = (categoryId) => {
+    const selectedCategory = categories.find(
+      (cat) => cat.categoryId === categoryId
+    );
+    if (!selectedCategory) return "";
+
+    // Nếu là category con (có parentCategoryId)
+    if (selectedCategory.parentCategoryId) {
+      // Tìm category cha
+      const parentCategory = categories.find(
+        (cat) => cat.categoryId === selectedCategory.parentCategoryId
+      );
+      if (parentCategory) {
+        // Trả về "Baby, Sleep Tips" (ví dụ)
+        return `${parentCategory.categoryName}, ${selectedCategory.categoryName}`;
+      }
+      return selectedCategory.categoryName;
+    }
+
+    // Nếu là category cha (không có parentCategoryId)
+    return selectedCategory.categoryName;
+  };
+
+  // Cập nhật handleEditBlog để set tags tự động
   const handleEditBlog = async (record) => {
     setEditingBlogId(record.blogId);
+    const tags = getTagsFromCategory(record.categoryId);
     blogForm.setFieldsValue({
       title: record.title,
       content: record.content,
       categoryId: record.categoryId,
       imageBlog: record.imageBlog,
-      tags: record.tags,
+      tags: tags,
       referenceSources: record.referenceSources,
       status: record.status,
     });
@@ -790,7 +815,13 @@ function Blog() {
                 label="Category"
                 rules={[{ required: true, message: "Category is required" }]}
               >
-                <Select placeholder="Select a category">
+                <Select
+                  placeholder="Select a category"
+                  onChange={(value) => {
+                    const tags = getTagsFromCategory(value);
+                    blogForm.setFieldsValue({ tags });
+                  }}
+                >
                   {categories.map((category) => (
                     <Select.Option
                       key={category.categoryId}
@@ -806,8 +837,15 @@ function Blog() {
                 <Input placeholder="Enter image URL" />
               </Form.Item>
 
-              <Form.Item name="tags" label="Tags">
-                <Input placeholder="Enter tags, separated by commas" />
+              <Form.Item
+                name="tags"
+                label="Tags"
+                rules={[{ required: true, message: "Tags are required" }]}
+              >
+                <Input
+                  placeholder="Tags will be automatically filled based on category"
+                  disabled
+                />
               </Form.Item>
 
               <Form.Item name="referenceSources" label="Reference Sources">
