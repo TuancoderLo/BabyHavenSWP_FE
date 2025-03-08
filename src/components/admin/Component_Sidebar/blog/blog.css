@@ -1,0 +1,98 @@
+/* ==========================================================================
+   MAIN CONTAINER STYLES
+   ========================================================================== */
+.blog-container {
+  padding: 24px;
+}
+
+/* ==========================================================================
+   HEADER & NAVIGATION STYLES
+   ========================================================================== */
+.blog-header {
+  margin-bottom: 16px;
+}
+
+/* Tab navigation */
+.blog-tabs {
+  margin-bottom: 16px;
+}
+
+/* Section headers with filters */
+.blog-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.blog-title-section {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Filter buttons group */
+.blog-filters {
+  margin-top: 8px;
+}
+
+/* ==========================================================================
+   TABLE STYLES
+   ========================================================================== */
+.blog-table {
+  background: #fff;
+  border-radius: 8px;
+}
+
+/* Table action buttons */
+.blog-action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* Status and tag styles in table */
+.blog-tag {
+  margin: 2px;
+}
+
+.status-tag {
+  text-transform: capitalize;
+}
+
+/* ==========================================================================
+   MODAL & FORM STYLES
+   ========================================================================== */
+.blog-modal {
+  max-width: 800px;
+}
+
+/* Form layout */
+.blog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Form footer with action buttons */
+.blog-form-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+/* ==========================================================================
+   RESPONSIVE STYLES
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Stack header elements on mobile */
+  .blog-section-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Make filters scrollable on mobile */
+  .blog-filters {
+    width: 100%;
+    overflow-x: auto;
+  }
+}
