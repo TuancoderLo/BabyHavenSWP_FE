@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import blogCategoryApi from "../../../../services/blogCategoryApi";
 import blogApi from "../../../../services/blogApi";
+// import TextEditor from "./textEditor";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+
 import {
   Table,
   Button,
@@ -47,6 +49,27 @@ function Blog() {
   /* ==========================================================================
      API CALLS & DATA FETCHING
      ========================================================================== */
+  // Tách logic fetch parent names thành function riêng
+  const fetchParentNames = async (categoriesData) => {
+    try {
+      const newParentNames = {};
+      for (const category of categoriesData) {
+        if (category.parentCategoryId !== null) {
+          const response = await blogCategoryApi.getById(
+            category.parentCategoryId
+          );
+          if (response?.data?.status === 1) {
+            newParentNames[category.categoryId] =
+              response.data.data.categoryName;
+          }
+        }
+      }
+      setParentNames(newParentNames);
+    } catch (error) {
+      console.error("Error fetching parent names:", error);
+    }
+  };
+
   // Fetch Categories
   const fetchCategories = async () => {
     try {
@@ -188,15 +211,15 @@ function Blog() {
       if (response?.data?.status === 1) {
         message.success(
           editingBlogId
-            ? "Blog updated successfully"
-            : "Blog created successfully"
+            ? "Cập nhật bài viết thành công"
+            : "Thêm bài viết thành công"
         );
         setBlogModalVisible(false);
         blogForm.resetFields();
         await fetchBlogs();
       }
     } catch (error) {
-      message.error(`Operation failed: ${error.message}`);
+      message.error(`Thao tác thất bại: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -578,6 +601,9 @@ function Blog() {
               layout="vertical"
               onFinish={handleBlogSubmit}
               className="blog-form"
+              initialValues={{
+                status: "Draft",
+              }}
             >
               <Form.Item
                 name="title"
@@ -591,13 +617,106 @@ function Blog() {
                 name="content"
                 label="Nội dung"
                 rules={[{ required: true, message: "Vui lòng nhập nội dung" }]}
+                className="ck-editor-container"
               >
                 <CKEditor
                   editor={ClassicEditor}
                   data={blogForm.getFieldValue("content") || ""}
+                  config={{
+                    licenseKey:
+                      "eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3NDE5OTY3OTksImp0aSI6IjI2Yzc2ZmYwLTA1M2EtNGFiYi05MzE1LTJkMTJmOGI1MDEzYyIsInVzYWdlRW5kcG9pbnQiOiJodHRwczovL3Byb3h5LWV2ZW50LmNrZWRpdG9yLmNvbSIsImRpc3RyaWJ1dGlvbkNoYW5uZWwiOlsiY2xvdWQiLCJkcnVwYWwiLCJzaCJdLCJ3aGl0ZUxhYmVsIjp0cnVlLCJsaWNlbnNlVHlwZSI6InRyaWFsIiwiZmVhdHVyZXMiOlsiKiJdLCJ2YyI6ImI3MTUxOGY4In0.vICfmtINjCekKGTm_NVhjNHnL3-r5jROjdzpHuhYSKCBXc5nA_-xPV7WeViN36BggwgnprQ-EIFANTbAbTOP4Q",
+                    toolbar: {
+                      items: [
+                        "heading",
+                        "|",
+                        "bold",
+                        "italic",
+                        "link",
+                        "bulletedList",
+                        "numberedList",
+                        "|",
+                        "outdent",
+                        "indent",
+                        "|",
+                        "uploadImage",
+                        "blockQuote",
+                        "insertTable",
+                        "mediaEmbed",
+                        "undo",
+                        "redo",
+                      ],
+                      shouldNotGroupWhenFull: true,
+                    },
+                    image: {
+                      toolbar: [
+                        "imageStyle:inline",
+                        "imageStyle:block",
+                        "imageStyle:side",
+                        "|",
+                        "toggleImageCaption",
+                        "imageTextAlternative",
+                        "|",
+                        "linkImage",
+                      ],
+                      upload: {
+                        types: ["jpeg", "png", "gif", "bmp", "webp", "tiff"],
+                      },
+                    },
+                    table: {
+                      contentToolbar: [
+                        "tableColumn",
+                        "tableRow",
+                        "mergeTableCells",
+                        "tableCellProperties",
+                        "tableProperties",
+                      ],
+                    },
+                    heading: {
+                      options: [
+                        {
+                          model: "paragraph",
+                          title: "Paragraph",
+                          class: "ck-heading_paragraph",
+                        },
+                        {
+                          model: "heading1",
+                          view: "h1",
+                          title: "Heading 1",
+                          class: "ck-heading_heading1",
+                        },
+                        {
+                          model: "heading2",
+                          view: "h2",
+                          title: "Heading 2",
+                          class: "ck-heading_heading2",
+                        },
+                        {
+                          model: "heading3",
+                          view: "h3",
+                          title: "Heading 3",
+                          class: "ck-heading_heading3",
+                        },
+                      ],
+                    },
+                    fontSize: {
+                      options: ["tiny", "small", "default", "big", "huge"],
+                    },
+                    placeholder: "Nhập nội dung bài viết của bạn ở đây...",
+                    removePlugins: ["Title"],
+                    language: "vi",
+                  }}
+                  onReady={(editor) => {
+                    console.log("Editor is ready to use!", editor);
+                  }}
                   onChange={(event, editor) => {
                     const data = editor.getData();
                     blogForm.setFieldsValue({ content: data });
+                  }}
+                  onError={(error, { willEditorRestart }) => {
+                    console.error("Editor error:", error);
+                    if (willEditorRestart) {
+                      console.warn("Editor will restart");
+                    }
                   }}
                 />
               </Form.Item>
@@ -641,7 +760,14 @@ function Blog() {
               </Form.Item>
 
               <div className="blog-form-footer">
-                <Button onClick={() => setBlogModalVisible(false)}>Hủy</Button>
+                <Button
+                  onClick={() => {
+                    setBlogModalVisible(false);
+                    blogForm.resetFields();
+                  }}
+                >
+                  Hủy
+                </Button>
                 <Button type="primary" htmlType="submit" loading={loading}>
                   {editingBlogId ? "Cập nhật" : "Thêm mới"}
                 </Button>

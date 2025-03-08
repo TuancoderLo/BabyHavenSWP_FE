@@ -34,7 +34,7 @@ const blogApi = {
       content: data.content?.trim(),
       categoryId: data.categoryId,
       categoryName: data.categoryName?.trim(),
-      authorName: data.authorName || "Admin",
+      // authorName: data.authorName || "Admin",
       imageBlog: data.imageBlog?.trim() || "",
       tags: data.tags?.trim() || "",
       referenceSources: data.referenceSources?.trim() || "",
