@@ -249,6 +249,8 @@ function Blog() {
   const handleBlogSubmit = async (values) => {
     try {
       setLoading(true);
+      const authorName = localStorage.getItem("name"); // Lấy tên người dùng từ localStorage
+
       const submitData = {
         title: values.title,
         content: values.content,
@@ -260,7 +262,7 @@ function Blog() {
         tags: values.tags || "",
         referenceSources: values.referenceSources || "",
         status: values.status || "Draft",
-        authorName: "Admin",
+        authorName: authorName || "Anonymous", // Sử dụng tên từ localStorage
       };
 
       let response;
@@ -281,7 +283,7 @@ function Blog() {
         await fetchBlogs();
       }
     } catch (error) {
-      message.error("Unable to delete blog post: " + error.message);
+      message.error("Unable to save blog post: " + error.message);
     } finally {
       setLoading(false);
     }
