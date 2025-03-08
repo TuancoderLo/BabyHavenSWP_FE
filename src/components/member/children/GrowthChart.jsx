@@ -23,8 +23,10 @@ const GrowthChart = ({ childName, selectedTool}) => {
       //   setRecords([]);
       // }
         // Gọi API với childId, startDate và endDate (nếu có)
-        const response = await childApi.getGrowthRecords(childName, localStorage.getItem("name"));
-        const fetchedRecords = response.data.data;
+        const parentName = localStorage.getItem("name");
+        console.log(parentName);
+        const response = await childApi.getGrowthRecords(childName, parentName);
+        const fetchedRecords = response.data;
         // Nếu API trả về null hoặc mảng rỗng, vẫn giữ records là mảng rỗng
         setRecords(fetchedRecords || []);
       } catch (error) {
@@ -33,10 +35,10 @@ const GrowthChart = ({ childName, selectedTool}) => {
       }
     };
 
-    if (childId) {
+    if (childName) {
       fetchGrowthRecordsRange();
     }
-  }, [childId, startDate, endDate]);
+  }, [childName]);
 
   // 2. Vẽ lại biểu đồ khi records hoặc selectedTool thay đổi
   useEffect(() => {
