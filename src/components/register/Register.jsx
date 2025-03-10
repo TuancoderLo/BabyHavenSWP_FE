@@ -4,8 +4,8 @@ import "./Register.css";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../config/firebase";
 import api from "../../config/axios";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+// import { toast } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -48,11 +48,9 @@ function Register() {
         uid: user.uid,
       });
 
-      toast.success("Đăng nhập Google thành công!");
       navigate("/login"); // hoặc trang bạn muốn chuyển đến
     } catch (error) {
       console.error("Lỗi đăng nhập Google:", error);
-      toast.error("Đăng nhập Google thất bại: " + error.message);
     }
   };
 
@@ -135,8 +133,7 @@ function Register() {
         password: formData.password,
       });
 
-      if (response.data.status === 1) {
-        toast.success("Đăng ký thành công!");
+      if (response.data.status === 200 || response.status === 200) {
         navigate("/login");
       } else {
         setError(
