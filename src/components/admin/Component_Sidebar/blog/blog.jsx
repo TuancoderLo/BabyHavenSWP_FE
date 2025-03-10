@@ -251,9 +251,15 @@ function Blog() {
       setLoading(true);
       const email = localStorage.getItem("email"); // Lấy email người dùng từ localStorage
 
+      // Xử lý nội dung từ CKEditor theo yêu cầu của back-end
+      const content =
+        typeof values.content === "object"
+          ? JSON.stringify(values.content) // Chuyển object thành chuỗi JSON
+          : values.content?.getData?.() || values.content || ""; // Nếu là CKEditor instance hoặc string
+
       const submitData = {
         title: values.title,
-        content: values.content,
+        content: content, // Gửi dưới dạng string theo yêu cầu của back-end
         categoryId: values.categoryId,
         categoryName:
           categories.find((cat) => cat.categoryId === values.categoryId)
@@ -264,6 +270,8 @@ function Blog() {
         referenceSources: values.referenceSources || "",
         status: values.status || "Draft",
       };
+
+      console.log("Submitting blog data:", submitData);
 
       let response;
       if (editingBlogId) {
@@ -284,6 +292,7 @@ function Blog() {
       }
     } catch (error) {
       message.error("Unable to save blog post: " + error.message);
+      console.error("Blog submission error:", error);
     } finally {
       setLoading(false);
     }
