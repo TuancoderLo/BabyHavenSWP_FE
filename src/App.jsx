@@ -6,6 +6,7 @@ import Guest from "./components/guest/Guest";
 import Login from "./components/login/Login";
 import Register from "./components/register/Register";
 import CategoryPage from "./pages/CategoryPage";
+import Transactions from "./components/transactions/Transactions";
 
 // HomePage (user)
 import Homepage from "./components/homepage/HomePage";
@@ -87,7 +88,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/packages" element={<MemberPackages />} />
         <Route path="/category/:categoryId" element={<CategoryPage />} />
-
+        <Route path="/transactions" element={<Transactions />} />
         {/* Protected routes */}
         <Route
           path="/homepage"

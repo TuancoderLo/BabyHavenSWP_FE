@@ -19,23 +19,23 @@ function Member() {
         <div className="member-navbar">
           <NavBar />
         </div>
-      {/* Container cho nội dung chính */}
-      <div className="member-main-content">
+        {/* Container cho nội dung chính */}
+        <div className="member-main-content">
 
-        {/* Các trang con sẽ được render ở đây */}
-        <Routes>
-          <Route index element={<Children />} />
-          <Route path="children" element={<Children />} />
-          <Route path="doctor-consultation" element={<Consultation />} />
-          <Route path="transactions" element={<TransactionsMember />} />
-          <Route path="membership" element={<Membership />} />
-          <Route path="notifications" element={<Notifications />} />
-          <Route path="account" element={<Account />} />
-          <Route path="*" element={<Navigate to="/homepage" />} />
-        </Routes>
+          {/* Các trang con sẽ được render ở đây */}
+          <Routes>
+            <Route index element={<Children />} />
+            <Route path="children" element={<Children />} />
+            <Route path="doctor-consultation" element={<Consultation />} />
+            <Route path="transactions-member" element={<TransactionsMember />} />
+            <Route path="membership" element={<Membership />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="account" element={<Account />} />
+            <Route path="*" element={<Navigate to="/homepage" />} />
+          </Routes>
+        </div>
       </div>
     </div>
-  </div>
   );
 }
 
