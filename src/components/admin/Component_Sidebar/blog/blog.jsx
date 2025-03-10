@@ -249,7 +249,7 @@ function Blog() {
   const handleBlogSubmit = async (values) => {
     try {
       setLoading(true);
-      const authorName = localStorage.getItem("name"); // Lấy tên người dùng từ localStorage
+      const email = localStorage.getItem("email"); // Lấy email người dùng từ localStorage
 
       const submitData = {
         title: values.title,
@@ -258,11 +258,11 @@ function Blog() {
         categoryName:
           categories.find((cat) => cat.categoryId === values.categoryId)
             ?.categoryName || "",
+        email: email || "", // Sử dụng email từ localStorage
         imageBlog: values.imageBlog || "",
         tags: values.tags || "",
         referenceSources: values.referenceSources || "",
         status: values.status || "Draft",
-        authorName: authorName || "Anonymous", // Sử dụng tên từ localStorage
       };
 
       let response;
