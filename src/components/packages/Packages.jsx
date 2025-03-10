@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import packages from "../../assets/packages.png";
 import "./Packages.css";
 import { useNavigate } from "react-router-dom";
+import membershipApi from "../../services/memberShipApi";
+
 
 
 function Packages() {
@@ -22,18 +24,21 @@ function Packages() {
   
     // Gọi API khi component mount
     useEffect(() => {
-        fetch("https://localhost:7279/api/MembershipPackages")
-          .then((res) => res.json())
-          .then((data) => {
-            console.log("API Response:", data); //  Kiểm tra phản hồi API
-            if (data?.data) {
-              const activePackages = data.data.filter((pkg) => pkg.status.toLowerCase() === "active");
-              console.log("Active Packages:", activePackages); // Kiểm tra dữ liệu lọc được
-              setPackagesData(activePackages);
-            }
-          })
-          .catch((err) => console.error("Fetch error:", err));
-      }, []);
+      membershipApi
+        .getAllPackages()
+        .then((res) => {
+          console.log("API Response:", res.data);
+          if (res.data?.data) {
+            // Lọc các gói active
+            const activePackages = res.data.data.filter(
+              (pkg) => pkg.status.toLowerCase() === "active"
+            );
+            console.log("Active Packages:", activePackages);
+            setPackagesData(activePackages);
+          }
+        })
+        .catch((err) => console.error("Fetch error:", err));
+    }, []);
       
   
     // Mở modal
@@ -78,9 +83,9 @@ function Packages() {
       {open && (
         <div className="packages-overlay" onClick={handleClose}>
           <div className="packages-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="close-btn" onClick={handleClose}>
+            {/* <button className="close-btn" onClick={handleClose}>
               &times;
-            </button>
+            </button> */}
 
             {currentStep === 1 && (
               <>

@@ -43,7 +43,7 @@ function SidebarHover() {
       {/* Menu */}
       <ul className="admin-sidebar-menu">
         <li>
-          <Link to="/admin/home">
+          <Link to="/homepage">
             <FaHome className="admin-icon" />
             {expanded && <span>Home</span>}
           </Link>

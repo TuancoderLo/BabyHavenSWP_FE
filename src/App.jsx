@@ -13,13 +13,16 @@ import Member from "./components/member/Member";
 // Admin
 import Admin from "./components/admin/Admin";
 import ChartCard from "./components/admin/ChartCard/ChartCard";
-import Home from "./components/admin/Component_Sidebar/home/home";
+// import Home from "./components/admin/Component_Sidebar/home/home";
 import Blog from "./components/admin/Component_Sidebar/blog/blog";
 import Members from "./components/admin/Component_Sidebar/members/members";
 import AdminPackages from "./components/admin/Component_Sidebar/packages/packages";
 import Inbox from "./components/admin/Component_Sidebar/inbox/inbox";
 import Notifications from "./components/admin/Component_Sidebar/notifications/notifications";
 import Settings from "./components/admin/Component_Sidebar/settings/settings";
+
+//doctor
+import Doctor from "./pages/Doctor/Doctor";
 
 //Member
 import MemberPackages from "./components/packages/Packages";
@@ -101,7 +104,7 @@ function App() {
           path="/doctor"
           element={
             <ProtectedRoute roles={["2"]}>
-              <Navigate to="/" />
+              <Doctor />
             </ProtectedRoute>
           }
         />
@@ -126,7 +129,7 @@ function App() {
         >
           {/* Các route con trong /admin */}
           <Route index element={<ChartCard />} />
-          <Route path="home" element={<Home />} />
+          {/* <Route path="home" element={<Home />} /> */}
           <Route path="blog" element={<Blog />} />
           <Route path="members" element={<Members />} />
           <Route path="packages" element={<AdminPackages />} />

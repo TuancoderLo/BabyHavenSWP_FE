@@ -10,6 +10,7 @@ import Name from "../../assets/Name.png";
 import Packages from "../packages/Packages";
 import blogCategoryApi from "../../services/blogCategoryApi";
 import BlogSection from "../topics/BlogSection";
+import HeaderGuest from "../commonGuest/HeaderGuest";
 
 function Guest() {
   const navigate = useNavigate();
@@ -98,69 +99,7 @@ function Guest() {
   return (
     <div className="homepage">
       {/* Navigation */}
-      <header className="homepage-header">
-        <nav>
-          <div className="logo">
-            <img src={Logo} />
-            <img src={Name} />
-          </div>
-          <div className="nav-links">
-            <div className="dropdown">
-              <a href="#getting-pregnant">Getting Pregnant</a>
-              <div className="dropdown-content">
-                <a href="#fertility">Fertility</a>
-                <a href="#ovulation">Ovulation</a>
-                <a href="#preparation">Preparation</a>
-              </div>
-            </div>
-            <div className="dropdown">
-              <a href="#pregnancy">Pregnancy</a>
-              <div className="dropdown-content">
-                <a href="#first-trimester">First Trimester</a>
-                <a href="#second-trimester">Second Trimester</a>
-                <a href="#third-trimester">Third Trimester</a>
-              </div>
-            </div>
-            <div className="dropdown">
-              <a href="#baby">Baby</a>
-              <div className="dropdown-content">
-                <a href="#newborn">Newborn</a>
-                <a href="#development">Development</a>
-                <a href="#care">Baby Care</a>
-              </div>
-            </div>
-            <div className="dropdown">
-              <a href="#toddler">Toddler</a>
-              <div className="dropdown-content">
-                <a href="#development">Development</a>
-                <a href="#nutrition">Nutrition</a>
-                <a href="#activities">Activities</a>
-              </div>
-            </div>
-            <div className="dropdown">
-              <a href="#child">Child</a>
-              <div className="dropdown-content">
-                <a href="#education">Education</a>
-                <a href="#health">Health</a>
-                <a href="#activities">Activities</a>
-              </div>
-            </div>
-            <a href="#community">Community</a>
-            <a href="#!" onClick={handleScrollToFeatures}>
-              Features
-            </a>
-          </div>
-          <div className="user-actions">
-            <NavLink className="join-btn" to={"/register"}>
-              Join
-            </NavLink>
-            <button className="logout-btn" onClick={() => navigate("/login")}>
-              {/* <i className="fas fa-sign-in-alt"></i> */}
-              Sign Up
-            </button>
-          </div>
-        </nav>
-      </header>
+      <HeaderGuest />
 
       {/* Hero Section */}
       <section className="hero-section">

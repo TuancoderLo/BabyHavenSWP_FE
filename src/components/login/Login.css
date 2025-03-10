@@ -105,6 +105,27 @@ html {
   position: relative;
 }
 
+/* Thêm CSS cho password-group */
+.password-group {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #94a3b8;
+  font-size: 16px;
+  z-index: 10;
+  transition: color 0.3s ease;
+}
+
+.password-toggle:hover {
+  color: #00bfa6;
+}
+
 input {
   width: 100%;
   padding: 10px 14px;
@@ -113,6 +134,11 @@ input {
   font-size: 13px;
   color: #1e293b;
   transition: all 0.3s ease;
+}
+
+/* Điều chỉnh padding cho input password để tránh chồng lên icon */
+.password-group input {
+  padding-right: 40px;
 }
 
 input:focus {

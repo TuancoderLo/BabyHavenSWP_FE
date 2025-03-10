@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom"; // Để điều hướng ngư�
 import { jwtDecode } from "jwt-decode";
 import "./GoogleCallback.css";
 
-
 const GoogleCallback = () => {
     const navigate = useNavigate();
     const [error, setError] = useState("");

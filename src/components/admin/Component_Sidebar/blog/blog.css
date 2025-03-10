@@ -1,0 +1,194 @@
+/* ==========================================================================
+   MAIN CONTAINER STYLES
+   ========================================================================== */
+.blog-container {
+  padding: 24px;
+}
+
+/* ==========================================================================
+   HEADER & NAVIGATION STYLES
+   ========================================================================== */
+.blog-header {
+  margin-bottom: 16px;
+}
+
+/* Tab navigation */
+.blog-tabs {
+  margin-bottom: 16px;
+}
+
+/* Section headers with filters */
+.blog-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.blog-title-section {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Filter buttons group */
+.blog-filters {
+  margin-top: 8px;
+}
+
+/* ==========================================================================
+   TABLE STYLES
+   ========================================================================== */
+.blog-table {
+  background: #fff;
+  border-radius: 8px;
+}
+
+/* Table action buttons */
+.blog-action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* Status and tag styles in table */
+.blog-tag {
+  margin: 2px;
+}
+
+.status-tag {
+  text-transform: capitalize;
+}
+
+/* ==========================================================================
+   MODAL & FORM STYLES
+   ========================================================================== */
+.blog-modal {
+  max-width: 800px;
+}
+
+/* Form layout */
+.blog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Form footer with action buttons */
+.blog-form-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+/* ==========================================================================
+   RESPONSIVE STYLES
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Stack header elements on mobile */
+  .blog-section-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Make filters scrollable on mobile */
+  .blog-filters {
+    width: 100%;
+    overflow-x: auto;
+  }
+}
+
+/* ==========================================================================
+   CKEDITOR STYLES
+   ========================================================================== */
+/* Container styles */
+.ck-editor-container {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+/* Editor content styles */
+.ck-content {
+  font-family: "Lato", sans-serif;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+/* Editor height */
+.ck-editor__editable {
+  min-height: 300px !important;
+  max-height: 500px !important;
+  overflow-y: auto !important;
+}
+
+/* Reset fixed width */
+.editor-container_classic-editor .editor-container__editor {
+  min-width: unset !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Toolbar styles */
+.ck.ck-toolbar {
+  border: 1px solid #ddd !important;
+  border-radius: 4px 4px 0 0 !important;
+  background: #fff !important;
+}
+
+/* Content area styles */
+.ck.ck-editor__main > .ck-editor__editable {
+  border: 1px solid #ddd !important;
+  border-radius: 0 0 4px 4px !important;
+  background: #fff !important;
+  padding: 1rem !important;
+}
+
+/* Focus styles */
+.ck.ck-editor__editable:not(.ck-editor__nested-editable).ck-focused {
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+/* Table styles */
+.ck-content .table {
+  width: 100% !important;
+  margin: 1em 0 !important;
+  border-collapse: collapse !important;
+}
+
+.ck-content .table table {
+  border: 1px solid #ddd !important;
+}
+
+.ck-content .table table td,
+.ck-content .table table th {
+  padding: 8px !important;
+  border: 1px solid #ddd !important;
+}
+
+/* Image styles */
+.ck-content .image {
+  max-width: 100% !important;
+  margin: 1em auto !important;
+}
+
+.ck-content .image img {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
+
+/* Responsive styles for editor */
+@media (max-width: 768px) {
+  .ck-editor__editable {
+    min-height: 200px !important;
+  }
+
+  .ck.ck-toolbar {
+    flex-wrap: wrap !important;
+  }
+
+  .ck.ck-toolbar > * {
+    flex-shrink: 0 !important;
+  }
+}
