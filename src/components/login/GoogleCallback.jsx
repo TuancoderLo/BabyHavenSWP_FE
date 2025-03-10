@@ -20,7 +20,8 @@ const GoogleCallback = () => {
                     name: tokenPayload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
                     userId: tokenPayload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"],
                     roleId: tokenPayload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
-                    profilePicture: tokenPayload["ProfileImage"]
+                    profilePicture: tokenPayload["ProfileImage"],
+                    isVerifed: tokenPayload["IsVerified"]
                 };
                 localStorage.setItem("isAuthenticated", "true");
                 localStorage.setItem("role", user.roleId);
@@ -29,6 +30,9 @@ const GoogleCallback = () => {
                 localStorage.setItem("email", user.email);
                 localStorage.setItem("name", user.name);
                 localStorage.setItem("profilePicture", user.profilePicture);
+                localStorage.setItem("isVerified", user.isVerifed);
+
+                console.log(tokenPayload);
 
                 navigate("/homepage");
             } else {
