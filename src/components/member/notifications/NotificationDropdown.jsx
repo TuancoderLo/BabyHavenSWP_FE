@@ -2,6 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './NotificationDropdown.css';
 
+// Import icon từ react-icons
+import {
+  FaBell,
+  FaExclamationCircle,
+  FaEnvelopeOpenText,
+  FaCalendarCheck,
+  FaCreditCard,
+  FaGift,
+} from 'react-icons/fa';
+
 const sampleNotifications = [
   { id: 1, type: 'alert', message: 'Child health alert: Check vaccination.', timestamp: new Date('2025-03-01T10:00:00'), read: false },
   { id: 2, type: 'contact', message: 'Doctor replied: Please review your consultation.', timestamp: new Date('2025-03-02T12:30:00'), read: true },
@@ -11,12 +21,13 @@ const sampleNotifications = [
   { id: 6, type: 'alert', message: 'Growth chart updated for your child.', timestamp: new Date('2025-03-06T08:00:00'), read: false },
 ];
 
+// Map type => icon component
 const typeIcons = {
-  alert: '📢',
-  contact: '📩',
-  appointment: '📆',
-  transaction: '💳',
-  offer: '🎁'
+  alert: <FaExclamationCircle />,
+  contact: <FaEnvelopeOpenText />,
+  appointment: <FaCalendarCheck />,
+  transaction: <FaCreditCard />,
+  offer: <FaGift />,
 };
 
 function NotificationDropdown() {
@@ -25,7 +36,7 @@ function NotificationDropdown() {
   const dropdownRef = useRef(null);
 
   useEffect(() => {
-    // Giả lập dữ liệu thông báo, trong thực tế fetch từ API
+    // Giả lập dữ liệu thông báo
     setNotifications(sampleNotifications);
   }, []);
 
@@ -33,7 +44,7 @@ function NotificationDropdown() {
     setIsOpen(!isOpen);
   };
 
-  // Đóng dropdown khi click bên ngoài
+  // Đóng dropdown khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -44,28 +55,39 @@ function NotificationDropdown() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Lấy 5 thông báo mới nhất theo thời gian giảm dần
+  // Lấy 5 thông báo mới nhất
   const recentNotifications = [...notifications]
     .sort((a, b) => b.timestamp - a.timestamp)
     .slice(0, 5);
 
+  // Có thông báo chưa đọc?
+  const hasUnread = notifications.some(n => !n.read);
+
   return (
     <div className="notification-dropdown" ref={dropdownRef}>
       <div className="notification-bell" onClick={toggleDropdown}>
-        🔔
-        {notifications.some(n => !n.read) && <span className="unread-indicator">🔵</span>}
+        <FaBell size={24} />
+        {hasUnread && <span className="unread-indicator" />}
       </div>
+
       {isOpen && (
         <div className="dropdown-menu">
           <ul>
             {recentNotifications.map(n => (
-              <li key={n.id} className={`dropdown-item ${n.read ? 'read' : 'unread'}`}>
-                <span className="item-icon">{typeIcons[n.type]}</span>
+              <li
+                key={n.id}
+                className={`dropdown-item ${n.read ? 'read' : 'unread'}`}
+              >
+                <span className="item-icon">
+                  {typeIcons[n.type] || <FaExclamationCircle />}
+                </span>
                 <span className="item-message">{n.message}</span>
               </li>
             ))}
           </ul>
-          <Link to="/notifications" className="view-all-btn">Xem tất cả</Link>
+          <Link to="/member/notifications" className="view-all-btn">
+            View All
+          </Link>
         </div>
       )}
     </div>

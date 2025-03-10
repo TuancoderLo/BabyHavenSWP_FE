@@ -3,7 +3,8 @@ import calculateBMI from "../../../services/bmiUtils";
 import childApi from "../../../services/childApi";
 import Chart from "chart.js/auto"; // Đảm bảo Chart.js đã được cài đặt
 
-const GrowthChart = ({ childId, selectedTool, startDate, endDate }) => {
+// const GrowthChart = ({ childId, selectedTool, startDate, endDate }) => {
+const GrowthChart = ({ childName, selectedTool, onRecordSelect}) => {
   const [records, setRecords] = useState([]);
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
@@ -12,9 +13,20 @@ const GrowthChart = ({ childId, selectedTool, startDate, endDate }) => {
   useEffect(() => {
     const fetchGrowthRecordsRange = async () => {
       try {
+      //   // Gọi API với childId, startDate và endDate (nếu có)
+      //   const response = await childApi.getGrowthRecordsRange(childId, startDate, endDate);
+      //   const fetchedRecords = response.data.data;
+      //   // Nếu API trả về null hoặc mảng rỗng, vẫn giữ records là mảng rỗng
+      //   setRecords(fetchedRecords || []);
+      // } catch (error) {
+      //   console.error("Error fetching growth records:", error);
+      //   setRecords([]);
+      // }
         // Gọi API với childId, startDate và endDate (nếu có)
-        const response = await childApi.getGrowthRecordsRange(childId, startDate, endDate);
-        const fetchedRecords = response.data.data;
+        const parentName = localStorage.getItem("name");
+        console.log(parentName);
+        const response = await childApi.getGrowthRecords(childName, parentName);
+        const fetchedRecords = response.data;
         // Nếu API trả về null hoặc mảng rỗng, vẫn giữ records là mảng rỗng
         setRecords(fetchedRecords || []);
       } catch (error) {
@@ -23,18 +35,22 @@ const GrowthChart = ({ childId, selectedTool, startDate, endDate }) => {
       }
     };
 
-    if (childId) {
+    if (childName) {
       fetchGrowthRecordsRange();
     }
-  }, [childId, startDate, endDate]);
+  }, [childName]);
 
   // 2. Vẽ lại biểu đồ khi records hoặc selectedTool thay đổi
   useEffect(() => {
-    // Sử dụng records nhận được; ngay cả khi rỗng, ta vẫn tạo ra mảng label rỗng
-    let dataRecords = records; 
+    if (chartInstance.current) {
+      chartInstance.current.destroy();
+    }
+
+    let dataRecords = records;
     let labels = [];
     let dataPoints = [];
     let datasetLabel = "";
+
 
     // Hàm tạo label dựa vào ngày ghi nhận, nếu không có thì hiển thị "Record X"
     const generateLabels = (record, index) => {
@@ -105,24 +121,109 @@ const GrowthChart = ({ childId, selectedTool, startDate, endDate }) => {
           {
             label: datasetLabel,
             data: dataPoints,
-            borderColor: "blue",
-            fill: false,
+            borderColor: "#064F83",
+            borderWidth: 2,
+            tension: 0.3,
+            cubicInterpolationMode: "monotone",
+            pointRadius: 4,
+            pointBackgroundColor: "#fff",
+            pointBorderColor: "#064F83",
+            fill: false, // or true nếu muốn vùng tô
           },
         ],
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false, 
+        devicePixelRatio: 4,
+        onClick: (evt) => {
+          // Lấy danh sách điểm data đang được click
+          const points = chartInstance.current.getElementsAtEventForMode(
+            evt,
+            "nearest",
+            { intersect: true },
+            false
+          );
+          if (!points.length) return; // click ra vùng trống
+
+          const index = points[0].index;
+          // record tương ứng với dataRecords[index]
+          const clickedRecord = dataRecords[index];
+          console.log("Clicked record:", clickedRecord);
+
+          // Gọi callback cho parent
+          if (onRecordSelect) {
+            onRecordSelect(clickedRecord);
+          }
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: "#333",
+              font: {
+                family: "'Inter', sans-serif",
+                size: 14,
+              },
+            },
+          },
+          tooltip: {
+            backgroundColor: "#fff",
+            titleColor: "#333",
+            bodyColor: "#333",
+            borderColor: "#ccc",
+            borderWidth: 1,
+            displayColors: false,
+          },
+        },
         scales: {
           x: {
-            title: { display: true, text: "Record Date" },
+            title: {
+              display: true,
+              text: "Record Date",
+              color: "#333",
+              font: {
+                family: "'Inter', sans-serif",
+                size: 14,
+                weight: "600",
+              },
+            },
+            ticks: {
+              color: "#333",
+              font: {
+                family: "'Inter', sans-serif",
+                size: 13,
+              },
+            },
+            grid: {
+              color: "rgba(0,0,0,0.1)",
+            },
           },
           y: {
-            title: { display: true, text: datasetLabel },
+            title: {
+              display: true,
+              text: datasetLabel,
+              color: "#333",
+              font: {
+                family: "'Inter', sans-serif",
+                size: 14,
+                weight: "600",
+              },
+            },
+            ticks: {
+              color: "#333",
+              font: {
+                family: "'Inter', sans-serif",
+                size: 13,
+              },
+            },
+            grid: {
+              color: "rgba(0,0,0,0.1)",
+            },
           },
         },
       },
-    });
-  }, [records, selectedTool]);
+    });    
+  }, [records, selectedTool, onRecordSelect]);
   useEffect(() => {
     console.log("Fetched records:", records);
   }, [records]);

@@ -28,11 +28,9 @@ function NavBar() {
       <div className="avatar-member">
         <img src={userData?.profilePicture || avatar_LOGO} alt="User Avatar" />
       </div>
+      <NotificationDropdown />
     </div>
-    <div className="navbar-right">
-  <NotificationDropdown />
-  {/* Các thông tin khác như tên, avatar... */}
-</div>
+
     </header>
   );
 }

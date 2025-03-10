@@ -12,6 +12,8 @@ function ChildrenPage() {
 
   const [childrenList, setChildrenList] = useState([]);
   const [selectedChild, setSelectedChild] = useState(null);
+  //set chiều cao và cân nặng dựa vào record
+  const [selectedRecord, setSelectedRecord] = useState(null);
 
   // Lấy memberId từ localStorage
   const memberId = localStorage.getItem("memberId");
@@ -120,7 +122,7 @@ const closeRecordOverlay = () => {
     <div className="children-page-container">
       {/* Khối chính: gồm cột bên trái (Children) và phần còn lại */}
       <div className="top-bar-member">
-  <h2 className="section-title">Children</h2>
+  <h2 className="class= section-title-child">Children</h2>
   <div className="feature-buttons">
     <div className="child-education">
     <button>Child Education</button>
@@ -180,45 +182,51 @@ const closeRecordOverlay = () => {
 
         {/* Box 3: Growth chart */}
         <div className="growth-chart-box-around">
-           {/* Nút Child Education + Analyze with AI
-      <div className="feature-buttons">
-        <button className="feature-btn">Child Education</button>
-        <button className="feature-btn">Analyze with AI</button>
-          </div> */}
           <div className="growth-chart-box-card">
-            <div className ="chart-header">
-          <h3>Growth chart</h3>
-            <div className="chart-toolbar">
-          <select
-            className="toolbar-select"
-            value={selectedTool}
-            onChange={handleToolChange}
-          >
-            <option value="BMI">BMI</option>
-            <option value="Head measure">Head measure</option>
-            <option value="Global std">Global std</option>
-            <option value="Milestone">Milestone</option>
-          </select>
+            <div className="chart-header">
+              <h3>Growth chart</h3>
+              <div className="chart-toolbar">
+                <select
+                  className="toolbar-select"
+                  value={selectedTool}
+                  onChange={handleToolChange}
+                >
+                  <option value="BMI">BMI</option>
+                  <option value="Head measure">Head measure</option>
+                  <option value="Global std">Global std</option>
+                  <option value="Milestone">Milestone</option>
+                </select>
               </div>
-              </div>
-              <div className="chart-box">
-              <div className="chart-area">
-              {selectedChild && selectedChild.childId && (
-  <GrowthChart
-    childId={selectedChild.childId}
-    selectedTool={selectedTool}
-    startDate="2025-01-01"  // ví dụ: truyền ngày bắt đầu
-    endDate="2025-03-07"    // ví dụ: truyền ngày kết thúc
-  />
-)}
-</div>
-</div>
             </div>
+            <div className="chart-box">
+              <div className="chart-area">
+                {selectedChild && selectedChild.name && (
+                  <GrowthChart
+                    childName={selectedChild.name}
+                    selectedTool={selectedTool}
+                    onRecordSelect={(record) => {
+                      console.log("Parent got record:", record);
+                      setSelectedRecord(record);
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
                   {/* Box 4: Thông tin Weight, Height, Connect to doctor, Add a record */}
-        <div className="growth-info-box-card">
-          <p>Height: 80 cm</p>
-          <p>Weight: 30 kg</p>
-            <p>Feb 15, 2025</p>
+                  <div className="growth-info-box-card">
+            {selectedRecord ? (
+              <>
+                <p>Height: {selectedRecord.height || "--"} cm</p>
+                <p>Weight: {selectedRecord.weight || "--"} kg</p>
+              </>
+            ) : (
+              <>
+                <p>Height: -- cm</p>
+                <p>Weight: -- kg</p>
+                <p>No record selected</p>
+              </>
+            )}
             <div className="action-buttons">
             <div className="connect-doctor">
              <button>Connect to doctor</button>
@@ -243,7 +251,7 @@ const closeRecordOverlay = () => {
     child={selectedChild}
     memberId={memberId} 
     closeOverlay={closeRecordOverlay} 
-  /> //t quen :))) sua điiii/ hay
+  /> 
 )}
     </div>
   );

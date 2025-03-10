@@ -10,7 +10,12 @@ const childApi = {
   
   getChildByName: (child, memberId) => api.get(`Children/${child.name}/${child.dateOfBirth}/${memberId}`),
 
-  getGrowthRecords: (odataParams) => api.get(`GrowthRecord/odata`, { params: odataParams }),
+  getGrowthRecords: (childName, parentName) => api.get(`GrowthRecord/odata`, {
+    params: {
+      $filter: `ChildName eq '${childName}' and ParentName eq '${parentName}'`
+    }
+  }),
+  
   getGrowthRecordsRange:(childId, startDate, endDate) => api.get(`GrowthRecord/child/${childId}/date-range`, {
     params: {
       startDate,

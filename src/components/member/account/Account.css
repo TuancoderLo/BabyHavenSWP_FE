@@ -1,228 +1,239 @@
-/* Account.css */
-
+/* Toàn trang account */
 .account-page {
-    margin: 10px;
-    font-family: Arial, sans-serif;
-  }
-  
-  .account-page h1 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  /* Form chứa thông tin tài khoản */
-  .account-form {
-    padding: 20px;
-  }
-  
-  /* Phần Avatar */
-  .avatar-section {
-    margin-bottom: 20px;
-  }
-  
-  .avatar-section h2 {
-    margin-bottom: 10px;
-  }
-  
-  .avatar-preview {
-    width: 150px;
-    height: 150px;
-    margin-bottom: 10px;
-    border: 2px solid #ddd;
-    border-radius: 50%;
-    overflow: hidden;
-  }
-  
-  .avatar-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .avatar-placeholder {
-    width: 100%;
-    height: 100%;
-    background: #f0f0f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #888;
-    font-size: 14px;
-  }
-  
-  .avatar-actions {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .upload-btn {
-    background: #007bff;
-    color: #fff;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    text-align: center;
-    width: fit-content;
-    margin-bottom: 10px;
-  }
-  
-  .upload-btn:hover {
-    background: #0056b3;
-  }
-  
-  .preset-avatars {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .preset-avatars img {
-    width: 50px;
-    height: 50px;
-    border: 2px solid transparent;
-    border-radius: 50%;
-    cursor: pointer;
-    object-fit: cover;
-  }
-  
-  .preset-avatars img.selected {
-    border-color: #007bff;
-  }
-  
-  /* Thông tin tài khoản */
-  .account-info {
-    margin-bottom: 20px;
-  }
-  
-  .account-info .form-group {
-    margin-bottom: 15px;
-  }
-  
-  .form-group label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-  
-  .form-group input {
-    width: 100%;
-    padding: 8px 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  /* Thay đổi mật khẩu */
-  .change-password {
-    margin-bottom: 20px;
-  }
-  
-  .change-password h2 {
-    margin-bottom: 10px;
-  }
-  
-  /* Xóa tài khoản */
-  .delete-account {
-    margin-bottom: 20px;
-  }
-  
-  .delete-account h2 {
-    margin-bottom: 10px;
-    color: #d9534f;
-  }
-  
-  .delete-account p {
-    margin-bottom: 10px;
-  }
-  
-  .delete-btn {
-    background: #d9534f;
-    color: #fff;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .delete-btn:hover {
-    background: #c9302c;
-  }
-  
-  /* Nút Save Changes */
-  .save-btn {
-    background: #28a745;
-    color: #fff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    display: block;
-    margin: 20px auto 0;
-    font-size: 16px;
-  }
-  
-  .save-btn:hover {
-    background: #218838;
-  }
-  
-  /* Modal xác nhận xóa tài khoản */
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-  
-  .modal {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    text-align: center;
-  }
-  
-  .modal h3 {
-    margin-bottom: 15px;
-  }
-  
-  .modal p {
-    margin-bottom: 20px;
-  }
-  
-  .modal-actions {
-    display: flex;
-    justify-content: space-around;
-  }
-  
-  .modal-actions button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .modal-actions button:first-child {
-    background: #6c757d;
-    color: #fff;
-  }
-  
-  .modal-actions button:last-child {
-    background: #d9534f;
-    color: #fff;
-  }
-  
-  .modal-actions button:first-child:hover {
-    background: #5a6268;
-  }
-  
-  .modal-actions button:last-child:hover {
-    background: #c9302c;
-  }
-  
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Form tổng */
+.account-form {
+  max-width: 900px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Tiêu đề chung cho mỗi section */
+.section-title {
+  background: #064F83; /* Xanh đậm từ ChildrenPage */
+  color: #fff;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  display: inline-block;
+}
+
+/* Phần avatar */
+.avatar-section {
+  background: #f0fbff; /* Nền xanh rất nhạt từ ChildrenPage */
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e2f0f7;
+}
+
+.avatar-preview {
+  width: 130px;
+  height: 130px;
+  margin-bottom: 10px;
+  border: 2px solid #00D0BC; /* Viền xanh ngọc nổi bật */
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #eaeaea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666; /* Tông xám nhẹ nhàng */
+  font-size: 14px;
+}
+
+.avatar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.upload-btn {
+  background: #00D0BC; /* Xanh ngọc từ ChildrenPage */
+  color: #fff;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  text-align: center;
+  width: fit-content;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+.upload-btn:hover {
+  background: #00bfa6; /* Tông đậm hơn khi hover */
+}
+
+/* Account info */
+.account-info {
+  background: #f9f9f9; /* Nền xám nhạt từ ChildrenPage */
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #eee; /* Viền nhẹ nhàng */
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  transition: border-color 0.3s;
+}
+.form-group input:focus {
+  border-color: #699BF7; /* Xanh nhạt khi focus */
+  outline: none;
+}
+
+/* Thay đổi mật khẩu */
+.change-password {
+  background: #f9f9f9; /* Nền xám nhạt */
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+/* Xóa tài khoản */
+.delete-account {
+  background: #fff4f4; /* Nền đỏ nhạt cảnh báo */
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ffd5d5;
+}
+
+.delete-title {
+  background: #f44336 !important; /* Màu đỏ giữ nguyên cho cảnh báo */
+}
+
+/* Nút xóa tài khoản */
+.delete-btn {
+  background: #f44336;
+  color: #fff;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+.delete-btn:hover {
+  background: #d32f2f;
+}
+
+/* Nút Save Changes */
+.save-btn {
+  background: #064F83; /* Xanh đậm từ ChildrenPage */
+  color: #fff;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  align-self: flex-end;
+  margin-top: 1rem;
+  transition: background 0.3s;
+}
+.save-btn:hover {
+  background: #043c66; /* Đậm hơn khi hover */
+}
+
+/* Modal xóa tài khoản */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.modal h3 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  color: #064F83; /* Xanh đậm cho tiêu đề modal */
+}
+
+.modal p {
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+  color: #666;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.modal-actions button:first-child {
+  background: #699BF7; /* Xanh nhạt cho nút Cancel */
+  color: #fff;
+}
+.modal-actions button:first-child:hover {
+  background: #5587e0; /* Đậm hơn khi hover */
+}
+
+.modal-actions button:last-child {
+  background: #f44336; /* Đỏ cho nút Confirm */
+  color: #fff;
+}
+.modal-actions button:last-child:hover {
+  background: #d32f2f;
+}

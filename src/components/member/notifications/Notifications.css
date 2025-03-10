@@ -1,69 +1,119 @@
-/* Notifications.css */
+
 .notifications-page {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    font-family: sans-serif;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  font-family: sans-serif;
+  background: linear-gradient(135deg, #e0f7fa, #ffffff); /* pastel xanh nhạt */
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  animation: fadeInUp 0.4s ease-out forwards;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+/* Hiệu ứng xuất hiện mượt */
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  .filter-container {
-    margin-bottom: 20px;
-  }
-  
-  .filter-container select {
-    margin-left: 10px;
-    padding: 5px;
-  }
-  
-  .notifications-list {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .notification-item {
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid #eee;
-    padding: 10px 0;
-  }
-  
-  .notification-item:last-child {
-    border-bottom: none;
-  }
-  
-  .notification-icon {
-    font-size: 24px;
-    margin-right: 10px;
-  }
-  
-  .notification-content {
-    flex: 1;
-  }
-  
-  .notification-message {
-    margin: 0;
-    font-size: 16px;
-  }
-  
-  .notification-timestamp {
-    font-size: 12px;
-    color: #888;
-  }
-  
-  .mark-read-btn {
-    background: #28a745;
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .notification-item.unread .notification-icon::after {
-    content: ' 🔵';
-    font-size: 14px;
-  }
-  
+}
+
+.notifications-page h1 {
+  margin-bottom: 1rem;
+  color: #064F83; /* Xanh đậm */
+  text-align: center;
+}
+
+.filter-container {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.filter-container select {
+  margin-left: 10px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+/* Danh sách thông báo */
+.notifications-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.notification-item {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding: 12px 0;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.notification-item:hover {
+  background: #ffffffaa;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Ẩn border cuối */
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+/* Icon */
+.notification-icon {
+  font-size: 24px;
+  margin-right: 12px;
+  color: #064F83;
+  position: relative;
+}
+
+/* Nội dung */
+.notification-content {
+  flex: 1;
+}
+
+.notification-message {
+  margin: 0 0 4px 0;
+  font-size: 15px;
+  color: #333;
+}
+
+.notification-timestamp {
+  font-size: 12px;
+  color: #888;
+}
+
+/* Nút Mark as read */
+.mark-read-btn {
+  background: #00D0BC;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+.mark-read-btn:hover {
+  background: #00bfa6;
+}
+
+/* Thêm chấm unread ở icon (nếu thích) */
+.notification-item.unread .notification-icon::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 8px;
+  height: 8px;
+  background: #f44336; /* đỏ */
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 2px rgba(0,0,0,0.3);
+}
