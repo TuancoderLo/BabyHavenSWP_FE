@@ -55,10 +55,10 @@ function Sidebar() {
   </li>
 
   <li
-    className={activePath === "/member/transaction" ? "active" : ""}
-    onClick={() => setActivePath("/member/transaction")}
+    className={activePath === "/member/transactions" ? "active" : ""}
+    onClick={() => setActivePath("/member/transactions")}
   >
-    <Link to="/member/transaction" className="menu-item">
+    <Link to="/member/transactions" className="menu-item">
       <i className="fas fa-money-check-alt"></i> 
       {/* Hoặc fas fa-credit-card */}
       <span>Transaction</span>

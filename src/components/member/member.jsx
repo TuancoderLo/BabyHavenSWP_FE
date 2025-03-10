@@ -5,7 +5,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Children from "./children/ChildrenPage";
 import Consultation from "./consulation/DoctorConsultation";
 import Membership from "./membership/MemberShipPage";
-import TransactionsMember from "./transactionsMember/transactionsMember";
+import TransactionsMember from "./transactionsMember/TransactionsMember";
 import Notifications from "./notifications/Notifications";
 import Account from "./account/Account";
 

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // <-- import navigate
 import "./MemberShipPage.css";
-import membershipApi from "../../../services/memberShipApi"; 
+import membershipApi from "../../../services/memberShipApi";
 
 function MemberShipPage() {
-  const [currentPlan, setCurrentPlan] = useState(null); 
-  const [packages, setPackages] = useState([]);         
+  const [currentPlan, setCurrentPlan] = useState(null);
+  const [packages, setPackages] = useState([]);
+  const navigate = useNavigate(); // dùng để chuyển trang
 
   useEffect(() => {
     const memberId = localStorage.getItem("memberId");
@@ -34,7 +36,6 @@ function MemberShipPage() {
       .getAllPackages()
       .then((res) => {
         const all = res.data?.data || [];
-        // Lọc chỉ lấy gói status = "Active"
         const activePackages = all.filter((pkg) => pkg.status === "Active");
         setPackages(activePackages);
       })
@@ -44,11 +45,18 @@ function MemberShipPage() {
       });
   }, []);
 
-  // Ví dụ hàm xử lý khi chọn gói
-  const handleChoosePackage = (pkgName) => {
-    console.log("User clicked on package:", pkgName);
-    // Tùy logic: mở trang thanh toán, v.v.
-  };
+// Truyền toàn bộ object pkg thay vì pkg.packageName
+const handleChoosePackage = (pkg) => {
+  console.log("User clicked on package:", pkg);
+  // Lấy userName từ localStorage (nếu cần)
+  const userName = localStorage.getItem("name") || "Guest";
+
+  // Chuyển sang /member/transactions, mang theo đối tượng pkg
+  navigate("/member/transactions", {
+    state: { selectedPackage: pkg, userName },
+  });
+};
+
 
   return (
     <div className="membership-page">
@@ -56,14 +64,10 @@ function MemberShipPage() {
         <h2 className="membership-page-title">Membership Management</h2>
 
         <div className="membership-row">
-          {/* Cột trái: Danh sách gói membership */}
+          {/* Danh sách gói membership */}
           <div className="membership-column packages-list">
             <h3 className="column-title">Available Plans</h3>
             <div className="packages-row">
-              {/* 
-                Lọc: Nếu currentPlan != null, bỏ gói có cùng packageName.
-                Nếu currentPlan = null, hiển thị tất cả 
-              */}
               {packages
                 .filter(
                   (pkg) =>
@@ -94,16 +98,16 @@ function MemberShipPage() {
                         Max children: {pkg.maxChildrenAllowed}
                       </p>
                       <button
-                        className="package-btn"
-                        onClick={() => handleChoosePackage(pkg.packageName)}
-                      >
-                        {pkg.packageName === "Free" ? "Try Now" : "Choose Plan"}
-                      </button>
+  className="package-btn"
+  onClick={() => handleChoosePackage(pkg)} // truyền pkg object
+>
+  {pkg.packageName === "Free" ? "Try Now" : "Choose Plan"}
+</button>
+
                     </div>
                   );
                 })}
 
-              {/* Nếu mảng trống sau khi filter => thông báo */}
               {packages.filter(
                 (pkg) =>
                   !currentPlan ||
@@ -114,7 +118,7 @@ function MemberShipPage() {
             </div>
           </div>
 
-          {/* Cột phải: Current plan */}
+          {/* Current plan */}
           <div className="membership-column current-plan">
             <h3 className="column-title">Your current plan</h3>
             <div className="card membership-plan-card">
