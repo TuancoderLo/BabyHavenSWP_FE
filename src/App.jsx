@@ -21,6 +21,9 @@ import Inbox from "./components/admin/Component_Sidebar/inbox/inbox";
 import Notifications from "./components/admin/Component_Sidebar/notifications/notifications";
 import Settings from "./components/admin/Component_Sidebar/settings/settings";
 
+//doctor
+import Doctor from "./pages/Doctor/Doctor";
+
 //Member
 import MemberPackages from "./components/packages/Packages";
 // ↑ đổi tên import (MamberPackages) để khác với AdminPackages
@@ -101,7 +104,7 @@ function App() {
           path="/doctor"
           element={
             <ProtectedRoute roles={["2"]}>
-              <Navigate to="/" />
+              <Doctor />
             </ProtectedRoute>
           }
         />
