@@ -23,87 +23,179 @@ html {
   display: flex;
   background: #ffffff;
   overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .auth-left {
-  width: 65%;
+  width: 70%;
   height: 100vh;
   position: relative;
   overflow: hidden;
+  padding: 0;
+  display: block;
 }
 
 .auth-right {
-  width: 35%;
+  width: 30%;
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 30px;
   background: #f8fafc;
-  padding: 20px;
+  position: relative;
 }
 
 .auth-box {
   width: 100%;
-  max-width: 340px;
-  padding: 24px;
+  max-width: 380px;
+  padding: 60px;
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-radius: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .auth-image {
   width: 100%;
   height: 100%;
   position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .auth-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
+}
+
+.home-link {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 20px;
+  color: #1e293b;
+  cursor: pointer;
 }
 
 .auth-header {
-  margin-bottom: 24px;
+  margin-bottom: 30px;
 }
 
 .auth-header h1 {
   color: #00d0bc;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .header-subtitle {
   color: #64748b;
-  font-size: 13px;
-  line-height: 1.4;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .form-group {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   position: relative;
 }
 
-/* Style cho input fields */
-input,
-select {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 13px;
-  color: #1e293b;
-  background: #f8fafc;
-  transition: all 0.2s ease;
+/* Thêm CSS cho password-group */
+.password-group {
+  position: relative;
 }
 
-input:focus,
-select:focus {
+.password-toggle {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #94a3b8;
+  font-size: 16px;
+  z-index: 10;
+  transition: color 0.3s ease;
+}
+
+.password-toggle:hover {
+  color: #00bfa6;
+}
+
+input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1e293b;
+  transition: all 0.3s ease;
+}
+
+/* Điều chỉnh padding cho input password để tránh chồng lên icon */
+.password-group input {
+  padding-right: 40px;
+}
+
+input:focus {
   outline: none;
   border-color: #00bfa6;
-  background: white;
   box-shadow: 0 0 0 3px rgba(0, 191, 166, 0.1);
+}
+
+input::placeholder {
+  color: #94a3b8;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 10px;
+  background: #00bfa6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 16px;
+}
+
+.submit-btn:hover {
+  background: #00a892;
+}
+
+.toggle-form {
+  text-align: center;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.toggle-form span {
+  color: #00bfa6;
+  cursor: pointer;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.toggle-form span:hover {
+  text-decoration: underline;
+}
+
+.error-message {
+  color: #dc2626;
+  font-size: 14px;
+  margin-bottom: 16px;
+  text-align: center;
+  padding: 8px;
+  background-color: #fef2f2;
+  border-radius: 6px;
+  border: 1px solid #fee2e2;
 }
 
 /* Style cho select */
@@ -119,62 +211,6 @@ select {
 /* Style cho date input */
 input[type="date"] {
   padding-right: 8px;
-}
-
-/* Placeholder style */
-::placeholder {
-  color: #94a3b8;
-  font-size: 12px;
-}
-
-/* Style cho nút submit */
-.submit-btn {
-  width: 100%;
-  padding: 8px 12px;
-  background: #00bfa6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin: 16px 0;
-}
-
-.submit-btn:hover {
-  background: #00a892;
-}
-
-/* Style cho divider */
-.divider {
-  position: relative;
-  text-align: center;
-  margin: 16px 0;
-}
-
-.divider::before,
-.divider::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  width: 45%;
-  height: 1px;
-  background: #e2e8f0;
-}
-
-.divider::before {
-  left: 0;
-}
-.divider::after {
-  right: 0;
-}
-
-.divider span {
-  background: white;
-  padding: 0 12px;
-  color: #94a3b8;
-  font-size: 12px;
 }
 
 /* Style cho nút Google */
@@ -203,37 +239,6 @@ input[type="date"] {
   color: #4285f4;
 }
 
-/* Style cho toggle form */
-.toggle-form {
-  text-align: center;
-  color: #64748b;
-  font-size: 12px;
-  margin-top: 16px;
-}
-
-.toggle-form span {
-  color: #00bfa6;
-  cursor: pointer;
-  font-weight: 500;
-  margin-left: 4px;
-}
-
-.toggle-form span:hover {
-  text-decoration: underline;
-}
-
-/* Style cho error message */
-.error-message {
-  color: #dc2626;
-  font-size: 12px;
-  margin: 8px 0;
-  text-align: center;
-  padding: 6px;
-  background-color: #fef2f2;
-  border-radius: 4px;
-  border: 1px solid #fee2e2;
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .auth-left {
@@ -249,3 +254,5 @@ input[type="date"] {
     max-width: 320px;
   }
 }
+
+padding: 10px 14px;

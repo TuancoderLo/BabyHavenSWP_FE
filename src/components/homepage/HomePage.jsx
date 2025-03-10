@@ -5,11 +5,7 @@ import Header from "../common/Header";
 import Footer from "../common/Footer";
 import Logo from "../../assets/Logo.png";
 import avatar_LOGO from "../../assets/avatar_LOGO.jpg";
-import PregnancySection from "../topics/PregnancySection";
-import BabySection from "../topics/BabySection";
-import ToddleSection from "../topics/ToddleSection";
-import ChildSection from "../topics/ChildSection";
-import Name from "../../assets/Name.png";
+
 import Packages from "../packages/Packages";
 import blogCategoryApi from "../../services/blogCategoryApi";
 import BlogSection from "../topics/BlogSection";
