@@ -19,6 +19,12 @@ function Register() {
     confirmPassword: "",
   });
 
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigate = useNavigate();
+
   const handleGoogleRedirect = async () => {
     try {
       const provider = new GoogleAuthProvider();
@@ -50,9 +56,6 @@ function Register() {
     }
   };
 
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -61,13 +64,68 @@ function Register() {
     }));
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
+  const validateForm = () => {
+    if (
+      !formData.username.trim() ||
+      !formData.email.trim() ||
+      !formData.phoneNumber.trim() ||
+      !formData.name.trim() ||
+      !formData.dateOfBirth.trim() ||
+      !formData.password.trim() ||
+      !formData.confirmPassword.trim()
+    ) {
+      setError("All fields are required");
+      return false;
+    }
+
+    if (formData.username.trim().length < 3) {
+      setError("Username must be at least 3 characters long");
+      return false;
+    }
+
+    if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+      setError("Please enter a valid email address");
+      return false;
+    }
+
+    if (formData.phoneNumber.length !== 10) {
+      setError("Phone number must be exactly 10 digits");
+      return false;
+    }
+
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return false;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
-      // Tạo object mới không bao gồm confirmPassword
-      const submitData = {
+      const response = await api.post("Authentication/Register", {
         username: formData.username,
         email: formData.email,
         phoneNumber: formData.phoneNumber,
@@ -75,85 +133,31 @@ function Register() {
         gender: formData.gender,
         dateOfBirth: formData.dateOfBirth,
         password: formData.password,
-      };
+      });
 
-      const response = await api.post("register", submitData);
-      toast.success("Đăng ký thành công!");
-      navigate("/login");
+      if (response.data.status === 1) {
+        toast.success("Đăng ký thành công!");
+        navigate("/login");
+      } else {
+        setError(
+          response.data.message ||
+            "Registration failed. Please try again later."
+        );
+      }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Đăng ký thất bại!");
+      if (error.response) {
+        setError(
+          error.response.data.message ||
+            "Registration failed. Please try again later."
+        );
+      } else if (error.request) {
+        setError("Registration failed. Please try again later.");
+      } else {
+        setError("Registration error");
+      }
+    } finally {
+      setIsLoading(false);
     }
-
-    // Kiểm tra form trống
-    const {
-      username,
-      email,
-      phoneNumber,
-      name,
-      dateOfBirth,
-      password,
-      confirmPassword,
-    } = formData;
-    if (
-      !username ||
-      !email ||
-      !phoneNumber ||
-      !name ||
-      !dateOfBirth ||
-      !password ||
-      !confirmPassword
-    ) {
-      setError("Vui lòng điền đầy đủ thông tin!");
-      return;
-    }
-
-    // Kiểm tra định dạng email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError("Email không hợp lệ!");
-      return;
-    }
-
-    // Kiểm tra định dạng số điện thoại
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(phoneNumber)) {
-      setError("Số điện thoại không hợp lệ!");
-      return;
-    }
-
-    // Kiểm tra mật khẩu
-    if (password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự!");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp!");
-      return;
-    }
-
-    // Kiểm tra username đã tồn tại
-    const userExists = users.find((u) => u.username === username);
-    if (userExists) {
-      setError("Tên đăng nhập đã tồn tại!");
-      return;
-    }
-
-    // Thêm user mới
-    const newUser = {
-      id: users.length + 1,
-      username,
-      password,
-      email,
-      phone: phoneNumber,
-      firstName: name.split(" ")[0],
-      lastName: name.split(" ")[1],
-      role: "user",
-    };
-    users.push(newUser);
-
-    // Chuyển đến trang đăng nhập
-    navigate("/login");
   };
 
   return (
@@ -180,6 +184,8 @@ function Register() {
               Join us to discover amazing experiences
             </p>
           </div>
+
+          {error && <div className="error-message">{error}</div>}
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
@@ -250,32 +256,48 @@ function Register() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="form-group password-group">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
                 required
               />
+              <span
+                className="password-toggle"
+                onClick={togglePasswordVisibility}
+              >
+                <i
+                  className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}
+                ></i>
+              </span>
             </div>
 
-            <div className="form-group">
+            <div className="form-group password-group">
               <input
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
                 placeholder="Confirm Password"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
               />
+              <span
+                className="password-toggle"
+                onClick={toggleConfirmPasswordVisibility}
+              >
+                <i
+                  className={`fas ${
+                    showConfirmPassword ? "fa-eye-slash" : "fa-eye"
+                  }`}
+                ></i>
+              </span>
             </div>
 
-            {error && <div className="error-message">{error}</div>}
-
-            <button type="submit" className="submit-btn">
-              Sign Up
+            <button type="submit" className="submit-btn" disabled={isLoading}>
+              {isLoading ? "Creating account..." : "Sign Up"}
             </button>
 
             <div className="divider">

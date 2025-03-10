@@ -13,6 +13,7 @@ function Login({ onLoginSuccess }) {
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -21,6 +22,10 @@ function Login({ onLoginSuccess }) {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   const validateForm = () => {
@@ -216,15 +221,23 @@ function Login({ onLoginSuccess }) {
               />
             </div>
 
-            <div className="form-group">
+            <div className="form-group password-group">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
                 required
               />
+              <span
+                className="password-toggle"
+                onClick={togglePasswordVisibility}
+              >
+                <i
+                  className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}
+                ></i>
+              </span>
             </div>
 
             <button type="submit" className="submit-btn" disabled={isLoading}>
