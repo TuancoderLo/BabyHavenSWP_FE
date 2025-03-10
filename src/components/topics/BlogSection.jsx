@@ -68,7 +68,7 @@ const BlogSection = ({ parentCategoryId }) => {
   return (
     <div className="blog-section">
       {parentCategory && (
-        <h2 className="section-title">{parentCategory.categoryName}</h2>
+        <h2 className="section-topics">{parentCategory.categoryName}</h2>
       )}
 
       {/* Navigation */}

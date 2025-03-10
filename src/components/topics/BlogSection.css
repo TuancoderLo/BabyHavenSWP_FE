@@ -1,20 +1,20 @@
 .blog-section {
   padding: 20px;
-  margin-bottom: 40px;
+  margin-bottom: 10px;
 }
 
-.section-title {
+.section-topics {
+  display: grid;
   font-size: 2rem;
-  margin-bottom: 20px;
   color: #333;
+  justify-items: start;
 }
 
 .category-nav {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
-  overflow-x: auto;
-  padding-bottom: 10px;
+  overflow-x: visible;
 }
 
 .nav-item {
@@ -34,10 +34,12 @@
 
 .blog-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  flex-direction: row;
   gap: 20px;
   max-width: 1200px;
-  margin: 0 auto;
+  /*margin: 0 auto;*/
+  justify-items: start;
 }
 
 .blog-card {
