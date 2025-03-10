@@ -1,0 +1,166 @@
+/* Header & Navigation */
+.homepage-header {
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0.8rem 2rem;
+}
+
+/* Logo Section */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.logo img {
+  height: 30px;
+  border-radius: 8px;
+}
+
+/* Navigation Links */
+.nav-links {
+  display: contents;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #00d0bc !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  padding: 0.5rem 0.8rem;
+  border-radius: 4px;
+}
+
+.nav-links a:hover {
+  background-color: #f8f9fa;
+  color: #000000 !important;
+}
+
+/* Dropdown Styles */
+.dropdown {
+  position: relative;
+}
+
+.dropdown > a::after {
+  content: "▾";
+  margin-left: 0.4rem;
+  font-size: 0.9em;
+  color: #00d0bc;
+  transition: transform 0.3s ease;
+}
+
+.dropdown:hover > a::after {
+  transform: rotate(180deg);
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 130%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  min-width: 250px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  padding: 0.8rem 0;
+  opacity: 0;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 208, 188, 0.1);
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+  opacity: 1;
+  top: 100%;
+}
+
+/* Thêm hiệu ứng mũi tên cho dropdown */
+.dropdown-content::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 12px;
+  height: 12px;
+  background-color: white;
+  border-left: 1px solid rgba(0, 208, 188, 0.1);
+  border-top: 1px solid rgba(0, 208, 188, 0.1);
+}
+
+/* Auth Buttons */
+.auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.join-btn {
+  text-decoration: none;
+  color: #00d0bc;
+  font-weight: 600;
+  padding: 0.5rem 1.2rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  border: 1px solid #00d0bc;
+}
+
+.join-btn:hover {
+  background-color: rgba(0, 208, 188, 0.1);
+}
+
+.logout-btn {
+  background-color: #00d0bc;
+  color: white;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #00b8a6;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .nav-links {
+    gap: 2rem;
+  }
+
+  .nav-links a {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+
+  .homepage-header {
+    padding: 0.5rem 1rem;
+  }
+
+  .logo img {
+    height: 35px;
+  }
+}
