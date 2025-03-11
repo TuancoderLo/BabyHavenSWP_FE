@@ -9,27 +9,23 @@
 }
 
 .logo-container {
-  padding: 20px;
+  padding: 16px;
   text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .doctor-logo {
   color: #fff;
   font-size: 24px;
   font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  background: linear-gradient(45deg, #1890ff, #69c0ff);
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+  padding: 10px;
   transition: all 0.3s ease;
 }
 
 .doctor-profile {
-  padding: 20px;
+  padding: 24px 16px;
   text-align: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 20px;
 }
 
 .avatar-container {
@@ -37,14 +33,13 @@
 }
 
 .doctor-avatar {
-  border: 3px solid #1890ff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border: 2px solid #1890ff;
   transition: all 0.3s ease;
 }
 
 .doctor-avatar:hover {
+  border-color: #40a9ff;
   transform: scale(1.05);
-  border-color: #69c0ff;
 }
 
 .doctor-info {
@@ -53,27 +48,26 @@
 
 .doctor-name {
   color: #fff !important;
-  margin-bottom: 4px !important;
+  margin: 0 !important;
 }
 
 .doctor-specialty {
-  color: #69c0ff !important;
-  font-size: 14px;
+  color: #8c8c8c !important;
 }
 
 .doctor-menu {
-  background: transparent;
-  border: none;
+  border: none !important;
+  margin-top: 8px;
 }
 
 .doctor-menu .ant-menu-item {
-  margin: 8px 16px;
+  margin: 4px 8px !important;
   border-radius: 6px;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease !important;
 }
 
 .doctor-menu .ant-menu-item:hover {
-  background: rgba(24, 144, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1) !important;
 }
 
 .doctor-menu .ant-menu-item-selected {
@@ -84,13 +78,12 @@
   background: #fff;
   padding: 0 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 64px;
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .header-left {
@@ -100,56 +93,74 @@
 }
 
 .trigger {
-  font-size: 20px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  border-radius: 50%;
   cursor: pointer;
-  transition: color 0.3s;
-  padding: 8px;
-  border-radius: 4px;
+  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+  background: transparent;
 }
 
 .trigger:hover {
+  background: #f0f2f5;
   color: #1890ff;
-  background: rgba(24, 144, 255, 0.1);
 }
 
 .dashboard-title {
   margin: 0 !important;
-  background: linear-gradient(45deg, #1890ff, #69c0ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size: 20px !important;
+  color: #262626;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
 }
 
 .notification-badge {
-  cursor: pointer;
+  margin-right: 8px;
 }
 
 .notification-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 20px;
-  padding: 8px;
   border-radius: 50%;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .notification-icon:hover {
-  background: rgba(24, 144, 255, 0.1);
+  background: #f0f2f5;
   color: #1890ff;
+}
+
+.ant-badge-count {
+  box-shadow: 0 0 0 1px #fff;
+  font-size: 12px;
+  min-width: 20px;
+  height: 20px;
+  line-height: 20px;
+  font-weight: 500;
 }
 
 .doctor-content {
   padding: 24px;
-  background: #f5f5f5;
+  background: #f0f2f5;
 }
 
 .content-wrapper {
   background: #fff;
   border-radius: 8px;
   padding: 24px;
+  min-height: 280px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
@@ -158,12 +169,15 @@
 }
 
 .doctor-tabs .ant-tabs-nav {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .doctor-tabs .ant-tabs-tab {
+  padding: 12px 24px;
   transition: all 0.3s ease;
+  margin: 0 4px;
   border-radius: 6px 6px 0 0;
+  background: #fafafa;
 }
 
 .doctor-tabs .ant-tabs-tab:hover {
@@ -171,7 +185,7 @@
 }
 
 .doctor-tabs .ant-tabs-tab-active {
-  background: #1890ff;
+  background: #1890ff !important;
 }
 
 .doctor-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
@@ -183,6 +197,41 @@
   justify-content: center;
   align-items: center;
   height: 400px;
+}
+
+.ant-menu-item:active,
+.trigger:active,
+.notification-icon:active {
+  transform: scale(0.98);
+}
+
+.doctor-sider,
+.doctor-main-layout {
+  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+@media (max-width: 768px) {
+  .doctor-sider {
+    position: fixed;
+    height: 100vh;
+    z-index: 999;
+  }
+
+  .trigger {
+    width: 35px;
+    height: 35px;
+    font-size: 16px;
+  }
+
+  .notification-icon {
+    width: 35px;
+    height: 35px;
+    font-size: 18px;
+  }
+
+  .dashboard-title {
+    font-size: 18px !important;
+  }
 }
 
 /* Animation cho các thành phần */

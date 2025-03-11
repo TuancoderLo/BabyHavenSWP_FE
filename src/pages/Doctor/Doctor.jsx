@@ -47,17 +47,17 @@ const Doctor = () => {
     const role = localStorage.getItem("role");
 
     if (!isAuthenticated || role !== "2") {
-      message.error("Bạn không có quyền truy cập trang này");
+      message.error("You don't have permission to access this page");
       navigate("/login");
       return;
     }
 
-    const name = localStorage.getItem("name") || "Bác sĩ";
+    const name = localStorage.getItem("name") || "Doctor";
     const profilePicture = localStorage.getItem("profilePicture") || "";
 
     setDoctorInfo({
       name: name,
-      specialty: "Nhi khoa",
+      specialty: "Pediatrics",
       profilePicture: profilePicture,
       notifications: 5,
     });
@@ -76,27 +76,27 @@ const Doctor = () => {
     {
       key: "1",
       icon: <UserOutlined />,
-      label: "Thông tin cá nhân",
+      label: "Personal Information",
     },
     {
       key: "2",
       icon: <CalendarOutlined />,
-      label: "Yêu cầu tư vấn",
+      label: "Consultation Requests",
     },
     {
       key: "3",
       icon: <MessageOutlined />,
-      label: "Phản hồi tư vấn",
+      label: "Consultation Responses",
     },
     {
       key: "4",
       icon: <FileOutlined />,
-      label: "Yêu cầu hồ sơ",
+      label: "Record Requests",
     },
     {
       key: "logout",
       icon: <LogoutOutlined />,
-      label: "Đăng xuất",
+      label: "Logout",
       danger: true,
       onClick: handleLogout,
     },
@@ -119,7 +119,7 @@ const Doctor = () => {
           <div className="avatar-container">
             <Avatar
               size={collapsed ? 60 : 100}
-              src={doctorInfo.profilePicture}
+              src={doctorInfo.profilePicture || null}
               icon={<UserOutlined />}
               className="doctor-avatar"
             />
@@ -159,7 +159,7 @@ const Doctor = () => {
               />
             )}
             <Title level={4} className="dashboard-title">
-              Dashboard Bác sĩ
+              Doctor Dashboard
             </Title>
           </div>
           <div className="header-right">
@@ -186,16 +186,16 @@ const Doctor = () => {
                 className="doctor-tabs"
                 type="card"
               >
-                <TabPane tab="Thông tin cá nhân" key="1">
+                <TabPane tab="Personal Information" key="1">
                   <Bio />
                 </TabPane>
-                <TabPane tab="Yêu cầu tư vấn" key="2">
+                <TabPane tab="Consultation Requests" key="2">
                   <Request />
                 </TabPane>
-                <TabPane tab="Phản hồi tư vấn" key="3">
+                <TabPane tab="Consultation Responses" key="3">
                   <Response />
                 </TabPane>
-                <TabPane tab="Yêu cầu hồ sơ" key="4">
+                <TabPane tab="Record Requests" key="4">
                   <RecordRequest />
                 </TabPane>
               </Tabs>

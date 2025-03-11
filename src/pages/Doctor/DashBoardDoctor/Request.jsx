@@ -219,8 +219,8 @@ const Request = () => {
 
       message.success(
         values.action === "accepted"
-          ? "Đã chấp nhận yêu cầu tư vấn"
-          : "Đã từ chối yêu cầu tư vấn"
+          ? "Consultation request accepted"
+          : "Consultation request rejected"
       );
 
       // Refresh danh sách
@@ -247,7 +247,7 @@ const Request = () => {
 
       setConsultRequests(updatedRequests);
       setLoading(false);
-      message.success("Đã hoàn thành buổi tư vấn");
+      message.success("Consultation completed");
 
       // Refresh danh sách
       fetchConsultRequests();
@@ -257,34 +257,34 @@ const Request = () => {
   const getStatusTag = (status) => {
     switch (status) {
       case "pending":
-        return <Tag color="blue">Chờ phản hồi</Tag>;
+        return <Tag color="blue">Pending</Tag>;
       case "accepted":
-        return <Tag color="green">Đã chấp nhận</Tag>;
+        return <Tag color="green">Accepted</Tag>;
       case "rejected":
-        return <Tag color="red">Đã từ chối</Tag>;
+        return <Tag color="red">Rejected</Tag>;
       case "completed":
-        return <Tag color="purple">Đã hoàn thành</Tag>;
+        return <Tag color="purple">Completed</Tag>;
       default:
-        return <Tag>Không xác định</Tag>;
+        return <Tag>Unknown</Tag>;
     }
   };
 
   const getUrgencyTag = (urgency) => {
     switch (urgency) {
       case "high":
-        return <Tag color="red">Khẩn cấp</Tag>;
+        return <Tag color="red">Urgent</Tag>;
       case "normal":
-        return <Tag color="blue">Bình thường</Tag>;
+        return <Tag color="blue">Normal</Tag>;
       case "low":
-        return <Tag color="green">Không gấp</Tag>;
+        return <Tag color="green">Low Priority</Tag>;
       default:
-        return <Tag>Không xác định</Tag>;
+        return <Tag>Undefined</Tag>;
     }
   };
 
   const columns = [
     {
-      title: "Phụ huynh",
+      title: "Parent",
       dataIndex: "parentName",
       key: "parentName",
       render: (text, record) => (
@@ -295,7 +295,7 @@ const Request = () => {
       ),
     },
     {
-      title: "Trẻ",
+      title: "Child",
       dataIndex: "childName",
       key: "childName",
       render: (text, record) => (
@@ -306,34 +306,34 @@ const Request = () => {
       ),
     },
     {
-      title: "Chủ đề",
+      title: "Topic",
       dataIndex: "topic",
       key: "topic",
     },
     {
-      title: "Mức độ",
+      title: "Priority",
       dataIndex: "urgency",
       key: "urgency",
       render: (urgency) => getUrgencyTag(urgency),
     },
     {
-      title: "Ngày yêu cầu",
+      title: "Request Date",
       dataIndex: "requestDate",
       key: "requestDate",
       render: (date) => moment(date).format("DD/MM/YYYY HH:mm"),
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: (status) => getStatusTag(status),
     },
     {
-      title: "Hành động",
+      title: "Actions",
       key: "action",
       render: (_, record) => (
         <Space>
-          <Tooltip title="Xem chi tiết">
+          <Tooltip title="View details">
             <Button
               icon={<EyeOutlined />}
               onClick={() => handleViewDetail(record)}
@@ -341,7 +341,7 @@ const Request = () => {
           </Tooltip>
 
           {record.status === "pending" && (
-            <Tooltip title="Phản hồi">
+            <Tooltip title="Respond">
               <Button
                 type="primary"
                 icon={<MessageOutlined />}
@@ -351,7 +351,7 @@ const Request = () => {
           )}
 
           {record.status === "accepted" && (
-            <Tooltip title="Hoàn thành">
+            <Tooltip title="Complete">
               <Button
                 type="primary"
                 icon={<CheckCircleOutlined />}
@@ -367,7 +367,7 @@ const Request = () => {
   return (
     <div className="tab-container">
       <Title level={4} className="section-title">
-        Yêu cầu tư vấn
+        Consultation Requests
       </Title>
 
       <Tabs
@@ -379,7 +379,7 @@ const Request = () => {
             onClick={fetchConsultRequests}
             loading={loading}
           >
-            Làm mới
+            Refresh
           </Button>
         }
       >
@@ -391,7 +391,7 @@ const Request = () => {
               }
               offset={[10, 0]}
             >
-              Chờ phản hồi
+              Pending
             </Badge>
           }
           key="pending"
@@ -405,7 +405,7 @@ const Request = () => {
           />
         </TabPane>
 
-        <TabPane tab="Đã chấp nhận" key="accepted">
+        <TabPane tab="Accepted" key="accepted">
           <Table
             columns={columns}
             dataSource={consultRequests}
@@ -415,7 +415,7 @@ const Request = () => {
           />
         </TabPane>
 
-        <TabPane tab="Đã hoàn thành" key="completed">
+        <TabPane tab="Completed" key="completed">
           <Table
             columns={columns}
             dataSource={consultRequests}
@@ -425,7 +425,7 @@ const Request = () => {
           />
         </TabPane>
 
-        <TabPane tab="Đã từ chối" key="rejected">
+        <TabPane tab="Rejected" key="rejected">
           <Table
             columns={columns}
             dataSource={consultRequests}
@@ -438,7 +438,7 @@ const Request = () => {
 
       {/* Modal phản hồi yêu cầu */}
       <Modal
-        title="Phản hồi yêu cầu tư vấn"
+        title="Respond to Consultation Request"
         open={responseVisible}
         onCancel={() => setResponseVisible(false)}
         footer={null}
@@ -452,29 +452,29 @@ const Request = () => {
             initialValues={{ action: "accepted" }}
           >
             <Descriptions
-              title="Thông tin yêu cầu"
+              title="Request Information"
               bordered
               size="small"
               column={1}
             >
-              <Descriptions.Item label="Phụ huynh">
+              <Descriptions.Item label="Parent">
                 {selectedRequest.parentName}
               </Descriptions.Item>
-              <Descriptions.Item label="Trẻ">
+              <Descriptions.Item label="Child">
                 {selectedRequest.childName} ({selectedRequest.childAge})
               </Descriptions.Item>
-              <Descriptions.Item label="Chủ đề">
+              <Descriptions.Item label="Topic">
                 {selectedRequest.topic}
               </Descriptions.Item>
-              <Descriptions.Item label="Mô tả">
+              <Descriptions.Item label="Description">
                 {selectedRequest.description}
               </Descriptions.Item>
-              <Descriptions.Item label="Phương thức liên hệ">
+              <Descriptions.Item label="Contact Method">
                 {selectedRequest.contactMethod === "video"
-                  ? "Cuộc gọi video"
-                  : "Nhắn tin"}
+                  ? "Video Call"
+                  : "Chat"}
               </Descriptions.Item>
-              <Descriptions.Item label="Thời gian mong muốn">
+              <Descriptions.Item label="Preferred Time">
                 {moment(selectedRequest.preferredTime).format(
                   "DD/MM/YYYY HH:mm"
                 )}
@@ -485,12 +485,12 @@ const Request = () => {
 
             <Form.Item
               name="action"
-              label="Hành động"
-              rules={[{ required: true, message: "Vui lòng chọn hành động" }]}
+              label="Action"
+              rules={[{ required: true, message: "Please select an action" }]}
             >
               <Select>
-                <Option value="accepted">Chấp nhận yêu cầu</Option>
-                <Option value="rejected">Từ chối yêu cầu</Option>
+                <Option value="accepted">Accept Request</Option>
+                <Option value="rejected">Reject Request</Option>
               </Select>
             </Form.Item>
 
@@ -504,11 +504,11 @@ const Request = () => {
                 getFieldValue("action") === "accepted" ? (
                   <Form.Item
                     name="appointmentDate"
-                    label="Thời gian hẹn tư vấn"
+                    label="Appointment Date"
                     rules={[
                       {
                         required: true,
-                        message: "Vui lòng chọn thời gian hẹn",
+                        message: "Please select an appointment date",
                       },
                     ]}
                   >
@@ -516,24 +516,21 @@ const Request = () => {
                       showTime
                       format="DD/MM/YYYY HH:mm"
                       style={{ width: "100%" }}
-                      placeholder="Chọn thời gian hẹn"
+                      placeholder="Select appointment date"
                     />
                   </Form.Item>
                 ) : (
                   <Form.Item
                     name="rejectReason"
-                    label="Lý do từ chối"
+                    label="Reject Reason"
                     rules={[
                       {
                         required: true,
-                        message: "Vui lòng nhập lý do từ chối",
+                        message: "Please enter reject reason",
                       },
                     ]}
                   >
-                    <TextArea
-                      rows={4}
-                      placeholder="Nhập lý do từ chối yêu cầu"
-                    />
+                    <TextArea rows={4} placeholder="Enter reject reason" />
                   </Form.Item>
                 )
               }
@@ -541,22 +538,21 @@ const Request = () => {
 
             <Form.Item
               name="response"
-              label="Phản hồi"
-              rules={[{ required: true, message: "Vui lòng nhập phản hồi" }]}
+              label="Response"
+              rules={[{ required: true, message: "Please enter response" }]}
             >
-              <TextArea
-                rows={4}
-                placeholder="Nhập phản hồi của bạn cho phụ huynh"
-              />
+              <TextArea rows={4} placeholder="Enter response to parent" />
             </Form.Item>
 
             <Form.Item>
               <div
                 style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}
               >
-                <Button onClick={() => setResponseVisible(false)}>Hủy</Button>
+                <Button onClick={() => setResponseVisible(false)}>
+                  Cancel
+                </Button>
                 <Button type="primary" htmlType="submit" loading={loading}>
-                  Gửi phản hồi
+                  Send Response
                 </Button>
               </div>
             </Form.Item>
@@ -566,7 +562,7 @@ const Request = () => {
 
       {/* Drawer xem chi tiết */}
       <Drawer
-        title="Chi tiết yêu cầu tư vấn"
+        title="Consultation Request Details"
         placement="right"
         onClose={() => setDetailVisible(false)}
         open={detailVisible}
@@ -575,10 +571,10 @@ const Request = () => {
         {selectedRequest && (
           <>
             <Descriptions bordered column={1}>
-              <Descriptions.Item label="Trạng thái">
+              <Descriptions.Item label="Status">
                 {getStatusTag(selectedRequest.status)}
               </Descriptions.Item>
-              <Descriptions.Item label="Phụ huynh">
+              <Descriptions.Item label="Parent">
                 <div style={{ display: "flex", alignItems: "center" }}>
                   <Avatar src={selectedRequest.parentAvatar} size="small" />
                   <span style={{ marginLeft: 8 }}>
@@ -586,34 +582,34 @@ const Request = () => {
                   </span>
                 </div>
               </Descriptions.Item>
-              <Descriptions.Item label="Trẻ">
+              <Descriptions.Item label="Child">
                 {selectedRequest.childName} ({selectedRequest.childAge})
               </Descriptions.Item>
-              <Descriptions.Item label="Chủ đề">
+              <Descriptions.Item label="Topic">
                 {selectedRequest.topic}
               </Descriptions.Item>
-              <Descriptions.Item label="Mức độ">
+              <Descriptions.Item label="Priority">
                 {getUrgencyTag(selectedRequest.urgency)}
               </Descriptions.Item>
-              <Descriptions.Item label="Mô tả">
+              <Descriptions.Item label="Description">
                 {selectedRequest.description}
               </Descriptions.Item>
-              <Descriptions.Item label="Phương thức liên hệ">
+              <Descriptions.Item label="Contact Method">
                 {selectedRequest.contactMethod === "video"
-                  ? "Cuộc gọi video"
-                  : "Nhắn tin"}
+                  ? "Video Call"
+                  : "Chat"}
               </Descriptions.Item>
-              <Descriptions.Item label="Thời gian mong muốn">
+              <Descriptions.Item label="Preferred Time">
                 {moment(selectedRequest.preferredTime).format(
                   "DD/MM/YYYY HH:mm"
                 )}
               </Descriptions.Item>
-              <Descriptions.Item label="Ngày yêu cầu">
+              <Descriptions.Item label="Request Date">
                 {moment(selectedRequest.requestDate).format("DD/MM/YYYY HH:mm")}
               </Descriptions.Item>
 
               {selectedRequest.responseDate && (
-                <Descriptions.Item label="Ngày phản hồi">
+                <Descriptions.Item label="Response Date">
                   {moment(selectedRequest.responseDate).format(
                     "DD/MM/YYYY HH:mm"
                   )}
@@ -621,7 +617,7 @@ const Request = () => {
               )}
 
               {selectedRequest.appointmentDate && (
-                <Descriptions.Item label="Thời gian hẹn">
+                <Descriptions.Item label="Appointment Date">
                   {moment(selectedRequest.appointmentDate).format(
                     "DD/MM/YYYY HH:mm"
                   )}
@@ -629,7 +625,7 @@ const Request = () => {
               )}
 
               {selectedRequest.completedDate && (
-                <Descriptions.Item label="Ngày hoàn thành">
+                <Descriptions.Item label="Completed Date">
                   {moment(selectedRequest.completedDate).format(
                     "DD/MM/YYYY HH:mm"
                   )}
@@ -637,13 +633,13 @@ const Request = () => {
               )}
 
               {selectedRequest.rejectReason && (
-                <Descriptions.Item label="Lý do từ chối">
+                <Descriptions.Item label="Reject Reason">
                   {selectedRequest.rejectReason}
                 </Descriptions.Item>
               )}
 
               {selectedRequest.notes && (
-                <Descriptions.Item label="Ghi chú">
+                <Descriptions.Item label="Notes">
                   {selectedRequest.notes}
                 </Descriptions.Item>
               )}
@@ -658,7 +654,7 @@ const Request = () => {
                     handleRespond(selectedRequest);
                   }}
                 >
-                  Phản hồi yêu cầu
+                  Respond to Request
                 </Button>
               </div>
             )}

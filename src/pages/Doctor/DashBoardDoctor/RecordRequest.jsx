@@ -201,8 +201,8 @@ const RecordRequest = () => {
 
       message.success(
         values.action === "approved"
-          ? "Đã chấp nhận yêu cầu xem hồ sơ"
-          : "Đã từ chối yêu cầu xem hồ sơ"
+          ? "Record request approved"
+          : "Record request rejected"
       );
 
       // Refresh danh sách
@@ -213,36 +213,36 @@ const RecordRequest = () => {
   const getStatusTag = (status) => {
     switch (status) {
       case "pending":
-        return <Tag color="blue">Chờ phản hồi</Tag>;
+        return <Tag color="blue">Pending</Tag>;
       case "approved":
-        return <Tag color="green">Đã chấp nhận</Tag>;
+        return <Tag color="green">Approved</Tag>;
       case "rejected":
-        return <Tag color="red">Đã từ chối</Tag>;
+        return <Tag color="red">Rejected</Tag>;
       default:
-        return <Tag>Không xác định</Tag>;
+        return <Tag>Unknown</Tag>;
     }
   };
 
   const getRecordTypeTag = (type) => {
     switch (type) {
       case "vaccination":
-        return <Tag color="purple">Tiêm chủng</Tag>;
+        return <Tag color="purple">Vaccination</Tag>;
       case "health_check":
-        return <Tag color="cyan">Khám sức khỏe</Tag>;
+        return <Tag color="cyan">Health Check</Tag>;
       case "allergy":
-        return <Tag color="orange">Dị ứng</Tag>;
+        return <Tag color="orange">Allergy</Tag>;
       case "medical_history":
-        return <Tag color="blue">Lịch sử bệnh</Tag>;
+        return <Tag color="blue">Medical History</Tag>;
       case "full_record":
-        return <Tag color="magenta">Toàn bộ hồ sơ</Tag>;
+        return <Tag color="magenta">Full Record</Tag>;
       default:
-        return <Tag>Khác</Tag>;
+        return <Tag>Other</Tag>;
     }
   };
 
   const columns = [
     {
-      title: "Phụ huynh",
+      title: "Parent",
       dataIndex: "parentName",
       key: "parentName",
       render: (text, record) => (
@@ -253,7 +253,7 @@ const RecordRequest = () => {
       ),
     },
     {
-      title: "Trẻ",
+      title: "Child",
       dataIndex: "childName",
       key: "childName",
       render: (text, record) => (
@@ -264,29 +264,29 @@ const RecordRequest = () => {
       ),
     },
     {
-      title: "Loại hồ sơ",
+      title: "Record Type",
       dataIndex: "recordType",
       key: "recordType",
       render: (type) => getRecordTypeTag(type),
     },
     {
-      title: "Ngày yêu cầu",
+      title: "Request Date",
       dataIndex: "requestDate",
       key: "requestDate",
       render: (date) => moment(date).format("DD/MM/YYYY HH:mm"),
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: (status) => getStatusTag(status),
     },
     {
-      title: "Hành động",
+      title: "Actions",
       key: "action",
       render: (_, record) => (
         <Space>
-          <Tooltip title="Xem chi tiết">
+          <Tooltip title="View details">
             <Button
               icon={<EyeOutlined />}
               onClick={() => handleViewDetail(record)}
@@ -294,7 +294,7 @@ const RecordRequest = () => {
           </Tooltip>
 
           {record.status === "pending" && (
-            <Tooltip title="Phản hồi">
+            <Tooltip title="Respond">
               <Button
                 type="primary"
                 icon={<FileSearchOutlined />}
@@ -385,7 +385,7 @@ const RecordRequest = () => {
   return (
     <div className="tab-container">
       <Title level={4} className="section-title">
-        Yêu cầu xem hồ sơ y tế
+        Medical Record Request
       </Title>
 
       <Tabs
@@ -397,7 +397,7 @@ const RecordRequest = () => {
             onClick={fetchRecordRequests}
             loading={loading}
           >
-            Làm mới
+            Refresh
           </Button>
         }
       >
@@ -409,7 +409,7 @@ const RecordRequest = () => {
               }
               offset={[10, 0]}
             >
-              Chờ phản hồi
+              Pending
             </Badge>
           }
           key="pending"
@@ -421,14 +421,12 @@ const RecordRequest = () => {
             loading={loading}
             pagination={{ pageSize: 5 }}
             locale={{
-              emptyText: (
-                <Empty description="Không có yêu cầu xem hồ sơ nào đang chờ phản hồi" />
-              ),
+              emptyText: <Empty description="No pending record requests" />,
             }}
           />
         </TabPane>
 
-        <TabPane tab="Đã chấp nhận" key="approved">
+        <TabPane tab="Approved" key="approved">
           <Table
             columns={columns}
             dataSource={recordRequests}
@@ -436,14 +434,12 @@ const RecordRequest = () => {
             loading={loading}
             pagination={{ pageSize: 5 }}
             locale={{
-              emptyText: (
-                <Empty description="Không có yêu cầu xem hồ sơ nào đã được chấp nhận" />
-              ),
+              emptyText: <Empty description="No approved record requests" />,
             }}
           />
         </TabPane>
 
-        <TabPane tab="Đã từ chối" key="rejected">
+        <TabPane tab="Rejected" key="rejected">
           <Table
             columns={columns}
             dataSource={recordRequests}
@@ -451,9 +447,7 @@ const RecordRequest = () => {
             loading={loading}
             pagination={{ pageSize: 5 }}
             locale={{
-              emptyText: (
-                <Empty description="Không có yêu cầu xem hồ sơ nào đã bị từ chối" />
-              ),
+              emptyText: <Empty description="No rejected record requests" />,
             }}
           />
         </TabPane>
@@ -461,7 +455,7 @@ const RecordRequest = () => {
 
       {/* Modal phản hồi yêu cầu */}
       <Modal
-        title="Phản hồi yêu cầu xem hồ sơ y tế"
+        title="Respond to Medical Record Request"
         open={responseVisible}
         onCancel={() => setResponseVisible(false)}
         footer={null}
@@ -475,31 +469,31 @@ const RecordRequest = () => {
             initialValues={{ action: "approved" }}
           >
             <Descriptions
-              title="Thông tin yêu cầu"
+              title="Request Information"
               bordered
               size="small"
               column={1}
             >
-              <Descriptions.Item label="Phụ huynh">
+              <Descriptions.Item label="Parent">
                 {selectedRequest.parentName}
               </Descriptions.Item>
-              <Descriptions.Item label="Trẻ">
+              <Descriptions.Item label="Child">
                 {selectedRequest.childName} ({selectedRequest.childAge})
               </Descriptions.Item>
-              <Descriptions.Item label="Loại hồ sơ">
+              <Descriptions.Item label="Record Type">
                 {getRecordTypeTag(selectedRequest.recordType)}
               </Descriptions.Item>
-              <Descriptions.Item label="Lý do yêu cầu">
+              <Descriptions.Item label="Request Reason">
                 {selectedRequest.reason}
               </Descriptions.Item>
-              <Descriptions.Item label="Ngày yêu cầu">
+              <Descriptions.Item label="Request Date">
                 {moment(selectedRequest.requestDate).format("DD/MM/YYYY HH:mm")}
               </Descriptions.Item>
             </Descriptions>
 
             <Divider />
 
-            <Title level={5}>Hồ sơ y tế liên quan</Title>
+            <Title level={5}>Related Medical Records</Title>
             <List
               dataSource={getMedicalRecords(selectedRequest.childName).filter(
                 (record) =>
@@ -520,7 +514,7 @@ const RecordRequest = () => {
                     style={{ width: "100%", marginBottom: 8 }}
                   >
                     <p>
-                      <strong>Cập nhật lần cuối:</strong> {item.lastUpdated}
+                      <strong>Last Updated:</strong> {item.lastUpdated}
                     </p>
                     <List
                       size="small"
@@ -541,12 +535,12 @@ const RecordRequest = () => {
 
             <Form.Item
               name="action"
-              label="Hành động"
-              rules={[{ required: true, message: "Vui lòng chọn hành động" }]}
+              label="Action"
+              rules={[{ required: true, message: "Please select an action" }]}
             >
               <Select>
-                <Option value="approved">Chấp nhận yêu cầu</Option>
-                <Option value="rejected">Từ chối yêu cầu</Option>
+                <Option value="approved">Approve Request</Option>
+                <Option value="rejected">Reject Request</Option>
               </Select>
             </Form.Item>
 
@@ -560,31 +554,25 @@ const RecordRequest = () => {
                 getFieldValue("action") === "approved" ? (
                   <Form.Item
                     name="approvalNote"
-                    label="Ghi chú khi chấp nhận"
+                    label="Approval Note"
                     rules={[
-                      { required: true, message: "Vui lòng nhập ghi chú" },
+                      { required: true, message: "Please enter approval note" },
                     ]}
                   >
-                    <TextArea
-                      rows={4}
-                      placeholder="Nhập ghi chú về thông tin hồ sơ đã cung cấp"
-                    />
+                    <TextArea rows={4} placeholder="Enter approval note" />
                   </Form.Item>
                 ) : (
                   <Form.Item
                     name="rejectReason"
-                    label="Lý do từ chối"
+                    label="Reject Reason"
                     rules={[
                       {
                         required: true,
-                        message: "Vui lòng nhập lý do từ chối",
+                        message: "Please enter reject reason",
                       },
                     ]}
                   >
-                    <TextArea
-                      rows={4}
-                      placeholder="Nhập lý do từ chối yêu cầu"
-                    />
+                    <TextArea rows={4} placeholder="Enter reject reason" />
                   </Form.Item>
                 )
               }
@@ -594,9 +582,11 @@ const RecordRequest = () => {
               <div
                 style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}
               >
-                <Button onClick={() => setResponseVisible(false)}>Hủy</Button>
+                <Button onClick={() => setResponseVisible(false)}>
+                  Cancel
+                </Button>
                 <Button type="primary" htmlType="submit" loading={loading}>
-                  Gửi phản hồi
+                  Submit
                 </Button>
               </div>
             </Form.Item>
@@ -606,7 +596,7 @@ const RecordRequest = () => {
 
       {/* Drawer xem chi tiết */}
       <Drawer
-        title="Chi tiết yêu cầu xem hồ sơ y tế"
+        title="Medical Record Request Details"
         placement="right"
         onClose={() => setDetailVisible(false)}
         open={detailVisible}
@@ -615,10 +605,10 @@ const RecordRequest = () => {
         {selectedRequest && (
           <>
             <Descriptions bordered column={1}>
-              <Descriptions.Item label="Trạng thái">
+              <Descriptions.Item label="Status">
                 {getStatusTag(selectedRequest.status)}
               </Descriptions.Item>
-              <Descriptions.Item label="Phụ huynh">
+              <Descriptions.Item label="Parent">
                 <div style={{ display: "flex", alignItems: "center" }}>
                   <Avatar src={selectedRequest.parentAvatar} size="small" />
                   <span style={{ marginLeft: 8 }}>
@@ -626,21 +616,21 @@ const RecordRequest = () => {
                   </span>
                 </div>
               </Descriptions.Item>
-              <Descriptions.Item label="Trẻ">
+              <Descriptions.Item label="Child">
                 {selectedRequest.childName} ({selectedRequest.childAge})
               </Descriptions.Item>
-              <Descriptions.Item label="Loại hồ sơ">
+              <Descriptions.Item label="Record Type">
                 {getRecordTypeTag(selectedRequest.recordType)}
               </Descriptions.Item>
-              <Descriptions.Item label="Lý do yêu cầu">
+              <Descriptions.Item label="Request Reason">
                 {selectedRequest.reason}
               </Descriptions.Item>
-              <Descriptions.Item label="Ngày yêu cầu">
+              <Descriptions.Item label="Request Date">
                 {moment(selectedRequest.requestDate).format("DD/MM/YYYY HH:mm")}
               </Descriptions.Item>
 
               {selectedRequest.responseDate && (
-                <Descriptions.Item label="Ngày phản hồi">
+                <Descriptions.Item label="Response Date">
                   {moment(selectedRequest.responseDate).format(
                     "DD/MM/YYYY HH:mm"
                   )}
@@ -648,13 +638,13 @@ const RecordRequest = () => {
               )}
 
               {selectedRequest.approvalNote && (
-                <Descriptions.Item label="Ghi chú khi chấp nhận">
+                <Descriptions.Item label="Approval Note">
                   {selectedRequest.approvalNote}
                 </Descriptions.Item>
               )}
 
               {selectedRequest.rejectReason && (
-                <Descriptions.Item label="Lý do từ chối">
+                <Descriptions.Item label="Reject Reason">
                   {selectedRequest.rejectReason}
                 </Descriptions.Item>
               )}
@@ -662,7 +652,7 @@ const RecordRequest = () => {
 
             {selectedRequest.status === "approved" && (
               <>
-                <Divider orientation="left">Hồ sơ y tế đã cung cấp</Divider>
+                <Divider orientation="left">Provided Medical Records</Divider>
                 <List
                   dataSource={getMedicalRecords(
                     selectedRequest.childName
@@ -687,7 +677,7 @@ const RecordRequest = () => {
                         style={{ width: "100%", marginBottom: 8 }}
                       >
                         <p>
-                          <strong>Cập nhật lần cuối:</strong> {item.lastUpdated}
+                          <strong>Last Updated:</strong> {item.lastUpdated}
                         </p>
                         <List
                           size="small"
@@ -715,7 +705,7 @@ const RecordRequest = () => {
                     handleRespond(selectedRequest);
                   }}
                 >
-                  Phản hồi yêu cầu
+                  Respond to Request
                 </Button>
               </div>
             )}

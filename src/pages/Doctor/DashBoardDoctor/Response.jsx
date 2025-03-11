@@ -188,19 +188,19 @@ const Response = () => {
   const getStatusTag = (status) => {
     switch (status) {
       case "scheduled":
-        return <Tag color="blue">Đã lên lịch</Tag>;
+        return <Tag color="blue">Scheduled</Tag>;
       case "completed":
-        return <Tag color="green">Đã hoàn thành</Tag>;
+        return <Tag color="green">Completed</Tag>;
       case "rejected":
-        return <Tag color="red">Đã từ chối</Tag>;
+        return <Tag color="red">Rejected</Tag>;
       default:
-        return <Tag>Không xác định</Tag>;
+        return <Tag>Unknown</Tag>;
     }
   };
 
   const columns = [
     {
-      title: "Phụ huynh",
+      title: "Parent",
       dataIndex: "parentName",
       key: "parentName",
       render: (text, record) => (
@@ -211,7 +211,7 @@ const Response = () => {
       ),
     },
     {
-      title: "Trẻ",
+      title: "Child",
       dataIndex: "childName",
       key: "childName",
       render: (text, record) => (
@@ -222,31 +222,31 @@ const Response = () => {
       ),
     },
     {
-      title: "Chủ đề",
+      title: "Topic",
       dataIndex: "topic",
       key: "topic",
     },
     {
-      title: "Ngày phản hồi",
+      title: "Response Date",
       dataIndex: "responseDate",
       key: "responseDate",
       render: (date) => moment(date).format("DD/MM/YYYY HH:mm"),
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: (status) => getStatusTag(status),
     },
     {
-      title: "Đánh giá",
+      title: "Rating",
       dataIndex: "rating",
       key: "rating",
       render: (rating) =>
         rating ? <Rate disabled defaultValue={rating} /> : "-",
     },
     {
-      title: "Hành động",
+      title: "Actions",
       key: "action",
       render: (_, record) => (
         <Button
@@ -254,7 +254,7 @@ const Response = () => {
           onClick={() => handleViewDetail(record)}
           type="primary"
         >
-          Chi tiết
+          Details
         </Button>
       ),
     },
@@ -263,7 +263,7 @@ const Response = () => {
   return (
     <div className="tab-container">
       <Title level={4} className="section-title">
-        Lịch sử phản hồi tư vấn
+        Consultation Response History
       </Title>
 
       <Tabs
@@ -271,11 +271,11 @@ const Response = () => {
         onChange={setActiveTab}
         tabBarExtraContent={
           <Button type="primary" onClick={fetchResponses} loading={loading}>
-            Làm mới
+            Refresh
           </Button>
         }
       >
-        <TabPane tab="Tất cả" key="all">
+        <TabPane tab="All" key="all">
           <Table
             columns={columns}
             dataSource={responses}
@@ -283,12 +283,12 @@ const Response = () => {
             loading={loading}
             pagination={{ pageSize: 5 }}
             locale={{
-              emptyText: <Empty description="Không có dữ liệu phản hồi" />,
+              emptyText: <Empty description="No response data available" />,
             }}
           />
         </TabPane>
 
-        <TabPane tab="Đã hoàn thành" key="completed">
+        <TabPane tab="Completed" key="completed">
           <Table
             columns={columns}
             dataSource={responses}
@@ -296,14 +296,12 @@ const Response = () => {
             loading={loading}
             pagination={{ pageSize: 5 }}
             locale={{
-              emptyText: (
-                <Empty description="Không có dữ liệu phản hồi đã hoàn thành" />
-              ),
+              emptyText: <Empty description="No completed responses" />,
             }}
           />
         </TabPane>
 
-        <TabPane tab="Đã lên lịch" key="scheduled">
+        <TabPane tab="Scheduled" key="scheduled">
           <Table
             columns={columns}
             dataSource={responses}
@@ -311,14 +309,12 @@ const Response = () => {
             loading={loading}
             pagination={{ pageSize: 5 }}
             locale={{
-              emptyText: (
-                <Empty description="Không có dữ liệu phản hồi đã lên lịch" />
-              ),
+              emptyText: <Empty description="No scheduled responses" />,
             }}
           />
         </TabPane>
 
-        <TabPane tab="Đã từ chối" key="rejected">
+        <TabPane tab="Rejected" key="rejected">
           <Table
             columns={columns}
             dataSource={responses}
@@ -326,9 +322,7 @@ const Response = () => {
             loading={loading}
             pagination={{ pageSize: 5 }}
             locale={{
-              emptyText: (
-                <Empty description="Không có dữ liệu phản hồi đã từ chối" />
-              ),
+              emptyText: <Empty description="No rejected responses" />,
             }}
           />
         </TabPane>
@@ -336,7 +330,7 @@ const Response = () => {
 
       {/* Drawer xem chi tiết */}
       <Drawer
-        title="Chi tiết phản hồi tư vấn"
+        title="Consultation Response Details"
         placement="right"
         onClose={() => setDetailVisible(false)}
         open={detailVisible}
@@ -345,10 +339,10 @@ const Response = () => {
         {selectedResponse && (
           <>
             <Descriptions bordered column={1}>
-              <Descriptions.Item label="Trạng thái">
+              <Descriptions.Item label="Status">
                 {getStatusTag(selectedResponse.status)}
               </Descriptions.Item>
-              <Descriptions.Item label="Phụ huynh">
+              <Descriptions.Item label="Parent">
                 <div style={{ display: "flex", alignItems: "center" }}>
                   <Avatar src={selectedResponse.parentAvatar} size="small" />
                   <span style={{ marginLeft: 8 }}>
@@ -356,20 +350,20 @@ const Response = () => {
                   </span>
                 </div>
               </Descriptions.Item>
-              <Descriptions.Item label="Trẻ">
+              <Descriptions.Item label="Child">
                 {selectedResponse.childName} ({selectedResponse.childAge})
               </Descriptions.Item>
-              <Descriptions.Item label="Chủ đề">
+              <Descriptions.Item label="Topic">
                 {selectedResponse.topic}
               </Descriptions.Item>
             </Descriptions>
 
-            <Divider orientation="left">Tiến trình tư vấn</Divider>
+            <Divider orientation="left">Consultation Progress</Divider>
 
             <Timeline>
               <Timeline.Item>
                 <p>
-                  <strong>Yêu cầu tư vấn</strong> -{" "}
+                  <strong>Consultation Request</strong> -{" "}
                   {moment(selectedResponse.requestDate).format(
                     "DD/MM/YYYY HH:mm"
                   )}
@@ -381,7 +375,7 @@ const Response = () => {
 
               <Timeline.Item>
                 <p>
-                  <strong>Phản hồi của bác sĩ</strong> -{" "}
+                  <strong>Doctor's Response</strong> -{" "}
                   {moment(selectedResponse.responseDate).format(
                     "DD/MM/YYYY HH:mm"
                   )}
@@ -394,7 +388,7 @@ const Response = () => {
               {selectedResponse.status === "rejected" ? (
                 <Timeline.Item color="red">
                   <p>
-                    <strong>Từ chối yêu cầu</strong>
+                    <strong>Request Rejected</strong>
                   </p>
                   <Card size="small">
                     <Paragraph>{selectedResponse.rejectReason}</Paragraph>
@@ -404,13 +398,13 @@ const Response = () => {
                 selectedResponse.appointmentDate && (
                   <Timeline.Item color="blue">
                     <p>
-                      <strong>Lịch hẹn tư vấn</strong> -{" "}
+                      <strong>Consultation Appointment</strong> -{" "}
                       {moment(selectedResponse.appointmentDate).format(
                         "DD/MM/YYYY HH:mm"
                       )}
                     </p>
                     {selectedResponse.status === "scheduled" && (
-                      <Tag color="processing">Sắp diễn ra</Tag>
+                      <Tag color="processing">Upcoming</Tag>
                     )}
                   </Timeline.Item>
                 )
@@ -419,13 +413,13 @@ const Response = () => {
               {selectedResponse.completedDate && (
                 <Timeline.Item color="green">
                   <p>
-                    <strong>Hoàn thành tư vấn</strong> -{" "}
+                    <strong>Consultation Completed</strong> -{" "}
                     {moment(selectedResponse.completedDate).format(
                       "DD/MM/YYYY HH:mm"
                     )}
                   </p>
                   {selectedResponse.notes && (
-                    <Card size="small" title="Ghi chú của bác sĩ">
+                    <Card size="small" title="Doctor's Notes">
                       <Paragraph>{selectedResponse.notes}</Paragraph>
                     </Card>
                   )}
@@ -435,7 +429,7 @@ const Response = () => {
               {selectedResponse.feedback && (
                 <Timeline.Item dot={<CommentOutlined />}>
                   <p>
-                    <strong>Đánh giá từ phụ huynh</strong>
+                    <strong>Parent's Feedback</strong>
                   </p>
                   <Card size="small">
                     <Rate disabled defaultValue={selectedResponse.rating} />

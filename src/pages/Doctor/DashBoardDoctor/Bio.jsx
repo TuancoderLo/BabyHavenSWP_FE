@@ -61,12 +61,12 @@ const Bio = () => {
         name: name,
         email: email,
         phone: "0912345678",
-        specialty: "Nhi khoa",
-        experience: "5 năm",
-        education: "Đại học Y Hà Nội",
-        certifications: "Chứng chỉ hành nghề bác sĩ nhi khoa",
+        specialty: "Pediatrics",
+        experience: "5 years",
+        education: "Hanoi Medical University",
+        certifications: "Certificate in Pediatric Practice",
         biography:
-          "Tôi là bác sĩ chuyên khoa nhi với hơn 5 năm kinh nghiệm trong lĩnh vực chăm sóc sức khỏe trẻ em. Tôi đam mê công việc của mình và luôn cố gắng mang đến dịch vụ chăm sóc tốt nhất cho các bệnh nhân nhỏ tuổi.",
+          "I am a pediatrician with over 5 years of experience in child healthcare. I am passionate about my work and always strive to provide the best care for my young patients.",
         birthDate: "1985-05-15",
         gender: "male",
       };
@@ -109,11 +109,11 @@ const Bio = () => {
         });
         setEditing(false);
         setLoading(false);
-        message.success("Cập nhật thông tin thành công!");
+        message.success("Information updated successfully!");
       }, 1000);
     } catch (error) {
       setLoading(false);
-      message.error("Có lỗi xảy ra khi cập nhật thông tin!");
+      message.error("An error occurred while updating information!");
     }
   };
 
@@ -128,11 +128,11 @@ const Bio = () => {
   const beforeUpload = (file) => {
     const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
     if (!isJpgOrPng) {
-      message.error("Bạn chỉ có thể tải lên file JPG/PNG!");
+      message.error("You can only upload JPG/PNG files!");
     }
     const isLt2M = file.size / 1024 / 1024 < 2;
     if (!isLt2M) {
-      message.error("Kích thước ảnh phải nhỏ hơn 2MB!");
+      message.error("Image must be smaller than 2MB!");
     }
     return isJpgOrPng && isLt2M;
   };
@@ -159,7 +159,7 @@ const Bio = () => {
   const uploadButton = (
     <div>
       <UploadOutlined />
-      <div style={{ marginTop: 8 }}>Tải ảnh lên</div>
+      <div style={{ marginTop: 8 }}>Upload Image</div>
     </div>
   );
 
@@ -174,7 +174,7 @@ const Bio = () => {
   return (
     <div className="tab-container">
       <Title level={4} className="section-title">
-        Thông tin cá nhân
+        Personal Information
       </Title>
 
       <Form
@@ -220,12 +220,12 @@ const Bio = () => {
                   block
                   style={{ marginTop: 16 }}
                 >
-                  Chỉnh sửa thông tin
+                  Edit Information
                 </Button>
               ) : (
                 <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
                   <Button onClick={handleCancel} block>
-                    Hủy
+                    Cancel
                   </Button>
                   <Button
                     type="primary"
@@ -234,7 +234,7 @@ const Bio = () => {
                     loading={loading}
                     block
                   >
-                    Lưu thông tin
+                    Save Information
                   </Button>
                 </div>
               )}
@@ -243,14 +243,17 @@ const Bio = () => {
 
           <Col xs={24} md={16}>
             <Card>
-              <Title level={5}>Thông tin cơ bản</Title>
+              <Title level={5}>Basic Information</Title>
               <Row gutter={16}>
                 <Col xs={24} md={12}>
                   <Form.Item
                     name="name"
-                    label="Họ và tên"
+                    label="Full Name"
                     rules={[
-                      { required: true, message: "Vui lòng nhập họ tên" },
+                      {
+                        required: true,
+                        message: "Please enter your full name",
+                      },
                     ]}
                   >
                     <Input prefix={<UserOutlined />} disabled={!editing} />
@@ -261,8 +264,8 @@ const Bio = () => {
                     name="email"
                     label="Email"
                     rules={[
-                      { required: true, message: "Vui lòng nhập email" },
-                      { type: "email", message: "Email không hợp lệ" },
+                      { required: true, message: "Please enter your email" },
+                      { type: "email", message: "Invalid email format" },
                     ]}
                   >
                     <Input disabled />
@@ -271,11 +274,11 @@ const Bio = () => {
                 <Col xs={24} md={12}>
                   <Form.Item
                     name="phone"
-                    label="Số điện thoại"
+                    label="Phone Number"
                     rules={[
                       {
                         required: true,
-                        message: "Vui lòng nhập số điện thoại",
+                        message: "Please enter your phone number",
                       },
                     ]}
                   >
@@ -283,7 +286,7 @@ const Bio = () => {
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
-                  <Form.Item name="birthDate" label="Ngày sinh">
+                  <Form.Item name="birthDate" label="Date of Birth">
                     <DatePicker
                       format="DD/MM/YYYY"
                       style={{ width: "100%" }}
@@ -293,20 +296,23 @@ const Bio = () => {
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
-                  <Form.Item name="gender" label="Giới tính">
+                  <Form.Item name="gender" label="Gender">
                     <Select disabled={!editing}>
-                      <Option value="male">Nam</Option>
-                      <Option value="female">Nữ</Option>
-                      <Option value="other">Khác</Option>
+                      <Option value="male">Male</Option>
+                      <Option value="female">Female</Option>
+                      <Option value="other">Other</Option>
                     </Select>
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
                   <Form.Item
                     name="specialty"
-                    label="Chuyên khoa"
+                    label="Specialty"
                     rules={[
-                      { required: true, message: "Vui lòng nhập chuyên khoa" },
+                      {
+                        required: true,
+                        message: "Please enter your specialty",
+                      },
                     ]}
                   >
                     <Input disabled={!editing} />
@@ -316,25 +322,25 @@ const Bio = () => {
 
               <Divider />
 
-              <Title level={5}>Thông tin chuyên môn</Title>
+              <Title level={5}>Professional Information</Title>
               <Row gutter={16}>
                 <Col xs={24} md={12}>
-                  <Form.Item name="experience" label="Kinh nghiệm">
+                  <Form.Item name="experience" label="Experience">
                     <Input disabled={!editing} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
-                  <Form.Item name="education" label="Học vấn">
+                  <Form.Item name="education" label="Education">
                     <Input disabled={!editing} />
                   </Form.Item>
                 </Col>
                 <Col xs={24}>
-                  <Form.Item name="certifications" label="Chứng chỉ">
+                  <Form.Item name="certifications" label="Certifications">
                     <Input disabled={!editing} />
                   </Form.Item>
                 </Col>
                 <Col xs={24}>
-                  <Form.Item name="biography" label="Tiểu sử">
+                  <Form.Item name="biography" label="Biography">
                     <TextArea rows={4} disabled={!editing} />
                   </Form.Item>
                 </Col>
