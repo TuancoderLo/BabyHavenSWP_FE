@@ -113,31 +113,29 @@ nav {
 
 .join-btn {
   text-decoration: none;
-  color: #00d0bc;
-  font-weight: 600;
-  padding: 0.5rem 1.2rem;
+  font-weight: Bold;
   border-radius: 4px;
   transition: all 0.3s ease;
-  border: 1px solid #00d0bc;
-}
-
-.join-btn:hover {
-  background-color: rgba(0, 208, 188, 0.1);
 }
 
 .logout-btn {
-  background-color: #00d0bc;
-  color: white;
-  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 0.5rem 1.2rem;
-  border-radius: 4px;
-  font-weight: 600;
+  background-color: #FF74C7;
+  color: #302e2e;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .logout-btn:hover {
-  background-color: #00b8a6;
+  background-color: #e344a3;
+  transform: translateY(-1px);
 }
 
 /* Responsive Design */
