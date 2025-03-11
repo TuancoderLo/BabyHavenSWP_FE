@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import blogCategoryApi from "../../../../services/blogCategoryApi";
 import blogApi from "../../../../services/blogApi";
-// import TextEditor from "./textEditor";
 import TextEditor from "./textEditor";
 
 import {
@@ -18,7 +17,6 @@ import {
   Tag,
 } from "antd";
 import "./blog.css";
-import TextEditor from "./textEditor";
 
 // Thêm CustomEditor component
 const CustomEditor = ({ value = "", onChange }) => {
@@ -728,17 +726,9 @@ function Blog() {
               <Form.Item
                 name="content"
                 label="Content"
-                rules={[
-                  { required: true, message: "Please enter the content" },
-                ]}
-                valuePropName="data"
-                getValueFromEvent={(event, editor) => {
-                  return editor.getData(); // Lấy dữ liệu từ CKEditor
-                }}
-              >
-                <TextEditor />
                 rules={[{ required: true, message: "Content is required" }]}
                 className="ck-editor-container"
+              >
                 <CustomEditor />
               </Form.Item>
 
