@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import blogCategoryApi from "../../../../services/blogCategoryApi";
 import blogApi from "../../../../services/blogApi";
 // import TextEditor from "./textEditor";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 import {
   Table,
@@ -19,6 +17,7 @@ import {
   Tag,
 } from "antd";
 import "./blog.css";
+import TextEditor from "./textEditor";
 
 function Blog() {
   /* ==========================================================================
@@ -705,109 +704,15 @@ function Blog() {
               <Form.Item
                 name="content"
                 label="Content"
-                rules={[{ required: true, message: "Content is required" }]}
-                className="ck-editor-container"
+                rules={[
+                  { required: true, message: "Please enter the content" },
+                ]}
+                valuePropName="data"
+                getValueFromEvent={(event, editor) => {
+                  return editor.getData(); // Lấy dữ liệu từ CKEditor
+                }}
               >
-                <CKEditor
-                  editor={ClassicEditor}
-                  data={blogForm.getFieldValue("content") || ""}
-                  config={{
-                    licenseKey:
-                      "eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3NDE5OTY3OTksImp0aSI6IjI2Yzc2ZmYwLTA1M2EtNGFiYi05MzE1LTJkMTJmOGI1MDEzYyIsInVzYWdlRW5kcG9pbnQiOiJodHRwczovL3Byb3h5LWV2ZW50LmNrZWRpdG9yLmNvbSIsImRpc3RyaWJ1dGlvbkNoYW5uZWwiOlsiY2xvdWQiLCJkcnVwYWwiLCJzaCJdLCJ3aGl0ZUxhYmVsIjp0cnVlLCJsaWNlbnNlVHlwZSI6InRyaWFsIiwiZmVhdHVyZXMiOlsiKiJdLCJ2YyI6ImI3MTUxOGY4In0.vICfmtINjCekKGTm_NVhjNHnL3-r5jROjdzpHuhYSKCBXc5nA_-xPV7WeViN36BggwgnprQ-EIFANTbAbTOP4Q",
-                    toolbar: {
-                      items: [
-                        "heading",
-                        "|",
-                        "bold",
-                        "italic",
-                        "link",
-                        "bulletedList",
-                        "numberedList",
-                        "|",
-                        "outdent",
-                        "indent",
-                        "|",
-                        "uploadImage",
-                        "blockQuote",
-                        "insertTable",
-                        "mediaEmbed",
-                        "undo",
-                        "redo",
-                      ],
-                      shouldNotGroupWhenFull: true,
-                    },
-                    image: {
-                      toolbar: [
-                        "imageStyle:inline",
-                        "imageStyle:block",
-                        "imageStyle:side",
-                        "|",
-                        "toggleImageCaption",
-                        "imageTextAlternative",
-                        "|",
-                        "linkImage",
-                      ],
-                      upload: {
-                        types: ["jpeg", "png", "gif", "bmp", "webp", "tiff"],
-                      },
-                    },
-                    table: {
-                      contentToolbar: [
-                        "tableColumn",
-                        "tableRow",
-                        "mergeTableCells",
-                        "tableCellProperties",
-                        "tableProperties",
-                      ],
-                    },
-                    heading: {
-                      options: [
-                        {
-                          model: "paragraph",
-                          title: "Paragraph",
-                          class: "ck-heading_paragraph",
-                        },
-                        {
-                          model: "heading1",
-                          view: "h1",
-                          title: "Heading 1",
-                          class: "ck-heading_heading1",
-                        },
-                        {
-                          model: "heading2",
-                          view: "h2",
-                          title: "Heading 2",
-                          class: "ck-heading_heading2",
-                        },
-                        {
-                          model: "heading3",
-                          view: "h3",
-                          title: "Heading 3",
-                          class: "ck-heading_heading3",
-                        },
-                      ],
-                    },
-                    fontSize: {
-                      options: ["tiny", "small", "default", "big", "huge"],
-                    },
-                    placeholder: "Enter your blog content here...",
-                    removePlugins: ["Title"],
-                    language: "en",
-                  }}
-                  onReady={(editor) => {
-                    console.log("Editor is ready to use!", editor);
-                  }}
-                  onChange={(event, editor) => {
-                    const data = editor.getData();
-                    blogForm.setFieldsValue({ content: data });
-                  }}
-                  onError={(error, { willEditorRestart }) => {
-                    console.error("Editor error:", error);
-                    if (willEditorRestart) {
-                      console.warn("Editor will restart");
-                    }
-                  }}
-                />
+                <TextEditor />
               </Form.Item>
 
               <Form.Item
