@@ -738,7 +738,7 @@ function Blog() {
               >
                 <TextEditor />
                 rules={[{ required: true, message: "Content is required" }]}
-                className="ck-editor-container" >
+                className="ck-editor-container"
                 <CustomEditor />
               </Form.Item>
 
