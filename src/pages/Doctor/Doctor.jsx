@@ -16,6 +16,8 @@ import {
   FileOutlined,
   BellOutlined,
   LogoutOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import Bio from "./DashBoardDoctor/Bio";
@@ -41,7 +43,6 @@ const Doctor = () => {
   });
 
   useEffect(() => {
-    // Kiểm tra xác thực và vai trò
     const isAuthenticated = localStorage.getItem("isAuthenticated");
     const role = localStorage.getItem("role");
 
@@ -51,16 +52,14 @@ const Doctor = () => {
       return;
     }
 
-    // Lấy thông tin doctor từ localStorage
     const name = localStorage.getItem("name") || "Bác sĩ";
     const profilePicture = localStorage.getItem("profilePicture") || "";
 
-    // Trong thực tế, bạn sẽ gọi API để lấy thông tin chi tiết của bác sĩ
     setDoctorInfo({
       name: name,
-      specialty: "Nhi khoa", // Mặc định, trong thực tế sẽ lấy từ API
+      specialty: "Nhi khoa",
       profilePicture: profilePicture,
-      notifications: 5, // Giả lập có 5 thông báo mới
+      notifications: 5,
     });
   }, [navigate]);
 
@@ -69,18 +68,39 @@ const Doctor = () => {
   };
 
   const handleLogout = () => {
-    // Xóa thông tin đăng nhập
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("role");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("roleId");
-    localStorage.removeItem("email");
-    localStorage.removeItem("name");
-    localStorage.removeItem("profilePicture");
-
-    // Chuyển hướng về trang đăng nhập
+    localStorage.clear();
     navigate("/login");
   };
+
+  const menuItems = [
+    {
+      key: "1",
+      icon: <UserOutlined />,
+      label: "Thông tin cá nhân",
+    },
+    {
+      key: "2",
+      icon: <CalendarOutlined />,
+      label: "Yêu cầu tư vấn",
+    },
+    {
+      key: "3",
+      icon: <MessageOutlined />,
+      label: "Phản hồi tư vấn",
+    },
+    {
+      key: "4",
+      icon: <FileOutlined />,
+      label: "Yêu cầu hồ sơ",
+    },
+    {
+      key: "logout",
+      icon: <LogoutOutlined />,
+      label: "Đăng xuất",
+      danger: true,
+      onClick: handleLogout,
+    },
+  ];
 
   return (
     <Layout className="doctor-dashboard">
@@ -89,96 +109,97 @@ const Doctor = () => {
         collapsible
         collapsed={collapsed}
         className="doctor-sider"
+        width={280}
       >
-        <div className="doctor-logo">{collapsed ? "BH" : "Baby Haven"}</div>
+        <div className="logo-container">
+          <div className="doctor-logo">{collapsed ? "BH" : "Baby Haven"}</div>
+        </div>
+
         <div className="doctor-profile">
-          <Avatar
-            size={collapsed ? 50 : 80}
-            src={doctorInfo.profilePicture}
-            icon={<UserOutlined />}
-          />
+          <div className="avatar-container">
+            <Avatar
+              size={collapsed ? 60 : 100}
+              src={doctorInfo.profilePicture}
+              icon={<UserOutlined />}
+              className="doctor-avatar"
+            />
+          </div>
           {!collapsed && (
             <div className="doctor-info">
-              <Title level={5}>{doctorInfo.name}</Title>
-              <Text type="secondary">{doctorInfo.specialty}</Text>
+              <Title level={4} className="doctor-name">
+                {doctorInfo.name}
+              </Title>
+              <Text className="doctor-specialty">{doctorInfo.specialty}</Text>
             </div>
           )}
         </div>
+
         <Menu
           theme="dark"
           mode="inline"
           selectedKeys={[activeTab]}
           onClick={({ key }) => setActiveTab(key)}
-          items={[
-            {
-              key: "1",
-              icon: <UserOutlined />,
-              label: "Thông tin cá nhân",
-            },
-            {
-              key: "2",
-              icon: <CalendarOutlined />,
-              label: "Yêu cầu tư vấn",
-            },
-            {
-              key: "3",
-              icon: <MessageOutlined />,
-              label: "Phản hồi tư vấn",
-            },
-            {
-              key: "4",
-              icon: <FileOutlined />,
-              label: "Yêu cầu hồ sơ",
-            },
-            {
-              key: "logout",
-              icon: <LogoutOutlined />,
-              label: "Đăng xuất",
-              danger: true,
-              onClick: handleLogout,
-            },
-          ]}
+          items={menuItems}
+          className="doctor-menu"
         />
       </Sider>
+
       <Layout className="doctor-main-layout">
         <Header className="doctor-header">
           <div className="header-left">
-            {React.createElement(collapsed ? "menu-unfold" : "menu-fold", {
-              className: "trigger",
-              onClick: () => setCollapsed(!collapsed),
-            })}
-            <Title level={4}>Dashboard Bác sĩ</Title>
+            {collapsed ? (
+              <MenuUnfoldOutlined
+                className="trigger"
+                onClick={() => setCollapsed(false)}
+              />
+            ) : (
+              <MenuFoldOutlined
+                className="trigger"
+                onClick={() => setCollapsed(true)}
+              />
+            )}
+            <Title level={4} className="dashboard-title">
+              Dashboard Bác sĩ
+            </Title>
           </div>
           <div className="header-right">
-            <Badge count={doctorInfo.notifications} overflowCount={99}>
+            <Badge
+              count={doctorInfo.notifications}
+              overflowCount={99}
+              className="notification-badge"
+            >
               <BellOutlined className="notification-icon" />
             </Badge>
           </div>
         </Header>
+
         <Content className="doctor-content">
           {loading ? (
             <div className="loading-container">
               <Spin size="large" />
             </div>
           ) : (
-            <Tabs
-              activeKey={activeTab}
-              onChange={handleTabChange}
-              className="doctor-tabs"
-            >
-              <TabPane tab="Thông tin cá nhân" key="1">
-                <Bio />
-              </TabPane>
-              <TabPane tab="Yêu cầu tư vấn" key="2">
-                <Request />
-              </TabPane>
-              <TabPane tab="Phản hồi tư vấn" key="3">
-                <Response />
-              </TabPane>
-              <TabPane tab="Yêu cầu hồ sơ" key="4">
-                <RecordRequest />
-              </TabPane>
-            </Tabs>
+            <div className="content-wrapper">
+              <Tabs
+                activeKey={activeTab}
+                onChange={handleTabChange}
+                className="doctor-tabs"
+                type="card"
+              >
+                <TabPane tab="Thông tin cá nhân" key="1">
+                  <Bio />
+                </TabPane>
+                <TabPane tab="Yêu cầu tư vấn" key="2">
+                  <Request />
+                </TabPane>
+                <TabPane tab="Phản hồi tư vấn" key="3">
+                  <Response />
+                </TabPane>
+                <TabPane tab="Yêu cầu hồ sơ" key="4">
+                  <RecordRequest />
+                </TabPane>
+              </Tabs>
+            </div>
           )}
         </Content>
       </Layout>
