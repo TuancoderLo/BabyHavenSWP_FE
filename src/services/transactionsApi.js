@@ -19,8 +19,8 @@ const transactionsApi = {
  // Lấy thông tin memberMembership
  getMemberMembershipId: async (membershipId) => {
   // Sử dụng OData filter để lấy record có memberMembershipId bằng giá trị membershipId
-  const response = await api.get(`MemberMemberships/odata?$filter=memberMembershipId eq '${membershipId}'`);
-  const list = response.data.data;
+  const response = await api.get(`MemberMemberships/odata?$filter=memberMembershipId eq ${membershipId}`);
+  const list = response.data;
   if (Array.isArray(list) && list.length > 0) {
     return list[0].memberMembershipId;
   } else {
