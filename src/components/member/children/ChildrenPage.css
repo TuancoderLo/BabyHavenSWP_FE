@@ -36,9 +36,6 @@
     font-weight: 500;
   }
   
-  /**************************************************
-                                                                        CÁC NÚT FEATURE (Child Education, Analyze with AI)
-                                                                      **************************************************/
   .feature-buttons {
     width: 40%;
     display: flex;
@@ -174,16 +171,30 @@
   } */
 
   .add-child-btn {
-    background: #f8fafa;
-    box-shadow: #333;
-    color: #999;
-    padding: 20px 16px;
-    box-shadow: 0 0 8px rgba(21, 22, 22, 0.3); 
-    transition: box-shadow 0.3s, background 0.3s;
-    
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #064F83;
+    color: white;
+    border: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
 }
 .add-child-btn:hover {
-  background: #00bfa6;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  background: #0862a3;
+}
+
+.add-child-btn i {
+  font-size: 24px;
 }
 
 .add-milestones-btn {
@@ -263,24 +274,20 @@
 }
 /* Container cho vùng biểu đồ */
 .chart-area {
-  position: relative;
-  width: 100%;
-  height: 400px; /* Tăng chiều cao để biểu đồ hiển thị rõ hơn */
-  background-color: #fff;
-  padding: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  flex: 1;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden; /* Ẩn phần thừa nếu canvas vượt quá */
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  margin-top: -12px;
 }
 
 /* Đảm bảo canvas chart chiếm đầy vùng container */
 .chart-area canvas {
-  display: block;
+  flex: 1;
   width: 100% !important;
-  height: 100% !important;
+  height: calc(100% - 16px) !important;
+  min-height: 250px;
 }
 
   
@@ -390,4 +397,480 @@ growth-chart-box card {
     margin-inline-end: 0px;
     font-weight: bold;
     unicode-bidi: isolate;
+}
+
+.parent {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    gap: 8px;
+    width: 100%;
+    height: 100vh;
+    padding: 20px;
+    background: transparent;
+}
+
+/* Children Page Title - div23 */
+.children-page-title {
+    grid-column: 1 / span 6;
+    grid-row: 1;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 12px;
+    padding-left: 4px;
+}
+
+/* Child slots container */
+.child-slots-container {
+    grid-area: 2 / 1 / 8 / 2;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* Child slots - div4,5,6,7 */
+.child-slot {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    height: 85px;
+    position: relative;
+}
+
+.child-slot:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.child-slot.selected {
+    border-color: #064F83;
+    background-color: #f0f7ff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.child-slot.empty {
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background: #f8f9fa;
+    border: 2px dashed #ccc;
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    color: #666;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.child-slot.empty:hover {
+    background: #f0f0f0;
+    border-color: #00D0BC;
+    color: #00D0BC;
+}
+
+.child-slot.empty i {
+    font-size: 20px;
+    color: #00D0BC;
+}
+
+.child-slot.empty span {
+    font-weight: 500;
+}
+
+/* Remove individual grid-area assignments */
+.child-slot-1, .child-slot-2, .child-slot-3, .child-slot-4, .child-slot-5, .child-slot-6 {
+    /* grid-area properties removed */
+}
+
+/* Child details section - div1 */
+.child-details-section {
+    grid-area: 2 / 2 / 4 / 3;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    height: 100%;
+    min-height: 250px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.child-details-section h2 {
+    position: sticky;
+    top: 0;
+    background: white;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #eee;
+    z-index: 1;
+}
+
+/* Latest record section */
+.latest-record-section {
+    grid-area: 2 / 3 / 3 / 6;
+    background: white;
+    border-radius: 8px;
+    padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.latest-record-title {
+    font-size: 18px;
+    color: #333;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.latest-record-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.record-info {
+    display: flex;
+    align-items: center;
+    gap: 48px;
+}
+
+.record-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    border: none;
+}
+
+.record-label {
+    color: #666;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.record-value {
+    color: #333;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.add-record-btn {
+    margin: 0;
+    padding: 8px 16px;
+    background: #00D0BC;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+/* Growth chart section */
+.growth-chart-section {
+    grid-area: 3 / 3 / 8 / 6;
+    background: white;
+    border-radius: 8px;
+    padding: 4px 16px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.growth-chart-section h2 {
+    display: flex;
+    align-items: center;
+    color: #00D0BC;
+    font-size: 20px;
+    margin-bottom: 2px;
+}
+
+
+
+.chart-toolbar {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+}
+
+/* Child slot content styling */
+.child-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    position: relative;
+}
+
+.gender-icon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: #064F83;
+    font-size: 16px;
+}
+
+.gender-icon.male {
+    color: #064F83;
+}
+
+.gender-icon.female {
+    color: #FF69B4;
+}
+
+.child-name {
+    font-weight: bold;
+    font-size: 18px;
+    color: #333;
+}
+
+.child-age {
+    font-size: 14px;
+    color: #666;
+}
+
+.child-metrics {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.metric {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.metric-label {
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+}
+
+.metric-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.child-details-content {
+    margin-top: 20px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    color: #666;
+    font-size: 14px;
+}
+
+.detail-value {
+    color: #333;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.no-child-selected {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 16px;
+    text-align: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+/* Child education section */
+.child-education-section {
+    grid-area: 8 / 3 / 9 / 4;
+    background: #064F83;
+    display: none;
+}
+
+/* Analyze AI section */
+.analyze-ai-section {
+    grid-area: 8 / 4 / 9 / 5;
+    background: #699BF7;
+    display: none;
+}
+
+/* Connect Doctor section */
+.connect-doctor-section {
+    grid-area: 8 / 5 / 9 / 6;
+    background: #0682FF;
+    display: none;
+}
+
+/* Add Growth Record - div18 */
+.add-record-section {
+    grid-area: 8 / 3 / 9 / 6;
+    background: #00D0BC;
+    display: none;
+}
+
+/* Expert advice section - div11 */
+.expert-advice-section {
+    grid-area: 2 / 6 / 6 / 7;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.expert-advice-section h3 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.advice-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.no-advice {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #666;
+    font-size: 14px;
+    text-align: center;
+    padding: 20px;
+}
+
+.advice-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.advice-section {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.advice-section h4 {
+    color: #00D0BC;
+    font-size: 16px;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.advice-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.advice-section li {
+    color: #444;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.advice-section li:before {
+    content: "•";
+    color: #00D0BC;
+    font-size: 18px;
+    position: absolute;
+    left: 0;
+    top: -2px;
+}
+
+/* Scrollbar styling */
+.advice-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.advice-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.advice-content::-webkit-scrollbar-thumb {
+    background: #00D0BC;
+    border-radius: 3px;
+}
+
+.advice-content::-webkit-scrollbar-thumb:hover {
+    background: #00a396;
+}
+
+.chart-filters {
+    display: flex;
+    gap: 24px;
+    margin-left: 24px;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.filter-item {
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 4px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.filter-item:hover {
+  color: #00D0BC;
+}
+
+.filter-item.active {
+  color: #00D0BC;
+}
+
+.filter-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #00D0BC;
+  border-radius: 2px;
 }

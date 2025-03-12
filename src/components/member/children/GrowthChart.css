@@ -1,0 +1,62 @@
+.growth-chart-container {
+  width: 100%;
+  height: calc(100% - 40px);
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 350px;
+  color: #666;
+  font-size: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+/* Custom styles cho tooltip */
+.recharts-tooltip-wrapper {
+  outline: none;
+}
+
+/* Custom styles cho legend */
+.recharts-legend-item {
+  padding: 0 8px;
+}
+
+.recharts-legend-item-text {
+  color: #666 !important;
+  font-size: 12px !important;
+}
+
+/* Custom styles cho grid lines */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: #f0f0f0;
+}
+
+/* Custom styles cho axis */
+.recharts-text {
+  fill: #666;
+  font-size: 10px;
+}
+
+/* Hover effect cho points */
+.recharts-dot:hover {
+  transform: scale(1.2);
+  transition: transform 0.2s ease;
+}
+
+/* Đảm bảo container của chart không bị overflow */
+.recharts-wrapper {
+  overflow: visible !important;
+}
+
+/* Tối ưu khoảng cách cho x-axis */
+.recharts-xAxis .recharts-cartesian-axis-tick {
+  font-size: 10px !important;
+} 
