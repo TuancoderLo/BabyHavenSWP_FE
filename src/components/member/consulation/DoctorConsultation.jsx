@@ -15,6 +15,8 @@ function DoctorConsultation() {
   const [error, setError] = useState(null);
   const [doctors, setDoctors] = useState([]);
   const [doctorSpecializations, setDoctorSpecializations] = useState({});
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
 
   // Add steps variable
   const steps = ["Enter Information", "Select Doctor", "Confirm"];
@@ -22,6 +24,7 @@ function DoctorConsultation() {
   useEffect(() => {
     fetchChildren();
     fetchDoctors();
+    fetchCategories();
   }, []);
 
   const fetchChildren = async () => {
@@ -94,17 +97,27 @@ function DoctorConsultation() {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      const response = await doctorApi.getConsultationRequests();
+      if (response?.data) {
+        // Get unique categories from the response
+        const uniqueCategories = [
+          ...new Set(response.data.map((req) => req.category)),
+        ];
+        setCategories(uniqueCategories);
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
   const handleChildSelect = (child) => {
     setSelectedChild(child);
   };
-
-  const categories = [
-    "General Consultation",
-    "Pediatric Care",
-    "Vaccination",
-    "Development Check",
-    "Nutrition Advice",
-  ];
 
   const handleNextStep = () => {
     if (currentStep < 3) {
@@ -125,6 +138,7 @@ function DoctorConsultation() {
                 className="doctor-category-select"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
+                disabled={loadingCategories}
               >
                 <option value="">Select category</option>
                 {categories.map((category) => (
@@ -133,6 +147,9 @@ function DoctorConsultation() {
                   </option>
                 ))}
               </select>
+              {loadingCategories && (
+                <div className="loading-spinner-small"></div>
+              )}
             </div>
 
             <div className="doctor-editor-container">

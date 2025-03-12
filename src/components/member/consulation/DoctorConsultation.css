@@ -129,6 +129,7 @@ body {
 
 .doctor-category-container {
   width: 100%;
+  position: relative;
 }
 
 .doctor-category-select {
@@ -700,4 +701,19 @@ body {
 /* Fix for source display */
 .ck-content-display source {
   display: none;
+}
+
+.loading-spinner-small {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #2563eb;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-top: 8px;
+}
+
+.doctor-category-select:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
 }
