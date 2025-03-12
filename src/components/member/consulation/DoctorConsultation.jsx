@@ -177,8 +177,7 @@ function DoctorConsultation() {
         status: selectedDoctor.status.toLowerCase() === "active" ? 1 : 0,
         urgency: "high",
         category: selectedCategory,
-        description: plainDescription, // Sử dụng nội dung đã được xử lý
-        attachments: [],
+        description: plainDescription,
       };
 
       console.log("Submitting payload:", payload);
