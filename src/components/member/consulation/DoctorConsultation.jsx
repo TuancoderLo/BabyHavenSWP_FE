@@ -1,95 +1,206 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./DoctorConsultation.css";
 
 function DoctorConsultation() {
   const [selectedChild, setSelectedChild] = useState(null);
-  const [formData, setFormData] = useState({
-    category: "",
-    details: "",
-    doctorSelection: null,
-    additionalInfo: {},
-  });
-  const [currentStep, setCurrentStep] = useState(1);
-  const [children, setChildren] = useState([
+  const [currentStep, setCurrentStep] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [consultationContent, setConsultationContent] = useState("");
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+
+  // Add steps variable
+  const steps = ["Enter Information", "Select Doctor", "Confirm"];
+
+  // Mock data with unique keys
+  const children = [
     { id: 1, name: "Child 1" },
     { id: 2, name: "Child 2" },
-  ]);
+  ];
 
-  useEffect(() => {
-    // TODO: Gọi API để lấy danh sách children
-    // setChildren(response.data);
-  }, []);
+  const categories = [
+    "General Consultation",
+    "Pediatric Care",
+    "Vaccination",
+    "Development Check",
+    "Nutrition Advice",
+  ];
 
-  const handleInputChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+  const doctors = {
+    recent: [
+      {
+        id: 1,
+        name: "Dr. Sarah Johnson",
+        status: "online",
+        major: "Pediatrics",
+        specializing: "Child Development",
+        avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+      },
+      {
+        id: 2,
+        name: "Dr. Michael Chen",
+        status: "offline",
+        major: "Pediatrics",
+        specializing: "Pediatric Neurology",
+        avatar: "https://randomuser.me/api/portraits/men/1.jpg",
+      },
+    ],
+    available: [
+      {
+        id: 3,
+        name: "Dr. Emily Wilson",
+        status: "online",
+        major: "Pediatrics",
+        specializing: "Child Psychology",
+        avatar: "https://randomuser.me/api/portraits/women/2.jpg",
+      },
+      {
+        id: 4,
+        name: "Dr. James Miller",
+        status: "online",
+        major: "Pediatrics",
+        specializing: "Pediatric Cardiology",
+        avatar: "https://randomuser.me/api/portraits/men/2.jpg",
+      },
+    ],
   };
 
-  const handleSubmit = () => {
-    // TODO: Gửi dữ liệu đến database
-    console.log("Submit data:", {
-      childId: selectedChild,
-      ...formData,
-    });
+  const handleNextStep = () => {
+    if (currentStep < 3) {
+      setCurrentStep(currentStep + 1);
+    }
   };
 
   const renderStepContent = () => {
     switch (currentStep) {
+      case 0:
+        return (
+          <div className="doctor-consultation-form">
+            <div className="doctor-category-container">
+              <div className="doctor-section-title">
+                Select Consultation Category:
+              </div>
+              <select
+                className="doctor-category-select"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+              >
+                <option value="">Select category</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="doctor-editor-container">
+              <div className="doctor-section-title">Consultation Details:</div>
+              <textarea
+                className="doctor-editor-area"
+                placeholder="Enter your consultation details..."
+                value={consultationContent}
+                onChange={(e) => setConsultationContent(e.target.value)}
+              />
+            </div>
+          </div>
+        );
+
       case 1:
         return (
-          <div className="form-container">
-            <div className="consultation-form">
-              <div className="form-group category-input">
-                <label>Category</label>
-                <input
-                  type="text"
-                  value={formData.category}
-                  onChange={(e) =>
-                    handleInputChange("category", e.target.value)
-                  }
-                  placeholder="Enter category"
-                />
-              </div>
-              <div className="form-group consultation-details">
-                <textarea
-                  value={formData.details}
-                  onChange={(e) => handleInputChange("details", e.target.value)}
-                  placeholder="Enter your consultation details"
-                  className="consultation-textarea"
-                />
-              </div>
+          <div className="doctor-grid-section">
+            <div className="doctor-section-title">
+              Select Consulting Doctor:
             </div>
-            <button className="next-step-btn" onClick={() => setCurrentStep(2)}>
-              Next step
-            </button>
+            <div className="doctor-grid">
+              {doctors.recent.map((doctor) => (
+                <div
+                  key={doctor.id}
+                  className={`doctor-profile-card ${
+                    selectedDoctor?.id === doctor.id ? "selected" : ""
+                  }`}
+                  onClick={() => setSelectedDoctor(doctor)}
+                >
+                  <div className="doctor-profile-header">
+                    <div className="doctor-profile-avatar">
+                      <img src={doctor.avatar} alt={doctor.name} />
+                    </div>
+                    <div className="doctor-profile-info">
+                      <div className="doctor-profile-name">{doctor.name}</div>
+                      <div className="doctor-profile-status">
+                        <span
+                          className={`doctor-status-dot ${doctor.status}`}
+                        ></span>
+                        {doctor.status}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="doctor-profile-details">
+                    <div className="doctor-profile-major">{doctor.major}</div>
+                    <div className="doctor-profile-specialty">
+                      {doctor.specializing}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         );
+
       case 2:
         return (
-          <div className="form-container">
-            <div className="consultation-form">
-              <h3>Choose Doctor</h3>
-              {/* Nội dung cho bước 2 sẽ được thêm sau */}
+          <div className="doctor-review-container">
+            <div className="doctor-review-content">
+              <div className="doctor-section-title">
+                Review Consultation Information
+              </div>
+              <div style={{ marginBottom: "15px" }}>
+                <strong>Category:</strong> {selectedCategory}
+              </div>
+              <div>
+                <strong>Details:</strong>
+                <div style={{ marginTop: "10px", whiteSpace: "pre-wrap" }}>
+                  {consultationContent}
+                </div>
+              </div>
             </div>
-            <button className="next-step-btn" onClick={() => setCurrentStep(3)}>
-              Next step
-            </button>
+
+            {selectedDoctor && (
+              <div className="doctor-review-selection">
+                <div className="doctor-section-title">Selected Information</div>
+                <div className="doctor-profile-card selected">
+                  <div className="doctor-profile-header">
+                    <div className="doctor-profile-avatar">
+                      <img
+                        src={selectedDoctor.avatar}
+                        alt={selectedDoctor.name}
+                      />
+                    </div>
+                    <div className="doctor-profile-info">
+                      <div className="doctor-profile-name">
+                        {selectedDoctor.name}
+                      </div>
+                      <div className="doctor-profile-status">
+                        <span
+                          className={`doctor-status-dot ${selectedDoctor.status}`}
+                        ></span>
+                        {selectedDoctor.status}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="doctor-profile-details">
+                    <div className="doctor-profile-major">
+                      {selectedDoctor.major}
+                    </div>
+                    <div className="doctor-profile-specialty">
+                      {selectedDoctor.specializing}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         );
-      case 3:
-        return (
-          <div className="form-container">
-            <div className="consultation-form">
-              <h3>Submit</h3>
-              {/* Nội dung cho bước 3 sẽ được thêm sau */}
-            </div>
-            <button className="next-step-btn" onClick={handleSubmit}>
-              Submit
-            </button>
-          </div>
-        );
+
       default:
         return null;
     }
@@ -97,58 +208,43 @@ function DoctorConsultation() {
 
   return (
     <div className="doctor-consultation">
-      <div className="content-wrapper">
-        <div className="child-selection">
-          {children.map((child) => (
+      <div className="doctor-sidebar">
+        {children.map((child) => (
+          <div
+            key={child.id}
+            className={`doctor-child-item ${
+              selectedChild?.id === child.id ? "selected" : ""
+            }`}
+            onClick={() => setSelectedChild(child.id)}
+          >
+            <div className="doctor-child-icon">
+              <i className="fas fa-child"></i>
+            </div>
+            <div className="doctor-child-label">{child.name}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="doctor-content">
+        <div className="doctor-steps">
+          {steps.map((step, index) => (
             <div
-              key={child.id}
-              className={`child-card ${
-                selectedChild === child.id ? "selected" : ""
+              key={index}
+              className={`doctor-step-item ${
+                currentStep === index ? "active" : ""
               }`}
-              onClick={() => setSelectedChild(child.id)}
+              onClick={() => setCurrentStep(index)}
             >
-              <div className="child-icon">
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"
-                    fill="#666666"
-                  />
-                </svg>
-              </div>
-              <div className="child-name">{child.name}</div>
+              {step}
             </div>
           ))}
         </div>
 
-        <div className="main-container">
-          <div className="steps-navigation">
-            <div
-              className={`step ${currentStep === 1 ? "active" : ""}`}
-              onClick={() => setCurrentStep(1)}
-            >
-              1. Entry information
-            </div>
-            <div
-              className={`step ${currentStep === 2 ? "active" : ""}`}
-              onClick={() => setCurrentStep(2)}
-            >
-              2. Choose doctor
-            </div>
-            <div
-              className={`step ${currentStep === 3 ? "active" : ""}`}
-              onClick={() => setCurrentStep(3)}
-            >
-              3. Submit
-            </div>
-          </div>
-
-          <div className="main-content">{renderStepContent()}</div>
+        <div className="doctor-form-content">
+          {renderStepContent()}
+          <button className="doctor-action-button" onClick={handleNextStep}>
+            {currentStep === steps.length - 1 ? "Complete" : "Next"}
+          </button>
         </div>
       </div>
     </div>
