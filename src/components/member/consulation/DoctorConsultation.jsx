@@ -149,22 +149,26 @@ function DoctorConsultation() {
         throw new Error("Vui lòng chọn category");
       }
 
-      // Log để kiểm tra status của doctor
-      console.log("Selected doctor status:", selectedDoctor.status);
+      // Format ngày giờ theo định dạng yêu cầu
+      const currentDate = new Date();
+      const requestDate =
+        currentDate.toISOString().slice(0, 10) +
+        " " +
+        currentDate.toTimeString().slice(0, 8) +
+        "." +
+        currentDate.getMilliseconds().toString().padEnd(3, "0");
 
       const payload = {
-        consultationRequestCreateDto: {
-          memberId: memberId,
-          childName: selectedChild.name,
-          childBirth: selectedChild.childBirth,
-          doctorId: selectedDoctor.doctorId,
-          requestDate: new Date().toISOString(),
-          status: selectedDoctor.status.toLowerCase() === "active" ? 1 : 0, // Chuyển đổi status text thành số
-          urgency: "other", // Hardcode urgency là "other"
-          category: selectedCategory,
-          description: consultationContent,
-          attachments: null,
-        },
+        memberId: memberId,
+        childName: selectedChild.name,
+        childBirth: selectedChild.childBirth,
+        doctorId: selectedDoctor.doctorId,
+        requestDate: requestDate,
+        status: selectedDoctor.status.toLowerCase() === "active" ? 1 : 0,
+        urgency: "high",
+        category: selectedCategory,
+        description: consultationContent,
+        attachments: [], // Truyền array rỗng thay vì null
       };
 
       console.log("Submitting payload:", payload);
