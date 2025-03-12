@@ -31,6 +31,18 @@ const doctorApi = {
       throw error;
     }
   },
+
+  createConsultationRequest: async (data) => {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/ConsultationRequests`,
+        data
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export default doctorApi;

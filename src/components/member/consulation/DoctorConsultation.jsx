@@ -17,6 +17,8 @@ function DoctorConsultation() {
   const [doctorSpecializations, setDoctorSpecializations] = useState({});
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   // Add steps variable
   const steps = ["Enter Information", "Select Doctor", "Confirm"];
@@ -42,10 +44,10 @@ function DoctorConsultation() {
       const response = await childApi.getByMember(memberId);
       console.log("API Response:", response);
 
-      // Kiểm tra response và lấy mảng children từ cấu trúc đúng
       if (response?.data?.data && Array.isArray(response.data.data)) {
         const childrenData = response.data.data.map((child) => ({
           name: child.name,
+          childBirth: child.dateOfBirth,
         }));
         console.log("Processed children data:", childrenData);
         setChildren(childrenData);
@@ -122,6 +124,68 @@ function DoctorConsultation() {
   const handleNextStep = () => {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setSubmitLoading(true);
+      setSubmitError(null);
+
+      const memberId = localStorage.getItem("memberId");
+      if (!memberId) {
+        throw new Error("Vui lòng đăng nhập để tiếp tục");
+      }
+
+      if (!selectedChild) {
+        throw new Error("Vui lòng chọn trẻ");
+      }
+
+      if (!selectedDoctor) {
+        throw new Error("Vui lòng chọn bác sĩ");
+      }
+
+      if (!selectedCategory) {
+        throw new Error("Vui lòng chọn category");
+      }
+
+      // Log để kiểm tra status của doctor
+      console.log("Selected doctor status:", selectedDoctor.status);
+
+      const payload = {
+        consultationRequestCreateDto: {
+          memberId: memberId,
+          childName: selectedChild.name,
+          childBirth: selectedChild.childBirth,
+          doctorId: selectedDoctor.doctorId,
+          requestDate: new Date().toISOString(),
+          status: selectedDoctor.status.toLowerCase() === "active" ? 1 : 0, // Chuyển đổi status text thành số
+          urgency: "other", // Hardcode urgency là "other"
+          category: selectedCategory,
+          description: consultationContent,
+          attachments: null,
+        },
+      };
+
+      console.log("Submitting payload:", payload);
+
+      const response = await doctorApi.createConsultationRequest(payload);
+      console.log("Submit response:", response);
+
+      alert("Gửi yêu cầu tư vấn thành công!");
+      setCurrentStep(0);
+      setSelectedCategory("");
+      setConsultationContent("");
+      setSelectedDoctor(null);
+    } catch (error) {
+      console.error("Error submitting consultation:", error);
+      setSubmitError(
+        error.response?.data?.title ||
+          error.message ||
+          "Không thể gửi yêu cầu tư vấn"
+      );
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
@@ -322,6 +386,17 @@ function DoctorConsultation() {
                 </div>
               </div>
             )}
+
+            <div className="doctor-submit-section">
+              {submitError && <div className="submit-error">{submitError}</div>}
+              <button
+                className="doctor-action-button"
+                onClick={handleSubmit}
+                disabled={submitLoading}
+              >
+                {submitLoading ? "Đang gửi..." : "Complete"}
+              </button>
+            </div>
           </div>
         );
 
