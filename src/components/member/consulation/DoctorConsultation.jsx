@@ -127,6 +127,13 @@ function DoctorConsultation() {
     }
   };
 
+  // Thêm hàm helper để loại bỏ HTML tags
+  const stripHtml = (html) => {
+    const tmp = document.createElement("div");
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || "";
+  };
+
   const handleSubmit = async () => {
     try {
       setSubmitLoading(true);
@@ -158,6 +165,9 @@ function DoctorConsultation() {
         "." +
         currentDate.getMilliseconds().toString().padEnd(3, "0");
 
+      // Xử lý nội dung từ CKEditor, loại bỏ HTML tags
+      const plainDescription = stripHtml(consultationContent);
+
       const payload = {
         memberId: memberId,
         childName: selectedChild.name,
@@ -167,8 +177,8 @@ function DoctorConsultation() {
         status: selectedDoctor.status.toLowerCase() === "active" ? 1 : 0,
         urgency: "high",
         category: selectedCategory,
-        description: consultationContent,
-        attachments: [], // Truyền array rỗng thay vì null
+        description: plainDescription, // Sử dụng nội dung đã được xử lý
+        attachments: [],
       };
 
       console.log("Submitting payload:", payload);
