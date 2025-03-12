@@ -246,11 +246,12 @@ function DoctorConsultation() {
               <div style={{ marginBottom: "15px" }}>
                 <strong>Category:</strong> {selectedCategory}
               </div>
-              <div>
+              <div className="consultation-details">
                 <strong>Details:</strong>
-                <div style={{ marginTop: "10px", whiteSpace: "pre-wrap" }}>
-                  {consultationContent}
-                </div>
+                <div
+                  className="consultation-details-content ck-content-display"
+                  dangerouslySetInnerHTML={{ __html: consultationContent }}
+                />
               </div>
             </div>
 

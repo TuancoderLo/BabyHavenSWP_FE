@@ -598,3 +598,106 @@ body {
   text-align: center;
   color: #6b7280;
 }
+
+/* Review Content Styles */
+.doctor-review-content {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.consultation-details {
+  margin-top: 16px;
+}
+
+.consultation-details-content {
+  margin-top: 12px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+/* CKEditor Content Styles */
+.ck-content-display {
+  font-family: inherit;
+  line-height: 1.6;
+  color: #334155;
+}
+
+.ck-content-display p {
+  margin-bottom: 1em;
+}
+
+.ck-content-display img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1em 0;
+}
+
+.ck-content-display figure {
+  margin: 1em 0;
+  text-align: center;
+}
+
+.ck-content-display figure img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.ck-content-display figure figcaption {
+  font-size: 0.875em;
+  color: #64748b;
+  margin-top: 0.5em;
+}
+
+.ck-content-display a {
+  color: #0ea5e9;
+  text-decoration: none;
+}
+
+.ck-content-display a:hover {
+  text-decoration: underline;
+}
+
+.ck-content-display ul,
+.ck-content-display ol {
+  margin: 1em 0;
+  padding-left: 2em;
+}
+
+.ck-content-display li {
+  margin-bottom: 0.5em;
+}
+
+.ck-content-display blockquote {
+  margin: 1em 0;
+  padding: 1em;
+  border-left: 4px solid #e2e8f0;
+  background: #f1f5f9;
+  font-style: italic;
+}
+
+.ck-content-display code {
+  background: #f1f5f9;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.ck-content-display pre {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 1em;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+
+/* Fix for source display */
+.ck-content-display source {
+  display: none;
+}
