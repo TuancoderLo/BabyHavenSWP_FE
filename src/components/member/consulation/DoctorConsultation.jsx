@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./DoctorConsultation.css";
+import childApi from "../../../services/childApi";
 
 function DoctorConsultation() {
   const [selectedChild, setSelectedChild] = useState(null);
@@ -7,15 +8,53 @@ function DoctorConsultation() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [consultationContent, setConsultationContent] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [children, setChildren] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Add steps variable
   const steps = ["Enter Information", "Select Doctor", "Confirm"];
 
-  // Mock data with unique keys
-  const children = [
-    { id: 1, name: "Child 1" },
-    { id: 2, name: "Child 2" },
-  ];
+  useEffect(() => {
+    fetchChildren();
+  }, []);
+
+  const fetchChildren = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const memberId = localStorage.getItem("memberId");
+      console.log("MemberId from localStorage:", memberId);
+
+      if (!memberId) {
+        throw new Error("Vui lòng đăng nhập để xem danh sách trẻ em");
+      }
+
+      const response = await childApi.getByMember(memberId);
+      console.log("API Response:", response);
+
+      // Kiểm tra response và lấy mảng children từ cấu trúc đúng
+      if (response?.data?.data && Array.isArray(response.data.data)) {
+        const childrenData = response.data.data.map((child) => ({
+          name: child.name,
+        }));
+        console.log("Processed children data:", childrenData);
+        setChildren(childrenData);
+      } else {
+        throw new Error("Không tìm thấy dữ liệu trẻ em");
+      }
+    } catch (err) {
+      console.error("Error in fetchChildren:", err);
+      setError(err.message || "Không thể tải danh sách trẻ em");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChildSelect = (child) => {
+    setSelectedChild(child);
+  };
 
   const categories = [
     "General Consultation",
@@ -274,20 +313,38 @@ function DoctorConsultation() {
   return (
     <div className="doctor-consultation">
       <div className="doctor-sidebar">
-        {children.map((child) => (
-          <div
-            key={child.id}
-            className={`doctor-child-item ${
-              selectedChild?.id === child.id ? "selected" : ""
-            }`}
-            onClick={() => setSelectedChild(child.id)}
-          >
-            <div className="doctor-child-icon">
-              <i className="fas fa-child"></i>
-            </div>
-            <div className="doctor-child-label">{child.name}</div>
+        {loading ? (
+          <div className="loading-state">
+            <div className="loading-spinner"></div>
+            <p>Loading children...</p>
           </div>
-        ))}
+        ) : error ? (
+          <div className="error-state">
+            <p>{error}</p>
+            <button onClick={fetchChildren} className="retry-button">
+              Retry
+            </button>
+          </div>
+        ) : children.length === 0 ? (
+          <div className="empty-state">
+            <p>No children found</p>
+          </div>
+        ) : (
+          children.map((child, index) => (
+            <div
+              key={index}
+              className={`doctor-child-item ${
+                selectedChild?.name === child.name ? "selected" : ""
+              }`}
+              onClick={() => handleChildSelect(child)}
+            >
+              <div className="doctor-child-icon">
+                <i className="fas fa-child"></i>
+              </div>
+              <div className="doctor-child-label">{child.name}</div>
+            </div>
+          ))
+        )}
       </div>
 
       <div className="doctor-content">
