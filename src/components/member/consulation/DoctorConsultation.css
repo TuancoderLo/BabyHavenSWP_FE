@@ -147,21 +147,23 @@ body {
   display: flex;
   flex-direction: column;
   width: 100%;
-  min-height: 300px;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
-.doctor-editor-area {
-  flex: 1;
+.doctor-editor-container .main-container {
   width: 100%;
+  margin: 0;
+}
+
+.doctor-editor-container
+  .editor-container_classic-editor
+  .editor-container__editor {
+  min-width: 100%;
+  max-width: 100%;
+}
+
+.doctor-editor-container .ck-editor__editable {
   min-height: 300px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 15px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #333;
-  resize: none;
 }
 
 /* Doctor selection grid */

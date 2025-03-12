@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./DoctorConsultation.css";
 import childApi from "../../../services/childApi";
+import TextEditor from "../../../components/admin/Component_Sidebar/blog/textEditor";
 
 function DoctorConsultation() {
   const [selectedChild, setSelectedChild] = useState(null);
@@ -142,11 +143,9 @@ function DoctorConsultation() {
 
             <div className="doctor-editor-container">
               <div className="doctor-section-title">Consultation Details:</div>
-              <textarea
-                className="doctor-editor-area"
-                placeholder="Enter your consultation details..."
+              <TextEditor
                 value={consultationContent}
-                onChange={(e) => setConsultationContent(e.target.value)}
+                onChange={(newContent) => setConsultationContent(newContent)}
               />
             </div>
           </div>
