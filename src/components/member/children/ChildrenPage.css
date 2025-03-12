@@ -410,17 +410,6 @@ growth-chart-box card {
     background: transparent;
 }
 
-/* Children Page Title - div23 */
-.children-page-title {
-    grid-column: 1 / span 6;
-    grid-row: 1;
-    font-size: 24px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 12px;
-    padding-left: 4px;
-}
-
 /* Child slots container */
 .child-slots-container {
     grid-area: 2 / 1 / 8 / 2;
@@ -434,7 +423,7 @@ growth-chart-box card {
 
 /* Child slots - div4,5,6,7 */
 .child-slot {
-    background: white;
+    background: linear-gradient(135deg, #ffffff, #f8fdff);
     border-radius: 12px;
     padding: 16px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -448,14 +437,25 @@ growth-chart-box card {
     position: relative;
 }
 
-.child-slot:hover {
+.child-slot:not(.selected):hover {
+    background: linear-gradient(135deg, #917bff, #f7c3ff);
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
+.child-slot:not(.selected):hover .child-name,
+.child-slot:not(.selected):hover .child-age,
+.child-slot:not(.selected):hover .gender-icon {
+    color: #ffffff;
+}
+
 .child-slot.selected {
-    border-color: #064F83;
-    background-color: #f0f7ff;
+    border-color: #bf00ff;
+    background: white;
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.child-slot.selected:hover {
+    background: white;
 }
 
 .child-slot.empty {
@@ -463,7 +463,7 @@ growth-chart-box card {
     align-items: center;
     cursor: pointer;
     background: #f8f9fa;
-    border: 2px dashed #ccc;
+    border: 2px #ccc;
     display: flex;
     flex-direction: row;
     gap: 12px;
@@ -502,6 +502,7 @@ growth-chart-box card {
     min-height: 250px;
     max-height: 300px;
     overflow-y: auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .child-details-section h2 {
@@ -516,41 +517,56 @@ growth-chart-box card {
 
 /* Latest record section */
 .latest-record-section {
-    grid-area: 2 / 3 / 3 / 6;
-    background: white;
-    border-radius: 8px;
-    padding: 16px 24px;
+    grid-area: 2 / 3 / 3 / 5;
+    background: linear-gradient(135deg, #FFF0F5, #F0F7FF);
+    border-radius: 12px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 5px;
+    box-shadow: 0 4px 15px rgba(255, 182, 193, 0.15);
 }
 
 .latest-record-title {
-    font-size: 18px;
-    color: #333;
+    font-size: 20px;
+    color: #FF69B4;
     font-weight: 600;
-    white-space: nowrap;
+    margin-bottom: 8px;
 }
 
 .latest-record-content {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
     width: 100%;
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(255, 182, 193, 0.1);
 }
 
 .record-info {
     display: flex;
     align-items: center;
-    gap: 48px;
+    gap: 32px;
 }
 
 .record-row {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 0;
-    border: none;
+    padding: 4px 0;
+    position: relative;
+}
+
+.record-row:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -16px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 70%;
+    width: 1px;
+    background: #eee;
 }
 
 .record-label {
@@ -563,31 +579,113 @@ growth-chart-box card {
     color: #333;
     font-weight: 600;
     font-size: 14px;
+    min-width: 60px;
 }
 
 .add-record-btn {
-    margin: 0;
-    padding: 8px 16px;
-    background: #00D0BC;
+    margin-top: 8px;
+    padding: 8px 20px;
+    background: linear-gradient(45deg, #FF69B4, #FFB6C1);
     color: white;
     border: none;
-    border-radius: 6px;
-    font-weight: 500;
+    border-radius: 25px;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(255, 105, 180, 0.2);
+}
+
+.add-record-btn:hover {
+    background: linear-gradient(45deg, #FF1493, #FF69B4);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+}
+
+.add-record-btn:disabled {
+    background: linear-gradient(45deg, #ccc, #ddd);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Health Alert Section */
+.health-alert-section {
+    grid-area: 2 / 5 / 3 / 6;
+    background: linear-gradient(135deg, #E8FFF9, #F0F7FF);
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.health-alert-title {
+    font-size: 16px;
+    color: #333;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.health-alert-title::before {
+    content: '🏥';
+    font-size: 20px;
+}
+
+.health-alert-content {
+    background: white;
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 60px;
+}
+
+.health-alert-content.healthy {
+    color: #00A36C;
+    background: rgba(0, 163, 108, 0.1);
+    font-weight: 600;
+}
+
+.health-alert-content.warning {
+    color: #FF6B6B;
+    background: rgba(255, 107, 107, 0.1);
+    font-weight: 500;
+}
+
+.health-alert-content::before {
+    margin-right: 8px;
+}
+
+.health-alert-content.healthy::before {
+    content: '✨';
+}
+
+.health-alert-content.warning::before {
+    content: '⚠️';
 }
 
 /* Growth chart section */
 .growth-chart-section {
     grid-area: 3 / 3 / 8 / 6;
-    background: white;
+    background: linear-gradient(135deg, #f8fdff, #f5f9ff);
     border-radius: 8px;
     padding: 4px 16px;
     display: flex;
     flex-direction: column;
     height: 100%;
     overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 208, 188, 0.1);
 }
 
 .growth-chart-section h2 {
@@ -741,51 +839,43 @@ growth-chart-box card {
 
 /* Expert advice section - div11 */
 .expert-advice-section {
-    grid-area: 2 / 6 / 6 / 7;
+    grid-area: 4 / 6 / 8 / 7;
     background: white;
     border-radius: 8px;
     padding: 20px;
     display: flex;
     flex-direction: column;
-    height: 100%;
-    overflow: hidden;
+    max-height: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .expert-advice-section h3 {
-    font-size: 18px;
+    font-size: 13px;
     color: #333;
     margin-bottom: 16px;
     padding-bottom: 12px;
     border-bottom: 1px solid #eee;
+    flex-shrink: 0;
 }
 
 .advice-content {
     flex: 1;
     overflow-y: auto;
     padding-right: 8px;
-}
-
-.no-advice {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: #666;
-    font-size: 14px;
-    text-align: center;
-    padding: 20px;
+    min-height: 0;
 }
 
 .advice-sections {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
 }
 
 .advice-section {
     background: #f8f9fa;
     border-radius: 8px;
     padding: 16px;
+    flex-shrink: 0;
 }
 
 .advice-section h4 {
@@ -804,7 +894,7 @@ growth-chart-box card {
 .advice-section li {
     color: #444;
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.6;
     margin-bottom: 8px;
     padding-left: 20px;
     position: relative;
@@ -873,4 +963,151 @@ growth-chart-box card {
   height: 2px;
   background-color: #00D0BC;
   border-radius: 2px;
+}
+
+/* Growth Analysis Section */
+.growth-analysis-section {
+    grid-area: 2 / 6 / 4 / 7;
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.growth-analysis-section h3 {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.analysis-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.analyze-ai-btn {
+  background: linear-gradient(45deg, #00D0BC, #7112ff);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(0, 208, 188, 0.2);
+  margin-top: auto;
+}
+
+.analyze-ai-btn:hover {
+  background: linear-gradient(45deg, #00D0BC, #7112ff);
+  box-shadow: 0 4px 8px rgba(0, 208, 188, 0.3);
+  transform: translateY(-1px);
+}
+
+.analyze-ai-btn i {
+  font-size: 16px;
+}
+
+.analysis-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #f8f9fa;
+}
+
+.analysis-label {
+  color: #666;
+  font-size: 13px;
+  font-weight: 500;
+  min-width: 95px;
+}
+
+.analysis-value {
+  font-weight: 600;
+  font-size: 13px;
+  text-align: right;
+  min-width: 60px;
+}
+
+.analysis-item.increase .analysis-value {
+  color: #00D0BC;
+}
+
+.analysis-item.decrease .analysis-value {
+  color: #FF9AA2;
+}
+
+.milestone-section {
+    grid-area: 4 / 2 / 5 / 3;
+    background: linear-gradient(135deg, #fff4f8, #f0f7ff);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    border: 2px dashed #FFB6C1;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.milestone-section:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 182, 193, 0.2);
+}
+
+.milestone-content {
+    color: #444;
+    font-size: 16px;
+    line-height: 1.6;
+    text-align: center;
+    padding: 0 10px;
+    position: relative;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+.milestone-content::before {
+    content: '👶';
+    font-size: 28px;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.add-milestone-button {
+    background: linear-gradient(45deg, #FF69B4, #FFB6C1);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 12px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+}
+
+.add-milestone-button:hover {
+    background: linear-gradient(45deg, #FF1493, #FF69B4);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+}
+
+.add-milestone-button::before {
+    content: '📝';
+    font-size: 18px;
 }

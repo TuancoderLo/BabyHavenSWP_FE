@@ -16,6 +16,7 @@ function ChildrenPage() {
   //set chiều cao và cân nặng dựa vào record
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0); // Thêm state để trigger refresh
+  const [growthRecords, setGrowthRecords] = useState([]); // Thêm state mới
 
   // Lấy memberId từ localStorage
   const memberId = localStorage.getItem("memberId");
@@ -59,25 +60,42 @@ function ChildrenPage() {
       
       // Lấy dữ liệu growth record mới nhất
       try {
-        const growthRecordsResponse = await childApi.getGrowthRecords(child.name, memberId);
-        if (growthRecordsResponse.data && Array.isArray(growthRecordsResponse.data)) {
-          // Sắp xếp theo thời gian gần nhất
-          const sortedRecords = growthRecordsResponse.data.sort((a, b) => 
-            new Date(b.createdAt) - new Date(a.createdAt)
-          );
+        const parentName = localStorage.getItem("name");
+        const growthRecordsResponse = await childApi.getGrowthRecords(child.name, parentName);
+        console.log("Growth Records Response:", growthRecordsResponse);
+        
+        if (growthRecordsResponse.data) {
+          let records = Array.isArray(growthRecordsResponse.data) 
+            ? growthRecordsResponse.data 
+            : [growthRecordsResponse.data];
+            
+          // Lọc bỏ các record không có weight hoặc height
+          records = records.filter(record => record && (record.weight || record.height));
           
-          if (sortedRecords.length > 0) {
+          // Sắp xếp theo thời gian gần nhất
+          records.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          
+          setGrowthRecords(records); // Cập nhật state growthRecords
+          
+          if (records.length > 0) {
             // Lấy record mới nhất
-            const latestRecord = sortedRecords[0];
+            const latestRecord = records[0];
+            console.log("Latest Growth Record:", latestRecord);
             setSelectedRecord(latestRecord);
+          } else {
+            setSelectedRecord(null);
           }
         }
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu growth record:", error);
+        setSelectedRecord(null);
+        setGrowthRecords([]); // Reset growth records khi có lỗi
       }
     } catch (error) {
       console.error("Lỗi khi lấy thông tin trẻ:", error);
       setSelectedChild(child);
+      setSelectedRecord(null);
+      setGrowthRecords([]); // Reset growth records khi có lỗi
     }
   };
   
@@ -235,10 +253,82 @@ const closeRecordOverlay = () => {
     );
   };
 
+  const calculateBMI = (weight, height) => {
+    if (!weight || !height) return null;
+    // Chuyển height từ cm sang m
+    const heightInMeters = height / 100;
+    // Tính BMI = weight / (height * height)
+    return weight / (heightInMeters * heightInMeters);
+  };
+
+  const calculateGrowthChange = (records) => {
+    if (!records || records.length < 2) return null;
+    
+    const latest = records[0];
+    const previous = records[1];
+    
+    // Tính BMI cho cả record mới nhất và record trước đó
+    const latestBMI = calculateBMI(latest.weight, latest.height);
+    const previousBMI = calculateBMI(previous.weight, previous.height);
+    
+    return {
+      weight: {
+        change: (latest.weight - previous.weight).toFixed(1),
+        trend: latest.weight > previous.weight ? 'increase' : 'decrease'
+      },
+      height: {
+        change: (latest.height - previous.height).toFixed(1),
+        trend: latest.height > previous.height ? 'increase' : 'decrease'
+      },
+      bmi: {
+        change: latestBMI && previousBMI ? (latestBMI - previousBMI).toFixed(1) : 'N/A',
+        trend: latestBMI > previousBMI ? 'increase' : 'decrease'
+      }
+    };
+  };
+
+  const renderGrowthAnalysis = () => {
+    if (!selectedChild || !selectedRecord) return null;
+
+    // Lấy 2 record gần nhất từ state growthRecords
+    const records = growthRecords.slice(0, 2);
+
+    const changes = calculateGrowthChange(records);
+    if (!changes) return null;
+
+    return (
+      <div className="growth-analysis-section">
+        <h3>Growth Analysis</h3>
+        <div className="analysis-content">
+          <div className={`analysis-item ${changes.weight.trend}`}>
+            <span className="analysis-label">Weight Change:</span>
+            <span className="analysis-value">
+              {changes.weight.change > 0 ? '+' : ''}{changes.weight.change} kg
+            </span>
+          </div>
+          <div className={`analysis-item ${changes.height.trend}`}>
+            <span className="analysis-label">Height Change:</span>
+            <span className="analysis-value">
+              {changes.height.change > 0 ? '+' : ''}{changes.height.change} cm
+            </span>
+          </div>
+          <div className={`analysis-item ${changes.bmi.trend}`}>
+            <span className="analysis-label">BMI Change:</span>
+            <span className="analysis-value">
+              {changes.bmi.change !== 'N/A' ? (changes.bmi.change > 0 ? '+' : '') + changes.bmi.change : 'N/A'}
+            </span>
+          </div>
+        </div>
+        <button className="analyze-ai-btn" onClick={() => console.log('AI Analysis coming soon')}>
+          <i className="fas fa-robot"></i>
+          Analyze with AI
+        </button>
+      </div>
+    );
+  };
+
   return (
     <div className="parent">
-      <div className="children-page-title">Children Page</div>
-
       {/* Child slots container */}
       <div className="child-slots-container">
         {/* Child slots */}
@@ -299,6 +389,16 @@ const closeRecordOverlay = () => {
         )}
       </div>
 
+      {/* Milestone section */}
+      <div className="milestone-section">
+        <div className="milestone-content">
+          Want to track every precious milestone of your little one?
+        </div>
+        <button className="add-milestone-button">
+          Add Milestone
+        </button>
+      </div>
+
       {/* Latest Record Section */}
       <div className="latest-record-section">
         <h3 className="latest-record-title">Latest Growth Record</h3>
@@ -316,15 +416,32 @@ const closeRecordOverlay = () => {
                 {selectedRecord ? `${selectedRecord.weight || '--'} kg` : '-- kg'}
               </span>
             </div>
+            <div className="record-row">
+              <span className="record-label">BMI:</span>
+              <span className="record-value">
+                {selectedRecord && selectedRecord.height && selectedRecord.weight
+                  ? (selectedRecord.weight / Math.pow(selectedRecord.height / 100, 2)).toFixed(1)
+                  : '--'}
+              </span>
+            </div>
           </div>
           <button 
             className="add-record-btn" 
             onClick={handleAddRecord}
             disabled={!selectedChild}
-            style={{ opacity: selectedChild ? 1 : 0.6, cursor: selectedChild ? 'pointer' : 'not-allowed' }}
           >
-            Add Growth Record
+            Add Record
           </button>
+        </div>
+      </div>
+
+      {/* Health Alert Section */}
+      <div className="health-alert-section">
+        <div className="health-alert-title">
+          Health Alert
+        </div>
+        <div className={`health-alert-content ${selectedChild?.healthAlert ? 'warning' : 'healthy'}`}>
+          {selectedChild?.healthAlert || "Your child's health is in good condition"}
         </div>
       </div>
 
@@ -377,9 +494,12 @@ const closeRecordOverlay = () => {
         </div>
       </div>
 
+      {/* Growth Analysis Section */}
+      {renderGrowthAnalysis()}
+
       {/* Expert advice section */}
       <div className="expert-advice-section">
-        <h3>Expert Advice</h3>
+        <h3>Expert Advice for your child</h3>
         <div className="advice-content">
           {renderExpertAdvice()}
         </div>
