@@ -99,44 +99,52 @@ const handleConfirmPayment = async () => {
   }
 
   try {
-    // 1) Tạo MemberMembership (POST /api/MemberMemberships)
-    await transactionsApi.createMemberMembership({
+    // 1) Tạo memberMembership và nhận về membership id (dạng chuỗi)
+    const membershipRes = await transactionsApi.createMemberMembership({
       memberId: memberId,
       packageName: selectedPackage.packageName,
     });
-
-    // 2) Lấy memberMembershipId (đầu tiên) cho memberId
-    const newMemberMembershipId = await transactionsApi.getMemberMembershipId(memberId);
-    if (!newMemberMembershipId) {
-      alert("Cannot find any memberMembershipId for this memberId!");
+    const membershipId = membershipRes.data.data; // ví dụ: "2c989e71-eeb5-47bc-b18d-e000632aae7f"
+    if (!membershipId) {
+      alert("Failed to create memberMembership!");
       return;
     }
 
-    // 3) Tạo Transaction => { userId, memberMembershipId }
-    await transactionsApi.createTransaction({
+    // 2) Lấy thông tin chi tiết của memberMembership qua API GET /api/MemberMemberships/odata
+    // Hàm getMemberMembershipId nhận vào membershipId vừa tạo và trả về memberMembershipId từ chi tiết
+    const newMemberMembershipId = await transactionsApi.getMemberMembershipId(membershipId);
+    if (!newMemberMembershipId) {
+      alert("Cannot retrieve membership details!");
+      return;
+    }
+
+    // 3) Tạo Transaction với userId và memberMembershipId (vừa lấy được)
+    const transactionRes = await transactionsApi.createTransaction({
       userId: userId,
       memberMembershipId: newMemberMembershipId,
     });
+    const transactionData = transactionRes.data.data;
+    if (!transactionData || transactionData.paymentStatus !== "Pending") {
+      alert("Transaction is not pending or failed!");
+      return;
+    }
+    const gatewayTransactionId = transactionData.gatewayTransactionId;
 
-    // 4) Tạo Payment URL
-    const returnUrl = window.location.origin + "/membership?paymentStatus=success";
-    const payRes = await transactionsApi.createPayment(newMemberMembershipId, returnUrl);
-    const paymentUrl = payRes.data;
+    // 4) Gọi API VNPay để tạo URL thanh toán với gatewayTransactionId
+    const paymentRes = await transactionsApi.createPayment(gatewayTransactionId);
+    const paymentUrl = paymentRes.data;
     if (!paymentUrl) {
       alert("Cannot get payment URL from server!");
       return;
     }
-
-    // 5) Redirect sang cổng thanh toán
+    // 5) Redirect sang cổng VNPay
     window.location.href = paymentUrl;
-
   } catch (err) {
     console.error("Payment error:", err);
     alert("Payment initiation failed, please try again.");
   }
 };
 
-// Step 3: Đóng
 const handleFinish = () => {
   handleCloseOverlay();
 };
