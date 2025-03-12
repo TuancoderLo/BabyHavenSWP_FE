@@ -1,235 +1,220 @@
-import { useState, useEffect, useRef } from "react";
-import calculateBMI from "../../../services/bmiUtils";
+import React, { useState, useEffect } from 'react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
+import './GrowthChart.css';
 import childApi from "../../../services/childApi";
-import Chart from "chart.js/auto"; // Đảm bảo Chart.js đã được cài đặt
 
-// const GrowthChart = ({ childId, selectedTool, startDate, endDate }) => {
-const GrowthChart = ({ childName, selectedTool, onRecordSelect}) => {
-  const [records, setRecords] = useState([]);
-  const chartRef = useRef(null);
-  const chartInstance = useRef(null);
+const GrowthChart = ({ childName, selectedTool, onRecordSelect, refreshTrigger = 0 }) => {
+  const [data, setData] = useState({ months: [], records: [] });
+  const [loading, setLoading] = useState(true);
 
-  // 1. Lấy danh sách GrowthRecord theo childId và theo khoảng thời gian (startDate, endDate)
+  // Hàm tính BMI
+  const calculateBMI = (weight, height) => {
+    console.log('calculateBMI input:', { weight, height });
+    
+    // Kiểm tra giá trị đầu vào
+    const validWeight = parseFloat(weight);
+    const validHeight = parseFloat(height);
+    
+    if (isNaN(validWeight) || isNaN(validHeight) || validWeight <= 0 || validHeight <= 0) {
+      console.log('BMI calculation skipped - invalid input');
+      return null;
+    }
+    
+    const heightInMeters = validHeight / 100;
+    const bmi = Number((validWeight / (heightInMeters * heightInMeters)).toFixed(1));
+    
+    // Kiểm tra kết quả tính toán
+    if (isNaN(bmi) || !isFinite(bmi)) {
+      console.log('BMI calculation resulted in invalid value');
+      return null;
+    }
+    
+    console.log('Calculated BMI:', bmi);
+    return bmi;
+  };
+
   useEffect(() => {
-    const fetchGrowthRecordsRange = async () => {
+    const fetchGrowthData = async () => {
+      if (!childName) return;
+      
+      setLoading(true);
       try {
-      //   // Gọi API với childId, startDate và endDate (nếu có)
-      //   const response = await childApi.getGrowthRecordsRange(childId, startDate, endDate);
-      //   const fetchedRecords = response.data.data;
-      //   // Nếu API trả về null hoặc mảng rỗng, vẫn giữ records là mảng rỗng
-      //   setRecords(fetchedRecords || []);
-      // } catch (error) {
-      //   console.error("Error fetching growth records:", error);
-      //   setRecords([]);
-      // }
-        // Gọi API với childId, startDate và endDate (nếu có)
         const parentName = localStorage.getItem("name");
-        console.log(parentName);
         const response = await childApi.getGrowthRecords(childName, parentName);
-        const fetchedRecords = response.data;
-        // Nếu API trả về null hoặc mảng rỗng, vẫn giữ records là mảng rỗng
-        setRecords(fetchedRecords || []);
-      } catch (error) {
-        console.error("Error fetching growth records:", error);
-        setRecords([]);
-      }
-    };
+        console.log("Full API Response:", response);
 
-    if (childName) {
-      fetchGrowthRecordsRange();
-    }
-  }, [childName]);
+        const records = Array.isArray(response.data) ? response.data : [response.data];
+        const currentYear = new Date().getFullYear();
+        
+        // Xử lý và lọc dữ liệu
+        const processedRecords = records
+          .filter(record => record && (record.weight || record.height)) // Lọc bỏ record không có dữ liệu
+          .map(record => {
+            const recordDate = new Date(record.createdAt || record.recordDate);
+            if (recordDate.getFullYear() !== currentYear) return null;
 
-  // 2. Vẽ lại biểu đồ khi records hoặc selectedTool thay đổi
-  useEffect(() => {
-    if (chartInstance.current) {
-      chartInstance.current.destroy();
-    }
+            const weight = parseFloat(record.weight);
+            const height = parseFloat(record.height);
+            
+            if (isNaN(weight) || isNaN(height) || weight <= 0 || height <= 0) return null;
+            
+            const bmi = Number((weight / Math.pow(height / 100, 2)).toFixed(1));
+            if (isNaN(bmi) || !isFinite(bmi)) return null;
 
-    let dataRecords = records;
-    let labels = [];
-    let dataPoints = [];
-    let datasetLabel = "";
+            // Tính vị trí x dựa trên tháng và ngày
+            const month = recordDate.getMonth();
+            const day = recordDate.getDate();
+            const x = month + (day - 1) / 31; // Vị trí x từ 0-11.99
 
+            return {
+              x,
+              month: recordDate.toLocaleDateString('en-US', { month: 'short' }),
+              date: recordDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
+              bmi,
+              weight,
+              height,
+              dayOfMonth: day,
+              timestamp: recordDate.getTime()
+            };
+          })
+          .filter(record => record !== null)
+          .sort((a, b) => a.timestamp - b.timestamp);
 
-    // Hàm tạo label dựa vào ngày ghi nhận, nếu không có thì hiển thị "Record X"
-    const generateLabels = (record, index) => {
-      const date = record.createdAt || record.recordDate;
-      if (date) {
-        const dateObj = new Date(date);
-        return dateObj.toLocaleDateString();
-      }
-      return `Record ${index + 1}`;
-    };
-
-    switch (selectedTool) {
-      case "BMI":
-        // Tạo label cho mỗi record
-        labels = dataRecords.map((r, index) => generateLabels(r, index));
-        // Với mỗi record, nếu weight hoặc height null, dùng 0 làm giá trị mặc định
-        dataPoints = dataRecords.map((r) => {
-          // Kiểm tra cả 'weight' và 'Weight', tương tự với height
-          const weight = r.weight != null ? r.weight : (r.Weight != null ? r.Weight : 0);
-          const height = r.height != null ? r.height : (r.Height != null ? r.Height : 0);
-          return weight > 0 && height > 0 ? parseFloat(calculateBMI(weight, height)) : 0;
-        });        
-        datasetLabel = "BMI (kg/m²)";
-        break;
-
-      case "Head measure":
-        labels = dataRecords.map((r, index) => generateLabels(r, index));
-        dataPoints = dataRecords.map((r) => r.headCircumference != null ? r.headCircumference : 0);
-        datasetLabel = "Head Circumference (cm)";
-        break;
-
-      case "Global std":
-        labels = dataRecords.map((r, index) => generateLabels(r, index));
-        dataPoints = dataRecords.map((r) => {
-          const weight = r.weight != null ? r.weight : 0;
-          const height = r.height != null ? r.height : 0;
-          return weight > 0 && height > 0 ? parseFloat(calculateBMI(weight, height)) : 0;
+        setData({
+          months: Array.from({ length: 12 }, (_, i) => ({
+            month: new Date(currentYear, i).toLocaleDateString('en-US', { month: 'short' }),
+            index: i
+          })),
+          records: processedRecords
         });
-        datasetLabel = "Child BMI vs Global Standard";
-        break;
+      } catch (error) {
+        console.error('Error fetching growth data:', error);
+        setData({ months: [], records: [] });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      case "Milestone":
-        labels = dataRecords.map((r, index) => generateLabels(r, index));
-        dataPoints = dataRecords.map((r) => r.milestoneValue != null ? r.milestoneValue : 0);
-        datasetLabel = "Milestone";
-        break;
+    fetchGrowthData();
+  }, [childName, refreshTrigger]);
 
-      default:
-        // Nếu không có tool nào được chọn, tạo mảng rỗng
-        labels = dataRecords.map((_, index) => `Record ${index + 1}`);
-        dataPoints = dataRecords.map(() => 0);
-        datasetLabel = "Data";
-        break;
-    }
+  if (loading) {
+    return <div className="loading">Loading chart...</div>;
+  }
 
-    // Hủy chart cũ nếu có
-    if (chartInstance.current) {
-      chartInstance.current.destroy();
-    }
-
-    // Tạo chart mới
-    const ctx = chartRef.current.getContext("2d");
-    chartInstance.current = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels,
-        datasets: [
-          {
-            label: datasetLabel,
-            data: dataPoints,
-            borderColor: "#064F83",
-            borderWidth: 2,
-            tension: 0.3,
-            cubicInterpolationMode: "monotone",
-            pointRadius: 4,
-            pointBackgroundColor: "#fff",
-            pointBorderColor: "#064F83",
-            fill: false, // or true nếu muốn vùng tô
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false, 
-        devicePixelRatio: 4,
-        onClick: (evt) => {
-          // Lấy danh sách điểm data đang được click
-          const points = chartInstance.current.getElementsAtEventForMode(
-            evt,
-            "nearest",
-            { intersect: true },
-            false
+  const renderChart = () => {
+    switch (selectedTool) {
+      case 'BMI':
+        if (!data.records || data.records.length === 0) {
+          return (
+            <div style={{ 
+              height: '350px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              color: '#666' 
+            }}>
+              No BMI data available
+            </div>
           );
-          if (!points.length) return; // click ra vùng trống
+        }
 
-          const index = points[0].index;
-          // record tương ứng với dataRecords[index]
-          const clickedRecord = dataRecords[index];
-          console.log("Clicked record:", clickedRecord);
+        return (
+          <ResponsiveContainer width="100%" height={350}>
+            <LineChart margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis 
+                dataKey="x"
+                type="number"
+                domain={[0, 11]}
+                ticks={[0,1,2,3,4,5,6,7,8,9,10,11]}
+                tickFormatter={(value) => {
+                  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                  return months[Math.floor(value)];
+                }}
+                stroke="#666"
+                tick={{ fill: '#666', fontSize: 10 }}
+              />
+              <YAxis 
+                yAxisId="bmi"
+                orientation="left"
+                stroke="#FF9AA2"
+                tick={{ fill: '#666', fontSize: 11 }}
+                domain={[10, 30]}
+                ticks={[10, 15, 20, 25, 30]}
+              />
+              <YAxis 
+                yAxisId="right"
+                orientation="right"
+                stroke="#B5EAD7"
+                tick={{ fill: '#666', fontSize: 11 }}
+                hide={true}
+              />
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  border: '1px solid #ccc',
+                  borderRadius: '8px',
+                  padding: '10px'
+                }}
+                formatter={(value, name) => {
+                  if (name === 'BMI') {
+                    return [`${value}`, 'BMI (kg/m²)'];
+                  }
+                  return [value, name];
+                }}
+                labelFormatter={(label, payload) => {
+                  if (payload && payload[0]) {
+                    return `Date: ${payload[0].payload.date}`;
+                  }
+                  return '';
+                }}
+              />
+              <Legend 
+                verticalAlign="top" 
+                height={30}
+                wrapperStyle={{
+                  paddingTop: '5px',
+                  fontSize: '12px'
+                }}
+              />
+              <Line
+                yAxisId="bmi"
+                data={data.records}
+                type="monotone"
+                dataKey="bmi"
+                stroke="#FF9AA2"
+                strokeWidth={2}
+                dot={{ fill: '#FF9AA2', r: 4 }}
+                activeDot={{ r: 6, fill: '#FF9AA2' }}
+                name="BMI"
+                connectNulls={true}
+                onClick={(point) => {
+                  if (onRecordSelect && point) {
+                    onRecordSelect(point);
+                  }
+                }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        );
+      default:
+        return <div>Select a measurement tool</div>;
+    }
+  };
 
-          // Gọi callback cho parent
-          if (onRecordSelect) {
-            onRecordSelect(clickedRecord);
-          }
-        },
-        plugins: {
-          legend: {
-            labels: {
-              color: "#333",
-              font: {
-                family: "'Inter', sans-serif",
-                size: 14,
-              },
-            },
-          },
-          tooltip: {
-            backgroundColor: "#fff",
-            titleColor: "#333",
-            bodyColor: "#333",
-            borderColor: "#ccc",
-            borderWidth: 1,
-            displayColors: false,
-          },
-        },
-        scales: {
-          x: {
-            title: {
-              display: true,
-              text: "Record Date",
-              color: "#333",
-              font: {
-                family: "'Inter', sans-serif",
-                size: 14,
-                weight: "600",
-              },
-            },
-            ticks: {
-              color: "#333",
-              font: {
-                family: "'Inter', sans-serif",
-                size: 13,
-              },
-            },
-            grid: {
-              color: "rgba(0,0,0,0.1)",
-            },
-          },
-          y: {
-            title: {
-              display: true,
-              text: datasetLabel,
-              color: "#333",
-              font: {
-                family: "'Inter', sans-serif",
-                size: 14,
-                weight: "600",
-              },
-            },
-            ticks: {
-              color: "#333",
-              font: {
-                family: "'Inter', sans-serif",
-                size: 13,
-              },
-            },
-            grid: {
-              color: "rgba(0,0,0,0.1)",
-            },
-          },
-        },
-      },
-    });    
-  }, [records, selectedTool, onRecordSelect]);
-  useEffect(() => {
-    console.log("Fetched records:", records);
-  }, [records]);
   return (
-    <div className="chart-area">
-      <canvas ref={chartRef} />
+    <div className="growth-chart-container">
+      {renderChart()}
     </div>
   );
 };
