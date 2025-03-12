@@ -29,37 +29,45 @@ function DoctorConsultation() {
     recent: [
       {
         id: 1,
-        name: "Dr. Sarah Johnson",
+        name: "Doctor 1",
         status: "online",
         major: "Pediatrics",
         specializing: "Child Development",
-        avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+        isFavorite: true,
       },
       {
         id: 2,
-        name: "Dr. Michael Chen",
+        name: "Doctor 2",
         status: "offline",
         major: "Pediatrics",
         specializing: "Pediatric Neurology",
-        avatar: "https://randomuser.me/api/portraits/men/1.jpg",
+        isFavorite: false,
       },
     ],
     available: [
       {
         id: 3,
-        name: "Dr. Emily Wilson",
+        name: "Doctor 3",
         status: "online",
         major: "Pediatrics",
         specializing: "Child Psychology",
-        avatar: "https://randomuser.me/api/portraits/women/2.jpg",
+        isFavorite: false,
       },
       {
         id: 4,
-        name: "Dr. James Miller",
+        name: "Doctor 4",
         status: "online",
         major: "Pediatrics",
         specializing: "Pediatric Cardiology",
-        avatar: "https://randomuser.me/api/portraits/men/2.jpg",
+        isFavorite: false,
+      },
+      {
+        id: 5,
+        name: "Doctor 5",
+        status: "online",
+        major: "Pediatrics",
+        specializing: "General Pediatrics",
+        isFavorite: false,
       },
     ],
   };
@@ -107,41 +115,98 @@ function DoctorConsultation() {
 
       case 1:
         return (
-          <div className="doctor-grid-section">
-            <div className="doctor-section-title">
-              Select Consulting Doctor:
-            </div>
-            <div className="doctor-grid">
-              {doctors.recent.map((doctor) => (
-                <div
-                  key={doctor.id}
-                  className={`doctor-profile-card ${
-                    selectedDoctor?.id === doctor.id ? "selected" : ""
-                  }`}
-                  onClick={() => setSelectedDoctor(doctor)}
-                >
-                  <div className="doctor-profile-header">
-                    <div className="doctor-profile-avatar">
-                      <img src={doctor.avatar} alt={doctor.name} />
+          <div className="doctor-selection-container">
+            {/* Recent Doctors Section */}
+            <div className="doctor-section">
+              <h3 className="doctor-section-heading">Recent doctor</h3>
+              <div className="doctor-cards">
+                {doctors.recent.map((doctor) => (
+                  <div
+                    key={doctor.id}
+                    className={`doctor-card ${
+                      selectedDoctor?.id === doctor.id ? "selected" : ""
+                    }`}
+                    onClick={() => setSelectedDoctor(doctor)}
+                  >
+                    <div className="doctor-avatar">
+                      <img
+                        src={`https://ui-avatars.com/api/?name=${doctor.name}&background=random`}
+                        alt={doctor.name}
+                      />
                     </div>
-                    <div className="doctor-profile-info">
-                      <div className="doctor-profile-name">{doctor.name}</div>
-                      <div className="doctor-profile-status">
-                        <span
-                          className={`doctor-status-dot ${doctor.status}`}
-                        ></span>
+                    <div className="doctor-info">
+                      <h4>{doctor.name}</h4>
+                      <div className="doctor-status">
+                        <span className={`status-dot ${doctor.status}`}></span>
                         {doctor.status}
                       </div>
+                      <p className="doctor-major">Major: {doctor.major}</p>
+                      <p className="doctor-specializing">
+                        Specializing: {doctor.specializing}
+                      </p>
                     </div>
                   </div>
-                  <div className="doctor-profile-details">
-                    <div className="doctor-profile-major">{doctor.major}</div>
-                    <div className="doctor-profile-specialty">
-                      {doctor.specializing}
+                ))}
+              </div>
+            </div>
+
+            {/* Available Doctors Section */}
+            <div className="doctor-section">
+              <h3 className="doctor-section-heading">Available doctors</h3>
+              <div className="doctor-cards">
+                {doctors.available.map((doctor) => (
+                  <div
+                    key={doctor.id}
+                    className={`doctor-card ${
+                      selectedDoctor?.id === doctor.id ? "selected" : ""
+                    }`}
+                    onClick={() => setSelectedDoctor(doctor)}
+                  >
+                    <div className="doctor-avatar">
+                      <img
+                        src={`https://ui-avatars.com/api/?name=${doctor.name}&background=random`}
+                        alt={doctor.name}
+                      />
+                    </div>
+                    <div className="doctor-info">
+                      <h4>{doctor.name}</h4>
+                      <div className="doctor-status">
+                        <span className={`status-dot ${doctor.status}`}></span>
+                        {doctor.status}
+                      </div>
+                      <p className="doctor-major">Major: {doctor.major}</p>
+                      <p className="doctor-specializing">
+                        Specializing: {doctor.specializing}
+                      </p>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+
+            {/* All Doctors Section */}
+            <div className="doctor-section">
+              <h3 className="doctor-section-heading">All doctors</h3>
+              <div className="doctor-list">
+                {[...doctors.recent, ...doctors.available].map((doctor) => (
+                  <div
+                    key={doctor.id}
+                    className={`doctor-list-item ${
+                      selectedDoctor?.id === doctor.id ? "selected" : ""
+                    }`}
+                    onClick={() => setSelectedDoctor(doctor)}
+                  >
+                    <div className="doctor-name">
+                      {doctor.name}
+                      <span className={`status-dot ${doctor.status}`}></span>
+                    </div>
+                    <div className="doctor-details">
+                      <span>Major: {doctor.major}</span>
+                      <span>Specializing: {doctor.specializing}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         );
