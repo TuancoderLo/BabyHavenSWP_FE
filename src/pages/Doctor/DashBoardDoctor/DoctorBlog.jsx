@@ -4,28 +4,23 @@ import {
   Button,
   Table,
   Space,
-  Modal,
   Form,
   Input,
   message,
   Typography,
-  Upload,
-  Spin,
-  Select,
   Tag,
+  Tabs,
+  Select,
 } from "antd";
-import {
-  EditOutlined,
-  DeleteOutlined,
-  PlusOutlined,
-  UploadOutlined,
-} from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import TextEditor from "../../../components/admin/Component_Sidebar/blog/textEditor";
 import axios from "axios";
+import "./DoctorBlog.css";
 
 const { Title } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
+const { TabPane } = Tabs;
 
 const CustomEditor = ({ value = "", onChange }) => {
   return (
@@ -43,14 +38,10 @@ const CustomEditor = ({ value = "", onChange }) => {
 const DoctorBlog = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
   const [form] = Form.useForm();
-  const [editingBlog, setEditingBlog] = useState(null);
   const [content, setContent] = useState("");
   const [categories, setCategories] = useState([]);
-  const [subCategories, setSubCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedCategoryName, setSelectedCategoryName] = useState("");
+  const [activeTab, setActiveTab] = useState("1");
 
   useEffect(() => {
     fetchBlogs();
@@ -62,7 +53,6 @@ const DoctorBlog = () => {
       setLoading(true);
       const email = localStorage.getItem("email");
       const response = await axios.get(`https://localhost:7279/api/Blog`);
-      console.log("Blog response:", response.data);
       if (response.data.status === 1) {
         const doctorBlogs = response.data.data.filter(
           (blog) => blog.email === email
@@ -72,7 +62,6 @@ const DoctorBlog = () => {
     } catch (error) {
       console.error("Error fetching blogs:", error);
       message.error("Không thể tải danh sách bài viết");
-      setBlogs([]);
     } finally {
       setLoading(false);
     }
@@ -92,23 +81,9 @@ const DoctorBlog = () => {
     }
   };
 
-  const fetchSubCategories = async (categoryId) => {
-    try {
-      const response = await axios.get(
-        `https://localhost:7279/api/BlogCategories/parent-categories/${categoryId}`
-      );
-      if (response.data.status === 1) {
-        setSubCategories(response.data.data || []);
-      }
-    } catch (error) {
-      console.error("Error fetching sub-categories:", error);
-      setSubCategories([]);
-    }
-  };
-
-  const getTagsFromCategory = (categoryId) => {
+  const getTagsFromCategory = (categoryName) => {
     const selectedCategory = categories.find(
-      (cat) => cat.categoryId === categoryId
+      (cat) => cat.categoryName === categoryName
     );
     if (!selectedCategory) return "";
 
@@ -124,20 +99,9 @@ const DoctorBlog = () => {
     return selectedCategory.categoryName;
   };
 
-  const handleCategoryChange = async (value) => {
-    setSelectedCategory(value);
-    await fetchSubCategories(value);
-    const tags = getTagsFromCategory(value);
-    form.setFieldsValue({ tags });
-  };
-
-  const handleSubCategoryChange = (value, option) => {
-    form.setFieldsValue({ categoryName: option.children });
-    setSelectedCategoryName(option.children);
-  };
-
   const handleSubmit = async (values) => {
     try {
+      setLoading(true);
       const email = localStorage.getItem("email");
       if (!email) {
         message.error("Vui lòng đăng nhập lại");
@@ -148,60 +112,36 @@ const DoctorBlog = () => {
         title: values.title,
         content: content,
         email: email,
-        categoryName:
-          categories.find((cat) => cat.categoryId === values.categoryId)
-            ?.categoryName || "",
+        categoryName: values.categoryName,
         imageBlog: values.imageBlog || "",
         tags: values.tags || "",
         referenceSources: values.referenceSources || "",
-        status: 0,
+        status: 0, // Pending approval
       };
 
-      console.log("Submitting blog data:", blogData);
-
-      if (editingBlog) {
-        await axios.put(
-          `https://localhost:7279/api/Blog/${editingBlog.blogId}`,
-          blogData
-        );
-        message.success("Cập nhật bài viết thành công");
-      } else {
-        await axios.post("https://localhost:7279/api/Blog", blogData);
-        message.success("Tạo bài viết mới thành công");
-      }
-
-      setModalVisible(false);
+      await axios.post("https://localhost:7279/api/Blog", blogData);
+      message.success("Tạo bài viết mới thành công");
       form.resetFields();
       setContent("");
-      setSelectedCategory(null);
-      setSelectedCategoryName("");
-      setSubCategories([]);
       fetchBlogs();
+      setActiveTab("2"); // Chuyển sang tab danh sách sau khi tạo thành công
     } catch (error) {
       console.error("Error submitting blog:", error);
-      message.error(error.response?.data?.message || "Không thể lưu bài viết");
+      message.error("Không thể lưu bài viết");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleEdit = (blog) => {
-    setEditingBlog(blog);
-    setContent(blog.content);
-    const categoryObj = categories.find(
-      (cat) => cat.categoryName === blog.categoryName
-    );
-    if (categoryObj) {
-      setSelectedCategory(categoryObj.categoryId);
-      fetchSubCategories(categoryObj.categoryId);
+  const handleDelete = async (blogId) => {
+    try {
+      await axios.delete(`https://localhost:7279/api/Blog/${blogId}`);
+      message.success("Xóa bài viết thành công");
+      fetchBlogs();
+    } catch (error) {
+      console.error("Error deleting blog:", error);
+      message.error("Không thể xóa bài viết");
     }
-
-    form.setFieldsValue({
-      title: blog.title,
-      categoryId: categoryObj?.categoryId,
-      imageBlog: blog.imageBlog,
-      tags: blog.tags,
-      referenceSources: blog.referenceSources,
-    });
-    setModalVisible(true);
   };
 
   const columns = [
@@ -222,7 +162,7 @@ const DoctorBlog = () => {
       key: "status",
       render: (status) => {
         const statusColors = {
-          0: "orange", // Draft
+          0: "orange", // Pending
           1: "green", // Approved
           2: "red", // Rejected
         };
@@ -242,7 +182,17 @@ const DoctorBlog = () => {
           <Button
             type="primary"
             icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
+            onClick={() => {
+              setActiveTab("1");
+              form.setFieldsValue({
+                title: record.title,
+                categoryName: record.categoryName,
+                imageBlog: record.imageBlog,
+                tags: record.tags,
+                referenceSources: record.referenceSources,
+              });
+              setContent(record.content);
+            }}
           >
             Sửa
           </Button>
@@ -258,142 +208,155 @@ const DoctorBlog = () => {
     },
   ];
 
-  const handleDelete = async (blogId) => {
-    try {
-      await axios.delete(`https://localhost:7279/api/Blog/${blogId}`);
-      message.success("Xóa bài viết thành công");
-      fetchBlogs();
-    } catch (error) {
-      console.error("Error deleting blog:", error);
-      message.error("Không thể xóa bài viết");
-    }
-  };
-
   return (
-    <div className="blog-container" style={{ padding: "24px" }}>
-      <Card>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginBottom: "16px",
-          }}
-        >
-          <Title level={4}>Quản lý Blog</Title>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => {
-              setEditingBlog(null);
-              form.resetFields();
-              setContent("");
-              setModalVisible(true);
-            }}
-          >
-            Tạo bài viết mới
-          </Button>
-        </div>
-
-        <Table
-          columns={columns}
-          dataSource={blogs}
-          loading={loading}
-          rowKey="blogId"
-          pagination={{
-            defaultPageSize: 10,
-            showSizeChanger: true,
-            showTotal: (total) => `Tổng ${total} bài viết`,
-          }}
-        />
-
-        <Modal
-          title={editingBlog ? "Chỉnh sửa bài viết" : "Tạo bài viết mới"}
-          open={modalVisible}
-          onCancel={() => {
-            setModalVisible(false);
-            form.resetFields();
-            setContent("");
-            setSelectedCategory(null);
-            setSelectedCategoryName("");
-            setSubCategories([]);
-          }}
-          footer={null}
-          width={800}
-        >
-          <Form form={form} layout="vertical" onFinish={handleSubmit}>
-            <Form.Item
-              name="title"
-              label="Tiêu đề"
-              rules={[{ required: true, message: "Vui lòng nhập tiêu đề" }]}
-            >
-              <Input placeholder="Nhập tiêu đề bài viết" />
-            </Form.Item>
-
-            <Form.Item
-              name="categoryId"
-              label="Danh mục"
-              rules={[{ required: true, message: "Vui lòng chọn danh mục" }]}
-            >
-              <Select
-                placeholder="Chọn danh mục"
-                onChange={handleCategoryChange}
-                value={selectedCategory}
+    <div className="blog-container">
+      <Card bordered={false}>
+        <Title level={4} style={{ marginBottom: 24 }}>
+          Quản lý Blog
+        </Title>
+        <Tabs activeKey={activeTab} onChange={setActiveTab}>
+          <TabPane tab="Viết Blog" key="1">
+            <div className="write-blog-container">
+              <Form
+                form={form}
+                layout="vertical"
+                onFinish={handleSubmit}
+                className="blog-form"
               >
-                {categories.map((category) => (
-                  <Option key={category.categoryId} value={category.categoryId}>
-                    {category.categoryName}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
+                <div className="input-row">
+                  <Form.Item
+                    name="title"
+                    rules={[
+                      { required: true, message: "Vui lòng nhập tiêu đề" },
+                    ]}
+                    className="input-item"
+                  >
+                    <Input placeholder="Title" className="blog-input" />
+                  </Form.Item>
 
-            <Form.Item
-              name="tags"
-              label="Tags"
-              rules={[
-                {
-                  required: true,
-                  message: "Tags sẽ được tự động điền theo danh mục",
-                },
-              ]}
-            >
-              <Input disabled />
-            </Form.Item>
+                  <Form.Item
+                    name="tags"
+                    rules={[
+                      { required: true, message: "Tags sẽ được tự động điền" },
+                    ]}
+                    className="input-item"
+                  >
+                    <Input
+                      placeholder="Tags"
+                      className="blog-input"
+                      disabled
+                      style={{ backgroundColor: "#f5f5f5" }}
+                    />
+                  </Form.Item>
 
-            <Form.Item
-              name="imageBlog"
-              label="Ảnh blog"
-              rules={[
-                { required: true, message: "Vui lòng nhập đường dẫn ảnh" },
-              ]}
-            >
-              <Input placeholder="Nhập đường dẫn ảnh" />
-            </Form.Item>
+                  <Form.Item
+                    name="referenceSources"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng nhập nguồn tham khảo",
+                      },
+                    ]}
+                    className="input-item"
+                  >
+                    <Input
+                      placeholder="Reference source"
+                      className="blog-input"
+                    />
+                  </Form.Item>
 
-            <Form.Item
-              label="Nội dung"
-              rules={[{ required: true, message: "Vui lòng nhập nội dung" }]}
-            >
-              <CustomEditor
-                value={content}
-                onChange={(newContent) => setContent(newContent)}
-              />
-            </Form.Item>
+                  <Form.Item name="status" className="input-item">
+                    <Input
+                      placeholder="Status"
+                      className="blog-input"
+                      disabled
+                      value="Chờ duyệt"
+                      style={{ backgroundColor: "#f5f5f5" }}
+                    />
+                  </Form.Item>
+                </div>
 
-            <Form.Item name="referenceSources" label="Nguồn tham khảo">
-              <TextArea rows={3} placeholder="Nhập nguồn tham khảo (nếu có)" />
-            </Form.Item>
+                <div className="category-section">
+                  <Form.Item
+                    name="categoryName"
+                    rules={[
+                      { required: true, message: "Vui lòng chọn danh mục" },
+                    ]}
+                    className="category-item"
+                  >
+                    <Select
+                      placeholder="Chọn danh mục"
+                      onChange={(value) => {
+                        const tags = getTagsFromCategory(value);
+                        form.setFieldsValue({ tags });
+                      }}
+                      className="category-select"
+                    >
+                      {categories.map((category) => (
+                        <Option
+                          key={category.categoryId}
+                          value={category.categoryName}
+                        >
+                          {category.categoryName}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
 
-            <Form.Item style={{ marginTop: "50px" }}>
-              <Space>
-                <Button onClick={() => setModalVisible(false)}>Hủy</Button>
-                <Button type="primary" htmlType="submit">
-                  {editingBlog ? "Cập nhật" : "Tạo mới"}
-                </Button>
-              </Space>
-            </Form.Item>
-          </Form>
-        </Modal>
+                  <Form.Item
+                    name="imageBlog"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng nhập đường dẫn ảnh",
+                      },
+                    ]}
+                    className="image-item"
+                  >
+                    <Input placeholder="Image URL" className="blog-input" />
+                  </Form.Item>
+                </div>
+
+                <div className="content-section">
+                  <div className="content-header">
+                    <h3>Nội dung bài viết</h3>
+                  </div>
+                  <div className="content-body">
+                    <Form.Item
+                      rules={[
+                        { required: true, message: "Vui lòng nhập nội dung" },
+                      ]}
+                    >
+                      <CustomEditor
+                        value={content}
+                        onChange={(newContent) => setContent(newContent)}
+                      />
+                    </Form.Item>
+                  </div>
+                </div>
+
+                <div className="submit-button">
+                  <Button type="primary" htmlType="submit" size="large">
+                    Confirm
+                  </Button>
+                </div>
+              </Form>
+            </div>
+          </TabPane>
+
+          <TabPane tab="Danh sách Blog" key="2">
+            <Table
+              columns={columns}
+              dataSource={blogs}
+              loading={loading}
+              pagination={{
+                defaultPageSize: 10,
+                showSizeChanger: true,
+                showTotal: (total) => `Tổng ${total} bài viết`,
+              }}
+            />
+          </TabPane>
+        </Tabs>
       </Card>
     </div>
   );
