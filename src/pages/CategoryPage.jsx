@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Header from "../components/common/Header";
+import HeaderGuest from "../components/commonGuest/HeaderGuest";
 import Footer from "../components/common/Footer";
 import api from "../config/axios";
 import "./CategoryPage.css";
@@ -13,6 +14,9 @@ function CategoryPage() {
   const [categoryName, setCategoryName] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [blogsPerPage] = useState(6);
+
+  // Kiểm tra trạng thái đăng nhập
+  const isLoggedIn = localStorage.getItem("token") !== null;
 
   useEffect(() => {
     if (categoryId) {
@@ -108,7 +112,7 @@ function CategoryPage() {
 
   return (
     <div className="category-page">
-      <Header />
+      {isLoggedIn ? <Header /> : <HeaderGuest />}
 
       <main className="category-content">
         {categoryName && (

@@ -93,8 +93,13 @@ function Header() {
     <header className="homepage-header">
       <nav>
         <div className="logo">
-          <img src={Logo} alt="Logo" />
-          <img src={Name} alt="Name" />
+          <div
+            onClick={() => navigate("/homepage")}
+            style={{ cursor: "pointer" }}
+          >
+            <img src={Logo} alt="Logo" />
+            <img src={Name} alt="Name" />
+          </div>
         </div>
 
         <div className="nav-links">

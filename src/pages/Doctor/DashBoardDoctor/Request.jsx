@@ -59,9 +59,9 @@ const Request = () => {
       const mockData = [
         {
           id: 1,
-          parentName: "Nguyễn Văn A",
+          parentName: "Nguyễn Thị Lam",
           parentAvatar: "https://randomuser.me/api/portraits/men/32.jpg",
-          childName: "Bé Na",
+          childName: "NGa",
           childAge: "2 tuổi",
           requestDate: "2023-11-15T08:30:00",
           status: "pending",
@@ -74,9 +74,9 @@ const Request = () => {
         },
         {
           id: 2,
-          parentName: "Trần Thị B",
+          parentName: "Trần Văn Hiếu",
           parentAvatar: "https://randomuser.me/api/portraits/women/44.jpg",
-          childName: "Bé Bin",
+          childName: "Hoàng",
           childAge: "6 tháng",
           requestDate: "2023-11-14T10:15:00",
           status: "pending",
