@@ -16,34 +16,36 @@ const transactionsApi = {
       return api.post("MemberMemberships", data);
     },
     
-  // Lấy memberMembershipId (đầu tiên) theo memberId
-  getMemberMembershipId: async (memberId) => {
-    const response = await api.get(`MemberMemberships/odata?$filter=MemberId eq ${memberId}`);
-    const list = response.data;
-    if (Array.isArray(list) && list.length > 0) {
-      return list[0].memberMembershipId;
-    } else {
-      throw new Error("No memberMembership found for this memberId");
-    }
-  },
+ // Lấy thông tin memberMembership
+ getMemberMembershipId: async (membershipId) => {
+  // Sử dụng OData filter để lấy record có memberMembershipId bằng giá trị membershipId
+  const response = await api.get(`MemberMemberships/odata?$filter=memberMembershipId eq ${membershipId}`);
+  const list = response.data;
+  if (Array.isArray(list) && list.length > 0) {
+    return list[0].memberMembershipId;
+  } else {
+    throw new Error("MemberMembership not found for this id");
+  }
+},
   // Tạo transaction
   createTransaction: (transactionData) => {
     // POST /api/Transactions
     return api.post("Transactions", transactionData);
   },
-  //Lấy Tracsaction theo id
-  getTransactionById: (id) => {
-    return api.get(`Transactions/${id}`);
-  },
-
   
   // Gọi API tạo Payment URL (VNPay)
-  createPayment: (memberMembershipId, returnUrl) => {
-    // GET /api/vnpay/create-payment?memberMembershipId=...&returnUrl=...
-    return api.get(
-      `vnpay/create-payment?memberMembershipId=${memberMembershipId}&returnUrl=${encodeURIComponent(returnUrl)}`
-    );
-  },
+createPayment: (gatewayTransactionId) => {
+  return api.get(`vnpay/create-payment?gatewayTransactionId=${gatewayTransactionId}`, {
+    validateStatus: function (status) {
+      return status === 200 || status === 1; // Chấp nhận cả status 1 và 200
+    }
+  });
+},
+
+// Lấy thông tin transaction theo userId và memberMembershipId
+getTransaction: (userId, memberMembershipId) => {
+  return api.get(`Transactions/${userId}/${memberMembershipId}`);
+}
 };
 
 export default transactionsApi;
