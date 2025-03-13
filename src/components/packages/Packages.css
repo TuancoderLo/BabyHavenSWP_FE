@@ -188,70 +188,70 @@
 /* =========== STEP 1: CHOOSE HOW TO PAY =========== */
 .choose-payment-step .payment-method-options {
   display: flex;
-  flex-direction: column; /* Thay vì row (mặc định) */
-  align-items: center;    /* Canh giữa theo chiều ngang */
-  gap: 1rem;
-  margin-bottom: 2rem;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-.payment-box {
-  width: 750px;
-  flex: 1;
-  border: 2px solid #ccc;
-  border-radius: 10px;
-  padding: 0.5rem;
-  text-align: center;
+.payment-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 15px 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: white;
   cursor: pointer;
-  transition: border-color 0.3s;
-}
-.payment-box.active {
-  border-color: #00d0bc;
-}
-.payment-box:hover {
-  border-color: #00d0bc;
+  transition: all 0.3s ease;
 }
 
-.payment-box span {
-  display: block;
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+.payment-button:hover {
+  border-color: #2196f3;
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
+}
+
+.payment-button.active {
+  border-color: #2196f3;
+  background-color: #f5f9ff;
+}
+
+.payment-button span {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.payment-logos {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .payment-logos img {
   height: 24px;
-  margin: 0 4px;
+  width: auto;
+  object-fit: contain;
 }
 
-.step-buttons-centered {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
+.choose-payment-step {
+  text-align: center;
+  padding: 40px 20px;
 }
 
-.previous-btn,
-.next-btn {
-  padding: 0.6rem 1.4rem;
-  border: none;
-  border-radius: 20px;
+.step-title {
+  font-size: 24px;
   font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
+  margin-bottom: 8px;
 }
 
-.previous-btn {
-  background: #ccc;
-}
-.previous-btn:hover {
-  background: #bbb;
-}
-
-.next-btn {
-  background: #00d0bc;
-  color: #fff;
-}
-.next-btn:hover {
-  background: #00bfa6;
+.step-subtitle {
+  color: #666;
+  margin-bottom: 32px;
+  line-height: 1.5;
 }
 
 /* =========== STEP 2: PAYMENT INFO =========== */
@@ -409,4 +409,267 @@
 }
 .close-overlay:hover {
   background: #bbb;
+}
+
+/* Logo styles */
+.payment-page-logo {
+  margin-bottom: 20px;
+}
+
+.payment-page-logo img {
+  height: 40px;
+  width: auto;
+}
+
+/* Payment method options */
+.payment-method-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 600px !important;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.payment-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 15px 25px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Step 2: Payment Info Styles */
+.step2-container {
+  display: flex;
+  gap: 24px;
+  padding: 0 20px;
+}
+
+.step2-left {
+  flex: 1;
+}
+
+/* Selected Package Box */
+.selected-package-box {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.package-icon {
+  width: 48px;
+  height: 48px;
+  margin-right: 16px;
+  background: #f0f7ff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.package-icon img {
+  width: 32px;
+  height: 32px;
+}
+
+.package-info {
+  flex-grow: 1;
+}
+
+.package-name {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.package-price {
+  color: #666;
+  font-size: 14px;
+}
+
+/* Promotion Input */
+.promo-input-box {
+  margin-bottom: 16px;
+}
+
+.promo-input-box input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+/* Payment Method Box */
+.payment-method-box {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.payment-method-text {
+  flex-grow: 1;
+  font-weight: 500;
+}
+
+.payment-logos {
+  display: flex;
+  gap: 8px;
+  margin-right: 16px;
+}
+
+.payment-logos img {
+  height: 24px;
+  width: auto;
+}
+
+.change-button {
+  color: #2196f3;
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+/* Terms Check */
+.terms-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 16px;
+  font-size: 14px;
+  color: #666;
+}
+
+.terms-check input[type="checkbox"] {
+  margin-top: 3px;
+}
+
+.terms-check a {
+  color: #2196f3;
+  text-decoration: none;
+}
+
+/* Subscription Box */
+.subscription-box {
+  flex: 1;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.subscription-box h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.subscription-items {
+  margin-bottom: 16px;
+}
+
+.subscription-items div {
+  margin-bottom: 8px;
+}
+
+.subscription-dates {
+  color: #666;
+  font-size: 14px;
+  margin: 16px 0;
+  line-height: 1.5;
+}
+
+.cost-breakdown {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.cost-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+  font-weight: 600;
+  color: #2196f3;
+  font-size: 16px;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+  padding: 0 20px;
+}
+
+.btn-cancel, .btn-confirm {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.btn-cancel {
+  background: white;
+  border: 1px solid #e0e0e0;
+  color: #666;
+}
+
+.btn-confirm {
+  background: #2196f3;
+  border: none;
+  color: white;
+}
+
+.babyhaven-logo {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.babyhaven-logo .logo-img {
+  height: 40px;
+  width: auto;
+}
+
+.babyhaven-logo .name-img {
+  height: 20px;
+  width: auto;
+}
+
+/* Điều chỉnh padding cho container để không bị che bởi logo */
+.transaction-step {
+  padding-top: 80px;
+  position: relative;
 }

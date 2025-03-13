@@ -7,6 +7,8 @@ import packagesIcon from "../../assets/packages.png";
 import momo from "../../assets/momo.png";
 import vnpay from "../../assets/vnpay.jpg";
 import visa from "../../assets/visa.jpg";
+import logo from "../../assets/logo.png";
+import name from "../../assets/name.png";
 
 function Packages() {
   const [showOverlay, setShowOverlay] = useState(false);
@@ -99,44 +101,57 @@ const handleConfirmPayment = async () => {
   }
 
   try {
-    // 1) Tạo MemberMembership (POST /api/MemberMemberships)
-    await transactionsApi.createMemberMembership({
+    // 1) Tạo memberMembership và nhận về membership id (dạng chuỗi)
+    const membershipRes = await transactionsApi.createMemberMembership({
       memberId: memberId,
       packageName: selectedPackage.packageName,
     });
-
-    // 2) Lấy memberMembershipId (đầu tiên) cho memberId
-    const newMemberMembershipId = await transactionsApi.getMemberMembershipId(memberId);
-    if (!newMemberMembershipId) {
-      alert("Cannot find any memberMembershipId for this memberId!");
+    const membershipId = membershipRes.data.data; // ví dụ: "2c989e71-eeb5-47bc-b18d-e000632aae7f"
+    if (!membershipId) {
+      alert("Failed to create memberMembership!");
       return;
     }
 
-    // 3) Tạo Transaction => { userId, memberMembershipId }
-    await transactionsApi.createTransaction({
+    // 2) Lấy thông tin chi tiết của memberMembership qua API GET /api/MemberMemberships/odata
+    // Hàm getMemberMembershipId nhận vào membershipId vừa tạo và trả về memberMembershipId từ chi tiết
+    const newMemberMembershipId = await transactionsApi.getMemberMembershipId(membershipId);
+    if (!newMemberMembershipId) {
+      alert("Cannot retrieve membership details!");
+      return;
+    }
+
+    // 3) Tạo Transaction với userId và memberMembershipId (vừa lấy được)
+    const transactionRes = await transactionsApi.createTransaction({
       userId: userId,
       memberMembershipId: newMemberMembershipId,
     });
+    
+    // Lấy thông tin transaction vừa tạo
+    const transactionResponse = await transactionsApi.getTransaction(userId, newMemberMembershipId);
+    const transactionData = transactionResponse.data.data;
+    
+    if (!transactionData || transactionData.paymentStatus !== "Pending") {
+      alert("Transaction is not pending or failed!");
+      return;
+    }
+    const gatewayTransactionId = transactionData.gatewayTransactionId;
 
-    // 4) Tạo Payment URL
-    const returnUrl = window.location.origin + "/membership?paymentStatus=success";
-    const payRes = await transactionsApi.createPayment(newMemberMembershipId, returnUrl);
-    const paymentUrl = payRes.data;
+    // 4) Gọi API VNPay để tạo URL thanh toán với gatewayTransactionId
+    const paymentRes = await transactionsApi.createPayment(gatewayTransactionId);
+    const paymentUrl = paymentRes.data.data;
     if (!paymentUrl) {
       alert("Cannot get payment URL from server!");
       return;
     }
-
-    // 5) Redirect sang cổng thanh toán
+    console.log(paymentUrl);
+    // 5) Redirect sang cổng VNPay
     window.location.href = paymentUrl;
-
   } catch (err) {
     console.error("Payment error:", err);
     alert("Payment initiation failed, please try again.");
   }
 };
 
-// Step 3: Đóng
 const handleFinish = () => {
   handleCloseOverlay();
 };
@@ -195,6 +210,10 @@ const handleFinish = () => {
             {/* STEP 1: CHOOSE HOW TO PAY */}
             {currentStep === 1 && selectedPackage && (
               <div className="transaction-step choose-payment-step">
+                <div className="babyhaven-logo">
+                  <img src={logo} alt="BabyHaven Logo" className="logo-img" />
+                  <img src={name} alt="BabyHaven Name" className="name-img" />
+                </div>
                 <div className="step-indicator">STEP 1 OF 3</div>
                 <h2 className="step-title">CHOOSE HOW TO PAY</h2>
                 <p className="step-subtitle">
@@ -203,40 +222,34 @@ const handleFinish = () => {
                 </p>
 
                 <div className="payment-method-options">
-                  <div
-                    className={`payment-box ${
+                  <button
+                    className={`payment-button ${
                       paymentMethod === "CreditCard" ? "active" : ""
                     }`}
-                    onClick={() => handleSelectPayment("CreditCard")}
+                    onClick={() => {
+                      handleSelectPayment("CreditCard");
+                      setCurrentStep(2);
+                    }}
                   >
                     <span>Credit or Debit Card</span>
                     <div className="payment-logos">
                       <img src={visa} alt="Visa" />
                       <img src={vnpay} alt="VNPay" />
                     </div>
-                  </div>
-                  <div
-                    className={`payment-box ${
+                  </button>
+                  <button
+                    className={`payment-button ${
                       paymentMethod === "Momo" ? "active" : ""
                     }`}
-                    onClick={() => handleSelectPayment("Momo")}
+                    onClick={() => {
+                      handleSelectPayment("Momo");
+                      setCurrentStep(2);
+                    }}
                   >
                     <span>Momo E-Wallet</span>
                     <div className="payment-logos">
                       <img src={momo} alt="Momo" />
                     </div>
-                  </div>
-                </div>
-
-                <div className="step-buttons-centered">
-                  <button
-                    className="previous-btn"
-                    onClick={() => setCurrentStep(0)}
-                  >
-                    Back
-                  </button>
-                  <button className="next-btn" onClick={handleNextFromStep1}>
-                    Next
                   </button>
                 </div>
               </div>
@@ -245,95 +258,88 @@ const handleFinish = () => {
             {/* STEP 2: PAYMENT INFO */}
             {currentStep === 2 && selectedPackage && (
               <div className="transaction-step payment-info-step">
+                <div className="babyhaven-logo">
+                  <img src={logo} alt="BabyHaven Logo" className="logo-img" />
+                  <img src={name} alt="BabyHaven Name" className="name-img" />
+                </div>
                 <div className="step-indicator">STEP 2 OF 3</div>
                 <h2 className="step-title">Set up your payment information</h2>
 
                 <div className="step2-container">
                   <div className="step2-left">
-                    <div className="selected-package-line">
-                      <span className="package-name-highlight">
-                        {selectedPackage.packageName} package
-                      </span>
-                      <button
-                        className="change-btn"
-                        onClick={() => setCurrentStep(0)}
-                      >
+                    <div className="selected-package-box">
+                      <div className="package-icon">
+                        <img src={packagesIcon} alt="Premium" />
+                      </div>
+                      <div className="package-info">
+                        <div className="package-name">Premium package</div>
+                        <div className="package-price">1.279.000đ/12 months</div>
+                      </div>
+                      <button className="change-button" onClick={() => handleCloseOverlay()}>
                         Change
                       </button>
                     </div>
 
-                    <label className="label-promo">Add promotion here</label>
-                    <input
-                      type="text"
-                      className="promo-input"
-                      placeholder="Enter your code"
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value)}
-                    />
+                    <div className="promo-input-box">
+                      <input
+                        type="text"
+                        placeholder="Add promotion here"
+                        value={promoCode}
+                        onChange={(e) => setPromoCode(e.target.value)}
+                      />
+                    </div>
 
-                    <div className="payment-method-chosen">
-                      {paymentMethod === "CreditCard" && (
-                        <>
-                          <label>Credit or Debit Card</label>
-                          <div className="card-logos-inline">
-                            <img src={visa} alt="Visa" />
-                            <img src={vnpay} alt="VNPay" />
-                          </div>
-                        </>
-                      )}
-                      {paymentMethod === "Momo" && (
-                        <>
-                          <label>Momo E-Wallet</label>
-                          <div className="card-logos-inline">
-                            <img src={momo} alt="Momo" />
-                          </div>
-                        </>
-                      )}
+                    <div className="payment-method-box">
+                      <div className="payment-method-text">Credit or Debit Card</div>
+                      <div className="payment-logos">
+                        <img src={visa} alt="Visa" />
+                        <img src={vnpay} alt="VNPay" />
+                      </div>
+                      <button className="change-button" onClick={() => setCurrentStep(1)}>
+                        Change
+                      </button>
                     </div>
 
                     <div className="terms-check">
                       <input type="checkbox" id="agreeTerm" />
                       <label htmlFor="agreeTerm">
-                        I agree to the Terms of Use and Privacy Statement.
+                        By checking the checkbox, you agree to our <a href="#">Terms of Use</a>, <a href="#">Privacy Statement</a>, and that you are over 18.
                       </label>
                     </div>
                   </div>
 
-                  <div className="step2-right">
+                  <div className="subscription-box">
                     <h3>Your subscription</h3>
-                    <p>1. {selectedPackage.packageName} package</p>
-                    <p>2. Family package promotion</p>
-                    <p>
-                      Start date: 20-10-2024 <br />
-                      End date: 20-10-2025
-                    </p>
+                    <div className="subscription-items">
+                      <div>1. Premium package</div>
+                      <div>2. Family package promotion</div>
+                    </div>
+                    
+                    <div className="subscription-dates">
+                      <div>Start date: 20-10-2024</div>
+                      <div>End date: 20-10-2025</div>
+                    </div>
 
-                    <div className="cost-line">
-                      <span>Amount</span>
-                      <strong>
-                        {selectedPackage.price.toLocaleString()} VND
-                      </strong>
-                    </div>
-                    <div className="cost-line">
-                      <span>Promotion</span>
-                      <strong>{discount.toLocaleString()} VND</strong>
-                    </div>
-                    <hr />
-                    <div className="cost-line total-cost">
-                      <span>Total</span>
-                      <strong>
-                        {(selectedPackage.price - discount).toLocaleString()} VND
-                      </strong>
+                    <div className="cost-breakdown">
+                      <div className="cost-row">
+                        <span>Amount</span>
+                        <span className="amount">1.279.000 VND</span>
+                      </div>
+                      <div className="cost-row">
+                        <span>Promotion</span>
+                        <span className="promotion">280.000 VND</span>
+                      </div>
+                      <div className="total-row">
+                        <span>Total</span>
+                        <span className="total">999.000 VND</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="buttons-step2">
-                  <button
-                    className="btn-cancel"
-                    onClick={() => setCurrentStep(1)}
-                  >
-                    Back
+                <div className="action-buttons">
+                  <button className="btn-cancel" onClick={() => setCurrentStep(1)}>
+                    Cancel
                   </button>
                   <button className="btn-confirm" onClick={handleConfirmPayment}>
                     Confirm
