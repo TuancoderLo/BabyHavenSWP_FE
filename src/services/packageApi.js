@@ -1,11 +1,9 @@
-import axios from "axios";
-
-const BASE_URL = "https://localhost:7279/api";
+import api from "../config/axios";
 
 const packageApi = {
   getAllPackages: async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/MembershipPackages`);
+      const response = await api.get("/MembershipPackages");
       return {
         status: response.data.status,
         message: response.data.message,
@@ -31,10 +29,7 @@ const packageApi = {
         status: Number(data.status),
       };
 
-      const response = await axios.post(
-        `${BASE_URL}/MembershipPackages`,
-        packageData
-      );
+      const response = await api.post("/MembershipPackages", packageData);
       return response.data;
     } catch (error) {
       throw error;
@@ -66,10 +61,7 @@ const packageApi = {
 
       console.log("Dữ liệu được gửi đến API:", packageData);
 
-      const response = await axios.put(
-        `${BASE_URL}/MembershipPackages/${id}`,
-        packageData
-      );
+      const response = await api.put(`/MembershipPackages/${id}`, packageData);
       console.log("Phản hồi từ API:", response.data);
       return response.data;
     } catch (error) {
@@ -81,9 +73,7 @@ const packageApi = {
 
   deletePackage: async (id) => {
     try {
-      const response = await axios.delete(
-        `${BASE_URL}/MembershipPackages/${id}`
-      );
+      const response = await api.delete(`/MembershipPackages/${id}`);
       return response.data;
     } catch (error) {
       throw error;
