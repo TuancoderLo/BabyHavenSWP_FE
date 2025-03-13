@@ -3,7 +3,7 @@ import Sidebar from "./sidebar/Sidebar.jsx";
 import NavBar from "./navbar/NavBar.jsx";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Children from "./children/ChildrenPage";
-import Consultation from "./consulation/DoctorConsultation";
+import Consultation from "./consultation/DoctorConsultation";
 import Membership from "./membership/MemberShipPage";
 import TransactionsMember from "./transactionsMember/TransactionsMember";
 import Notifications from "./notifications/Notifications";
