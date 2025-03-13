@@ -18,12 +18,14 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import Bio from "./DashBoardDoctor/Bio";
 import Request from "./DashBoardDoctor/Request";
 import Response from "./DashBoardDoctor/Response";
 import RecordRequest from "./DashBoardDoctor/RecordRequest";
+import DoctorBlog from "./DashBoardDoctor/DoctorBlog";
 import "./Doctor.css";
 
 const { Header, Sider, Content } = Layout;
@@ -92,6 +94,11 @@ const Doctor = () => {
       key: "4",
       icon: <FileOutlined />,
       label: "Record Requests",
+    },
+    {
+      key: "5",
+      icon: <EditOutlined />,
+      label: "Blog Management",
     },
     {
       key: "logout",
@@ -197,6 +204,9 @@ const Doctor = () => {
                 </TabPane>
                 <TabPane tab="Record Requests" key="4">
                   <RecordRequest />
+                </TabPane>
+                <TabPane tab="Blog Management" key="5">
+                  <DoctorBlog />
                 </TabPane>
               </Tabs>
             </div>
