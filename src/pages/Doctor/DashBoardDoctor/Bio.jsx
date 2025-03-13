@@ -47,6 +47,7 @@ const Bio = () => {
     dateOfBirth: null,
     profilePicture: "",
   });
+  const [doctorId, setDoctorId] = useState(null);
 
   useEffect(() => {
     const fetchDoctorData = async () => {
@@ -64,7 +65,6 @@ const Bio = () => {
         const response = await axios.get("https://localhost:7279/api/Doctors");
         console.log("API Response:", response.data);
 
-        // Kiểm tra response status và data
         if (response.data.status !== 1 || !Array.isArray(response.data.data)) {
           console.error("Invalid response format:", response.data);
           message.error("Dữ liệu không đúng định dạng!");
@@ -72,7 +72,6 @@ const Bio = () => {
           return;
         }
 
-        // Tìm bác sĩ có email trùng khớp trong mảng data
         const doctor = response.data.data.find((doc) => doc.email === email);
         console.log("Found Doctor:", doctor);
 
@@ -81,6 +80,9 @@ const Bio = () => {
           setLoading(false);
           return;
         }
+
+        // Lưu doctorId vào state
+        setDoctorId(doctor.doctorId);
 
         // Lấy thông tin từ đối tượng doctor
         const combinedData = {
@@ -143,28 +145,67 @@ const Bio = () => {
     try {
       setLoading(true);
 
-      // Chuẩn bị dữ liệu để gửi lên server
-      const formData = {
-        ...values,
-        dateOfBirth: values.dateOfBirth
-          ? values.dateOfBirth.format("YYYY-MM-DD")
-          : null,
-        profilePicture: imageUrl,
+      if (!doctorId) {
+        message.error("Không tìm thấy ID bác sĩ!");
+        return;
+      }
+
+      // Chuẩn bị dữ liệu cho API Doctors
+      const doctorData = {
+        userName: values.userName || "",
+        name: values.name,
+        email: values.email,
+        phoneNumber: values.phoneNumber,
+        degree: values.degree,
+        hospitalName: values.hospitalName,
+        hospitalAddress: values.hospitalAddress,
+        biography: values.biography,
+        status: values.status,
       };
 
-      console.log("Dữ liệu cập nhật:", formData);
+      // Chuẩn bị dữ liệu cho API Specializations
+      const specializationData = {
+        specializationName: values.specializationName,
+        description: values.description,
+      };
 
-      // TODO: Thêm API call để cập nhật thông tin
-      // const response = await axios.put(`https://localhost:7279/api/Doctors/${doctorId}`, formData);
+      // Gọi API cập nhật thông tin bác sĩ
+      try {
+        const doctorResponse = await axios.put(
+          `https://localhost:7279/api/Doctors/${doctorId}`,
+          doctorData
+        );
+        console.log("Doctor update response:", doctorResponse.data);
+      } catch (error) {
+        console.error("Error updating doctor:", error);
+        message.error("Cập nhật thông tin bác sĩ thất bại!");
+        return;
+      }
 
+      // Gọi API cập nhật thông tin chuyên khoa
+      try {
+        const specializationResponse = await axios.put(
+          `https://localhost:7279/api/Specializations/${doctorId}`,
+          specializationData
+        );
+        console.log(
+          "Specialization update response:",
+          specializationResponse.data
+        );
+      } catch (error) {
+        console.error("Error updating specialization:", error);
+        message.warning("Cập nhật thông tin chuyên khoa thất bại!");
+      }
+
+      // Cập nhật state và UI
       setDoctorData({
         ...doctorData,
-        ...formData,
+        ...specializationData,
       });
       setEditing(false);
       message.success("Cập nhật thông tin thành công!");
     } catch (error) {
-      console.error("Error updating doctor data:", error);
+      console.error("Error in handleSave:", error);
       message.error("Có lỗi xảy ra khi cập nhật thông tin!");
     } finally {
       setLoading(false);
