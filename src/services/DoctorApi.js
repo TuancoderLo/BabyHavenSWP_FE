@@ -1,11 +1,9 @@
-import axios from "axios";
-
-const BASE_URL = "https://localhost:7279/api";
+import api from "../config/axios";
 
 const doctorApi = {
   getAllDoctors: async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/Doctors`);
+      const response = await api.get("/Doctors");
       return response.data;
     } catch (error) {
       throw error;
@@ -14,9 +12,7 @@ const doctorApi = {
 
   getDoctorSpecializations: async (doctorId) => {
     try {
-      const response = await axios.get(
-        `${BASE_URL}/Specializations/${doctorId}`
-      );
+      const response = await api.get(`/Specializations/${doctorId}`);
       return response.data;
     } catch (error) {
       throw error;
@@ -25,7 +21,7 @@ const doctorApi = {
 
   getConsultationRequests: async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/ConsultationRequests`);
+      const response = await api.get("/ConsultationRequests");
       return response.data;
     } catch (error) {
       throw error;
@@ -34,10 +30,7 @@ const doctorApi = {
 
   createConsultationRequest: async (data) => {
     try {
-      const response = await axios.post(
-        `${BASE_URL}/ConsultationRequests`,
-        data
-      );
+      const response = await api.post("/ConsultationRequests", data);
       return response.data;
     } catch (error) {
       throw error;
