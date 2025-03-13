@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import "./Packages.css";
 import membershipApi from "../../services/memberShipApi";
 import transactionsApi from "../../services/transactionsApi";
-
+import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 import packagesIcon from "../../assets/packages.png";
 import momo from "../../assets/momo.png";
 import vnpay from "../../assets/vnpay.jpg";
@@ -13,6 +14,7 @@ import name from "../../assets/name.png";
 function Packages() {
   const [showOverlay, setShowOverlay] = useState(false);
   const [packagesData, setPackagesData] = useState([]);
+  const navigate = useNavigate();
 
   // 0 = List gói, 1 = Choose how to pay, 2 = Payment info, 3 = Congrat
   const [currentStep, setCurrentStep] = useState(0);
@@ -20,17 +22,35 @@ function Packages() {
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [promoCode, setPromoCode] = useState("");
   const [paymentMethod, setPaymentMethod] = useState(null);
+  const [error, setError] = useState("");
 
   // Kiểm tra URL param ?paymentStatus=success => Step 3
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const paymentStatus = params.get("paymentStatus");
-    if (paymentStatus === "success") {
-      setCurrentStep(3);
-      const pkgJSON = localStorage.getItem("selectedPackage");
-      if (pkgJSON) {
-        setSelectedPackage(JSON.parse(pkgJSON));
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("token");
+
+      if (typeof token === "string" && token.trim() !== "") {
+        const tokenPayload = jwtDecode(token);
+        const paymentStatus = tokenPayload["Status"];
+        console.log(paymentStatus);
+          if (paymentStatus === "Completed") {
+            navigate("/homepage");
+            setCurrentStep(3);
+            const pkgJSON = localStorage.getItem("selectedPackage");
+            if (pkgJSON) {
+              setSelectedPackage(JSON.parse(pkgJSON));
+            }
+            
+            setShowOverlay(true);
+          }
+      } else {
+        setError("Invalid or missing token");
+        console.error("Invalid or missing token");
       }
+    } catch (error) {
+      // Xử lý lỗi nếu không có token hoặc token không hợp lệ
+      console.error("Error during payment:", error);
     }
   }, []);
 
