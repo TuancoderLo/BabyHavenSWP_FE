@@ -35,8 +35,17 @@ const transactionsApi = {
   
   // Gọi API tạo Payment URL (VNPay)
 createPayment: (gatewayTransactionId) => {
-  return api.get(`vnpay/create-payment?gatewayTransactionId=${gatewayTransactionId}`);
+  return api.get(`vnpay/create-payment?gatewayTransactionId=${gatewayTransactionId}`, {
+    validateStatus: function (status) {
+      return status === 200 || status === 1; // Chấp nhận cả status 1 và 200
+    }
+  });
 },
+
+// Lấy thông tin transaction theo userId và memberMembershipId
+getTransaction: (userId, memberMembershipId) => {
+  return api.get(`Transactions/${userId}/${memberMembershipId}`);
+}
 };
 
 export default transactionsApi;
