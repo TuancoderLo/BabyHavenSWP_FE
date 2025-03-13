@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./DoctorConsultation.css";
+import childApi from "../../../services/childApi";
+import doctorApi from "../../../services/DoctorApi";
+import TextEditor from "../../admin/Component_Sidebar/blog/textEditor";
 
 function DoctorConsultation() {
   const [selectedChild, setSelectedChild] = useState(null);
@@ -7,74 +10,195 @@ function DoctorConsultation() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [consultationContent, setConsultationContent] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [children, setChildren] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [doctors, setDoctors] = useState([]);
+  const [doctorSpecializations, setDoctorSpecializations] = useState({});
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   // Add steps variable
   const steps = ["Enter Information", "Select Doctor", "Confirm"];
 
-  // Mock data with unique keys
-  const children = [
-    { id: 1, name: "Child 1" },
-    { id: 2, name: "Child 2" },
-  ];
+  useEffect(() => {
+    fetchChildren();
+    fetchDoctors();
+    fetchCategories();
+  }, []);
 
-  const categories = [
-    "General Consultation",
-    "Pediatric Care",
-    "Vaccination",
-    "Development Check",
-    "Nutrition Advice",
-  ];
+  const fetchChildren = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const doctors = {
-    recent: [
-      {
-        id: 1,
-        name: "Doctor 1",
-        status: "online",
-        major: "Pediatrics",
-        specializing: "Child Development",
-        isFavorite: true,
-      },
-      {
-        id: 2,
-        name: "Doctor 2",
-        status: "offline",
-        major: "Pediatrics",
-        specializing: "Pediatric Neurology",
-        isFavorite: false,
-      },
-    ],
-    available: [
-      {
-        id: 3,
-        name: "Doctor 3",
-        status: "online",
-        major: "Pediatrics",
-        specializing: "Child Psychology",
-        isFavorite: false,
-      },
-      {
-        id: 4,
-        name: "Doctor 4",
-        status: "online",
-        major: "Pediatrics",
-        specializing: "Pediatric Cardiology",
-        isFavorite: false,
-      },
-      {
-        id: 5,
-        name: "Doctor 5",
-        status: "online",
-        major: "Pediatrics",
-        specializing: "General Pediatrics",
-        isFavorite: false,
-      },
-    ],
+      const memberId = localStorage.getItem("memberId");
+      console.log("MemberId from localStorage:", memberId);
+
+      if (!memberId) {
+        throw new Error("Vui lòng đăng nhập để xem danh sách trẻ em");
+      }
+
+      const response = await childApi.getByMember(memberId);
+      console.log("API Response:", response);
+
+      if (response?.data?.data && Array.isArray(response.data.data)) {
+        const childrenData = response.data.data.map((child) => ({
+          name: child.name,
+          childBirth: child.dateOfBirth,
+        }));
+        console.log("Processed children data:", childrenData);
+        setChildren(childrenData);
+      } else {
+        throw new Error("Không tìm thấy dữ liệu trẻ em");
+      }
+    } catch (err) {
+      console.error("Error in fetchChildren:", err);
+      setError(err.message || "Không thể tải danh sách trẻ em");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchDoctors = async () => {
+    try {
+      const response = await doctorApi.getAllDoctors();
+      if (response?.data) {
+        setDoctors(response.data);
+        // Fetch specializations for each doctor
+        response.data.forEach((doctor) => {
+          fetchDoctorSpecializations(doctor.doctorId);
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching doctors:", error);
+    }
+  };
+
+  const fetchDoctorSpecializations = async (doctorId) => {
+    try {
+      const response = await doctorApi.getDoctorSpecializations(doctorId);
+      if (response?.data) {
+        setDoctorSpecializations((prev) => ({
+          ...prev,
+          [doctorId]: response.data || [],
+        }));
+      }
+    } catch (error) {
+      console.error(
+        `Error fetching specializations for doctor ${doctorId}:`,
+        error
+      );
+      // Nếu có lỗi, set một mảng rỗng cho doctor đó
+      setDoctorSpecializations((prev) => ({
+        ...prev,
+        [doctorId]: [],
+      }));
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      const response = await doctorApi.getConsultationRequests();
+      if (response?.data) {
+        // Get unique categories from the response
+        const uniqueCategories = [
+          ...new Set(response.data.map((req) => req.category)),
+        ];
+        setCategories(uniqueCategories);
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
+  const handleChildSelect = (child) => {
+    setSelectedChild(child);
   };
 
   const handleNextStep = () => {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
+    }
+  };
+
+  // Thêm hàm helper để loại bỏ HTML tags
+  const stripHtml = (html) => {
+    const tmp = document.createElement("div");
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || "";
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setSubmitLoading(true);
+      setSubmitError(null);
+
+      const memberId = localStorage.getItem("memberId");
+      if (!memberId) {
+        throw new Error("Vui lòng đăng nhập để tiếp tục");
+      }
+
+      if (!selectedChild) {
+        throw new Error("Vui lòng chọn trẻ");
+      }
+
+      if (!selectedDoctor) {
+        throw new Error("Vui lòng chọn bác sĩ");
+      }
+
+      if (!selectedCategory) {
+        throw new Error("Vui lòng chọn category");
+      }
+
+      // Format ngày giờ theo định dạng yêu cầu
+      const currentDate = new Date();
+      const requestDate =
+        currentDate.toISOString().slice(0, 10) +
+        " " +
+        currentDate.toTimeString().slice(0, 8) +
+        "." +
+        currentDate.getMilliseconds().toString().padEnd(3, "0");
+
+      // Xử lý nội dung từ CKEditor, loại bỏ HTML tags
+      const plainDescription = stripHtml(consultationContent);
+
+      const payload = {
+        memberId: memberId,
+        childName: selectedChild.name,
+        childBirth: selectedChild.childBirth,
+        doctorId: selectedDoctor.doctorId,
+        requestDate: requestDate,
+        status: selectedDoctor.status.toLowerCase() === "active" ? 1 : 0,
+        urgency: "high",
+        category: selectedCategory,
+        description: plainDescription,
+      };
+
+      console.log("Submitting payload:", payload);
+
+      const response = await doctorApi.createConsultationRequest(payload);
+      console.log("Submit response:", response);
+
+      alert("Gửi yêu cầu tư vấn thành công!");
+      setCurrentStep(0);
+      setSelectedCategory("");
+      setConsultationContent("");
+      setSelectedDoctor(null);
+    } catch (error) {
+      console.error("Error submitting consultation:", error);
+      setSubmitError(
+        error.response?.data?.title ||
+          error.message ||
+          "Không thể gửi yêu cầu tư vấn"
+      );
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
@@ -91,6 +215,7 @@ function DoctorConsultation() {
                 className="doctor-category-select"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
+                disabled={loadingCategories}
               >
                 <option value="">Select category</option>
                 {categories.map((category) => (
@@ -99,15 +224,16 @@ function DoctorConsultation() {
                   </option>
                 ))}
               </select>
+              {loadingCategories && (
+                <div className="loading-spinner-small"></div>
+              )}
             </div>
 
             <div className="doctor-editor-container">
               <div className="doctor-section-title">Consultation Details:</div>
-              <textarea
-                className="doctor-editor-area"
-                placeholder="Enter your consultation details..."
+              <TextEditor
                 value={consultationContent}
-                onChange={(e) => setConsultationContent(e.target.value)}
+                onChange={(newContent) => setConsultationContent(newContent)}
               />
             </div>
           </div>
@@ -116,93 +242,86 @@ function DoctorConsultation() {
       case 1:
         return (
           <div className="doctor-selection-container">
-            {/* Recent Doctors Section */}
-            <div className="doctor-section">
-              <h3 className="doctor-section-heading">Recent doctor</h3>
-              <div className="doctor-cards">
-                {doctors.recent.map((doctor) => (
-                  <div
-                    key={doctor.id}
-                    className={`doctor-card ${
-                      selectedDoctor?.id === doctor.id ? "selected" : ""
-                    }`}
-                    onClick={() => setSelectedDoctor(doctor)}
-                  >
-                    <div className="doctor-avatar">
-                      <img
-                        src={`https://ui-avatars.com/api/?name=${doctor.name}&background=random`}
-                        alt={doctor.name}
-                      />
-                    </div>
-                    <div className="doctor-info">
-                      <h4>{doctor.name}</h4>
-                      <div className="doctor-status">
-                        <span className={`status-dot ${doctor.status}`}></span>
-                        {doctor.status}
-                      </div>
-                      <p className="doctor-major">Major: {doctor.major}</p>
-                      <p className="doctor-specializing">
-                        Specializing: {doctor.specializing}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Available Doctors Section */}
             <div className="doctor-section">
               <h3 className="doctor-section-heading">Available doctors</h3>
               <div className="doctor-cards">
-                {doctors.available.map((doctor) => (
+                {doctors.map((doctor) => (
                   <div
-                    key={doctor.id}
+                    key={doctor.doctorId}
                     className={`doctor-card ${
-                      selectedDoctor?.id === doctor.id ? "selected" : ""
+                      selectedDoctor?.doctorId === doctor.doctorId
+                        ? "selected"
+                        : ""
                     }`}
                     onClick={() => setSelectedDoctor(doctor)}
                   >
                     <div className="doctor-avatar">
                       <img
-                        src={`https://ui-avatars.com/api/?name=${doctor.name}&background=random`}
+                        src={
+                          doctor.user?.profilePicture ||
+                          `https://ui-avatars.com/api/?name=${doctor.name}&background=random`
+                        }
                         alt={doctor.name}
                       />
                     </div>
                     <div className="doctor-info">
                       <h4>{doctor.name}</h4>
                       <div className="doctor-status">
-                        <span className={`status-dot ${doctor.status}`}></span>
+                        <span
+                          className={`status-dot ${doctor.status.toLowerCase()}`}
+                        ></span>
                         {doctor.status}
                       </div>
-                      <p className="doctor-major">Major: {doctor.major}</p>
-                      <p className="doctor-specializing">
-                        Specializing: {doctor.specializing}
-                      </p>
+                      <p className="doctor-degree">{doctor.degree}</p>
+                      <p className="doctor-hospital">{doctor.hospitalName}</p>
+                      {Array.isArray(doctorSpecializations[doctor.doctorId]) &&
+                        doctorSpecializations[doctor.doctorId].map(
+                          (spec, index) => (
+                            <p key={index} className="doctor-specialization">
+                              {spec.name}
+                            </p>
+                          )
+                        )}
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* All Doctors Section */}
             <div className="doctor-section">
               <h3 className="doctor-section-heading">All doctors</h3>
               <div className="doctor-list">
-                {[...doctors.recent, ...doctors.available].map((doctor) => (
+                {doctors.map((doctor) => (
                   <div
-                    key={doctor.id}
+                    key={doctor.doctorId}
                     className={`doctor-list-item ${
-                      selectedDoctor?.id === doctor.id ? "selected" : ""
+                      selectedDoctor?.doctorId === doctor.doctorId
+                        ? "selected"
+                        : ""
                     }`}
                     onClick={() => setSelectedDoctor(doctor)}
                   >
                     <div className="doctor-name">
                       {doctor.name}
-                      <span className={`status-dot ${doctor.status}`}></span>
+                      <span
+                        className={`status-dot ${doctor.status.toLowerCase()}`}
+                      ></span>
                     </div>
                     <div className="doctor-details">
-                      <span>Major: {doctor.major}</span>
-                      <span>Specializing: {doctor.specializing}</span>
+                      <span>{doctor.degree}</span>
+                      <span>{doctor.hospitalName}</span>
+                      <div className="doctor-specializations">
+                        {Array.isArray(
+                          doctorSpecializations[doctor.doctorId]
+                        ) &&
+                          doctorSpecializations[doctor.doctorId].map(
+                            (spec, index) => (
+                              <span key={index} className="specialization-tag">
+                                {spec.name}
+                              </span>
+                            )
+                          )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -221,22 +340,26 @@ function DoctorConsultation() {
               <div style={{ marginBottom: "15px" }}>
                 <strong>Category:</strong> {selectedCategory}
               </div>
-              <div>
+              <div className="consultation-details">
                 <strong>Details:</strong>
-                <div style={{ marginTop: "10px", whiteSpace: "pre-wrap" }}>
-                  {consultationContent}
-                </div>
+                <div
+                  className="consultation-details-content ck-content-display"
+                  dangerouslySetInnerHTML={{ __html: consultationContent }}
+                />
               </div>
             </div>
 
             {selectedDoctor && (
               <div className="doctor-review-selection">
-                <div className="doctor-section-title">Selected Information</div>
+                <div className="doctor-section-title">Selected Doctor</div>
                 <div className="doctor-profile-card selected">
                   <div className="doctor-profile-header">
                     <div className="doctor-profile-avatar">
                       <img
-                        src={selectedDoctor.avatar}
+                        src={
+                          selectedDoctor.user?.profilePicture ||
+                          `https://ui-avatars.com/api/?name=${selectedDoctor.name}&background=random`
+                        }
                         alt={selectedDoctor.name}
                       />
                     </div>
@@ -246,23 +369,47 @@ function DoctorConsultation() {
                       </div>
                       <div className="doctor-profile-status">
                         <span
-                          className={`doctor-status-dot ${selectedDoctor.status}`}
+                          className={`doctor-status-dot ${selectedDoctor.status.toLowerCase()}`}
                         ></span>
                         {selectedDoctor.status}
                       </div>
                     </div>
                   </div>
                   <div className="doctor-profile-details">
-                    <div className="doctor-profile-major">
-                      {selectedDoctor.major}
+                    <div className="doctor-profile-degree">
+                      {selectedDoctor.degree}
                     </div>
-                    <div className="doctor-profile-specialty">
-                      {selectedDoctor.specializing}
+                    <div className="doctor-profile-hospital">
+                      {selectedDoctor.hospitalName}
                     </div>
+                    {Array.isArray(
+                      doctorSpecializations[selectedDoctor.doctorId]
+                    ) &&
+                      doctorSpecializations[selectedDoctor.doctorId].map(
+                        (spec, index) => (
+                          <div
+                            key={index}
+                            className="doctor-profile-specialization"
+                          >
+                            {spec.name}
+                          </div>
+                        )
+                      )}
                   </div>
                 </div>
               </div>
             )}
+
+            <div className="doctor-submit-section">
+              {submitError && <div className="submit-error">{submitError}</div>}
+              <button
+                className="doctor-action-button"
+                onClick={handleSubmit}
+                disabled={submitLoading}
+              >
+                {submitLoading ? "Đang gửi..." : "Complete"}
+              </button>
+            </div>
           </div>
         );
 
@@ -274,20 +421,38 @@ function DoctorConsultation() {
   return (
     <div className="doctor-consultation">
       <div className="doctor-sidebar">
-        {children.map((child) => (
-          <div
-            key={child.id}
-            className={`doctor-child-item ${
-              selectedChild?.id === child.id ? "selected" : ""
-            }`}
-            onClick={() => setSelectedChild(child.id)}
-          >
-            <div className="doctor-child-icon">
-              <i className="fas fa-child"></i>
-            </div>
-            <div className="doctor-child-label">{child.name}</div>
+        {loading ? (
+          <div className="loading-state">
+            <div className="loading-spinner"></div>
+            <p>Loading children...</p>
           </div>
-        ))}
+        ) : error ? (
+          <div className="error-state">
+            <p>{error}</p>
+            <button onClick={fetchChildren} className="retry-button">
+              Retry
+            </button>
+          </div>
+        ) : children.length === 0 ? (
+          <div className="empty-state">
+            <p>No children found</p>
+          </div>
+        ) : (
+          children.map((child, index) => (
+            <div
+              key={index}
+              className={`doctor-child-item ${
+                selectedChild?.name === child.name ? "selected" : ""
+              }`}
+              onClick={() => handleChildSelect(child)}
+            >
+              <div className="doctor-child-icon">
+                <i className="fas fa-child"></i>
+              </div>
+              <div className="doctor-child-label">{child.name}</div>
+            </div>
+          ))
+        )}
       </div>
 
       <div className="doctor-content">
