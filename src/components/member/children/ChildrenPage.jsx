@@ -57,26 +57,26 @@ function ChildrenPage() {
       console.log("Child: " + response)
       console.log("Lấy thông tin chi tiết của trẻ:", response.data);
       setSelectedChild(response.data.data);
-      
+
       // Lấy dữ liệu growth record mới nhất
       try {
         const parentName = localStorage.getItem("name");
         const growthRecordsResponse = await childApi.getGrowthRecords(child.name, parentName);
         console.log("Growth Records Response:", growthRecordsResponse);
-        
+
         if (growthRecordsResponse.data) {
-          let records = Array.isArray(growthRecordsResponse.data) 
-            ? growthRecordsResponse.data 
+          let records = Array.isArray(growthRecordsResponse.data)
+            ? growthRecordsResponse.data
             : [growthRecordsResponse.data];
-            
+
           // Lọc bỏ các record không có weight hoặc height
           records = records.filter(record => record && (record.weight || record.height));
-          
+
           // Sắp xếp theo thời gian gần nhất
           records.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-          
+
           setGrowthRecords(records); // Cập nhật state growthRecords
-          
+
           if (records.length > 0) {
             // Lấy record mới nhất
             const latestRecord = records[0];
@@ -98,7 +98,7 @@ function ChildrenPage() {
       setGrowthRecords([]); // Reset growth records khi có lỗi
     }
   };
-  
+
   // Hàm render Alert theo level
   const renderAlertBox = (level) => {
     const levels = {
@@ -131,83 +131,83 @@ function ChildrenPage() {
   const handleAddChild = () => {
     setShowAddChildModal(true);
   };
-  
+
   const closeOverlay = () => {
     setShowAddChildModal(false);
   };
 
   const [selectedTool, setSelectedTool] = useState("BMI");
-    const handleToolChange  = (e) => {
+  const handleToolChange = (e) => {
     setSelectedTool(e.target.value);
   };
 
   // State to control the AddRecord overlay
-const [showAddRecordModal, setShowAddRecordModal] = useState(false);
+  const [showAddRecordModal, setShowAddRecordModal] = useState(false);
 
-const handleAddRecord = () => {
-  if (!selectedChild) {
-    console.error("Please select a child first.");
-    return;
-  }
-  setShowAddRecordModal(true);
-};
+  const handleAddRecord = () => {
+    if (!selectedChild) {
+      console.error("Please select a child first.");
+      return;
+    }
+    setShowAddRecordModal(true);
+  };
 
-const closeRecordOverlay = () => {
-  setShowAddRecordModal(false);
-  // Trigger refresh khi đóng modal thêm record
-  setRefreshTrigger(prev => prev + 1);
-  
-  // Refresh growth record data if a child is selected
-  if (selectedChild) {
-    handleSelectChild(selectedChild);
-  }
-};
+  const closeRecordOverlay = () => {
+    setShowAddRecordModal(false);
+    // Trigger refresh khi đóng modal thêm record
+    setRefreshTrigger(prev => prev + 1);
+
+    // Refresh growth record data if a child is selected
+    if (selectedChild) {
+      handleSelectChild(selectedChild);
+    }
+  };
 
   // Hàm tính tuổi và trả về chuỗi phù hợp
   const calculateAge = (dateOfBirth) => {
     if (!dateOfBirth) return '0 days';
-    
+
     const birthDate = new Date(dateOfBirth);
     const today = new Date();
-    
+
     let years = today.getFullYear() - birthDate.getFullYear();
     let months = today.getMonth() - birthDate.getMonth();
-    
+
     // Tính số ngày
     const diffTime = Math.abs(today - birthDate);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (months < 0) {
       years--;
       months += 12;
     }
-    
+
     // Nếu chưa đủ 1 tháng, hiển thị số ngày
     if (years === 0 && months === 0) {
       return `${diffDays} days`;
     }
-    
+
     // Nếu chưa đủ 1 tuổi, hiển thị số tháng
     if (years < 1) {
       return `${months} months`;
     }
-    
+
     return `${years} years old`;
   };
 
   const getAgeInMonths = (dateOfBirth) => {
     if (!dateOfBirth) return 0;
-    
+
     const birthDate = new Date(dateOfBirth);
     const today = new Date();
-    
+
     let months = (today.getFullYear() - birthDate.getFullYear()) * 12;
     months += today.getMonth() - birthDate.getMonth();
-    
+
     if (today.getDate() < birthDate.getDate()) {
       months--;
     }
-    
+
     return months;
   };
 
@@ -263,14 +263,14 @@ const closeRecordOverlay = () => {
 
   const calculateGrowthChange = (records) => {
     if (!records || records.length < 2) return null;
-    
+
     const latest = records[0];
     const previous = records[1];
-    
+
     // Tính BMI cho cả record mới nhất và record trước đó
     const latestBMI = calculateBMI(latest.weight, latest.height);
     const previousBMI = calculateBMI(previous.weight, previous.height);
-    
+
     return {
       weight: {
         change: (latest.weight - previous.weight).toFixed(1),
@@ -335,11 +335,11 @@ const closeRecordOverlay = () => {
         {[1, 2, 3, 4, 5, 6].map((slotNumber) => {
           const child = childrenList[slotNumber - 1];
           const showAddChild = !child && childrenList.length < 6 && slotNumber === childrenList.length + 1;
-          
+
           if (!child && !showAddChild) return null;
-          
+
           return (
-            <div 
+            <div
               key={slotNumber}
               className={`child-slot child-slot-${slotNumber} ${!child ? 'empty' : ''} ${selectedChild && selectedChild.name === child?.name ? 'selected' : ''}`}
               onClick={() => child ? handleSelectChild(child) : handleAddChild()}
@@ -368,7 +368,7 @@ const closeRecordOverlay = () => {
       <div className="child-details-section">
         {selectedChild ? (
           <>
-            <h2>{selectedChild.name}'s Details</h2>
+            <h2>{selectedChild.name}</h2>
             <div className="child-details-content">
               <div className="detail-row">
                 <span className="detail-label">Age:</span>
@@ -425,8 +425,8 @@ const closeRecordOverlay = () => {
               </span>
             </div>
           </div>
-          <button 
-            className="add-record-btn" 
+          <button
+            className="add-record-btn"
             onClick={handleAddRecord}
             disabled={!selectedChild}
           >
@@ -450,25 +450,25 @@ const closeRecordOverlay = () => {
         <h2>
           Growth chart
           <div className="chart-filters">
-            <span 
+            <span
               className={`filter-item ${selectedTool === 'BMI' ? 'active' : ''}`}
               onClick={() => setSelectedTool('BMI')}
             >
               BMI
             </span>
-            <span 
+            <span
               className={`filter-item ${selectedTool === 'Head measure' ? 'active' : ''}`}
               onClick={() => setSelectedTool('Head measure')}
             >
               Head measure
             </span>
-            <span 
+            <span
               className={`filter-item ${selectedTool === 'Global std' ? 'active' : ''}`}
               onClick={() => setSelectedTool('Global std')}
             >
               Global std
             </span>
-            <span 
+            <span
               className={`filter-item ${selectedTool === 'Milestone' ? 'active' : ''}`}
               onClick={() => setSelectedTool('Milestone')}
             >
@@ -514,14 +514,14 @@ const closeRecordOverlay = () => {
         Analyze with AI
       </button>
 
-      <button 
+      <button
         className="action-button connect-doctor-section"
         onClick={() => handleConnectDoctor()}
       >
         Connect to Doctor
       </button>
 
-      <button 
+      <button
         className="action-button add-record-section"
         onClick={handleAddRecord}
       >
