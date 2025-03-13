@@ -34,16 +34,17 @@ function Packages() {
         const tokenPayload = jwtDecode(token);
         const paymentStatus = tokenPayload["Status"];
         console.log(paymentStatus);
-          if (paymentStatus === "Completed") {
-            navigate("/homepage");
-            setCurrentStep(3);
-            const pkgJSON = localStorage.getItem("selectedPackage");
-            if (pkgJSON) {
-              setSelectedPackage(JSON.parse(pkgJSON));
-            }
-            
-            setShowOverlay(true);
+        if (paymentStatus === "Completed") {
+          // Lưu thông tin vào sessionStorage để dùng sau khi redirect
+          const pkgJSON = localStorage.getItem("selectedPackage");
+          if (pkgJSON) {
+            sessionStorage.setItem("completedPayment", "true");
+            sessionStorage.setItem("selectedPackageAfterPayment", pkgJSON);
           }
+          
+          // Chỉ navigate đến homepage, không set step ở đây
+          navigate("/homepage");
+        }
       } else {
         setError("Invalid or missing token");
         console.error("Invalid or missing token");
@@ -53,6 +54,30 @@ function Packages() {
       console.error("Error during payment:", error);
     }
   }, []);
+
+  // Thêm useEffect mới để kiểm tra trạng thái thanh toán đã hoàn tất
+  useEffect(() => {
+    // Kiểm tra xem đã thanh toán thành công chưa (sau khi navigate từ payment về)
+    const completedPayment = sessionStorage.getItem("completedPayment");
+    if (completedPayment === "true") {
+      // Đợi một khoảng thời gian ngắn để đảm bảo homepage đã render
+      const timer = setTimeout(() => {
+        const pkgJSON = sessionStorage.getItem("selectedPackageAfterPayment");
+        if (pkgJSON) {
+          setSelectedPackage(JSON.parse(pkgJSON));
+        }
+        
+        setCurrentStep(3);
+        setShowOverlay(true);
+        
+        // Xóa dữ liệu từ sessionStorage để tránh hiển thị lại khi refresh
+        sessionStorage.removeItem("completedPayment");
+        sessionStorage.removeItem("selectedPackageAfterPayment");
+      }, 500); // Đợi 500ms
+      
+      return () => clearTimeout(timer);
+    }
+  }, []); // Empty dependency array => run once after component mounts
 
   // Lấy danh sách gói membership
   useEffect(() => {
