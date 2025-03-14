@@ -9,7 +9,7 @@ import CategoryPage from "./pages/CategoryPage";
 
 // HomePage (user)
 import Homepage from "./components/homepage/HomePage";
-import Member from "./components/member/Member";
+import Member from "./components/member/member";
 // Admin
 import Admin from "./components/admin/Admin";
 import ChartCard from "./components/admin/ChartCard/ChartCard";
