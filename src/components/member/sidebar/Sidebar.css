@@ -8,7 +8,6 @@
     background-color: #ffffff;
     width: 70px;
     height: 100vh;
-    transition: all 0.3s ease;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
     position: fixed;
     left: 0;
@@ -152,8 +151,6 @@
 /* Separator before Sign Out */
 .children-sidebar-nav li:last-child {
     margin-top: 24px;
-    border-top: 1px solid #eee;
-    background-color: #FFF3F3;
 }
 
 .children-sidebar-nav li:last-child i {

@@ -29,9 +29,8 @@ const Step1 = memo(
         <div className="gender-buttons">
           <button
             type="button"
-            className={`btn-gender male-btn ${
-              childForm.gender === "Male" ? "active-gender" : ""
-            } ${errors.gender ? "error-input" : ""}`}
+            className={`btn-gender male-btn ${childForm.gender === "Male" ? "active-gender" : ""
+              } ${errors.gender ? "error-input" : ""}`}
             onClick={() =>
               setChildForm((prev) => ({ ...prev, gender: "Male" }))
             }
@@ -40,9 +39,8 @@ const Step1 = memo(
           </button>
           <button
             type="button"
-            className={`btn-gender female-btn ${
-              childForm.gender === "Female" ? "active-gender" : ""
-            } ${errors.gender ? "error-input" : ""}`}
+            className={`btn-gender female-btn ${childForm.gender === "Female" ? "active-gender" : ""
+              } ${errors.gender ? "error-input" : ""}`}
             onClick={() =>
               setChildForm((prev) => ({ ...prev, gender: "Female" }))
             }
@@ -111,15 +109,15 @@ const Step1 = memo(
         />
         <div className="step-buttons">
           <div className="button-cofirm">
-          <button onClick={onConfirm}>
-            Confirm
-          </button>
+            <button onClick={onConfirm}>
+              Confirm
+            </button>
           </div>
-         <div className="button-add-record">
-         <button onClick={onAddRecord}>
-            Add a record
-          </button>
-         </div>
+          <div className="button-add-record">
+            <button onClick={onAddRecord}>
+              Add a record
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -128,20 +126,20 @@ const Step1 = memo(
 Step1.displayName = "Step1";
 
 Step1.propTypes = {
-    childForm: PropTypes.shape({
-      name: PropTypes.string,
-      gender: PropTypes.string,
-      dateOfBirth: PropTypes.string,
-      birthWeight: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      birthHeight: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      notes: PropTypes.string,
-    }).isRequired,
-    setChildForm: PropTypes.func.isRequired,
-    errors: PropTypes.object.isRequired,
-    onConfirm: PropTypes.func.isRequired,
-    onAddRecord: PropTypes.func.isRequired,
-  };
-  
+  childForm: PropTypes.shape({
+    name: PropTypes.string,
+    gender: PropTypes.string,
+    dateOfBirth: PropTypes.string,
+    birthWeight: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    birthHeight: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    notes: PropTypes.string,
+  }).isRequired,
+  setChildForm: PropTypes.func.isRequired,
+  errors: PropTypes.object.isRequired,
+  onConfirm: PropTypes.func.isRequired,
+  onAddRecord: PropTypes.func.isRequired,
+};
+
 const Step2Page1 = memo(
   ({ growthForm, setGrowthForm, errors, onConfirm, onOtherMeasure }) => {
     const handleWeightChange = useCallback(
@@ -244,15 +242,15 @@ const Step2Page1 = memo(
           }
         />
         <div className="step-buttons">
-        <div className="button-cofirm">
-          <button onClick={onConfirm}>
-            Confirm
-          </button>
+          <div className="button-cofirm">
+            <button onClick={onConfirm}>
+              Confirm
+            </button>
           </div>
           <div className="button-add-record">
-          <button type="button" onClick={onOtherMeasure}>
-            Other measure
-          </button>
+            <button type="button" onClick={onOtherMeasure}>
+              Other measure
+            </button>
           </div>
         </div>
       </div>
@@ -282,7 +280,7 @@ const Step2Page2 = memo(
     return (
       <div className="step-form">
         <div className="two-column-row">
-        <div>
+          <div>
             <label>Physical activity level</label>
             <input
               type="text"
@@ -436,15 +434,15 @@ const Step2Page2 = memo(
           </div>
         </div>
         <div className="step-buttons">
-        <div className="button-cofirm">
-          <button onClick={onConfirm}>
-            Confirm
-          </button>
+          <div className="button-cofirm">
+            <button onClick={onConfirm}>
+              Confirm
+            </button>
           </div>
           <div className="button-add-record">
-          <button type="button" onClick={onOtherMeasure}>
-            Other measure
-          </button>
+            <button type="button" onClick={onOtherMeasure}>
+              Other measure
+            </button>
           </div>
         </div>
       </div>
@@ -595,10 +593,10 @@ const Step2Page3 = memo(
           </div>
         </div>
         <div className="step-buttons">
-        <div className="button-cofirm">
-          <button onClick={onConfirm}>
-            Confirm
-          </button>
+          <div className="button-cofirm">
+            <button onClick={onConfirm}>
+              Confirm
+            </button>
           </div>
         </div>
       </div>
@@ -640,7 +638,7 @@ Step2Page3.propTypes = {
 //           </button>
 //           </div>
 //     </div>
-    
+
 //   );
 // });
 
@@ -709,7 +707,7 @@ const AddChild = ({ closeOverlay }) => {
       console.log("No user ID found in localStorage.");
     }
   }, []);
- 
+
 
   const [growthForm, setGrowthForm] = useState({
     createdAt: "",
@@ -897,50 +895,34 @@ const AddChild = ({ closeOverlay }) => {
   const [childId, setChildId] = useState("");
 
 
-const handleConfirmStep1 = useCallback(async () => {
-  if (!validateStep1()) return;
-  try {
-    const childPayload = {
-      name: childForm.name.trim(),
-      memberId: childForm.memberId,
-      dateOfBirth: new Date(childForm.dateOfBirth).toISOString().split("T")[0],
-      gender: childForm.gender,
-      birthWeight: childForm.birthWeight,
-      birthHeight: childForm.birthHeight,
-      notes: childForm.notes,
-    };
-    const childRes = await childApi.createChild(childPayload);
-    console.log("Child created:", childRes.data);
-    // Save childId for later use:
-    setChildId(childRes.data?.data?.childId || "");
-    // Automatically move to Step3 or prompt user as desired:
-    setCurrentStep(3);
-  } catch (err) {
-    console.error("Error saving child data:", err);
-  }
-}, [childForm, validateStep1]);
+  const handleConfirmStep1 = useCallback(async () => {
+    if (!validateStep1()) return;
+    try {
+      const childPayload = {
+        name: childForm.name.trim(),
+        memberId: childForm.memberId,
+        dateOfBirth: new Date(childForm.dateOfBirth).toISOString().split("T")[0],
+        gender: childForm.gender,
+        birthWeight: childForm.birthWeight,
+        birthHeight: childForm.birthHeight,
+        notes: childForm.notes,
+      };
+      const childRes = await childApi.createChild(childPayload);
+      console.log("Child created:", childRes.data);
+      // Save childId for later use:
+      setChildId(childRes.data?.data?.childId || "");
+      // Automatically move to Step3 or prompt user as desired:
+      setCurrentStep(3);
+    } catch (err) {
+      console.error("Error saving child data:", err);
+    }
+  }, [childForm, validateStep1]);
 
-const handleAddRecordStep1 = useCallback(async () => {
-  if (!validateStep1()) return;
-  try {
-    const childPayload = {
-      name: childForm.name.trim(),
-      memberId: childForm.memberId,
-      dateOfBirth: new Date(childForm.dateOfBirth).toISOString().split("T")[0],
-      gender: childForm.gender,
-      birthWeight: childForm.birthWeight,
-      birthHeight: childForm.birthHeight,
-      notes: childForm.notes,
-    };
-    const childRes = await childApi.createChild(childPayload);
-    console.log("Child created:", childRes.data);
-    setChildId(childRes.data?.data?.childId || "");
+  const handleAddRecordStep1 = useCallback(() => {
+    if (!validateStep1()) return;
     setCurrentStep(2);
     setSubStep2(1);
-  } catch (err) {
-    console.error("Error saving child data:", err);
-  }
-}, [validateStep1, childForm]);
+  }, [validateStep1]);
 
   const handleOtherMeasure = useCallback(() => {
     if (!validateStep2()) return;
@@ -949,52 +931,52 @@ const handleAddRecordStep1 = useCallback(async () => {
     }
   }, [validateStep2, subStep2]);
 
-// Replace your existing handleConfirmStep2 with:
-const handleConfirmStep2 = useCallback(async () => {
-  if (!validateStep2()) return;
-  try {
-    const growthPayload = {
-      name: childForm.name,
-      dateOfBirth: new Date(childForm.dateOfBirth).toISOString().split("T")[0],
-      recordedBy: childForm.memberId,
-      createdAt: growthForm.createdAt || new Date().toISOString(),
-      weight: growthForm.weight ,
-      height: growthForm.height,
-      headCircumference: growthForm.headCircumference,
-      notes: growthForm.notes,
-      muscleMass: growthForm.muscleMass,
-      chestCircumference: growthForm.chestCircumference,
-      nutritionalStatus: growthForm.nutritionalStatus,
-      ferritinLevel: growthForm.ferritinLevel,
-      triglycerides: growthForm.triglycerides,
-      bloodSugarLevel: growthForm.bloodSugarLevel,
-      physicalActivityLevel: growthForm.physicalActivityLevel,
-      heartRate: growthForm.heartRate,
-      bloodPressure: growthForm.bloodPressure,
-      bodyTemperature: growthForm.bodyTemperature,
-      oxygenSaturation: growthForm.oxygenSaturation,
-      sleepDuration: growthForm.sleepDuration,
-      vision: growthForm.vision,
-      hearing: growthForm.hearing,
-      immunizationStatus: growthForm.immunizationStatus,
-      mentalHealthStatus: growthForm.mentalHealthStatus,
-      growthHormoneLevel: growthForm.growthHormoneLevel,
-      attentionSpan: growthForm.attentionSpan,
-      neurologicalReflexes: growthForm.neurologicalReflexes,
-      developmentalMilestones: growthForm.developmentalMilestones,
-    };
-    const growthRes = await childApi.createGrowthRecord(growthPayload);
-    console.log("Growth record created:", growthRes.data);
-    setCurrentStep(3);
-  } catch (err) {
-    console.error("Error saving growth record:", err);
-  }
-}, [growthForm, validateStep2, childId, childForm.memberId]);
+  // Replace your existing handleConfirmStep2 with:
+  const handleConfirmStep2 = useCallback(async () => {
+    if (!validateStep2()) return;
+    try {
+      const growthPayload = {
+        name: childForm.name,
+        dateOfBirth: new Date(childForm.dateOfBirth).toISOString().split("T")[0],
+        recordedBy: childForm.memberId,
+        createdAt: growthForm.createdAt || new Date().toISOString(),
+        weight: growthForm.weight,
+        height: growthForm.height,
+        headCircumference: growthForm.headCircumference,
+        notes: growthForm.notes,
+        muscleMass: growthForm.muscleMass,
+        chestCircumference: growthForm.chestCircumference,
+        nutritionalStatus: growthForm.nutritionalStatus,
+        ferritinLevel: growthForm.ferritinLevel,
+        triglycerides: growthForm.triglycerides,
+        bloodSugarLevel: growthForm.bloodSugarLevel,
+        physicalActivityLevel: growthForm.physicalActivityLevel,
+        heartRate: growthForm.heartRate,
+        bloodPressure: growthForm.bloodPressure,
+        bodyTemperature: growthForm.bodyTemperature,
+        oxygenSaturation: growthForm.oxygenSaturation,
+        sleepDuration: growthForm.sleepDuration,
+        vision: growthForm.vision,
+        hearing: growthForm.hearing,
+        immunizationStatus: growthForm.immunizationStatus,
+        mentalHealthStatus: growthForm.mentalHealthStatus,
+        growthHormoneLevel: growthForm.growthHormoneLevel,
+        attentionSpan: growthForm.attentionSpan,
+        neurologicalReflexes: growthForm.neurologicalReflexes,
+        developmentalMilestones: growthForm.developmentalMilestones,
+      };
+      const growthRes = await childApi.createGrowthRecord(growthPayload);
+      console.log("Growth record created:", growthRes.data);
+      setCurrentStep(3);
+    } catch (err) {
+      console.error("Error saving growth record:", err);
+    }
+  }, [growthForm, validateStep2, childId, childForm.memberId]);
 
-const handleCloseStep3 = useCallback(() => {
-  window.location.reload();
-  closeOverlay();
-}, [closeOverlay]);
+  const handleCloseStep3 = useCallback(() => {
+    window.location.reload();
+    closeOverlay();
+  }, [closeOverlay]);
 
   const handleOverlayClick = useCallback((e) => {
     if (e.target === e.currentTarget) {
@@ -1075,7 +1057,7 @@ const handleCloseStep3 = useCallback(() => {
             ×
           </button>
         )} */}
-  
+
         {/* CỘT TRÁI */}
         <div className="wizard-left">
           <div className="blue-bar"></div>
@@ -1083,14 +1065,14 @@ const handleCloseStep3 = useCallback(() => {
             {currentStep === 3 ? (
               // Bước 3: hiển thị dòng chúc mừng ở cột trái
               <h2 className="congrats-text" style={{ color: "#000" }}>
-  Congratulation
-  <span style={{ color: "#D970FF" }}>! </span>
-  <br />
-  <span>Welcome</span>
-  <br />
-  <span style={{ color: "#FF00CC" }}>{childForm.name}</span> to{" "}
-  <span style={{ color: "#00D0BC" }}>BabyHaven</span>
-</h2>
+                Congratulation
+                <span style={{ color: "#D970FF" }}>! </span>
+                <br />
+                <span>Welcome</span>
+                <br />
+                <span style={{ color: "#FF00CC" }}>{childForm.name}</span> to{" "}
+                <span style={{ color: "#00D0BC" }}>BabyHaven</span>
+              </h2>
 
             ) : (
               // Bước 1 & 2: hiển thị tiêu đề và step labels như cũ
@@ -1111,19 +1093,19 @@ const handleCloseStep3 = useCallback(() => {
             )}
           </div>
         </div>
-  
+
         {/* CỘT PHẢI */}
         <div className="wizard-right">
           {currentStep === 3 ? (
             // Bước 3: render ảnh bé to + nút Close ở đây
             <div className="step3-wrapper">
               <img src={baby} alt="Baby" className="baby-image" />
-  
+
               <div className="step-buttons">
-              <div className="button-cofirm">
-                <button type="button" onClick={handleCloseStep3}>
-                  Close
-                </button>
+                <div className="button-cofirm">
+                  <button type="button" onClick={handleCloseStep3}>
+                    Close
+                  </button>
                 </div>
               </div>
             </div>

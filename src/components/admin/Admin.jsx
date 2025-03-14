@@ -4,6 +4,8 @@ import { Outlet, useLocation } from "react-router-dom";
 import SidebarHover from "../../components/admin/Sidebar/SidebarHover";
 import Topbar from "../../components/admin/Topbar/Topbar";
 import ChartCard from "../../components/admin/ChartCard/ChartCard";
+import PackageChart from "../../components/admin/PackageChart/PackageChart";
+import RevenueChart from "../../components/admin/RevenueChart/RevenueChart";
 import "./Admin.css";
 
 function Admin() {
@@ -46,10 +48,32 @@ function Admin() {
 
         {/* Khu vực nội dung */}
         <div className="admin-content">
-          {/* Hiển thị ChartCard khi ở trang admin chính */}
+          {/* Hiển thị dashboard khi ở trang admin chính */}
           {location.pathname === "/admin" && (
-            <div className="chart-container">
-              <ChartCard data={chartData} />
+            <div className="dashboard-container">
+              <div className="dashboard-charts">
+                {/* Biểu đồ doanh số */}
+                <div className="chart-item">
+                  <ChartCard data={chartData} />
+                </div>
+
+                {/* Biểu đồ phân bố package */}
+                <div className="chart-item">
+                  <PackageChart />
+                </div>
+
+                {/* Biểu đồ doanh thu và thành viên mới */}
+                <div className="chart-item chart-item-full">
+                  <RevenueChart />
+                </div>
+              </div>
+
+              <div className="dashboard-info">
+                {/* Khu vực thông tin bổ sung */}
+                <div className="info-section">
+                  {/* Nội dung thông tin sẽ được thêm sau */}
+                </div>
+              </div>
             </div>
           )}
 

@@ -77,14 +77,6 @@ function Packages() {
     setPaymentMethod(method);
   };
 
-  const handleNextFromStep1 = () => {
-    if (!paymentMethod) {
-      alert("Please select a payment method!");
-      return;
-    }
-    setCurrentStep(2);
-  };
-
   // Tính discount (demo)
   const discount = promoCode === "ABC" ? 280000 : 0;
 // Step 2: Tạo memberMembership => getMemberMembershipId => tạo transaction => paymentURL
