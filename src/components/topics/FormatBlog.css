@@ -216,11 +216,32 @@
   line-height: 1.5;
 }
 
-.author-specialization {
+.author-info {
+  width: 100%;
+  text-align: left;
+  margin-bottom: 1rem;
   font-size: 0.9rem;
   color: #333;
-  margin-bottom: 1rem;
-  font-weight: 600;
+}
+
+.author-info p {
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.author-fullname,
+.author-specialization,
+.author-email {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px dashed #eee;
+  padding-bottom: 0.5rem;
+}
+
+.author-info strong {
+  color: #00bfa6;
+  margin-right: 0.5rem;
 }
 
 .contact-author-btn {
@@ -232,6 +253,7 @@
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  margin-top: 0.5rem;
 }
 
 .contact-author-btn:hover {

@@ -253,7 +253,7 @@ function FormatBlog() {
                   return (
                     <img
                       src={isValidUrl ? authorImageUrl : DEFAULT_AVATAR}
-                      alt={blog.authorName || "Tác giả"}
+                      alt={blog.name || blog.authorName || "Tác giả"}
                       onError={(e) => {
                         console.log("Sử dụng ảnh mặc định cho tác giả");
                         e.target.onerror = null;
@@ -264,16 +264,23 @@ function FormatBlog() {
                 })()}
               </div>
               <h3 className="author-name">
-                {blog.authorName || "Tác giả ẩn danh"}
+                {blog.name || blog.authorName || "Tác giả ẩn danh"}
               </h3>
               <p className="author-bio">
                 {blog.authorBio ||
-                  "Tác giả của bài viết này chưa cập nhật thông tin giới thiệu."}
+                  "Tác giả chưa cập nhật thông tin giới thiệu."}
               </p>
-              <div className="author-specialization">
-                <p>
-                  Chuyên ngành: {blog.authorSpecialization || "Chưa cập nhật"}
-                </p>
+              <div className="author-info">
+                {blog.email && (
+                  <p className="author-email">
+                    <strong>Email:</strong> {blog.email}
+                  </p>
+                )}
+                {blog.authorSpecialization && (
+                  <p className="author-specialization">
+                    <strong>Chuyên ngành:</strong> {blog.authorSpecialization}
+                  </p>
+                )}
               </div>
               <button className="contact-author-btn">Liên hệ ngay</button>
             </div>
@@ -302,7 +309,9 @@ function FormatBlog() {
                   <div className="related-blog-content">
                     <h3 className="related-blog-title">{relatedBlog.title}</h3>
                     <p className="related-blog-author">
-                      {relatedBlog.authorName || "Tác giả ẩn danh"}
+                      {relatedBlog.name ||
+                        relatedBlog.authorName ||
+                        "Tác giả ẩn danh"}
                     </p>
                   </div>
                 </div>
