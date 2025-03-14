@@ -5,11 +5,13 @@ import HeaderGuest from "../commonGuest/HeaderGuest";
 import Footer from "../common/Footer";
 import api from "../../config/axios";
 import "./FormatBlog.css";
+import avatar_LOGO from "../../assets/avatar_LOGO.jpg"; // Import avatar mặc định
 
 function FormatBlog() {
   const { blogId } = useParams();
   const navigate = useNavigate();
   const [blog, setBlog] = useState(null);
+  const [relatedBlogs, setRelatedBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -59,6 +61,11 @@ function FormatBlog() {
         setError("Không tìm thấy bài viết này");
       } else {
         setBlog(blogData);
+
+        // Sau khi có dữ liệu blog, lấy các bài viết liên quan
+        if (blogData.categoryId) {
+          fetchRelatedBlogs(blogData.categoryId, id);
+        }
       }
     } catch (error) {
       console.error("Error fetching blog details:", error);
@@ -69,6 +76,36 @@ function FormatBlog() {
       setError("Có lỗi xảy ra khi tải bài viết. Vui lòng thử lại sau.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Lấy các bài viết liên quan từ cùng danh mục
+  const fetchRelatedBlogs = async (categoryId, currentBlogId) => {
+    try {
+      const response = await api.get(`Blog/blogs/${categoryId}`);
+      console.log("Related blogs API response:", response);
+
+      let blogsData = [];
+      if (response.data) {
+        if (response.data.data) {
+          blogsData = Array.isArray(response.data.data)
+            ? response.data.data
+            : [];
+        } else {
+          blogsData = Array.isArray(response.data) ? response.data : [];
+        }
+      }
+
+      // Lọc bỏ bài viết hiện tại và giới hạn còn 8 bài
+      const filteredBlogs = blogsData
+        .filter(
+          (blog) => blog.blogId != currentBlogId && blog.status === "Approved"
+        )
+        .slice(0, 8);
+
+      setRelatedBlogs(filteredBlogs);
+    } catch (error) {
+      console.error("Error fetching related blogs:", error);
     }
   };
 
@@ -94,36 +131,67 @@ function FormatBlog() {
     navigate(-1); // Quay lại trang trước đó
   };
 
+  // Hàm chuyển hướng đến bài viết khác
+  const handleReadMore = (blog) => {
+    const blogId = blog.blogId || blog.id;
+    localStorage.setItem("currentBlogId", blogId);
+    navigate(`/blog/${blogId}`);
+    window.scrollTo(0, 0);
+  };
+
   return (
     <div className="blog-page">
       {isLoggedIn ? <Header /> : <HeaderGuest />}
 
-      <main className="blog-content-container">
-        <button onClick={handleGoBack} className="back-button">
-          &larr; Quay lại
-        </button>
+      <div className="blog-navigation">
+        <div className="blog-navigation-container">
+          <button onClick={handleGoBack} className="back-button">
+            &larr; Quay lại
+          </button>
+          <div className="breadcrumbs">
+            <span>Trang chủ</span> &gt;
+            <span>{blog?.categoryName || "Danh mục"}</span> &gt;
+            <span className="current-page">{blog?.title || "Bài viết"}</span>
+          </div>
+        </div>
+      </div>
 
-        {loading ? (
+      {loading ? (
+        <div className="loading-container">
           <div className="loading">Đang tải bài viết...</div>
-        ) : error ? (
+        </div>
+      ) : error ? (
+        <div className="error-container">
           <div className="error">{error}</div>
-        ) : blog ? (
-          <article className="blog-detail">
-            <header className="blog-header">
+        </div>
+      ) : blog ? (
+        <main className="blog-content-container">
+          <div className="blog-grid-layout">
+            {/* Nội dung bài viết chính - div6 */}
+            <div className="blog-main-content">
               <h1 className="blog-title">{blog.title}</h1>
 
               <div className="blog-metadata">
-                <p className="blog-author">
-                  {blog.authorName
-                    ? `Tác giả: ${blog.authorName}`
-                    : "Tác giả: Ẩn danh"}
-                </p>
-                <p className="blog-category">Danh mục: {blog.categoryName}</p>
-                {blog.createdAt && (
-                  <p className="blog-date">
-                    Ngày đăng: {formatDate(blog.createdAt)}
-                  </p>
-                )}
+                <span className="blog-date">
+                  {formatDate(blog.createdAt || blog.createdDate)}
+                </span>
+                <span className="blog-category">{blog.categoryName}</span>
+              </div>
+
+              {blog.imageBlog && (
+                <div className="blog-featured-image">
+                  <img
+                    src={blog.imageBlog}
+                    alt={blog.title}
+                    onError={(e) => {
+                      e.target.src = "/placeholder-image.jpg";
+                    }}
+                  />
+                </div>
+              )}
+
+              <div className="blog-content">
+                <div dangerouslySetInnerHTML={{ __html: blog.content }} />
               </div>
 
               <div className="blog-tags">
@@ -133,29 +201,65 @@ function FormatBlog() {
                   </span>
                 ))}
               </div>
-            </header>
+            </div>
 
-            {blog.imageBlog && (
-              <div className="blog-featured-image">
+            {/* Thông tin tác giả - div7 */}
+            <div className="blog-author-card">
+              <div className="author-image">
                 <img
-                  src={blog.imageBlog}
-                  alt={blog.title}
+                  src={blog.authorImage || avatar_LOGO}
+                  alt={blog.authorName || "Tác giả"}
                   onError={(e) => {
-                    e.target.src = "/placeholder-image.jpg";
+                    e.target.src = avatar_LOGO;
                   }}
                 />
               </div>
-            )}
-
-            <div className="blog-full-content">
-              {/* Hiển thị nội dung blog */}
-              <div dangerouslySetInnerHTML={{ __html: blog.content }} />
+              <h3 className="author-name">
+                {blog.authorName || "Tác giả ẩn danh"}
+              </h3>
+              <p className="author-bio">
+                {blog.authorBio ||
+                  "Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."}
+              </p>
+              <div className="author-specialization">
+                <p>
+                  Chuyên ngành: {blog.authorSpecialization || "Chưa cập nhật"}
+                </p>
+              </div>
+              <button className="contact-author-btn">Liên hệ ngay</button>
             </div>
-          </article>
-        ) : (
+
+            {/* Các bài viết liên quan - div8-15 */}
+            {relatedBlogs.map((relatedBlog, index) => (
+              <div
+                key={relatedBlog.blogId || relatedBlog.id || index}
+                className={`related-blog-card related-blog-${index + 1}`}
+                onClick={() => handleReadMore(relatedBlog)}
+              >
+                <div className="related-blog-image">
+                  <img
+                    src={relatedBlog.imageBlog || "/placeholder-image.jpg"}
+                    alt={relatedBlog.title}
+                    onError={(e) => {
+                      e.target.src = "/placeholder-image.jpg";
+                    }}
+                  />
+                </div>
+                <div className="related-blog-content">
+                  <h3 className="related-blog-title">{relatedBlog.title}</h3>
+                  <p className="related-blog-author">
+                    {relatedBlog.authorName || "Tác giả ẩn danh"}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </main>
+      ) : (
+        <div className="error-container">
           <div className="error">Không tìm thấy bài viết</div>
-        )}
-      </main>
+        </div>
+      )}
 
       <Footer />
     </div>
