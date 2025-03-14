@@ -6,10 +6,11 @@ import Guest from "./components/guest/Guest";
 import Login from "./components/login/Login";
 import Register from "./components/register/Register";
 import CategoryPage from "./pages/CategoryPage";
+import FormatBlog from "./components/topics/FormatBlog";
 
 // HomePage (user)
 import Homepage from "./components/homepage/HomePage";
-import Member from "./components/member/Member";
+import Member from "./components/member/member";
 // Admin
 import Admin from "./components/admin/Admin";
 import ChartCard from "./components/admin/ChartCard/ChartCard";
@@ -18,7 +19,7 @@ import Blog from "./components/admin/Component_Sidebar/blog/blog";
 import Members from "./components/admin/Component_Sidebar/members/members";
 import AdminPackages from "./components/admin/Component_Sidebar/packages/packages";
 import Inbox from "./components/admin/Component_Sidebar/inbox/inbox";
-import Notifications from "./components/admin/Component_Sidebar/notifications/notifications";
+import Notifications from "./components/admin/Component_Sidebar/Notifications/notifications.jsx";
 import Settings from "./components/admin/Component_Sidebar/settings/settings";
 
 //doctor
@@ -90,6 +91,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/packages" element={<MemberPackages />} />
         <Route path="/category/:categoryId" element={<CategoryPage />} />
+        <Route path="/blog/:blogId" element={<FormatBlog />} />
 
         {/* Protected routes */}
         <Route

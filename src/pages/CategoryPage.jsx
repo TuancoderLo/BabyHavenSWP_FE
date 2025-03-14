@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Header from "../components/common/Header";
 import HeaderGuest from "../components/commonGuest/HeaderGuest";
 import Footer from "../components/common/Footer";
@@ -14,6 +14,7 @@ function CategoryPage() {
   const [categoryName, setCategoryName] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [blogsPerPage] = useState(6);
+  const navigate = useNavigate();
 
   // Kiểm tra trạng thái đăng nhập
   const isLoggedIn = localStorage.getItem("token") !== null;
@@ -110,6 +111,19 @@ function CategoryPage() {
     return tags.split(",").map((tag) => tag.trim());
   };
 
+  // Hàm xử lý khi nhấp vào "Đọc thêm"
+  const handleReadMore = (blog) => {
+    const blogId = blog.blogId || blog.id;
+    console.log("Handling read more click for blog:", blog);
+    console.log("Navigating to blog with ID:", blogId);
+
+    // Lưu blogId vào localStorage
+    localStorage.setItem("currentBlogId", blogId);
+
+    // Chuyển hướng theo cách thủ công
+    navigate(`/blog/${blogId}`);
+  };
+
   return (
     <div className="category-page">
       {isLoggedIn ? <Header /> : <HeaderGuest />}
@@ -166,7 +180,12 @@ function CategoryPage() {
                     </p>
 
                     {blog.status === "Approved" && (
-                      <button className="read-more-btn">Đọc thêm</button>
+                      <button
+                        className="read-more-btn"
+                        onClick={() => handleReadMore(blog)}
+                      >
+                        Đọc thêm
+                      </button>
                     )}
                   </div>
                 </div>

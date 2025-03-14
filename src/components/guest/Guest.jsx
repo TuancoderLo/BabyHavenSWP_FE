@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import "./Guest.css";
-import Logo from "../../assets/Logo.png";
-import Name from "../../assets/Name.png";
-// import PregnancySection from "../topics/PregnancySection";
-// import BabySection from "../topics/BabySection";
-// import ToddleSection from "../topics/ToddleSection";
-// import ChildSection from "../topics/ChildSection";
 import Packages from "../packages/Packages";
 import blogCategoryApi from "../../services/blogCategoryApi";
 import BlogSection from "../topics/BlogSection";

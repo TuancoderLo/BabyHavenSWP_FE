@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ChildrenPage.css";
+
 import AddMilestone from "./AddMilestone.jsx";
+
 import GrowthChart from "./GrowthChart.jsx";
 import childApi from "../../../services/childApi";
 import AddChild from "./AddChild";

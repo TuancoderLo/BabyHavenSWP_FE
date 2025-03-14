@@ -2,17 +2,19 @@ import React, { useState, useEffect } from "react";
 import "./Packages.css";
 import membershipApi from "../../services/memberShipApi";
 import transactionsApi from "../../services/transactionsApi";
-
+import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 import packagesIcon from "../../assets/packages.png";
 import momo from "../../assets/momo.png";
 import vnpay from "../../assets/vnpay.jpg";
 import visa from "../../assets/visa.jpg";
-import logo from "../../assets/logo.png";
-import name from "../../assets/name.png";
+import logo from "../../assets/Logo.png";
+import name from "../../assets/Name.png";
 
 function Packages() {
   const [showOverlay, setShowOverlay] = useState(false);
   const [packagesData, setPackagesData] = useState([]);
+  const navigate = useNavigate();
 
   // 0 = List gói, 1 = Choose how to pay, 2 = Payment info, 3 = Congrat
   const [currentStep, setCurrentStep] = useState(0);
@@ -20,19 +22,62 @@ function Packages() {
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [promoCode, setPromoCode] = useState("");
   const [paymentMethod, setPaymentMethod] = useState(null);
+  const [error, setError] = useState("");
 
   // Kiểm tra URL param ?paymentStatus=success => Step 3
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const paymentStatus = params.get("paymentStatus");
-    if (paymentStatus === "success") {
-      setCurrentStep(3);
-      const pkgJSON = localStorage.getItem("selectedPackage");
-      if (pkgJSON) {
-        setSelectedPackage(JSON.parse(pkgJSON));
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("token");
+
+      if (typeof token === "string" && token.trim() !== "") {
+        const tokenPayload = jwtDecode(token);
+        const paymentStatus = tokenPayload["Status"];
+        console.log(paymentStatus);
+        if (paymentStatus === "Completed") {
+          // Lưu thông tin vào sessionStorage để dùng sau khi redirect
+          const pkgJSON = localStorage.getItem("selectedPackage");
+          if (pkgJSON) {
+            sessionStorage.setItem("completedPayment", "true");
+            sessionStorage.setItem("selectedPackageAfterPayment", pkgJSON);
+            // Redirect về homepage
+            window.location.href = "/homepage";
+          }
+        }
+      } else {
+        setError("Invalid or missing token");
+        console.error("Invalid or missing token");
       }
+    } catch (error) {
+      // Xử lý lỗi nếu không có token hoặc token không hợp lệ
+      console.error("Error during payment:", error);
     }
   }, []);
+
+  // Thêm useEffect mới để kiểm tra trạng thái thanh toán đã hoàn tất
+  useEffect(() => {
+    // Kiểm tra xem đã thanh toán thành công chưa (sau khi navigate từ payment về)
+    const completedPayment = sessionStorage.getItem("completedPayment");
+    console.log(completedPayment);
+    if (completedPayment === "true") {
+      // Đợi một khoảng thời gian ngắn để đảm bảo homepage đã render
+      const timer = setTimeout(() => {
+        const pkgJSON = sessionStorage.getItem("selectedPackageAfterPayment");
+        if (pkgJSON) {
+          setSelectedPackage(JSON.parse(pkgJSON));
+        }
+        
+        setCurrentStep(3);
+        setShowOverlay(true);
+        
+        // Xóa dữ liệu từ sessionStorage để tránh hiển thị lại khi refresh
+        sessionStorage.removeItem("completedPayment");
+        sessionStorage.removeItem("selectedPackageAfterPayment");
+      }, 5000); // Đợi 500ms
+      
+      return () => clearTimeout(timer);
+    }
+  }, []); // Empty dependency array => run once after component mounts
 
   // Lấy danh sách gói membership
   useEffect(() => {
