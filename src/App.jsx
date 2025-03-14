@@ -6,6 +6,7 @@ import Guest from "./components/guest/Guest";
 import Login from "./components/login/Login";
 import Register from "./components/register/Register";
 import CategoryPage from "./pages/CategoryPage";
+import FormatBlog from "./components/topics/FormatBlog";
 
 // HomePage (user)
 import Homepage from "./components/homepage/HomePage";
@@ -90,6 +91,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/packages" element={<MemberPackages />} />
         <Route path="/category/:categoryId" element={<CategoryPage />} />
+        <Route path="/blog/:blogId" element={<FormatBlog />} />
 
         {/* Protected routes */}
         <Route
