@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ChildrenPage.css";
-import api from "../../../config/axios.js";
 import GrowthChart from "./GrowthChart.jsx";
 import childApi from "../../../services/childApi";
 import AddChild from "./AddChild";
