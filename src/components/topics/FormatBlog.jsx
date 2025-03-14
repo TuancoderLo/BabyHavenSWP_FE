@@ -5,7 +5,14 @@ import HeaderGuest from "../commonGuest/HeaderGuest";
 import Footer from "../common/Footer";
 import api from "../../config/axios";
 import "./FormatBlog.css";
-import avatar_LOGO from "../../assets/avatar_LOGO.jpg"; // Import avatar mặc định
+// Import ảnh mặc định từ public thay vì assets
+// import avatar_LOGO from "../../assets/avatar_LOGO.jpg";
+
+// Sử dụng URL ảnh từ nguồn đáng tin cậy thay vì file local
+const DEFAULT_AVATAR =
+  "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+const DEFAULT_IMAGE =
+  "https://cdn.pixabay.com/photo/2017/02/10/19/11/placeholder-2055727_1280.jpg";
 
 function FormatBlog() {
   const { blogId } = useParams();
@@ -82,30 +89,48 @@ function FormatBlog() {
   // Lấy các bài viết liên quan từ cùng danh mục
   const fetchRelatedBlogs = async (categoryId, currentBlogId) => {
     try {
+      console.log(`Fetching related blogs for category: ${categoryId}`);
       const response = await api.get(`Blog/blogs/${categoryId}`);
       console.log("Related blogs API response:", response);
 
       let blogsData = [];
       if (response.data) {
         if (response.data.data) {
+          // Nếu data nằm trong property 'data'
           blogsData = Array.isArray(response.data.data)
             ? response.data.data
             : [];
         } else {
+          // Nếu data nằm trực tiếp trong response.data
           blogsData = Array.isArray(response.data) ? response.data : [];
         }
       }
 
+      console.log("All blogs in category:", blogsData);
+
       // Lọc bỏ bài viết hiện tại và giới hạn còn 8 bài
       const filteredBlogs = blogsData
-        .filter(
-          (blog) => blog.blogId != currentBlogId && blog.status === "Approved"
-        )
+        .filter((blog) => {
+          // Chuyển đổi sang cùng kiểu dữ liệu để so sánh
+          const blogIdNum = parseInt(blog.blogId);
+          const currentIdNum = parseInt(currentBlogId);
+
+          console.log(
+            `Comparing blog ID ${blogIdNum} with current ID ${currentIdNum}`
+          );
+
+          return blogIdNum !== currentIdNum && blog.status === "Approved";
+        })
         .slice(0, 8);
 
+      console.log("Filtered related blogs:", filteredBlogs);
       setRelatedBlogs(filteredBlogs);
     } catch (error) {
       console.error("Error fetching related blogs:", error);
+      console.error("Error details:", {
+        message: error.message,
+        response: error.response?.data,
+      });
     }
   };
 
@@ -134,8 +159,16 @@ function FormatBlog() {
   // Hàm chuyển hướng đến bài viết khác
   const handleReadMore = (blog) => {
     const blogId = blog.blogId || blog.id;
+    console.log("Navigating to related blog:", blog);
+    console.log("Using blog ID:", blogId);
+
+    // Lưu blogId vào localStorage
     localStorage.setItem("currentBlogId", blogId);
+
+    // Chuyển hướng đến trang chi tiết blog
     navigate(`/blog/${blogId}`);
+
+    // Cuộn lên đầu trang
     window.scrollTo(0, 0);
   };
 
@@ -184,7 +217,9 @@ function FormatBlog() {
                     src={blog.imageBlog}
                     alt={blog.title}
                     onError={(e) => {
-                      e.target.src = "/placeholder-image.jpg";
+                      console.log("Sử dụng ảnh mặc định cho bài viết");
+                      e.target.onerror = null;
+                      e.target.src = DEFAULT_IMAGE;
                     }}
                   />
                 </div>
@@ -206,20 +241,34 @@ function FormatBlog() {
             {/* Thông tin tác giả - div7 */}
             <div className="blog-author-card">
               <div className="author-image">
-                <img
-                  src={blog.authorImage || avatar_LOGO}
-                  alt={blog.authorName || "Tác giả"}
-                  onError={(e) => {
-                    e.target.src = avatar_LOGO;
-                  }}
-                />
+                {/* Kiểm tra URL ảnh trước khi hiển thị */}
+                {(() => {
+                  // Kiểm tra xem URL ảnh có hợp lệ không
+                  const authorImageUrl = blog.authorImage || blog.imageProfile;
+                  const isValidUrl =
+                    authorImageUrl &&
+                    (authorImageUrl.startsWith("http://") ||
+                      authorImageUrl.startsWith("https://"));
+
+                  return (
+                    <img
+                      src={isValidUrl ? authorImageUrl : DEFAULT_AVATAR}
+                      alt={blog.authorName || "Tác giả"}
+                      onError={(e) => {
+                        console.log("Sử dụng ảnh mặc định cho tác giả");
+                        e.target.onerror = null;
+                        e.target.src = DEFAULT_AVATAR;
+                      }}
+                    />
+                  );
+                })()}
               </div>
               <h3 className="author-name">
                 {blog.authorName || "Tác giả ẩn danh"}
               </h3>
               <p className="author-bio">
                 {blog.authorBio ||
-                  "Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."}
+                  "Tác giả của bài viết này chưa cập nhật thông tin giới thiệu."}
               </p>
               <div className="author-specialization">
                 <p>
@@ -230,29 +279,39 @@ function FormatBlog() {
             </div>
 
             {/* Các bài viết liên quan - div8-15 */}
-            {relatedBlogs.map((relatedBlog, index) => (
-              <div
-                key={relatedBlog.blogId || relatedBlog.id || index}
-                className={`related-blog-card related-blog-${index + 1}`}
-                onClick={() => handleReadMore(relatedBlog)}
-              >
-                <div className="related-blog-image">
-                  <img
-                    src={relatedBlog.imageBlog || "/placeholder-image.jpg"}
-                    alt={relatedBlog.title}
-                    onError={(e) => {
-                      e.target.src = "/placeholder-image.jpg";
-                    }}
-                  />
+            {relatedBlogs.length > 0 ? (
+              relatedBlogs.map((relatedBlog, index) => (
+                <div
+                  key={relatedBlog.blogId || relatedBlog.id || index}
+                  className={`related-blog-card related-blog-${index + 1}`}
+                  onClick={() => handleReadMore(relatedBlog)}
+                >
+                  <div className="related-blog-image">
+                    <img
+                      src={relatedBlog.imageBlog || DEFAULT_IMAGE}
+                      alt={relatedBlog.title}
+                      onError={(e) => {
+                        console.log(
+                          "Sử dụng ảnh mặc định cho bài viết liên quan"
+                        );
+                        e.target.onerror = null;
+                        e.target.src = DEFAULT_IMAGE;
+                      }}
+                    />
+                  </div>
+                  <div className="related-blog-content">
+                    <h3 className="related-blog-title">{relatedBlog.title}</h3>
+                    <p className="related-blog-author">
+                      {relatedBlog.authorName || "Tác giả ẩn danh"}
+                    </p>
+                  </div>
                 </div>
-                <div className="related-blog-content">
-                  <h3 className="related-blog-title">{relatedBlog.title}</h3>
-                  <p className="related-blog-author">
-                    {relatedBlog.authorName || "Tác giả ẩn danh"}
-                  </p>
-                </div>
+              ))
+            ) : (
+              <div className="no-related-blogs">
+                <p>Không có bài viết liên quan</p>
               </div>
-            ))}
+            )}
           </div>
         </main>
       ) : (
