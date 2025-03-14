@@ -19,7 +19,7 @@ import Blog from "./components/admin/Component_Sidebar/blog/blog";
 import Members from "./components/admin/Component_Sidebar/members/members";
 import AdminPackages from "./components/admin/Component_Sidebar/packages/packages";
 import Inbox from "./components/admin/Component_Sidebar/inbox/inbox";
-import Notifications from "./components/admin/Component_Sidebar/notifications/notifications";
+import Notifications from "./components/admin/Component_Sidebar/Notifications/notifications.jsx";
 import Settings from "./components/admin/Component_Sidebar/settings/settings";
 
 //doctor
