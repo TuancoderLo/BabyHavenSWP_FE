@@ -7,7 +7,7 @@ import packagesIcon from "../../assets/packages.png";
 import momo from "../../assets/momo.png";
 import vnpay from "../../assets/vnpay.jpg";
 import visa from "../../assets/visa.jpg";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/Logo.png";
 import name from "../../assets/name.png";
 
 function Packages() {
