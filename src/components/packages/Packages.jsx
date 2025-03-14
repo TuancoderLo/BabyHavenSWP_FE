@@ -8,8 +8,8 @@ import packagesIcon from "../../assets/packages.png";
 import momo from "../../assets/momo.png";
 import vnpay from "../../assets/vnpay.jpg";
 import visa from "../../assets/visa.jpg";
-import logo from "../../assets/logo.png";
-import name from "../../assets/name.png";
+import logo from "../../assets/Logo.png";
+import name from "../../assets/Name.png";
 
 function Packages() {
   const [showOverlay, setShowOverlay] = useState(false);
@@ -120,14 +120,6 @@ function Packages() {
   // Step 1: Chọn paymentMethod
   const handleSelectPayment = (method) => {
     setPaymentMethod(method);
-  };
-
-  const handleNextFromStep1 = () => {
-    if (!paymentMethod) {
-      alert("Please select a payment method!");
-      return;
-    }
-    setCurrentStep(2);
   };
 
   // Tính discount (demo)

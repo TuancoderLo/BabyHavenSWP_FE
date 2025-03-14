@@ -152,9 +152,9 @@ function DoctorConsultation() {
         throw new Error("Vui lòng chọn bác sĩ");
       }
 
-      if (!selectedCategory) {
-        throw new Error("Vui lòng chọn category");
-      }
+      // if (!selectedCategory) {
+      //   throw new Error("Vui lòng chọn category");
+      // }
 
       // Format ngày giờ theo định dạng yêu cầu
       const currentDate = new Date();
