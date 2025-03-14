@@ -40,10 +40,9 @@ function Packages() {
           if (pkgJSON) {
             sessionStorage.setItem("completedPayment", "true");
             sessionStorage.setItem("selectedPackageAfterPayment", pkgJSON);
+            // Redirect về homepage
+            window.location.href = "/homepage";
           }
-          
-          // Chỉ navigate đến homepage, không set step ở đây
-          navigate("/homepage");
         }
       } else {
         setError("Invalid or missing token");
@@ -59,6 +58,7 @@ function Packages() {
   useEffect(() => {
     // Kiểm tra xem đã thanh toán thành công chưa (sau khi navigate từ payment về)
     const completedPayment = sessionStorage.getItem("completedPayment");
+    console.log(completedPayment);
     if (completedPayment === "true") {
       // Đợi một khoảng thời gian ngắn để đảm bảo homepage đã render
       const timer = setTimeout(() => {
@@ -73,7 +73,7 @@ function Packages() {
         // Xóa dữ liệu từ sessionStorage để tránh hiển thị lại khi refresh
         sessionStorage.removeItem("completedPayment");
         sessionStorage.removeItem("selectedPackageAfterPayment");
-      }, 500); // Đợi 500ms
+      }, 5000); // Đợi 500ms
       
       return () => clearTimeout(timer);
     }
