@@ -1020,7 +1020,7 @@ const AddChild = ({ closeOverlay }) => {
             growthForm={growthForm}
             setGrowthForm={setGrowthForm}
             errors={errors}
-            onConfirm={handleConfirmStep2}
+            onConfirm={handleConfirmStep1}
             onOtherMeasure={handleOtherMeasure}
           />
         );
@@ -1030,7 +1030,7 @@ const AddChild = ({ closeOverlay }) => {
             growthForm={growthForm}
             setGrowthForm={setGrowthForm}
             errors={errors}
-            onConfirm={handleConfirmStep2}
+            onConfirm={handleConfirmStep1}
             onOtherMeasure={handleOtherMeasure}
           />
         );
@@ -1040,7 +1040,7 @@ const AddChild = ({ closeOverlay }) => {
             growthForm={growthForm}
             setGrowthForm={setGrowthForm}
             errors={errors}
-            onConfirm={handleConfirmStep2}
+            onConfirm={handleConfirmStep1}
           />
         );
       }

@@ -6,6 +6,7 @@ import childApi from "../../../services/childApi";
 import AddChild from "./AddChild";
 import AddRecord from "./AddRecord"; // Import the AddRecord component at the top
 import ExpertAdvice from "../../../services/expertAdviceData";
+import AddRecordButton from './common/button/AddRecord';
 
 function ChildrenPage() {
   const navigate = useNavigate();
@@ -424,13 +425,11 @@ function ChildrenPage() {
               </span>
             </div>
           </div>
-          <button
-            className="add-record-btn"
+          <AddRecordButton
             onClick={handleAddRecord}
             disabled={!selectedChild}
-          >
-            Add Record
-          </button>
+            className="add-record-btn"
+          />
         </div>
       </div>
 

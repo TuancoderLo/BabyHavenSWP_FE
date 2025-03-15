@@ -1,0 +1,30 @@
+.add-milestone-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background-color: #FF9F43;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(255, 159, 67, 0.2);
+}
+
+.add-milestone-button:hover:not(:disabled) {
+  background-color: #FF8F1F;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255, 159, 67, 0.3);
+}
+
+.add-milestone-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.milestone-icon {
+  font-size: 18px;
+}
