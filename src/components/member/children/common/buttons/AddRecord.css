@@ -1,0 +1,26 @@
+.add-record-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.add-record-button:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.add-record-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.plus-icon {
+  font-size: 14px;
+}

@@ -4,6 +4,8 @@ import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import childApi from "../../../services/childApi";
 import "./AddRecord.css";
+import calculateBMI from "../../../services/bmiUtils";
+import BabyGrowth from "../../../assets/baby_growth.png";
 
 const AddRecord = ({ child, memberId, closeOverlay }) => {
   if (!child) {
@@ -23,7 +25,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     );
   }
   // Fetch child details using GET /api/Children/{childId}
-  const [setChildDetails] = useState(null);
+  const setChildDetails = useState(null);
  
   useEffect(() => {
     const fetchChildDetails = async () => {
@@ -109,52 +111,68 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     return isValid;
   }, [growthForm, errors]);
 
+  const [showNotification, setShowNotification] = useState(false);
+
   const handleConfirmGrowthRecord = useCallback(async () => {
-    if (!validateGrowthForm()) return;
-    if (subStep2 < 3) {
-      setSubStep2((prev) => prev + 1);
+    // Only validate on step 1
+    if (currentStep === 1 && !validateGrowthForm()) return;
+    
+    // If we're on steps 1 or 2, just advance to the next step
+    if (currentStep < 3) {
+      setCurrentStep(prev => prev + 1);
       return;
     }
+    
+    // If we're on step 3, submit the data
     try {
       const growthPayload = {
-          name: child.name, // Only use child's name as needed
-          dateOfBirth: child.dateOfBirth,
-          recordedBy: memberId,
-          createdAt: growthForm.createdAt || new Date().toISOString(),
-          weight: growthForm.weight,
-          height: growthForm.height,
-          headCircumference: growthForm.headCircumference,
-          notes: growthForm.notes,
-          muscleMass: growthForm.muscleMass,
-          chestCircumference: growthForm.chestCircumference,
-          nutritionalStatus: growthForm.nutritionalStatus,
-          ferritinLevel: growthForm.ferritinLevel,
-          triglycerides: growthForm.triglycerides,
-          bloodSugarLevel: growthForm.bloodSugarLevel,
-          physicalActivityLevel: growthForm.physicalActivityLevel,
-          heartRate: growthForm.heartRate,
-          bloodPressure:
-            growthForm.bloodPressure,
-          bodyTemperature: growthForm.bodyTemperature,
-          oxygenSaturation: growthForm.oxygenSaturation,
-          sleepDuration: growthForm.sleepDuration,
-          vision: growthForm.vision,
-          hearing: growthForm.hearing,
-          immunizationStatus: growthForm.immunizationStatus,
-          mentalHealthStatus: growthForm.mentalHealthStatus,
-          growthHormoneLevel: growthForm.growthHormoneLevel,
-          attentionSpan: growthForm.attentionSpan,
-          neurologicalReflexes: growthForm.neurologicalReflexes,
-          developmentalMilestones: growthForm.developmentalMilestones,
+        name: child.name,
+        dateOfBirth: child.dateOfBirth,
+        recordedBy: memberId,
+        createdAt: growthForm.createdAt || new Date().toISOString(),
+        weight: growthForm.weight,
+        height: growthForm.height,
+        headCircumference: growthForm.headCircumference,
+        notes: growthForm.notes,
+        muscleMass: growthForm.muscleMass,
+        chestCircumference: growthForm.chestCircumference,
+        nutritionalStatus: growthForm.nutritionalStatus,
+        ferritinLevel: growthForm.ferritinLevel,
+        triglycerides: growthForm.triglycerides,
+        bloodSugarLevel: growthForm.bloodSugarLevel,
+        physicalActivityLevel: growthForm.physicalActivityLevel,
+        heartRate: growthForm.heartRate,
+        bloodPressure: growthForm.bloodPressure,
+        bodyTemperature: growthForm.bodyTemperature,
+        oxygenSaturation: growthForm.oxygenSaturation,
+        sleepDuration: growthForm.sleepDuration,
+        vision: growthForm.vision,
+        hearing: growthForm.hearing,
+        immunizationStatus: growthForm.immunizationStatus,
+        mentalHealthStatus: growthForm.mentalHealthStatus,
+        growthHormoneLevel: growthForm.growthHormoneLevel,
+        attentionSpan: growthForm.attentionSpan,
+        neurologicalReflexes: growthForm.neurologicalReflexes,
+        developmentalMilestones: growthForm.developmentalMilestones,
       };
+
+
   
       const growthRes = await childApi.createGrowthRecord(growthPayload);
       console.log("Growth record created:", growthRes.data);
-      setCurrentStep(2);
+      
+      // Show notification and close overlay
+      setShowNotification(true);
+      closeOverlay();
+      
+      // Hide notification after 3 seconds
+      setTimeout(() => {
+        setShowNotification(false);
+      }, 3000);
     } catch (err) {
       console.error("Error saving growth record:", err);
     }
-  }, [child, memberId, growthForm, subStep2, validateGrowthForm]);
+  }, [child, memberId, growthForm, currentStep, validateGrowthForm, closeOverlay]);
 
   const handlePrevious = useCallback(() => {
     if (subStep2 > 1) setSubStep2((prev) => prev - 1);
@@ -164,13 +182,26 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     closeOverlay();
   }, [closeOverlay]);
 
-
   const renderStepContent = useMemo(() => {
+    // Step 1: Add BMI information (same as before)
     if (currentStep === 1) {
-      if (subStep2 === 1) {
-        return (
-          <div className="step-form">
-            <label>Date</label>
+      return (
+        <div className="step-form">
+          {/* Child Information Card */}
+          <div className="child-info-card">
+            <h3>Child Information</h3>
+            <div className="child-info-details">
+              <p><strong>Name:</strong> {child.name}</p>
+              <div className="info-row">
+                <p><strong>Date of Birth:</strong> {new Date(child.dateOfBirth).toLocaleDateString()}</p>
+                {child.gender && <p className={`gender-tag ${child.gender.toLowerCase()}`}>{child.gender}</p>}
+              </div>
+            </div>
+          </div>
+          
+          {/* Date Section */}
+          <div className="form-section date-section">
+            <h4>Record Date</h4>
             <ReactDatePicker
               selected={
                 growthForm.createdAt ? new Date(growthForm.createdAt) : null
@@ -188,8 +219,12 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
             {errors.createdAt && (
               <p className="error-text">{errors.createdAt}</p>
             )}
+          </div>
 
-            <div className="two-column-row">
+          {/* Measurements Section */}
+          <div className="form-section">
+            <h4>Basic Measurements</h4>
+            <div className="measurements-section">
               <div>
                 <label>Baby's weight (kg)</label>
                 <input
@@ -224,9 +259,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                   <p className="error-text">{errors.height}</p>
                 )}
               </div>
-            </div>
-
-            <div className="two-column-row">
               <div>
                 <label>Head circumference (cm)</label>
                 <input
@@ -242,50 +274,52 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               </div>
               <div>
                 <label>BMI (kg/m2)</label>
-                <input type="number" readOnly value={growthForm.bmi} />
+                <input type="number" readOnly value={calculateBMI(growthForm.weight, growthForm.height)} />
               </div>
             </div>
-
-            <label>Notes</label>
-            <input
-              type="text"
-              value={growthForm.notes}
-              onChange={(e) =>
-                setGrowthForm((prev) => ({
-                  ...prev,
-                  notes: e.target.value,
-                }))
-              }
-            />
-
-            <div className="step-buttons">
-              {/* Không có nút Previous cho subStep2=1 */}
-              <div className="button-cofirm">
-                <button type="button" onClick={handleConfirmGrowthRecord}>
-                  Confirm
-                </button>
-              </div>
+            
+            <div className="notes-section">
+              <label>Notes</label>
+              <input
+                type="text"
+                value={growthForm.notes}
+                onChange={(e) =>
+                  setGrowthForm((prev) => ({
+                    ...prev,
+                    notes: e.target.value,
+                  }))
+                }
+              />
             </div>
           </div>
-        );
-      } 
-      if (subStep2 === 2) {
-        return (
-          <div className="step-form">
-            <div className="two-column-row">
-              <div>
-                <label>Physical activity level</label>
-                <input
-                  type="text"
-                  value={growthForm.physicalActivityLevel}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      physicalActivityLevel: e.target.value,
-                    }))
-                  }
-                />
-              </div>
+
+          <button type="button" className="confirm-button" onClick={handleConfirmGrowthRecord}>
+            Confirm
+          </button>
+        </div>
+      );
+    }
+    
+    // Step 2: Fields from old substep 2
+    if (currentStep === 2) {
+      return (
+        <div className="step-form">
+          {/* Child Information Card */}
+          <div className="child-info-card">
+            <h3>Child Information</h3>
+            <div className="child-info-details">
+              <p><strong>Name:</strong> {child.name}</p>
+              <p><strong>Date of Birth:</strong> {new Date(child.dateOfBirth).toLocaleDateString()}</p>
+              {child.gender && <p><strong>Gender:</strong> {child.gender}</p>}
+            </div>
+          </div>
+          
+          <h2>Recommendations for Your Baby</h2>
+          
+          {/* Nutritional Information Section */}
+          <div className="form-section">
+            <h4>Nutritional Information</h4>
+            <div className="measurements-section">
               <div>
                 <label>Nutritional status</label>
                 <input
@@ -299,9 +333,26 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                   }
                 />
               </div>
+              <div>
+                <label>Physical activity level</label>
+                <input
+                  type="text"
+                  value={growthForm.physicalActivityLevel}
+                  onChange={(e) =>
+                    setGrowthForm((prev) => ({
+                      ...prev,
+                      physicalActivityLevel: e.target.value,
+                    }))
+                  }
+                />
+              </div>
             </div>
-
-            <div className="two-column-row">
+          </div>
+          
+          {/* Blood Metrics Section */}
+          <div className="form-section">
+            <h4>Blood Metrics</h4>
+            <div className="measurements-section">
               <div>
                 <label>Ferritin level</label>
                 <input
@@ -313,11 +364,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                       ferritinLevel: e.target.value,
                     }))
                   }
-                  className={errors.ferritinLevel ? "error-input" : ""}
                 />
-                {errors.ferritinLevel && (
-                  <p className="error-text">{errors.ferritinLevel}</p>
-                )}
               </div>
               <div>
                 <label>Triglycerides</label>
@@ -330,15 +377,8 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                       triglycerides: e.target.value,
                     }))
                   }
-                  className={errors.triglycerides ? "error-input" : ""}
                 />
-                {errors.triglycerides && (
-                  <p className="error-text">{errors.triglycerides}</p>
-                )}
               </div>
-            </div>
-
-            <div className="two-column-row">
               <div>
                 <label>Blood sugar level</label>
                 <input
@@ -350,11 +390,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                       bloodSugarLevel: e.target.value,
                     }))
                   }
-                  className={errors.bloodSugarLevel ? "error-input" : ""}
                 />
-                {errors.bloodSugarLevel && (
-                  <p className="error-text">{errors.bloodSugarLevel}</p>
-                )}
               </div>
               <div>
                 <label>Chest circumference (cm)</label>
@@ -367,19 +403,44 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                       chestCircumference: e.target.value,
                     }))
                   }
-                  className={
-                    errors.chestCircumference ? "error-input" : ""
-                  }
                 />
-                {errors.chestCircumference && (
-                  <p className="error-text">
-                    {errors.chestCircumference}
-                  </p>
-                )}
               </div>
             </div>
-
-            <div className="two-column-row">
+          </div>
+          
+          <div className="step-buttons">
+            <button type="button" className="previous-btn" onClick={handlePrevious}>
+              Previous
+            </button>
+            <button type="button" className="confirm-button" onClick={handleConfirmGrowthRecord}>
+              Continue to Other Measurements
+            </button>
+          </div>
+        </div>
+      );
+    }
+    
+    // Step 3: Fields from old substep 3
+    if (currentStep === 3) {
+      return (
+        <div className="step-form">
+          {/* Child Information Card */}
+          <div className="child-info-card">
+            <h3>Child Information</h3>
+            <div className="child-info-details">
+              <p><strong>Name:</strong> {child.name}</p>
+              <p><strong>Date of Birth:</strong> {new Date(child.dateOfBirth).toLocaleDateString()}</p>
+              {child.gender && <p><strong>Gender:</strong> {child.gender}</p>}
+            </div>
+          </div>
+          
+          <h2>Additional Health Measurements</h2>
+          <p>Please provide any additional measurements you have:</p>
+          
+          {/* Vital Signs Section */}
+          <div className="form-section">
+            <h4>Vital Signs</h4>
+            <div className="measurements-section">
               <div>
                 <label>Heart rate</label>
                 <input
@@ -391,11 +452,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                       heartRate: e.target.value,
                     }))
                   }
-                  className={errors.heartRate ? "error-input" : ""}
                 />
-                {errors.heartRate && (
-                  <p className="error-text">{errors.heartRate}</p>
-                )}
               </div>
               <div>
                 <label>Blood pressure</label>
@@ -410,9 +467,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                   }
                 />
               </div>
-            </div>
-
-            <div className="two-column-row">
               <div>
                 <label>Body temperature (°C)</label>
                 <input
@@ -424,13 +478,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                       bodyTemperature: e.target.value,
                     }))
                   }
-                  className={
-                    errors.bodyTemperature ? "error-input" : ""
-                  }
                 />
-                {errors.bodyTemperature && (
-                  <p className="error-text">{errors.bodyTemperature}</p>
-                )}
               </div>
               <div>
                 <label>Oxygen saturation (%)</label>
@@ -443,37 +491,15 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                       oxygenSaturation: e.target.value,
                     }))
                   }
-                  className={
-                    errors.oxygenSaturation ? "error-input" : ""
-                  }
                 />
-                {errors.oxygenSaturation && (
-                  <p className="error-text">
-                    {errors.oxygenSaturation}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="step-buttons">
-              <button type="button" className="previous-btn" onClick={handlePrevious}>
-                Previous
-              </button>
-              <div className="button-cofirm">
-                <button type="button" onClick={handleConfirmGrowthRecord}>
-                  Confirm
-                </button>
               </div>
             </div>
           </div>
-        );
-      }
-
-      // subStep2 = 3 => tương tự Step2Page3
-      if (subStep2 === 3) {
-        return (
-          <div className="step-form">
-            <div className="two-column-row">
+          
+          {/* Development Metrics Section */}
+          <div className="form-section">
+            <h4>Development Metrics</h4>
+            <div className="measurements-section">
               <div>
                 <label>Sleep duration (hrs)</label>
                 <input
@@ -485,11 +511,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                       sleepDuration: e.target.value,
                     }))
                   }
-                  className={errors.sleepDuration ? "error-input" : ""}
                 />
-                {errors.sleepDuration && (
-                  <p className="error-text">{errors.sleepDuration}</p>
-                )}
               </div>
               <div>
                 <label>Growth hormone level</label>
@@ -502,19 +524,15 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                       growthHormoneLevel: e.target.value,
                     }))
                   }
-                  className={
-                    errors.growthHormoneLevel ? "error-input" : ""
-                  }
                 />
-                {errors.growthHormoneLevel && (
-                  <p className="error-text">
-                    {errors.growthHormoneLevel}
-                  </p>
-                )}
               </div>
             </div>
-
-            <div className="two-column-row">
+          </div>
+          
+          {/* Sensory and Health Status Section */}
+          <div className="form-section">
+            <h4>Sensory and Health Status</h4>
+            <div className="measurements-section">
               <div>
                 <label>Hearing</label>
                 <input
@@ -539,15 +557,8 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                       vision: e.target.value,
                     }))
                   }
-                  className={errors.vision ? "error-input" : ""}
                 />
-                {errors.vision && (
-                  <p className="error-text">{errors.vision}</p>
-                )}
               </div>
-            </div>
-
-            <div className="two-column-row">
               <div>
                 <label>Mental health status</label>
                 <input
@@ -575,8 +586,12 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 />
               </div>
             </div>
-
-            <div className="two-column-row">
+          </div>
+          
+          {/* Cognitive Development Section */}
+          <div className="form-section">
+            <h4>Cognitive Development</h4>
+            <div className="measurements-section">
               <div>
                 <label>Attention span</label>
                 <input
@@ -604,60 +619,44 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 />
               </div>
             </div>
-
-            <label>Developmental milestones</label>
-            <input
-              type="text"
-              value={growthForm.developmentalMilestones}
-              onChange={(e) =>
-                setGrowthForm((prev) => ({
-                  ...prev,
-                  developmentalMilestones: e.target.value,
-                }))
-              }
-            />
-
-            <div className="step-buttons">
-              <button type="button" className="previous-btn" onClick={handlePrevious}>
-                Previous
-              </button>
-              <div className="button-cofirm">
-                <button type="button" onClick={handleConfirmGrowthRecord}>
-                  Confirm
-                </button>
-              </div>
+            
+            <div className="notes-section">
+              <label>Developmental milestones</label>
+              <input
+                type="text"
+                value={growthForm.developmentalMilestones}
+                onChange={(e) =>
+                  setGrowthForm((prev) => ({
+                    ...prev,
+                    developmentalMilestones: e.target.value,
+                  }))
+                }
+              />
             </div>
           </div>
-        );
-      }
-    }
 
-    // currentStep = 2 => hiển thị message success
-    if (currentStep === 2) {
-      return (
-        <div className="step-form">
-          <h2>Record Saved Successfully</h2>
-          <p>Your growth record has been saved.</p>
           <div className="step-buttons">
-            <div className="button-cofirm">
-              <button type="button" onClick={handleClose}>
-                Close
-              </button>
-            </div>
+            <button type="button" className="previous-btn" onClick={handlePrevious}>
+              Previous
+            </button>
+            <button type="button" className="confirm-button" onClick={handleConfirmGrowthRecord}>
+              Submit Record
+            </button>
           </div>
         </div>
       );
     }
+    
 
     return null;
   }, [
     currentStep,
-    subStep2,
     growthForm,
     errors,
     handleConfirmGrowthRecord,
     handlePrevious,
     handleClose,
+    child,
   ]);
 
   return (
@@ -667,13 +666,30 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
       <div className="wizard-left">
         <div className="blue-bar"></div>
         <div className="wizard-left-content">
-          <h1 className="main-title">Add New Growth Record</h1>
-          <div className="step-labels">
-            <div className={`step-label ${currentStep === 1 ? "active-step" : ""}`}>
-              1. Add Record
+          <h1 className="main-title">Enter a new growth record to track your baby's health automatically</h1>
+          <div className="babygrowth-img">
+            <img src={BabyGrowth} alt="Baby Growth" />
+          </div>
+          <div className="step-progress">
+            <div className="step-item">
+              <div className={`step-circle ${currentStep > 1 ? 'completed' : currentStep === 1 ? 'active' : ''}`}>
+                {currentStep > 1 ? <span className="checkmark">✓</span> : '1'}
+              </div>
+              <div className="step-label">Add Record</div>
             </div>
-            <div className={`step-label ${currentStep === 2 ? "active-step" : ""}`}>
-              2. Submit
+            <div className="step-connector"></div>
+            <div className="step-item">
+              <div className={`step-circle ${currentStep > 2 ? 'completed' : currentStep === 2 ? 'active' : ''}`}>
+                {currentStep > 2 ? <span className="checkmark">✓</span> : '2'}
+              </div>
+              <div className="step-label">Recommendations for your baby</div>
+            </div>
+            <div className="step-connector"></div>
+            <div className="step-item">
+              <div className={`step-circle ${currentStep === 3 ? 'active' : ''}`}>
+                3
+              </div>
+              <div className="step-label">Other measurements</div>
             </div>
           </div>
         </div>

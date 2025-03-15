@@ -150,7 +150,18 @@
   color: #666;
 }
 
-.add-child-btn,
+.add-child-slot-button {
+  display: block;
+  opacity: unset;
+  background: transparent;
+  color: #333333;
+  border: none;
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
 
 .add-milestones-btn {
   display: block;
@@ -438,24 +449,32 @@ growth-chart-box card {
 }
 
 .child-slot:not(.selected):hover {
-    background: linear-gradient(135deg, #917bff, #f7c3ff);
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transition: all 0.2s ease;
 }
 
 .child-slot:not(.selected):hover .child-name,
 .child-slot:not(.selected):hover .child-age,
 .child-slot:not(.selected):hover .gender-icon {
-    color: #ffffff;
+    color: #000000;
 }
 
 .child-slot.selected {
-    border-color: #bf00ff;
+    border-color: #ff00fb;
     background: white;
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .child-slot.selected:hover {
     background: white;
+}
+
+.child-slot.selected.male {
+  border-color: #064F83;  /* Blue border for male */
+}
+
+.child-slot.selected.female {
+  border-color: #FF69B4;  /* Pink border for female */
 }
 
 .child-slot.empty {
@@ -518,7 +537,7 @@ growth-chart-box card {
 /* Latest record section */
 .latest-record-section {
     grid-area: 2 / 3 / 3 / 5;
-    background: linear-gradient(135deg, #FFF0F5, #F0F7FF);
+    background: white;
     border-radius: 12px;
     padding: 20px;
     display: flex;
@@ -585,6 +604,7 @@ growth-chart-box card {
 .add-record-btn {
     margin-top: 8px;
     padding: 8px 20px;
+    justify-content: center;
     background: linear-gradient(45deg, #FF69B4, #FFB6C1);
     color: white;
     border: none;
@@ -613,7 +633,7 @@ growth-chart-box card {
 /* Health Alert Section */
 .health-alert-section {
     grid-area: 2 / 5 / 3 / 6;
-    background: linear-gradient(135deg, #E8FFF9, #F0F7FF);
+    background: white;
     border-radius: 8px;
     padding: 16px;
     display: flex;
@@ -678,7 +698,7 @@ growth-chart-box card {
 /* Growth chart section */
 .growth-chart-section {
     grid-area: 3 / 3 / 8 / 6;
-    background: linear-gradient(135deg, #f8fdff, #f5f9ff);
+    background: white;
     border-radius: 8px;
     padding: 4px 16px;
     display: flex;
@@ -691,7 +711,7 @@ growth-chart-box card {
 .growth-chart-section h2 {
     display: flex;
     align-items: center;
-    color: #00D0BC;
+    color: #000000;
     font-size: 20px;
     margin-bottom: 2px;
 }
@@ -1105,9 +1125,4 @@ growth-chart-box card {
     background: linear-gradient(45deg, #FF1493, #FF69B4);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
-}
-
-.add-milestone-button::before {
-    content: '📝';
-    font-size: 18px;
 }

@@ -58,7 +58,7 @@ justify-content: center;
 }
 
 .step-label {
-  font-size: 1rem;
+  font-size: 0.5rem;
   color: #777;
   transition: color 0.2s, font-weight 0.2s;
 }
@@ -72,4 +72,391 @@ justify-content: center;
 .wizard-content {
   width: 60%; /* Cột phải chiếm phần còn lại */
   padding: 2rem; /* Nếu cần padding riêng */
+  overflow-y: auto;
+  max-height: 600px;
+}
+
+/* Form styling */
+.step-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.step-form h2 {
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 0.5rem;
+}
+
+.step-form p {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.step-form label {
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 0.3rem;
+  display: block;
+}
+
+.step-form input, 
+.step-form select,
+.react-datepicker__input-container input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.step-form input:focus, 
+.step-form select:focus,
+.react-datepicker__input-container input:focus {
+  border-color: #00D0BC;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 208, 188, 0.2);
+}
+
+.error-input {
+  border-color: #ff5252 !important;
+}
+
+.error-text {
+  color: #ff5252;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.two-column-row {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.two-column-row > div {
+  flex: 1;
+}
+
+/* Button styling */
+.step-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+  align-items: center;
+}
+
+.button-cofirm {
+  margin-left: auto;
+}
+
+.step-buttons button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.step-buttons button[type="button"]:not(.previous-btn) {
+  background-color: #00D0BC;
+  color: white;
+}
+
+.step-buttons button[type="button"]:not(.previous-btn):hover {
+  background-color: #00b8a6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.previous-btn {
+  background-color: #f5f5f5;
+  color: #555;
+  border: 1px solid #ddd !important;
+}
+
+.previous-btn:hover {
+  background-color: #e9e9e9;
+}
+
+/* Notification styling */
+.notification-board {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.notification-board h2 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.notification-board p {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.notification-board button {
+  background-color: #00D0BC;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.notification-board button:hover {
+  background-color: #00b8a6;
+}
+
+/* Confirm button at the bottom of step 1 */
+button[type="button"] {
+  background-color: #00D0BC;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 16px;
+}
+
+button[type="button"]:hover {
+  background-color: #00b8a6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Add this if it doesn't exist */
+.babygrowth-img {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.babygrowth-img img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Add these new styles for the step progress UI */
+.step-progress {
+  display: absolute;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 30px;
+  position: relative;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+  position: relative;
+  z-index: 2;
+}
+
+.step-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #666;
+  margin-right: 15px;
+}
+
+.step-circle.active {
+  background-color: #00D0BC;
+  color: white;
+}
+
+.step-circle.completed {
+  background-color: #00D0BC;
+  color: white;
+}
+
+.checkmark {
+  font-size: 20px;
+}
+
+.step-label {
+  font-size: 16px;
+  color: #333;
+  font-weight: 500;
+}
+
+.step-connector {
+  position: absolute;
+  left: 15px;
+  top: 30px;
+  width: 2px;
+  height: calc(100% - 80px);
+  background-color: #e0e0e0;
+  z-index: 1;
+}
+
+/* Add these new styles for the improved form layout */
+/* Child Information Card Styling */
+.child-info-card {
+  background-color: #f8f5ff;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 24px;
+  border-left: 4px solid #9c7df3;
+  box-shadow: 0 3px 10px rgba(156, 125, 243, 0.1);
+  transition: all 0.3s ease;
+}
+
+.child-info-card:hover {
+  box-shadow: 0 5px 15px rgba(156, 125, 243, 0.2);
+}
+
+.child-info-card h3 {
+  color: #7e52ff;
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(126, 82, 255, 0.2);
+  padding-bottom: 8px;
+}
+
+.child-info-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.child-info-details p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.child-info-details strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.gender-tag {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-block;
+  margin: 0;
+}
+
+.gender-tag.male {
+  background-color: #e1f5fe;
+  color: #0288d1;
+  border: 1px solid #b3e5fc;
+}
+
+.gender-tag.female {
+  background-color: #fce4ec;
+  color: #d81b60;
+  border: 1px solid #f8bbd0;
+}
+
+.gender-tag.other {
+  background-color: #f1f8e9;
+  color: #689f38;
+  border: 1px solid #dcedc8;
+}
+
+.form-section {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+}
+
+.form-section h4 {
+  color: #00D0BC;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+.date-section {
+  margin-bottom: 20px;
+}
+
+.measurements-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.notes-section {
+  margin-top: 20px;
+}
+
+/* Adjust input styling for the new layout */
+.form-section input, 
+.form-section select,
+.date-section .react-datepicker__input-container input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s;
+  background-color: #f9f9f9;
+}
+
+.form-section input:focus, 
+.form-section select:focus,
+.date-section .react-datepicker__input-container input:focus {
+  border-color: #00D0BC;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(0, 208, 188, 0.1);
+}
+
+/* Improve button styling */
+.confirm-button {
+  background-color: #00D0BC;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 16px;
+  display: block;
+  margin-left: auto;
+  margin-top: 20px;
+}
+
+.confirm-button:hover {
+  background-color: #00b8a6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
