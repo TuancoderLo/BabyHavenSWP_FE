@@ -9,7 +9,6 @@ const AddChild = ({
 }) => {
   return (
     <button
-      type="button"
       className={`add-child-button ${className}`}
       onClick={onClick}
       disabled={disabled}

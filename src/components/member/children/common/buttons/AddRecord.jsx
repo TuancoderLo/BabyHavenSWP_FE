@@ -9,7 +9,6 @@ const AddRecord = ({
 }) => {
   return (
     <button
-      type="button"
       className={`add-record-button ${className}`}
       onClick={onClick}
       disabled={disabled}

@@ -249,7 +249,6 @@ function Login({ onLoginSuccess }) {
             </div>
 
             <button
-              type="button"
               className="social-btn google"
               onClick={handleGoogleRedirect}
               disabled={isLoading}

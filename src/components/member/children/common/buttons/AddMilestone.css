@@ -20,12 +20,11 @@
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
-  transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(255, 159, 67, 0.2);
 }
 
 .add-milestone-button:hover:not(:disabled) {
-  background-color: #727272;
+  background: linear-gradient(45deg, #ffc743, #FF9F43);
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(255, 159, 67, 0.3);
 }
