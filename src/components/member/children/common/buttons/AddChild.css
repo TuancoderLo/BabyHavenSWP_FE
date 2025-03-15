@@ -1,0 +1,51 @@
+.add-child-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background-color: #FF97C1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(255, 151, 193, 0.2);
+}
+
+/* .add-child-button:hover:not(:disabled) {
+  background-color: #FF80B3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255, 151, 193, 0.3);
+} */
+
+.add-child-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.add-child-icon {
+  font-size: 14px;
+}
+
+.add-child-button.add-child-slot-button {
+    display: block;
+    opacity: unset;
+    background: transparent;
+    color: #333333;
+    border: none;
+    font-weight: 500;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: none;
+  }
+  
+  .add-child-button:hover:not(:disabled).add-child-slot-button:hover {
+    color: none;
+    background-color: none;
+    transform: none;
+    box-shadow: none;
+  }

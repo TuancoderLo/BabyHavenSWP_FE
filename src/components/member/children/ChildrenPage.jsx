@@ -9,7 +9,9 @@ import childApi from "../../../services/childApi";
 import AddChild from "./AddChild";
 import AddRecord from "./AddRecord"; // Import the AddRecord component at the top
 import ExpertAdvice from "../../../services/expertAdviceData";
-import AddRecordButton from './common/button/AddRecord';
+import AddRecordButton from './common/buttons/AddRecord';
+import AddMilestoneButton from './common/buttons/AddMilestone';
+import AddChildButton from './common/buttons/AddChild';
 
 function ChildrenPage() {
   const navigate = useNavigate();
@@ -354,7 +356,9 @@ function ChildrenPage() {
           return (
             <div
               key={slotNumber}
-              className={`child-slot child-slot-${slotNumber} ${!child ? 'empty' : ''} ${selectedChild && selectedChild.name === child?.name ? 'selected' : ''}`}
+              className={`child-slot child-slot-${slotNumber} ${!child ? 'empty' : ''} 
+              ${selectedChild && selectedChild.name === child?.name ? 'selected' : ''} 
+              ${child?.gender?.toLowerCase() || ''}`}
               onClick={() => child ? handleSelectChild(child) : handleAddChild()}
             >
               {child ? (
@@ -367,10 +371,10 @@ function ChildrenPage() {
                   <i className={`fas ${child.gender === 'Male' ? 'fa-mars' : 'fa-venus'} gender-icon ${child.gender.toLowerCase()}`}></i>
                 </div>
               ) : showAddChild ? (
-                <div>
-                  <i className="fas fa-plus"></i>
-                  <span>Add Child</span>
-                </div>
+                <AddChildButton
+                  onClick={handleAddChild}
+                  className="add-child-slot-button"
+                />
               ) : null}
             </div>
           );
@@ -407,9 +411,10 @@ function ChildrenPage() {
       <div className="milestone-content">
         Want to track every precious milestone of your little one?
       </div>
-      <button className="add-milestone-button" onClick={handleShowMilestoneModal}>
-        Add Milestone
-      </button>
+      <AddMilestoneButton
+        onClick={handleShowMilestoneModal}
+        disabled={!selectedChild}
+      />
     </div>
 
       {/* Latest Record Section */}

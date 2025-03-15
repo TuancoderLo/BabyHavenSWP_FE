@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaFlag } from 'react-icons/fa';
+import { FaPlus } from 'react-icons/fa';
 import './AddMilestone.css';
 
 const AddMilestone = ({ 
@@ -14,7 +14,7 @@ const AddMilestone = ({
       onClick={onClick}
       disabled={disabled}
     >
-      <FaFlag className="milestone-icon" />
+      <FaPlus className="icon" />
       Add Milestone
     </button>
   );
