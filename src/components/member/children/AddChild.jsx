@@ -918,11 +918,32 @@ const AddChild = ({ closeOverlay }) => {
     }
   }, [childForm, validateStep1]);
 
-  const handleAddRecordStep1 = useCallback(() => {
+  const handleAddRecordStep1 = useCallback(async () => {
     if (!validateStep1()) return;
-    setCurrentStep(2);
-    setSubStep2(1);
-  }, [validateStep1]);
+    const confirmed = window.confirm(
+"Do you want to create a child? If you click OK, the child will be created and go to the add record step; if you click Cancel, the child will not be created."
+    );
+    if (!confirmed) return;
+    try {
+      const childPayload = {
+        name: childForm.name.trim(),
+        memberId: childForm.memberId,
+        dateOfBirth: new Date(childForm.dateOfBirth).toISOString().split("T")[0],
+        gender: childForm.gender,
+        birthWeight: childForm.birthWeight,
+        birthHeight: childForm.birthHeight,
+        notes: childForm.notes,
+      };
+      const childRes = await childApi.createChild(childPayload);
+      console.log("Child created:", childRes.data);
+      setChildId(childRes.data?.data?.childId || "");
+      setCurrentStep(2);
+      setSubStep2(1);
+    } catch (err) {
+      console.error("Error saving child data:", err);
+    }
+  }, [childForm, validateStep1]);
+  
 
   const handleOtherMeasure = useCallback(() => {
     if (!validateStep2()) return;
