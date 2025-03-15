@@ -23,23 +23,7 @@ nav {
   padding: 0.8rem 2rem;
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-}
 
-.logo img {
-  height: 30px;
-  border-radius: 8px;
-}
-
-.logo span {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #2c3e50;
-  letter-spacing: -0.5px;
-}
 
 /* Navigation Links */
 .nav-links {
@@ -72,7 +56,7 @@ nav {
   content: "▾";
   margin-left: 0.4rem;
   font-size: 0.9em;
-  color: #00d0bc;
+  color: #000000;
   transition: transform 0.3s ease;
 }
 

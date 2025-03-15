@@ -45,9 +45,15 @@ function ChildrenPage() {
   }, [memberId, navigate]);
 
   // Gọi API lấy danh sách trẻ em theo memberId
+  // Add isLoading state
+  const [isLoading, setIsLoading] = useState(true);
+  const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
+  
+  // Update the useEffect that fetches children data
   useEffect(() => {
     if (!memberId) return;
-
+  
+    setIsLoading(true);
     childApi.getByMember(memberId)
       .then((response) => {
         console.log("API response:", response.data);
@@ -57,41 +63,49 @@ function ChildrenPage() {
           if (list.length > 0) {
             handleSelectChild(list[0]); // Tự động chọn trẻ đầu tiên
           } else {
-            handleAddChild();
+            setShowWelcomeMessage(true);
           }
+        } else {
+          setShowWelcomeMessage(true);
         }
       })
       .catch((error) => {
         console.error("Error fetching children:", error);
+        setShowWelcomeMessage(true);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-  }, [memberId]);
-
+    }, [memberId]);
+  
+  // Update the handleSelectChild function
   const handleSelectChild = async (child) => {
+    setIsLoading(true);
     try {
       const response = await childApi.getChildByName(child, memberId);
       console.log("Child: " + response)
       console.log("Lấy thông tin chi tiết của trẻ:", response.data);
       setSelectedChild(response.data.data);
-
+  
       // Lấy dữ liệu growth record mới nhất
       try {
         const parentName = localStorage.getItem("name");
         const growthRecordsResponse = await childApi.getGrowthRecords(child.name, parentName);
         console.log("Growth Records Response:", growthRecordsResponse);
-
+  
         if (growthRecordsResponse.data) {
           let records = Array.isArray(growthRecordsResponse.data)
             ? growthRecordsResponse.data
             : [growthRecordsResponse.data];
-
+  
           // Lọc bỏ các record không có weight hoặc height
           records = records.filter(record => record && (record.weight || record.height));
-
+  
           // Sắp xếp theo thời gian gần nhất
           records.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
+  
           setGrowthRecords(records); // Cập nhật state growthRecords
-
+  
           if (records.length > 0) {
             // Lấy record mới nhất
             const latestRecord = records[0];
@@ -111,6 +125,8 @@ function ChildrenPage() {
       setSelectedChild(child);
       setSelectedRecord(null);
       setGrowthRecords([]); // Reset growth records khi có lỗi
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -334,6 +350,13 @@ function ChildrenPage() {
             </span>
           </div>
         </div>
+        <button 
+            className="connect-doctor-button" 
+            onClick={() => navigate("/member/doctor-consultation")}
+          >
+            <i className="fas fa-stethoscope"></i>
+            Connect to doctor
+          </button>
         <button className="analyze-ai-btn" onClick={() => console.log('AI Analysis coming soon')}>
           <i className="fas fa-robot"></i>
           Analyze with AI
@@ -344,205 +367,226 @@ function ChildrenPage() {
 
   return (
     <div className="parent">
-      {/* Child slots container */}
-      <div className="child-slots-container">
-        {/* Child slots */}
-        {[1, 2, 3, 4, 5, 6].map((slotNumber) => {
-          const child = childrenList[slotNumber - 1];
-          const showAddChild = !child && childrenList.length < 6 && slotNumber === childrenList.length + 1;
-
-          if (!child && !showAddChild) return null;
-
-          return (
-            <div
-              key={slotNumber}
-              className={`child-slot child-slot-${slotNumber} ${!child ? 'empty' : ''} 
-              ${selectedChild && selectedChild.name === child?.name ? 'selected' : ''} 
-              ${child?.gender?.toLowerCase() || ''}`}
-              onClick={() => child ? handleSelectChild(child) : handleAddChild()}
-            >
-              {child ? (
-                <div className="child-info">
-                  <span className="child-name">{child.name}</span>
-                  <span className="child-age">
-                    <i className="fas fa-calendar-alt" style={{ marginRight: '4px' }}></i>
-                    {calculateAge(child.dateOfBirth)}
-                  </span>
-                  <i className={`fas ${child.gender === 'Male' ? 'fa-mars' : 'fa-venus'} gender-icon ${child.gender.toLowerCase()}`}></i>
-                </div>
-              ) : showAddChild ? (
-                <AddChildButton
-                  onClick={handleAddChild}
-                  className="add-child-slot-button"
-                />
-              ) : null}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Child details section */}
-      <div className="child-details-section">
-        {selectedChild ? (
-          <>
-            <h2>{selectedChild.name}</h2>
-            <div className="child-details-content">
-              <div className="detail-row">
-                <span className="detail-label">Age:</span>
-                <span className="detail-value">{calculateAge(selectedChild.dateOfBirth)}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Date of Birth:</span>
-                <span className="detail-value">{selectedChild.dateOfBirth || 'Not set'}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Gender:</span>
-                <span className="detail-value">{selectedChild.gender || 'Not set'}</span>
-              </div>
-            </div>
-          </>
-        ) : (
-          <p>Select a child to view details</p>
-        )}
-      </div>
-
-      {/* Milestone section */}
-      <div className="milestone-section">
-      <div className="milestone-content">
-        Want to track every precious milestone of your little one?
-      </div>
-      <AddMilestoneButton
-        onClick={handleShowMilestoneModal}
-        disabled={!selectedChild}
-      />
-    </div>
-
-      {/* Latest Record Section */}
-      <div className="latest-record-section">
-        <h3 className="latest-record-title">Latest Growth Record</h3>
-        <div className="latest-record-content">
-          <div className="record-info">
-            <div className="record-row">
-              <span className="record-label">Height:</span>
-              <span className="record-value">
-                {selectedRecord ? `${selectedRecord.height || '--'} cm` : '-- cm'}
-              </span>
-            </div>
-            <div className="record-row">
-              <span className="record-label">Weight:</span>
-              <span className="record-value">
-                {selectedRecord ? `${selectedRecord.weight || '--'} kg` : '-- kg'}
-              </span>
-            </div>
-            <div className="record-row">
-              <span className="record-label">BMI:</span>
-              <span className="record-value">
-                {selectedRecord && selectedRecord.height && selectedRecord.weight
-                  ? (selectedRecord.weight / Math.pow(selectedRecord.height / 100, 2)).toFixed(1)
-                  : '--'}
-              </span>
-            </div>
+      {isLoading ? (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading...</p>
+        </div>
+      ) : childrenList.length === 0 ? (
+        <div className="no-children-container">
+          <div className="welcome-message">
+            <h2>Welcome to <span className="highlight">BabyHaven</span>, let's start</h2>
+            <h2>your journey here with your baby.</h2>
           </div>
-          <AddRecordButton
-            onClick={handleAddRecord}
+          <button 
+            className="add-first-child-button" 
+            onClick={handleAddChild}
+          >
+            Add your first child's informations
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* Child slots container */}
+          <div className="child-slots-container">
+            {/* Child slots */}
+            {[1, 2, 3, 4, 5, 6].map((slotNumber) => {
+              const child = childrenList[slotNumber - 1];
+              const showAddChild = !child && childrenList.length < 6 && slotNumber === childrenList.length + 1;
+
+              if (!child && !showAddChild) return null;
+
+              return (
+                <div
+                  key={slotNumber}
+                  className={`child-slot child-slot-${slotNumber} ${!child ? 'empty' : ''} 
+                  ${selectedChild && selectedChild.name === child?.name ? 'selected' : ''} 
+                  ${child?.gender?.toLowerCase() || ''}`}
+                  onClick={() => child ? handleSelectChild(child) : handleAddChild()}
+                >
+                  {child ? (
+                    <div className="child-info">
+                      <span className="child-name">{child.name}</span>
+                      <span className="child-age">
+                        <i className="fas fa-calendar-alt" style={{ marginRight: '4px' }}></i>
+                        {calculateAge(child.dateOfBirth)}
+                      </span>
+                      <i className={`fas ${child.gender === 'Male' ? 'fa-mars' : 'fa-venus'} gender-icon ${child.gender.toLowerCase()}`}></i>
+                    </div>
+                  ) : showAddChild ? (
+                    <AddChildButton
+                      onClick={handleAddChild}
+                      className="add-child-slot-button"
+                    />
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Child details section */}
+          <div className="child-details-section">
+            {selectedChild ? (
+              <>
+                <h2>{selectedChild.name}</h2>
+                <div className="child-details-content">
+                  <div className="detail-row">
+                    <span className="detail-label">Age:</span>
+                    <span className="detail-value">{calculateAge(selectedChild.dateOfBirth)}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Date of Birth:</span>
+                    <span className="detail-value">{selectedChild.dateOfBirth || 'Not set'}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Gender:</span>
+                    <span className="detail-value">{selectedChild.gender || 'Not set'}</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <p>Select a child to view details</p>
+            )}
+          </div>
+
+          {/* Milestone section */}
+          <div className="milestone-section">
+          <div className="milestone-content">
+            Want to track every precious milestone of your little one?
+          </div>
+          <AddMilestoneButton
+            onClick={handleShowMilestoneModal}
             disabled={!selectedChild}
-            className="add-record-btn"
           />
         </div>
-      </div>
 
-      {/* Health Alert Section */}
-      <div className="health-alert-section">
-        <div className="health-alert-title">
-          Health Alert
-        </div>
-        <div className={`health-alert-content ${selectedChild?.healthAlert ? 'warning' : 'healthy'}`}>
-          {selectedChild?.healthAlert || "Your child's health is in good condition"}
-        </div>
-      </div>
-
-      {/* Growth chart section */}
-      <div className="growth-chart-section">
-        <h2>
-          Growth chart
-          <div className="chart-filters">
-            <span
-              className={`filter-item ${selectedTool === 'BMI' ? 'active' : ''}`}
-              onClick={() => setSelectedTool('BMI')}
-            >
-              BMI
-            </span>
-            <span
-              className={`filter-item ${selectedTool === 'Head measure' ? 'active' : ''}`}
-              onClick={() => setSelectedTool('Head measure')}
-            >
-              Head measure
-            </span>
-            <span
-              className={`filter-item ${selectedTool === 'Global std' ? 'active' : ''}`}
-              onClick={() => setSelectedTool('Global std')}
-            >
-              Global std
-            </span>
-            <span
-              className={`filter-item ${selectedTool === 'Milestone' ? 'active' : ''}`}
-              onClick={() => setSelectedTool('Milestone')}
-            >
-              Milestone
-            </span>
-          </div>
-        </h2>
-        <div className="chart-area">
-          {selectedChild ? (
-            <>
-              <GrowthChart
-                childName={selectedChild.name}
-                selectedTool={selectedTool}
-                onRecordSelect={setSelectedRecord}
-                refreshTrigger={refreshTrigger}
+          {/* Latest Record Section */}
+          <div className="latest-record-section">
+            <h3 className="latest-record-title">Latest Growth Record</h3>
+            <div className="latest-record-content">
+              <div className="record-info">
+                <div className="record-row">
+                  <span className="record-label">Height:</span>
+                  <span className="record-value">
+                    {selectedRecord ? `${selectedRecord.height || '--'} cm` : '-- cm'}
+                  </span>
+                </div>
+                <div className="record-row">
+                  <span className="record-label">Weight:</span>
+                  <span className="record-value">
+                    {selectedRecord ? `${selectedRecord.weight || '--'} kg` : '-- kg'}
+                  </span>
+                </div>
+                <div className="record-row">
+                  <span className="record-label">BMI:</span>
+                  <span className="record-value">
+                    {selectedRecord && selectedRecord.height && selectedRecord.weight
+                      ? (selectedRecord.weight / Math.pow(selectedRecord.height / 100, 2)).toFixed(1)
+                      : '--'}
+                  </span>
+                </div>
+              </div>
+              <AddRecordButton
+                onClick={handleAddRecord}
+                disabled={!selectedChild}
               />
-            </>
-          ) : (
-            <div className="no-child-selected">
-              <p>Please select a child to view their growth chart</p>
             </div>
-          )}
-        </div>
-      </div>
+          </div>
 
-      {/* Growth Analysis Section */}
-      {renderGrowthAnalysis()}
+          {/* Health Alert Section */}
+          <div className="health-alert-section">
+            <div className="health-alert-title">
+              Health Alert
+            </div>
+            <div className={`health-alert-content ${selectedChild?.healthAlert ? 'warning' : 'healthy'}`}>
+              {selectedChild?.healthAlert || "Your child's health is in good condition"}
+            </div>
+          </div>
 
-      {/* Expert advice section */}
-      <div className="expert-advice-section">
-        <h3>Expert Advice for your child</h3>
-        <div className="advice-content">
-          {renderExpertAdvice()}
-        </div>
-      </div>
+          {/* Growth chart section */}
+          <div className="growth-chart-section">
+            <h2>
+              Growth chart
+              <div className="chart-filters">
+                <span
+                  className={`filter-item ${selectedTool === 'BMI' ? 'active' : ''}`}
+                  onClick={() => setSelectedTool('BMI')}
+                >
+                  BMI
+                </span>
+                <span
+                  className={`filter-item ${selectedTool === 'Head measure' ? 'active' : ''}`}
+                  onClick={() => setSelectedTool('Head measure')}
+                >
+                  Head measure
+                </span>
+                <span
+                  className={`filter-item ${selectedTool === 'Global std' ? 'active' : ''}`}
+                  onClick={() => setSelectedTool('Global std')}
+                >
+                  Global std
+                </span>
+                <span
+                  className={`filter-item ${selectedTool === 'Milestone' ? 'active' : ''}`}
+                  onClick={() => setSelectedTool('Milestone')}
+                >
+                  Milestone
+                </span>
+              </div>
+            </h2>
+            <div className="chart-area">
+              {selectedChild ? (
+                <>
+                  <GrowthChart
+                    childName={selectedChild.name}
+                    selectedTool={selectedTool}
+                    onRecordSelect={setSelectedRecord}
+                    refreshTrigger={refreshTrigger}
+                  />
+                </>
+              ) : (
+                <div className="no-child-selected">
+                  <p>Please select a child to view their growth chart</p>
+                </div>
+              )}
+            </div>
+          </div>
 
-      {/* Action buttons */}
-      <button className="action-button child-education-section">
-        Child Education
-      </button>
+          {/* Growth Analysis Section */}
+          {renderGrowthAnalysis()}
 
-      <button className="action-button analyze-ai-section">
-        Analyze with AI
-      </button>
+          {/* Expert advice section */}
+          <div className="expert-advice-section">
+            <h3>Expert Advice for your child</h3>
+            <div className="advice-content">
+              {renderExpertAdvice()}
+            </div>
+          </div>
 
-      <button
-        className="action-button connect-doctor-section"
-        onClick={() => handleConnectDoctor()}
-      >
-        Connect to Doctor
-      </button>
+          {/* Action buttons */}
+          <button className="action-button child-education-section">
+            Child Education
+          </button>
 
-      <button
-        className="action-button add-record-section"
-        onClick={handleAddRecord}
-      >
-        Add Growth Record
-      </button>
+          <button className="action-button analyze-ai-section">
+            Analyze with AI
+          </button>
+
+          <button
+            className="action-button connect-doctor-section"
+            onClick={() => handleConnectDoctor()}
+          >
+            Connect to Doctor
+          </button>
+
+          <button
+            className="action-button add-record-section"
+            onClick={handleAddRecord}
+          >
+            Add Growth Record
+          </button>
+        </>
+      )}
 
       {/* Modals */}
       {showAddChildModal && <AddChild closeOverlay={closeOverlay} />}

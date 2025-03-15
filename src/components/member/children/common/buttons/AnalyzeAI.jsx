@@ -1,22 +1,22 @@
 import React from 'react';
 import { FaPlus } from 'react-icons/fa';
-import './AddMilestone.css';
+import './AnalyzeAI.css';
 
-const AddMilestone = ({ 
+const AnalyzeAI = ({ 
   onClick, 
   disabled = false,
   className = '' 
 }) => {
   return (
     <button
-      className={`add-milestone-button ${className}`}
+      className={`analyze-ai-button ${className}`}
       onClick={onClick}
       disabled={disabled}
     >
-      <FaPlus className="icon" />
-      Add Milestone
+      <FaPlus className="plus-icon" />
+      Analyze with AI
     </button>
   );
 };
 
-export default AddMilestone;
+export default AnalyzeAI;

@@ -4,6 +4,7 @@ import Logo from "../../assets/Logo.png";
 import Name from "../../assets/Name.png";
 import avatar_LOGO from "../../assets/avatar_LOGO.jpg";
 import api from "../../config/axios";
+import Sidebar from "./SidebarHeader";
 import "./Header.css";
 
 function Header() {
@@ -95,10 +96,10 @@ function Header() {
         <div className="logo">
           <div
             onClick={() => navigate("/homepage")}
-            style={{ cursor: "pointer" }}
+            style={{ cursor: "pointer"}}
           >
-            <img src={Logo} alt="Logo" />
-            <img src={Name} alt="Name" />
+            <img src={Logo} alt="Logo" className="logo-img" />
+            <img src={Name} alt="Name" className="logo-name" />
           </div>
         </div>
 
@@ -161,7 +162,7 @@ function Header() {
 
         <div
           className="avatar-sidebar-container"
-          onMouseEnter={handleMouseEnter}
+          onClick = {() => setMenuOpen(!menuOpen)}
           onMouseLeave={handleMouseLeave}
         >
           <div className="avatar-chip-img">
@@ -174,35 +175,14 @@ function Header() {
             {userData ? userData.name : "Name"}
           </span>
           {menuOpen && (
-            <div className="overlay" onClick={() => setMenuOpen(false)}></div>
+            <div>
+              <Sidebar 
+                userData={userData}
+                navigate={navigate}
+                handleLogout={handleLogout}
+              />
+            </div>
           )}
-          <div className={`sidebar-menu ${menuOpen ? "open" : ""}`}>
-            <div className="sidebar-header">
-              <i className="fas fa-user-circle"></i>
-              <span>{userData ? userData.name : "User"}</span>
-            </div>
-            <hr />
-            <div className="sidebar-section">
-              <h4>Activity</h4>
-              <p>Growth tracker</p>
-              <p>Doctor consultation</p>
-              <p>Health Analysis</p>
-            </div>
-            <hr />
-            <div className="sidebar-section">
-              <h4>Profile</h4>
-              <p onClick={() => navigate("/member/children")}>My children</p>
-              <p>My children's milestones</p>
-              <p>My membership plans</p>
-              <p>My requests</p>
-            </div>
-            <hr />
-            <div className="sidebar-section">
-              <h4>Setting</h4>
-              <p>Profile setting</p>
-              <p onClick={handleLogout}>Log out</p>
-            </div>
-          </div>
         </div>
       </nav>
     </header>

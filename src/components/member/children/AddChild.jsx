@@ -28,7 +28,6 @@ const Step1 = memo(
         <label>Gender of baby</label>
         <div className="gender-buttons">
           <button
-            type="button"
             className={`btn-gender male-btn ${childForm.gender === "Male" ? "active-gender" : ""
               } ${errors.gender ? "error-input" : ""}`}
             onClick={() =>
@@ -38,7 +37,6 @@ const Step1 = memo(
             Male
           </button>
           <button
-            type="button"
             className={`btn-gender female-btn ${childForm.gender === "Female" ? "active-gender" : ""
               } ${errors.gender ? "error-input" : ""}`}
             onClick={() =>

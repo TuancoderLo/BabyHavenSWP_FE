@@ -38,7 +38,7 @@ nav {
 
 .nav-links a {
   text-decoration: none;
-  color: #00d0bc !important;
+  color: #000000 !important;
   font-weight: 600;
   font-size: 0.95rem;
   transition: all 0.3s ease;
@@ -60,7 +60,7 @@ nav {
   content: "▾";
   margin-left: 0.4rem;
   font-size: 0.9em;
-  color: #00d0bc;
+  color: #000000;
   transition: transform 0.3s ease;
 }
 

@@ -20,11 +20,17 @@ nav {
 /* Logo Section */
 .logo {
   display: flex;
-  align-items: center;
-  gap: 0.8rem;
+  flex-direction: row;
+  justify-content: left;
+  gap: 2rem;
 }
 
-.logo img {
+.logo-img {
+  height: 30px;
+  border-radius: 8px;
+}
+
+.logo-name {
   height: 30px;
   border-radius: 8px;
 }
@@ -38,7 +44,7 @@ nav {
 
 .nav-links a {
   text-decoration: none;
-  color: #00d0bc !important;
+  color: #000000 !important;
   font-weight: 600;
   font-size: 0.95rem;
   transition: all 0.3s ease;
@@ -155,6 +161,8 @@ nav {
   }
 
   .logo img {
-    height: 35px;
+    height: 50px;
   }
 }
+
+
