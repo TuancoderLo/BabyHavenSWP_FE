@@ -100,7 +100,7 @@ html {
   line-height: 1.5;
 }
 
-.form-group {
+.form-group-login {
   margin-bottom: 16px;
   position: relative;
 }
@@ -126,7 +126,7 @@ html {
   color: #00bfa6;
 }
 
-input {
+.form-group-login input {
   width: 100%;
   padding: 10px 14px;
   border: 1px solid #e2e8f0;

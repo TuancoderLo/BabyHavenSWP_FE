@@ -271,7 +271,7 @@ const handleFinish = () => {
                     </div>
                     
                     <button 
-                      className={`package-btn-homepage ${currentPlan?.packageName === 'Free' ? 'current-plan' : ''}`}
+                      className={`package-btn-homepage ${currentPlan?.packageName === 'Free' ? 'current-plan' : 'Free'}`}
                       disabled={currentPlan?.packageName === 'Free'}
                     >
                       {currentPlan?.packageName === 'Free' ? 'YOUR CURRENT PLAN' : 'Free'}
@@ -280,6 +280,7 @@ const handleFinish = () => {
 
                   {/* Standard Package */}
                   <div className="package-card standard">
+                  <div className="best-service-badge">POPULAR</div>
                     <h3>STANDARD</h3>
                     <p className="package-description">Standard membership with advance features</p>
                     
@@ -307,7 +308,7 @@ const handleFinish = () => {
                     </div>
                     
                     <div className="package-price">
-                      <span className="price-amount">
+                      <span className="price-amount-homepage">
                         {packagesData.find(p => p.packageName === 'Standard')?.price.toLocaleString()}đ
                       </span>
                       <span className="price-duration">
@@ -325,8 +326,13 @@ const handleFinish = () => {
                     </button>
                   </div>
 
+                  
+
                   {/* Premium Package */}
                   <div className="package-card premium">
+                    <div className="premium-icon">
+                      <img src={packagesIcon} alt="Packages Icon"/>
+                    </div>
                     <div className="best-service-badge">BEST SERVICE</div>
                     <h3>PREMIUM</h3>
                     <p className="package-description">Premium membership with full features</p>
@@ -355,7 +361,7 @@ const handleFinish = () => {
                     </div>
                     
                     <div className="package-price">
-                      <span className="price-amount">
+                      <span className="price-amount-homepage">
                         {packagesData.find(p => p.packageName === 'Premium')?.price.toLocaleString()}đ
                       </span>
                       <span className="price-duration">

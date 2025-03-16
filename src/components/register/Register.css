@@ -127,7 +127,7 @@ html {
   color: #00bfa6;
 }
 
-input {
+.form-group input {
   width: 100%;
   padding: 10px 14px;
   border: 1px solid #e2e8f0;
@@ -255,4 +255,3 @@ input[type="date"] {
   }
 }
 
-padding: 10px 14px;

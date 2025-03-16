@@ -114,6 +114,12 @@
   justify-content: center;
 }
 
+.premium-icon img{
+  display: none;
+  width: 60px;
+  height: auto;
+}
+
 .package-card {
   flex: 1;
   min-width: 220px;
@@ -147,14 +153,12 @@
   line-height: 1.3;
 }
 
-.package-price {
-  margin-bottom: 1rem;
-}
-
-.price-amount {
+span.price-amount-homepage {
+  justify-self: left;
   font-size: 1.4rem;
   font-weight: 700;
   margin-right: 4px;
+  color: #000000;
 }
 
 .price-duration {
@@ -172,19 +176,41 @@
 .package-btn-homepage {
   margin-top: 8px;
   padding: 0.6rem 1.2rem;
-  background-color: #ff3300;
-  color: #fff;
-  border: none;
+  background-color: #ffffff;
+  color: #000000;
   border-radius: 7px;
+  border-color: #000000;
+  border-width: 0.5px;
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.3s ease, transform 0.2s ease;
 }
 .package-btn-homepage:hover {
-  background-color: #00bfa6;
+  background-color: #dbdbdb;
   transform: translateY(-2px);
 }
 
+.package-btn-homepage.current-plan:disabled {
+  margin-top: 13px;
+  padding: 0.6rem 1.2rem;
+  background-color: #bcbcbc;
+  color: #ffffff;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.9rem;
+  transform: none;
+}
+
+.package-btn-homepage.premium-btn {
+  background-color: #00bfa6;
+  color: white;
+  border: none;
+}
+
+.package-btn-homepage.premium-btn:hover {
+  background-color: #008f7c;
+  color: white;
+}
 /* =========== STEP 1: CHOOSE HOW TO PAY =========== */
 .choose-payment-step .payment-method-options {
   display: flex;
@@ -314,7 +340,6 @@
 .terms-check {
   display: flex;
   gap: 0.5rem;
-  margin-top: 1rem;
   font-size: 0.9rem;
 }
 
@@ -464,27 +489,23 @@
   background: white;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  margin-bottom: 16px;
 }
 
 .package-icon {
-  width: 48px;
-  height: 48px;
   margin-right: 16px;
-  background: #f0f7ff;
+  background: #ffffff;
   border-radius: 8px;
   display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .package-icon img {
-  width: 32px;
-  height: 32px;
+  width: 70px;
+  height: auto;
 }
 
 .package-info {
   flex-grow: 1;
+  max-height: 80px;
 }
 
 .package-name {
@@ -498,9 +519,6 @@
 }
 
 /* Promotion Input */
-.promo-input-box {
-  margin-bottom: 16px;
-}
 
 .promo-input-box input {
   width: 100%;
@@ -518,7 +536,6 @@
   background: white;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  margin-bottom: 16px;
 }
 
 .payment-method-text {
@@ -551,12 +568,12 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  margin-top: 16px;
   font-size: 14px;
   color: #666;
 }
 
-.terms-check input[type="checkbox"] {
+.terms-check.checkbox input {
+  padding: none;
   margin-top: 3px;
 }
 
@@ -688,9 +705,21 @@
   margin-bottom: 16px;
 }
 
+.premium-icon img {
+  display: block;
+  width: 60px;
+  height: auto;
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  z-index: 10;
+}
+
 .package-card.premium {
   border-color: #00D0BC;
   border-width: 3px;
+  position: relative;
+  overflow: visible;
 }
 
 .package-card h3 {
@@ -726,8 +755,7 @@
 }
 
 .package-price {
-  margin: 16px 0;
-  text-align: center;
+  margin: 14px 0;
 }
 
 
@@ -752,6 +780,7 @@
   left: 8px;
   background-color: white;
   border: 1px solid #eee;
+  color:#ffa600;
   border-radius: 4px;
   padding: 3px 6px;
   font-size: 10px;
