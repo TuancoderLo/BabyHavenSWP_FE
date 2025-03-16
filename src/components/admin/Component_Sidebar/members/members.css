@@ -1,0 +1,74 @@
+.members-container {
+  padding: 24px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.members-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.members-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.members-table {
+  margin-top: 16px;
+}
+
+.members-table .ant-table-thead > tr > th {
+  background-color: #f7f7f7;
+  font-weight: 600;
+}
+
+.members-table .ant-table-tbody > tr:hover > td {
+  background-color: #f5f8ff;
+}
+
+.delete-button {
+  background-color: #ff4d4f;
+  border-color: #ff4d4f;
+}
+
+.delete-button:hover {
+  background-color: #ff7875;
+  border-color: #ff7875;
+}
+
+.status-active {
+  color: #52c41a;
+  font-weight: 500;
+}
+
+.status-inactive {
+  color: #ff4d4f;
+  font-weight: 500;
+}
+
+.status-pending {
+  color: #faad14;
+  font-weight: 500;
+}
+
+.member-name {
+  font-weight: 500;
+}
+
+.package-name {
+  color: #1890ff;
+  font-weight: 500;
+}
+
+.index-column {
+  text-align: center;
+  font-weight: 500;
+}
