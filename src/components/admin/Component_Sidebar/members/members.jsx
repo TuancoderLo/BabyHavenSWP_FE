@@ -9,25 +9,25 @@ const Members = () => {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Thêm phương thức mới vào membershipApi
+  // Fetch all memberships
   const fetchAllMemberships = async () => {
     try {
       setLoading(true);
       const response = await membershipApi.getAllMemberships();
-      // Kiểm tra cấu trúc dữ liệu và điều chỉnh
+      // Check data structure and adjust
       if (Array.isArray(response.data)) {
         setMembers(response.data);
       } else if (response.data && Array.isArray(response.data.data)) {
-        // Nếu dữ liệu có cấu trúc { data: [...] }
+        // If data has structure { data: [...] }
         setMembers(response.data.data);
       } else {
-        // Nếu không phải mảng, log ra để kiểm tra
-        console.log("Dữ liệu không phải mảng:", response.data);
+        // If not an array, log to check
+        console.log("Data is not an array:", response.data);
         setMembers([]);
       }
     } catch (error) {
-      console.error("Lỗi khi tải dữ liệu:", error);
-      message.error("Không thể tải danh sách thành viên");
+      console.error("Error loading data:", error);
+      message.error("Could not load member list");
     } finally {
       setLoading(false);
     }
@@ -37,21 +37,21 @@ const Members = () => {
     fetchAllMemberships();
   }, []);
 
-  // Xử lý xóa thành viên
+  // Handle member deletion
   const handleDelete = async (memberMembershipId) => {
     try {
       setLoading(true);
       await membershipApi.deleteMembership(memberMembershipId);
-      message.success("Xóa thành viên thành công");
+      message.success("Member deleted successfully");
       fetchAllMemberships();
     } catch (error) {
-      message.error("Không thể xóa thành viên");
+      message.error("Could not delete member");
     } finally {
       setLoading(false);
     }
   };
 
-  // Hàm render trạng thái với màu sắc tương ứng
+  // Render status with appropriate color
   const renderStatus = (status) => {
     let className = "";
 
@@ -68,43 +68,43 @@ const Members = () => {
 
   const columns = [
     {
-      title: "STT",
+      title: "No.",
       key: "index",
       width: 80,
       className: "index-column",
       render: (_, __, index) => index + 1,
     },
     {
-      title: "Tên thành viên",
+      title: "Member Name",
       dataIndex: "memberName",
       key: "memberName",
       className: "member-name",
     },
     {
-      title: "Gói thành viên",
+      title: "Package Name",
       dataIndex: "packageName",
       key: "packageName",
       className: "package-name",
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: renderStatus,
     },
     {
-      title: "Thao tác",
+      title: "Actions",
       key: "action",
       render: (_, record) => (
         <>
           <Popconfirm
-            title="Bạn có chắc muốn xóa?"
+            title="Are you sure you want to delete?"
             onConfirm={() => handleDelete(record.memberMembershipId)}
-            okText="Có"
-            cancelText="Không"
+            okText="Yes"
+            cancelText="No"
           >
             <Button type="primary" danger className="delete-button">
-              Xóa
+              Delete
             </Button>
           </Popconfirm>
         </>
@@ -116,7 +116,7 @@ const Members = () => {
     <div className="members-container">
       <div className="members-header">
         <Title level={4} className="members-title">
-          Danh sách thành viên
+          Member List
         </Title>
       </div>
 
@@ -129,7 +129,7 @@ const Members = () => {
         pagination={{
           pageSize: 10,
           showSizeChanger: true,
-          showTotal: (total) => `Tổng cộng ${total} thành viên`,
+          showTotal: (total) => `Total ${total} members`,
         }}
       />
     </div>
