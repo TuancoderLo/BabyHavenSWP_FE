@@ -210,7 +210,7 @@ function Login({ onLoginSuccess }) {
           {error && <div className="error-message">{error}</div>}
 
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
+            <div className="form-group-login">
               <input
                 type="text"
                 name="email"

@@ -280,6 +280,7 @@ const handleFinish = () => {
 
                   {/* Standard Package */}
                   <div className="package-card standard">
+                  <div className="best-service-badge">POPULAR</div>
                     <h3>STANDARD</h3>
                     <p className="package-description">Standard membership with advance features</p>
                     
@@ -325,8 +326,13 @@ const handleFinish = () => {
                     </button>
                   </div>
 
+                  
+
                   {/* Premium Package */}
                   <div className="package-card premium">
+                    <div className="premium-icon">
+                      <img src={packagesIcon} alt="Packages Icon"/>
+                    </div>
                     <div className="best-service-badge">BEST SERVICE</div>
                     <h3>PREMIUM</h3>
                     <p className="package-description">Premium membership with full features</p>
