@@ -22,6 +22,7 @@ import {
 } from "@ant-design/icons";
 import moment from "moment";
 import locale from "antd/es/date-picker/locale/vi_VN";
+import axios from "axios";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -35,50 +36,105 @@ const Bio = () => {
   const [doctorData, setDoctorData] = useState({
     name: "",
     email: "",
-    phone: "",
-    specialty: "",
-    experience: "",
-    education: "",
-    certifications: "",
+    phoneNumber: "",
+    degree: "",
+    hospitalName: "",
+    hospitalAddress: "",
     biography: "",
-    birthDate: null,
-    gender: "male",
+    status: "",
+    specializationName: "",
+    description: "",
+    dateOfBirth: null,
+    profilePicture: "",
   });
+  const [doctorId, setDoctorId] = useState(null);
 
   useEffect(() => {
-    // Trong thực tế, bạn sẽ gọi API để lấy thông tin chi tiết của bác sĩ
-    // Ở đây tôi sẽ giả lập dữ liệu
-    setLoading(true);
+    const fetchDoctorData = async () => {
+      try {
+        setLoading(true);
+        const email = localStorage.getItem("email");
 
-    // Lấy một số thông tin từ localStorage
-    const name = localStorage.getItem("name") || "";
-    const email = localStorage.getItem("email") || "";
-    const profilePicture = localStorage.getItem("profilePicture") || "";
+        if (!email) {
+          message.error("Không tìm thấy thông tin email!");
+          setLoading(false);
+          return;
+        }
 
-    // Giả lập dữ liệu
-    setTimeout(() => {
-      const mockData = {
-        name: name,
-        email: email,
-        phone: "0912345678",
-        specialty: "Pediatrics",
-        experience: "5 years",
-        education: "Hanoi Medical University",
-        certifications: "Certificate in Pediatric Practice",
-        biography:
-          "I am a pediatrician with over 5 years of experience in child healthcare. I am passionate about my work and always strive to provide the best care for my young patients.",
-        birthDate: "1985-05-15",
-        gender: "male",
-      };
+        // Gọi API để lấy danh sách tất cả bác sĩ
+        const response = await axios.get("https://localhost:7279/api/Doctors");
+        console.log("API Response:", response.data);
 
-      setDoctorData(mockData);
-      setImageUrl(profilePicture);
-      form.setFieldsValue({
-        ...mockData,
-        birthDate: mockData.birthDate ? moment(mockData.birthDate) : null,
-      });
-      setLoading(false);
-    }, 1000);
+        if (response.data.status !== 1 || !Array.isArray(response.data.data)) {
+          console.error("Invalid response format:", response.data);
+          message.error("Dữ liệu không đúng định dạng!");
+          setLoading(false);
+          return;
+        }
+
+        const doctor = response.data.data.find((doc) => doc.email === email);
+        console.log("Found Doctor:", doctor);
+
+        if (!doctor) {
+          message.error("Không tìm thấy thông tin bác sĩ!");
+          setLoading(false);
+          return;
+        }
+
+        // Lưu doctorId vào state
+        setDoctorId(doctor.doctorId);
+
+        // Lấy thông tin từ đối tượng doctor
+        const combinedData = {
+          name: doctor.name || "",
+          email: doctor.email || "",
+          phoneNumber: doctor.phoneNumber || "",
+          degree: doctor.degree || "",
+          hospitalName: doctor.hospitalName || "",
+          hospitalAddress: doctor.hospitalAddress || "",
+          biography: doctor.biography || "",
+          status: doctor.status || "",
+          dateOfBirth: doctor.user?.dateOfBirth
+            ? moment(doctor.user.dateOfBirth)
+            : null,
+          profilePicture: doctor.user?.profilePicture || "",
+          specializationName: "", // Sẽ được cập nhật từ API specialization
+          description: "", // Sẽ được cập nhật từ API specialization
+        };
+
+        // Gọi API để lấy thông tin chuyên khoa
+        try {
+          const specialization = await axios.get(
+            `https://localhost:7279/api/Specializations/${doctor.doctorId}`
+          );
+          console.log("Specialization Data:", specialization.data);
+
+          if (specialization.data.status === 1 && specialization.data.data) {
+            combinedData.specializationName =
+              specialization.data.data.specializationName || "";
+            combinedData.description =
+              specialization.data.data.description || "";
+          }
+        } catch (error) {
+          console.error("Error fetching specialization:", error);
+          message.warning("Không thể tải thông tin chuyên khoa");
+        }
+
+        setDoctorData(combinedData);
+        setImageUrl(doctor.user?.profilePicture || "");
+        form.setFieldsValue({
+          ...combinedData,
+          dateOfBirth: combinedData.dateOfBirth, // Đã được chuyển đổi sang moment ở trên
+        });
+      } catch (error) {
+        console.error("Error fetching doctor data:", error);
+        message.error("Có lỗi xảy ra khi tải thông tin bác sĩ!");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctorData();
   }, [form]);
 
   const handleEdit = () => {
@@ -89,38 +145,77 @@ const Bio = () => {
     try {
       setLoading(true);
 
-      // Chuẩn bị dữ liệu để gửi lên server
-      const formData = {
-        ...values,
-        birthDate: values.birthDate
-          ? values.birthDate.format("YYYY-MM-DD")
-          : null,
-        profilePicture: imageUrl,
+      if (!doctorId) {
+        message.error("Không tìm thấy ID bác sĩ!");
+        return;
+      }
+
+      // Chuẩn bị dữ liệu cho API Doctors
+      const doctorData = {
+        userName: values.userName || "",
+        name: values.name,
+        email: values.email,
+        phoneNumber: values.phoneNumber,
+        degree: values.degree,
+        hospitalName: values.hospitalName,
+        hospitalAddress: values.hospitalAddress,
+        biography: values.biography,
+        status: values.status,
       };
 
-      // Trong thực tế, bạn sẽ gọi API để cập nhật thông tin
-      console.log("Dữ liệu cập nhật:", formData);
+      // Chuẩn bị dữ liệu cho API Specializations
+      const specializationData = {
+        specializationName: values.specializationName,
+        description: values.description,
+      };
 
-      // Giả lập API call thành công
-      setTimeout(() => {
-        setDoctorData({
-          ...doctorData,
-          ...formData,
-        });
-        setEditing(false);
-        setLoading(false);
-        message.success("Information updated successfully!");
-      }, 1000);
+      // Gọi API cập nhật thông tin bác sĩ
+      try {
+        const doctorResponse = await axios.put(
+          `https://localhost:7279/api/Doctors/${doctorId}`,
+          doctorData
+        );
+        console.log("Doctor update response:", doctorResponse.data);
+      } catch (error) {
+        console.error("Error updating doctor:", error);
+        message.error("Cập nhật thông tin bác sĩ thất bại!");
+        return;
+      }
+
+      // Gọi API cập nhật thông tin chuyên khoa
+      try {
+        const specializationResponse = await axios.put(
+          `https://localhost:7279/api/Specializations/${doctorId}`,
+          specializationData
+        );
+        console.log(
+          "Specialization update response:",
+          specializationResponse.data
+        );
+      } catch (error) {
+        console.error("Error updating specialization:", error);
+        message.warning("Cập nhật thông tin chuyên khoa thất bại!");
+      }
+
+      // Cập nhật state và UI
+      setDoctorData({
+        ...doctorData,
+        ...specializationData,
+      });
+      setEditing(false);
+      message.success("Cập nhật thông tin thành công!");
     } catch (error) {
+      console.error("Error in handleSave:", error);
+      message.error("Có lỗi xảy ra khi cập nhật thông tin!");
+    } finally {
       setLoading(false);
-      message.error("An error occurred while updating information!");
     }
   };
 
   const handleCancel = () => {
     form.setFieldsValue({
       ...doctorData,
-      birthDate: doctorData.birthDate ? moment(doctorData.birthDate) : null,
+      dateOfBirth: doctorData.dateOfBirth, // Đã là moment object
     });
     setEditing(false);
   };
@@ -174,7 +269,7 @@ const Bio = () => {
   return (
     <div className="tab-container">
       <Title level={4} className="section-title">
-        Personal Information
+        Thông tin cá nhân
       </Title>
 
       <Form
@@ -193,7 +288,7 @@ const Bio = () => {
                   listType="picture-card"
                   className="avatar-uploader"
                   showUploadList={false}
-                  action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188" // Fake API endpoint
+                  action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
                   beforeUpload={beforeUpload}
                   onChange={handleChange}
                   disabled={!editing}
@@ -209,7 +304,7 @@ const Bio = () => {
                   )}
                 </Upload>
                 <Text strong>{doctorData.name}</Text>
-                <Text type="secondary">{doctorData.specialty}</Text>
+                <Text type="secondary">{doctorData.specializationName}</Text>
               </div>
 
               {!editing ? (
@@ -220,12 +315,12 @@ const Bio = () => {
                   block
                   style={{ marginTop: 16 }}
                 >
-                  Edit Information
+                  Chỉnh sửa thông tin
                 </Button>
               ) : (
                 <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
                   <Button onClick={handleCancel} block>
-                    Cancel
+                    Hủy
                   </Button>
                   <Button
                     type="primary"
@@ -234,7 +329,7 @@ const Bio = () => {
                     loading={loading}
                     block
                   >
-                    Save Information
+                    Lưu thông tin
                   </Button>
                 </div>
               )}
@@ -243,16 +338,16 @@ const Bio = () => {
 
           <Col xs={24} md={16}>
             <Card>
-              <Title level={5}>Basic Information</Title>
+              <Title level={5}>Thông tin cơ bản</Title>
               <Row gutter={16}>
                 <Col xs={24} md={12}>
                   <Form.Item
                     name="name"
-                    label="Full Name"
+                    label="Họ và tên"
                     rules={[
                       {
                         required: true,
-                        message: "Please enter your full name",
+                        message: "Vui lòng nhập họ và tên",
                       },
                     ]}
                   >
@@ -264,8 +359,8 @@ const Bio = () => {
                     name="email"
                     label="Email"
                     rules={[
-                      { required: true, message: "Please enter your email" },
-                      { type: "email", message: "Invalid email format" },
+                      { required: true, message: "Vui lòng nhập email" },
+                      { type: "email", message: "Email không hợp lệ" },
                     ]}
                   >
                     <Input disabled />
@@ -273,12 +368,12 @@ const Bio = () => {
                 </Col>
                 <Col xs={24} md={12}>
                   <Form.Item
-                    name="phone"
-                    label="Phone Number"
+                    name="phoneNumber"
+                    label="Số điện thoại"
                     rules={[
                       {
                         required: true,
-                        message: "Please enter your phone number",
+                        message: "Vui lòng nhập số điện thoại",
                       },
                     ]}
                   >
@@ -286,7 +381,7 @@ const Bio = () => {
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
-                  <Form.Item name="birthDate" label="Date of Birth">
+                  <Form.Item name="dateOfBirth" label="Ngày sinh">
                     <DatePicker
                       format="DD/MM/YYYY"
                       style={{ width: "100%" }}
@@ -296,22 +391,18 @@ const Bio = () => {
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
-                  <Form.Item name="gender" label="Gender">
-                    <Select disabled={!editing}>
-                      <Option value="male">Male</Option>
-                      <Option value="female">Female</Option>
-                      <Option value="other">Other</Option>
-                    </Select>
+                  <Form.Item name="status" label="Trạng thái">
+                    <Input disabled={!editing} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
                   <Form.Item
-                    name="specialty"
-                    label="Specialty"
+                    name="specializationName"
+                    label="Chuyên khoa"
                     rules={[
                       {
                         required: true,
-                        message: "Please enter your specialty",
+                        message: "Vui lòng nhập chuyên khoa",
                       },
                     ]}
                   >
@@ -322,25 +413,25 @@ const Bio = () => {
 
               <Divider />
 
-              <Title level={5}>Professional Information</Title>
+              <Title level={5}>Thông tin chuyên môn</Title>
               <Row gutter={16}>
                 <Col xs={24} md={12}>
-                  <Form.Item name="experience" label="Experience">
+                  <Form.Item name="degree" label="Bằng cấp">
                     <Input disabled={!editing} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
-                  <Form.Item name="education" label="Education">
+                  <Form.Item name="hospitalName" label="Tên bệnh viện">
                     <Input disabled={!editing} />
                   </Form.Item>
                 </Col>
                 <Col xs={24}>
-                  <Form.Item name="certifications" label="Certifications">
+                  <Form.Item name="hospitalAddress" label="Địa chỉ bệnh viện">
                     <Input disabled={!editing} />
                   </Form.Item>
                 </Col>
                 <Col xs={24}>
-                  <Form.Item name="biography" label="Biography">
+                  <Form.Item name="biography" label="Tiểu sử">
                     <TextArea rows={4} disabled={!editing} />
                   </Form.Item>
                 </Col>

@@ -45,3 +45,66 @@
 .chart-container {
   margin-bottom: 20px;
 }
+
+.dashboard-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: auto auto;
+  gap: 20px;
+  width: 100%;
+}
+
+.dashboard-charts {
+  grid-column: span 4 / span 4;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: auto auto;
+  gap: 20px;
+}
+
+.chart-item {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Biểu đồ chiếm toàn bộ chiều rộng */
+.chart-item-full {
+  grid-column: span 2;
+}
+
+.dashboard-info {
+  grid-column: span 4 / span 4;
+  grid-row-start: 2;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.info-section {
+  width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .dashboard-charts {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-item-full {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-charts,
+  .dashboard-info {
+    grid-column: 1;
+  }
+}
