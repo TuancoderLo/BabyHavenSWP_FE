@@ -308,7 +308,7 @@ const handleFinish = () => {
                     </div>
                     
                     <div className="package-price">
-                      <span className="price-amount">
+                      <span className="price-amount-homepage">
                         {packagesData.find(p => p.packageName === 'Standard')?.price.toLocaleString()}đ
                       </span>
                       <span className="price-duration">
@@ -361,7 +361,7 @@ const handleFinish = () => {
                     </div>
                     
                     <div className="package-price">
-                      <span className="price-amount">
+                      <span className="price-amount-homepage">
                         {packagesData.find(p => p.packageName === 'Premium')?.price.toLocaleString()}đ
                       </span>
                       <span className="price-duration">
