@@ -75,10 +75,8 @@ function FormatBlog() {
           fetchDoctorInfo(blogData.email);
         }
 
-        // Sau khi có dữ liệu blog, lấy các bài viết liên quan
-        if (blogData.categoryId) {
-          fetchRelatedBlogs(blogData.categoryId, id);
-        }
+        // Lấy các bài viết liên quan dựa trên tags thay vì categoryId
+        fetchRelatedBlogs(id, blogData.tags);
       }
     } catch (error) {
       console.error("Error fetching blog details:", error);
@@ -190,51 +188,169 @@ function FormatBlog() {
     }
   };
 
-  // Lấy các bài viết liên quan từ cùng danh mục
-  const fetchRelatedBlogs = async (categoryId, currentBlogId) => {
+  // Lấy các bài viết liên quan dựa trên tags
+  const fetchRelatedBlogs = async (currentBlogId, currentBlogTags) => {
     try {
-      console.log(`Fetching related blogs for category: ${categoryId}`);
-      const response = await api.get(`Blog/blogs/${categoryId}`);
-      console.log("Related blogs API response:", response);
+      console.log("Current blog tags:", currentBlogTags);
 
-      let blogsData = [];
+      // Nếu không có tags, không cần tìm kiếm bài viết liên quan
+      if (!currentBlogTags) {
+        console.log(
+          "No tags found for current blog, skipping related blogs fetch"
+        );
+        setRelatedBlogs([]);
+        return;
+      }
+
+      // Tách tags thành mảng và loại bỏ khoảng trắng thừa
+      const tagsArray = currentBlogTags
+        .split(",")
+        .map((tag) => tag.trim().toLowerCase());
+      console.log("Current blog tags array:", tagsArray);
+
+      // Gọi API để lấy tất cả các bài viết
+      console.log("Fetching all blogs for tag comparison");
+      const response = await api.get("https://localhost:7279/api/Blog");
+      console.log("All blogs API response:", response);
+
+      // Xử lý dữ liệu trả về
+      let allBlogs = [];
       if (response.data) {
-        if (response.data.data) {
-          // Nếu data nằm trong property 'data'
-          blogsData = Array.isArray(response.data.data)
-            ? response.data.data
-            : [];
-        } else {
-          // Nếu data nằm trực tiếp trong response.data
-          blogsData = Array.isArray(response.data) ? response.data : [];
+        if (Array.isArray(response.data)) {
+          allBlogs = response.data;
+        } else if (response.data.data && Array.isArray(response.data.data)) {
+          allBlogs = response.data.data;
+        } else if (typeof response.data === "object") {
+          // Có thể là object chứa danh sách blogs
+          const possibleBlogs = Object.values(response.data).filter(
+            (item) => item && typeof item === "object" && item.blogId
+          );
+
+          if (possibleBlogs.length > 0) {
+            allBlogs = possibleBlogs;
+          }
         }
       }
 
-      console.log("All blogs in category:", blogsData);
+      console.log("All blogs count:", allBlogs.length);
 
-      // Lọc bỏ bài viết hiện tại và giới hạn còn 8 bài
-      const filteredBlogs = blogsData
-        .filter((blog) => {
-          // Chuyển đổi sang cùng kiểu dữ liệu để so sánh
-          const blogIdNum = parseInt(blog.blogId);
-          const currentIdNum = parseInt(currentBlogId);
+      // Lọc các bài viết có tags trùng với bài viết hiện tại
+      const matchedBlogs = allBlogs.filter((blog) => {
+        // Bỏ qua bài viết hiện tại
+        if (
+          blog.blogId === parseInt(currentBlogId) ||
+          blog.blogId === currentBlogId
+        ) {
+          return false;
+        }
+
+        // Bỏ qua các bài viết không được phê duyệt
+        if (blog.status !== "Approved") {
+          return false;
+        }
+
+        // Nếu blog không có tags, bỏ qua
+        if (!blog.tags) {
+          return false;
+        }
+
+        // Tách tags của blog này thành mảng
+        const blogTags = blog.tags
+          .split(",")
+          .map((tag) => tag.trim().toLowerCase());
+
+        // Kiểm tra xem có tag nào trùng với tags của bài viết hiện tại không
+        return tagsArray.some((currentTag) =>
+          blogTags.some(
+            (blogTag) =>
+              blogTag.includes(currentTag) || currentTag.includes(blogTag)
+          )
+        );
+      });
+
+      console.log("Matched blogs by tags:", matchedBlogs);
+
+      // Giới hạn số lượng bài viết liên quan
+      const limitedMatchedBlogs = matchedBlogs.slice(0, 8);
+
+      // Nếu không đủ 8 bài viết liên quan, có thể bổ sung thêm bài viết từ cùng danh mục
+      if (limitedMatchedBlogs.length < 8 && blog?.categoryId) {
+        console.log(
+          "Not enough related blogs by tags, fetching more from same category"
+        );
+        try {
+          const categoryResponse = await api.get(
+            `Blog/blogs/${blog.categoryId}`
+          );
+          let categoryBlogs = [];
+
+          if (categoryResponse.data) {
+            if (categoryResponse.data.data) {
+              categoryBlogs = Array.isArray(categoryResponse.data.data)
+                ? categoryResponse.data.data
+                : [];
+            } else {
+              categoryBlogs = Array.isArray(categoryResponse.data)
+                ? categoryResponse.data
+                : [];
+            }
+          }
+
+          // Lọc bỏ các bài viết đã có trong limitedMatchedBlogs và bài viết hiện tại
+          const additionalBlogs = categoryBlogs.filter((catBlog) => {
+            // Bỏ qua bài viết hiện tại
+            if (
+              catBlog.blogId === parseInt(currentBlogId) ||
+              catBlog.blogId === currentBlogId
+            ) {
+              return false;
+            }
+
+            // Bỏ qua các bài viết không được phê duyệt
+            if (catBlog.status !== "Approved") {
+              return false;
+            }
+
+            // Bỏ qua các bài viết đã có trong limitedMatchedBlogs
+            return !limitedMatchedBlogs.some(
+              (matchedBlog) => matchedBlog.blogId === catBlog.blogId
+            );
+          });
+
+          // Thêm các bài viết từ cùng danh mục vào danh sách bài viết liên quan
+          const remainingSlots = 8 - limitedMatchedBlogs.length;
+          const additionalBlogsToAdd = additionalBlogs.slice(0, remainingSlots);
 
           console.log(
-            `Comparing blog ID ${blogIdNum} with current ID ${currentIdNum}`
+            "Additional blogs from same category:",
+            additionalBlogsToAdd
           );
 
-          return blogIdNum !== currentIdNum && blog.status === "Approved";
-        })
-        .slice(0, 8);
-
-      console.log("Filtered related blogs:", filteredBlogs);
-      setRelatedBlogs(filteredBlogs);
+          // Kết hợp hai danh sách
+          const combinedBlogs = [
+            ...limitedMatchedBlogs,
+            ...additionalBlogsToAdd,
+          ];
+          setRelatedBlogs(combinedBlogs);
+        } catch (error) {
+          console.error(
+            "Error fetching additional blogs from category:",
+            error
+          );
+          // Nếu có lỗi, vẫn sử dụng các bài viết đã tìm được từ tags
+          setRelatedBlogs(limitedMatchedBlogs);
+        }
+      } else {
+        // Nếu đã đủ 8 bài viết hoặc không có categoryId
+        setRelatedBlogs(limitedMatchedBlogs);
+      }
     } catch (error) {
-      console.error("Error fetching related blogs:", error);
+      console.error("Error fetching related blogs by tags:", error);
       console.error("Error details:", {
         message: error.message,
         response: error.response?.data,
       });
+      setRelatedBlogs([]);
     }
   };
 
