@@ -21,6 +21,7 @@ function FormatBlog() {
   const [relatedBlogs, setRelatedBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [doctorInfo, setDoctorInfo] = useState(null);
 
   // Kiểm tra trạng thái đăng nhập
   const isLoggedIn = localStorage.getItem("token") !== null;
@@ -69,10 +70,13 @@ function FormatBlog() {
       } else {
         setBlog(blogData);
 
-        // Sau khi có dữ liệu blog, lấy các bài viết liên quan
-        if (blogData.categoryId) {
-          fetchRelatedBlogs(blogData.categoryId, id);
+        // Nếu có email của tác giả, kiểm tra xem có phải là Doctor không
+        if (blogData.email) {
+          fetchDoctorInfo(blogData.email);
         }
+
+        // Lấy các bài viết liên quan dựa trên tags thay vì categoryId
+        fetchRelatedBlogs(id, blogData.tags);
       }
     } catch (error) {
       console.error("Error fetching blog details:", error);
@@ -86,51 +90,267 @@ function FormatBlog() {
     }
   };
 
-  // Lấy các bài viết liên quan từ cùng danh mục
-  const fetchRelatedBlogs = async (categoryId, currentBlogId) => {
+  // Hàm mới để lấy thông tin Doctor
+  const fetchDoctorInfo = async (authorEmail) => {
     try {
-      console.log(`Fetching related blogs for category: ${categoryId}`);
-      const response = await api.get(`Blog/blogs/${categoryId}`);
-      console.log("Related blogs API response:", response);
+      console.log("Fetching doctor information for email:", authorEmail);
+      const response = await api.get("https://localhost:7279/api/Doctors");
+      console.log("Doctors API response:", response);
 
-      let blogsData = [];
+      // Kiểm tra cấu trúc dữ liệu trả về
+      console.log("Response data type:", typeof response.data);
+      console.log("Response data structure:", response.data);
+
+      let doctorsData = [];
+
+      // Xử lý nhiều trường hợp cấu trúc dữ liệu khác nhau
       if (response.data) {
-        if (response.data.data) {
-          // Nếu data nằm trong property 'data'
-          blogsData = Array.isArray(response.data.data)
-            ? response.data.data
-            : [];
-        } else {
-          // Nếu data nằm trực tiếp trong response.data
-          blogsData = Array.isArray(response.data) ? response.data : [];
+        if (Array.isArray(response.data)) {
+          // Nếu response.data là một mảng
+          doctorsData = response.data;
+        } else if (response.data.data && Array.isArray(response.data.data)) {
+          // Nếu response.data.data là một mảng
+          doctorsData = response.data.data;
+        } else if (typeof response.data === "object") {
+          // Nếu response.data là một object (có thể là một doctor duy nhất)
+          // hoặc là một object chứa danh sách doctors
+
+          // Kiểm tra xem có phải là một doctor duy nhất không
+          if (response.data.email) {
+            doctorsData = [response.data];
+          } else {
+            // Có thể là object chứa danh sách doctors
+            // Thử chuyển các thuộc tính của object thành mảng
+            const possibleDoctors = Object.values(response.data).filter(
+              (item) => item && typeof item === "object" && item.email
+            );
+
+            if (possibleDoctors.length > 0) {
+              doctorsData = possibleDoctors;
+            }
+          }
         }
       }
 
-      console.log("All blogs in category:", blogsData);
+      console.log("Processed doctors data:", doctorsData);
 
-      // Lọc bỏ bài viết hiện tại và giới hạn còn 8 bài
-      const filteredBlogs = blogsData
-        .filter((blog) => {
-          // Chuyển đổi sang cùng kiểu dữ liệu để so sánh
-          const blogIdNum = parseInt(blog.blogId);
-          const currentIdNum = parseInt(currentBlogId);
+      // Log tất cả email của doctors để debug
+      if (doctorsData.length > 0) {
+        console.log(
+          "Available doctor emails:",
+          doctorsData.map((doc) => doc.email)
+        );
+      } else {
+        console.log("No doctors data found in the response");
+      }
 
-          console.log(
-            `Comparing blog ID ${blogIdNum} with current ID ${currentIdNum}`
-          );
+      // Tìm doctor có email trùng với email của tác giả (không phân biệt chữ hoa/chữ thường)
+      const matchedDoctor = doctorsData.find(
+        (doctor) =>
+          doctor &&
+          doctor.email &&
+          doctor.email.toLowerCase() === authorEmail.toLowerCase()
+      );
 
-          return blogIdNum !== currentIdNum && blog.status === "Approved";
-        })
-        .slice(0, 8);
+      console.log("Matched doctor:", matchedDoctor);
 
-      console.log("Filtered related blogs:", filteredBlogs);
-      setRelatedBlogs(filteredBlogs);
+      if (matchedDoctor) {
+        console.log("Found matching doctor with email:", matchedDoctor.email);
+        console.log("Doctor degree:", matchedDoctor.degree);
+        console.log("Doctor biography:", matchedDoctor.biography);
+        setDoctorInfo(matchedDoctor);
+      } else {
+        console.log("No matching doctor found with email:", authorEmail);
+
+        // Thử tìm theo tên
+        const nameMatchedDoctor = doctorsData.find(
+          (doctor) =>
+            doctor &&
+            doctor.name &&
+            blog.name &&
+            (doctor.name.toLowerCase().includes(blog.name.toLowerCase()) ||
+              blog.name.toLowerCase().includes(doctor.name.toLowerCase()))
+        );
+
+        if (nameMatchedDoctor) {
+          console.log("Found doctor by name match:", nameMatchedDoctor.name);
+          setDoctorInfo(nameMatchedDoctor);
+        } else {
+          console.log("No matching doctor found by name either");
+        }
+      }
     } catch (error) {
-      console.error("Error fetching related blogs:", error);
+      console.error("Error fetching doctor information:", error);
       console.error("Error details:", {
         message: error.message,
         response: error.response?.data,
       });
+    }
+  };
+
+  // Lấy các bài viết liên quan dựa trên tags
+  const fetchRelatedBlogs = async (currentBlogId, currentBlogTags) => {
+    try {
+      console.log("Current blog tags:", currentBlogTags);
+
+      // Nếu không có tags, không cần tìm kiếm bài viết liên quan
+      if (!currentBlogTags) {
+        console.log(
+          "No tags found for current blog, skipping related blogs fetch"
+        );
+        setRelatedBlogs([]);
+        return;
+      }
+
+      // Tách tags thành mảng và loại bỏ khoảng trắng thừa
+      const tagsArray = currentBlogTags
+        .split(",")
+        .map((tag) => tag.trim().toLowerCase());
+      console.log("Current blog tags array:", tagsArray);
+
+      // Gọi API để lấy tất cả các bài viết
+      console.log("Fetching all blogs for tag comparison");
+      const response = await api.get("https://localhost:7279/api/Blog");
+      console.log("All blogs API response:", response);
+
+      // Xử lý dữ liệu trả về
+      let allBlogs = [];
+      if (response.data) {
+        if (Array.isArray(response.data)) {
+          allBlogs = response.data;
+        } else if (response.data.data && Array.isArray(response.data.data)) {
+          allBlogs = response.data.data;
+        } else if (typeof response.data === "object") {
+          // Có thể là object chứa danh sách blogs
+          const possibleBlogs = Object.values(response.data).filter(
+            (item) => item && typeof item === "object" && item.blogId
+          );
+
+          if (possibleBlogs.length > 0) {
+            allBlogs = possibleBlogs;
+          }
+        }
+      }
+
+      console.log("All blogs count:", allBlogs.length);
+
+      // Lọc các bài viết có tags trùng với bài viết hiện tại
+      const matchedBlogs = allBlogs.filter((blog) => {
+        // Bỏ qua bài viết hiện tại
+        if (
+          blog.blogId === parseInt(currentBlogId) ||
+          blog.blogId === currentBlogId
+        ) {
+          return false;
+        }
+
+        // Bỏ qua các bài viết không được phê duyệt
+        if (blog.status !== "Approved") {
+          return false;
+        }
+
+        // Nếu blog không có tags, bỏ qua
+        if (!blog.tags) {
+          return false;
+        }
+
+        // Tách tags của blog này thành mảng
+        const blogTags = blog.tags
+          .split(",")
+          .map((tag) => tag.trim().toLowerCase());
+
+        // Kiểm tra xem có tag nào trùng với tags của bài viết hiện tại không
+        return tagsArray.some((currentTag) =>
+          blogTags.some(
+            (blogTag) =>
+              blogTag.includes(currentTag) || currentTag.includes(blogTag)
+          )
+        );
+      });
+
+      console.log("Matched blogs by tags:", matchedBlogs);
+
+      // Giới hạn số lượng bài viết liên quan
+      const limitedMatchedBlogs = matchedBlogs.slice(0, 8);
+
+      // Nếu không đủ 8 bài viết liên quan, có thể bổ sung thêm bài viết từ cùng danh mục
+      if (limitedMatchedBlogs.length < 8 && blog?.categoryId) {
+        console.log(
+          "Not enough related blogs by tags, fetching more from same category"
+        );
+        try {
+          const categoryResponse = await api.get(
+            `Blog/blogs/${blog.categoryId}`
+          );
+          let categoryBlogs = [];
+
+          if (categoryResponse.data) {
+            if (categoryResponse.data.data) {
+              categoryBlogs = Array.isArray(categoryResponse.data.data)
+                ? categoryResponse.data.data
+                : [];
+            } else {
+              categoryBlogs = Array.isArray(categoryResponse.data)
+                ? categoryResponse.data
+                : [];
+            }
+          }
+
+          // Lọc bỏ các bài viết đã có trong limitedMatchedBlogs và bài viết hiện tại
+          const additionalBlogs = categoryBlogs.filter((catBlog) => {
+            // Bỏ qua bài viết hiện tại
+            if (
+              catBlog.blogId === parseInt(currentBlogId) ||
+              catBlog.blogId === currentBlogId
+            ) {
+              return false;
+            }
+
+            // Bỏ qua các bài viết không được phê duyệt
+            if (catBlog.status !== "Approved") {
+              return false;
+            }
+
+            // Bỏ qua các bài viết đã có trong limitedMatchedBlogs
+            return !limitedMatchedBlogs.some(
+              (matchedBlog) => matchedBlog.blogId === catBlog.blogId
+            );
+          });
+
+          // Thêm các bài viết từ cùng danh mục vào danh sách bài viết liên quan
+          const remainingSlots = 8 - limitedMatchedBlogs.length;
+          const additionalBlogsToAdd = additionalBlogs.slice(0, remainingSlots);
+
+          console.log(
+            "Additional blogs from same category:",
+            additionalBlogsToAdd
+          );
+
+          // Kết hợp hai danh sách
+          const combinedBlogs = [
+            ...limitedMatchedBlogs,
+            ...additionalBlogsToAdd,
+          ];
+          setRelatedBlogs(combinedBlogs);
+        } catch (error) {
+          console.error(
+            "Error fetching additional blogs from category:",
+            error
+          );
+          // Nếu có lỗi, vẫn sử dụng các bài viết đã tìm được từ tags
+          setRelatedBlogs(limitedMatchedBlogs);
+        }
+      } else {
+        // Nếu đã đủ 8 bài viết hoặc không có categoryId
+        setRelatedBlogs(limitedMatchedBlogs);
+      }
+    } catch (error) {
+      console.error("Error fetching related blogs by tags:", error);
+      console.error("Error details:", {
+        message: error.message,
+        response: error.response?.data,
+      });
+      setRelatedBlogs([]);
     }
   };
 
@@ -170,6 +390,60 @@ function FormatBlog() {
 
     // Cuộn lên đầu trang
     window.scrollTo(0, 0);
+  };
+
+  // Hàm render thông tin tác giả
+  const renderAuthorInfo = () => {
+    if (!blog) return null;
+
+    // Kiểm tra URL ảnh trước khi hiển thị
+    const authorImageUrl = blog.authorImage || blog.imageProfile;
+    const isValidUrl =
+      authorImageUrl &&
+      (authorImageUrl.startsWith("http://") ||
+        authorImageUrl.startsWith("https://"));
+
+    const authorImage = isValidUrl ? authorImageUrl : DEFAULT_AVATAR;
+    const authorName = blog.name || blog.authorName || "Tác giả ẩn danh";
+
+    // Kiểm tra xem có phải là Doctor không (dựa vào doctorInfo)
+    const isDoctorAuthor = doctorInfo !== null;
+
+    // Xác định thông tin hiển thị dựa vào loại tác giả
+    let authorDegree, authorBio;
+
+    if (isDoctorAuthor) {
+      // Nếu là Doctor, lấy thông tin từ doctorInfo
+      authorDegree = doctorInfo.degree || "";
+      authorBio = doctorInfo.biography || "";
+    } else {
+      // Nếu là Admin, để trống cả degree và biography
+      authorDegree = "";
+      authorBio = "";
+    }
+
+    return (
+      <div className="blog-author-card">
+        <div className="author-image">
+          <img
+            src={authorImage}
+            alt={authorName}
+            onError={(e) => {
+              console.log("Sử dụng ảnh mặc định cho tác giả");
+              e.target.onerror = null;
+              e.target.src = DEFAULT_AVATAR;
+            }}
+          />
+        </div>
+        <h3 className="author-name">{authorName}</h3>
+
+        {/* Luôn hiển thị phần degree, nhưng có thể trống */}
+        <div className="author-degree">{authorDegree}</div>
+
+        {/* Luôn hiển thị phần biography, nhưng có thể trống */}
+        <p className="author-bio">{authorBio}</p>
+      </div>
+    );
   };
 
   return (
@@ -239,51 +513,7 @@ function FormatBlog() {
             </div>
 
             {/* Thông tin tác giả - div7 */}
-            <div className="blog-author-card">
-              <div className="author-image">
-                {/* Kiểm tra URL ảnh trước khi hiển thị */}
-                {(() => {
-                  // Kiểm tra xem URL ảnh có hợp lệ không
-                  const authorImageUrl = blog.authorImage || blog.imageProfile;
-                  const isValidUrl =
-                    authorImageUrl &&
-                    (authorImageUrl.startsWith("http://") ||
-                      authorImageUrl.startsWith("https://"));
-
-                  return (
-                    <img
-                      src={isValidUrl ? authorImageUrl : DEFAULT_AVATAR}
-                      alt={blog.name || blog.authorName || "Tác giả"}
-                      onError={(e) => {
-                        console.log("Sử dụng ảnh mặc định cho tác giả");
-                        e.target.onerror = null;
-                        e.target.src = DEFAULT_AVATAR;
-                      }}
-                    />
-                  );
-                })()}
-              </div>
-              <h3 className="author-name">
-                {blog.name || blog.authorName || "Tác giả ẩn danh"}
-              </h3>
-              <p className="author-bio">
-                {blog.authorBio ||
-                  "Tác giả chưa cập nhật thông tin giới thiệu."}
-              </p>
-              <div className="author-info">
-                {blog.email && (
-                  <p className="author-email">
-                    <strong>Email:</strong> {blog.email}
-                  </p>
-                )}
-                {blog.authorSpecialization && (
-                  <p className="author-specialization">
-                    <strong>Chuyên ngành:</strong> {blog.authorSpecialization}
-                  </p>
-                )}
-              </div>
-              <button className="contact-author-btn">Liên hệ ngay</button>
-            </div>
+            {renderAuthorInfo()}
 
             {/* Các bài viết liên quan - div8-15 */}
             {relatedBlogs.length > 0 ? (
