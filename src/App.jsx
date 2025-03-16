@@ -13,7 +13,7 @@ import Homepage from "./components/homepage/HomePage";
 import Member from "./components/member/member";
 // Admin
 import Admin from "./components/admin/Admin";
-import ChartCard from "./components/admin/ChartCard/ChartCard";
+// import ChartCard from "./components/admin/ChartCard/ChartCard";
 // import Home from "./components/admin/Component_Sidebar/home/home";
 import Blog from "./components/admin/Component_Sidebar/blog/blog";
 import Members from "./components/admin/Component_Sidebar/members/members";
@@ -130,7 +130,7 @@ function App() {
           }
         >
           {/* Các route con trong /admin */}
-          <Route index element={<ChartCard />} />
+          {/* <Route index element={<ChartCard />} /> */}
           {/* <Route path="home" element={<Home />} /> */}
           <Route path="blog" element={<Blog />} />
           <Route path="members" element={<Members />} />
