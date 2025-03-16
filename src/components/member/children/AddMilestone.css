@@ -1,79 +1,189 @@
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+/* AddMilestone.css */
+
+.add-record-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-record-wizard {
+  background: #fff;
+  width: 80%;
+  max-width: 1000px;
+  min-height: 500px;
+  border-radius: 12px;
+  position: relative;
+  display: flex; /* 2 cột */
+  overflow: hidden;
+}
+
+/* Cột trái: hiển thị thông tin Child Information */
+.wizard-left {
+  width: 40%;
+  position: relative;
+  background: #f9f9f9;
+  padding: 20px;
+}
+
+.blue-bar {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  bottom: 20px;
+  width: 10px;
+  background: #42a5f5;
+  border-radius: 10px;
+}
+
+.wizard-left-content {
+  margin-left: 40px;
+}
+
+.main-title {
+  font-size: 1.4rem;
+  color: #7e52ff;
+  margin-bottom: 20px;
+}
+
+.babygrowth-img {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.babygrowth-img img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Child Information Card */
+.child-info-card {
+  background-color: #f8f5ff;
+  border-left: 4px solid #9c7df3;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 3px 10px rgba(156, 125, 243, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.child-info-card:hover {
+  box-shadow: 0 5px 15px rgba(156, 125, 243, 0.2);
+}
+
+.child-info-card h3 {
+  color: #7e52ff;
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(126, 82, 255, 0.2);
+  padding-bottom: 8px;
+}
+
+.child-info-details p {
+  font-size: 14px;
+  color: #555;
+  margin: 5px 0;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Cột phải: Form nhập milestone */
+.wizard-content {
+  width: 60%;
+  padding: 2rem;
+  overflow-y: auto;
+  max-height: 600px;
+}
+
+.step-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.step-form h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 0.5rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 0.3rem;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #00D0BC;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 208, 188, 0.2);
+}
+
+.error {
+  color: #ff5252;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+/* Nút xác nhận */
+.confirm-button {
+  background-color: #00D0BC;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: block;
+  margin-top: 20px;
+  margin-left: auto;
+}
+
+.confirm-button:hover {
+  background-color: #00b8a6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .add-record-wizard {
+    flex-direction: column;
   }
-  
-  .add-milestone-modal {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    width: 400px;
-    position: relative;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  }
-  
-  .add-milestone-modal h2 {
-    margin-top: 0;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
-  .close-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: transparent;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-  }
-  
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-  }
-  
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
+  .wizard-left, .wizard-content {
     width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
   }
-  
-  .submit-button {
-    width: 100%;
-    padding: 10px;
-    background: linear-gradient(45deg, #FF69B4, #FFB6C1);
-    border: none;
-    color: #fff;
-    font-weight: bold;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-  }
-  
-  .submit-button:hover {
-    background: linear-gradient(45deg, #FF1493, #FF69B4);
-  }
-  
-  .error {
-    color: red;
-    margin-bottom: 15px;
-    text-align: center;
-  }
-  
+}

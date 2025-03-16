@@ -597,9 +597,16 @@ function ChildrenPage() {
           closeOverlay={closeRecordOverlay}
         />
       )}
-       {showAddMilestoneModal && (
-        <AddMilestone closeOverlay={closeMilestoneOverlay} onSuccess={() => { /* refresh data nếu cần */ }} />
-      )}
+      {showAddMilestoneModal && (
+  <AddMilestone
+    child={selectedChild}
+    memberId={memberId}
+    closeOverlay={closeMilestoneOverlay}
+    onSuccess={() => {
+      // refresh dữ liệu nếu cần
+    }}
+  />
+)}
     </div>
   );  
 }
