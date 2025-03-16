@@ -12,6 +12,18 @@ const membershipApi = {
     // GET /api/MembershipPackages
     return api.get("MembershipPackages");
   },
+
+  // Thêm phương thức mới để lấy tất cả memberships
+  getAllMemberships: () => {
+    // GET /api/MemberMemberships
+    return api.get("MemberMemberships");
+  },
+
+  // Thêm phương thức xóa membership
+  deleteMembership: (memberMembershipId) => {
+    // DELETE /api/MemberMemberships/{memberMembershipId}
+    return api.delete(`MemberMemberships/${memberMembershipId}`);
+  },
 };
 
 export default membershipApi;

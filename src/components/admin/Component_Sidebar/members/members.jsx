@@ -1,64 +1,41 @@
 import React, { useState, useEffect } from "react";
-import {
-  Table,
-  Button,
-  Modal,
-  Form,
-  Input,
-  DatePicker,
-  Select,
-  message,
-  Popconfirm,
-} from "antd";
-import userAccountsApi from "../../../../services/userAccountsApi";
-import moment from "moment";
-
-const { Option } = Select;
+import { Table, Button, message, Popconfirm } from "antd";
+import membershipApi from "../../../../services/memberShipApi";
 
 const Members = () => {
   const [members, setMembers] = useState([]);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [form] = Form.useForm();
-  const [editingId, setEditingId] = useState(null);
 
-  // Lấy danh sách thành viên
-  const fetchMembers = async () => {
+  // Thêm phương thức mới vào membershipApi
+  const fetchAllMemberships = async () => {
     try {
-      const response = await userAccountsApi.getAll();
-      setMembers(response.data.data);
+      const response = await membershipApi.getAllMemberships();
+      // Kiểm tra cấu trúc dữ liệu và điều chỉnh
+      if (Array.isArray(response.data)) {
+        setMembers(response.data);
+      } else if (response.data && Array.isArray(response.data.data)) {
+        // Nếu dữ liệu có cấu trúc { data: [...] }
+        setMembers(response.data.data);
+      } else {
+        // Nếu không phải mảng, log ra để kiểm tra
+        console.log("Dữ liệu không phải mảng:", response.data);
+        setMembers([]);
+      }
     } catch (error) {
+      console.error("Lỗi khi tải dữ liệu:", error);
       message.error("Không thể tải danh sách thành viên");
     }
   };
 
   useEffect(() => {
-    fetchMembers();
+    fetchAllMemberships();
   }, []);
 
-  // Xử lý thêm/sửa thành viên
-  const handleSubmit = async (values) => {
-    try {
-      if (editingId) {
-        await userAccountsApi.update(editingId, values);
-        message.success("Cập nhật thành viên thành công");
-      } else {
-        await userAccountsApi.create(values);
-        message.success("Thêm thành viên thành công");
-      }
-      setIsModalVisible(false);
-      form.resetFields();
-      fetchMembers();
-    } catch (error) {
-      message.error("Có lỗi xảy ra");
-    }
-  };
-
   // Xử lý xóa thành viên
-  const handleDelete = async (id) => {
+  const handleDelete = async (memberMembershipId) => {
     try {
-      await userAccountsApi.delete(id);
+      await membershipApi.deleteMembership(memberMembershipId);
       message.success("Xóa thành viên thành công");
-      fetchMembers();
+      fetchAllMemberships();
     } catch (error) {
       message.error("Không thể xóa thành viên");
     }
@@ -66,24 +43,14 @@ const Members = () => {
 
   const columns = [
     {
-      title: "Tên người dùng",
-      dataIndex: "username",
-      key: "username",
+      title: "Tên thành viên",
+      dataIndex: "memberName",
+      key: "memberName",
     },
     {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-    },
-    {
-      title: "Số điện thoại",
-      dataIndex: "phoneNumber",
-      key: "phoneNumber",
-    },
-    {
-      title: "Họ tên",
-      dataIndex: "name",
-      key: "name",
+      title: "Gói thành viên",
+      dataIndex: "packageName",
+      key: "packageName",
     },
     {
       title: "Trạng thái",
@@ -95,24 +62,11 @@ const Members = () => {
       key: "action",
       render: (_, record) => (
         <>
-          <Button
-            type="primary"
-            onClick={() => {
-              setEditingId(record.id);
-              form.setFieldsValue({
-                ...record,
-                dateOfBirth: moment(record.dateOfBirth),
-              });
-              setIsModalVisible(true);
-            }}
-          >
-            Sửa
-          </Button>
           <Popconfirm
             title="Bạn có chắc muốn xóa?"
-            onConfirm={() => handleDelete(record.id)}
+            onConfirm={() => handleDelete(record.memberMembershipId)}
           >
-            <Button type="primary" danger style={{ marginLeft: 8 }}>
+            <Button type="primary" danger>
               Xóa
             </Button>
           </Popconfirm>
@@ -123,95 +77,11 @@ const Members = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      <Button
-        type="primary"
-        onClick={() => {
-          setEditingId(null);
-          form.resetFields();
-          setIsModalVisible(true);
-        }}
-        style={{ marginBottom: 16 }}
-      >
-        Thêm thành viên
-      </Button>
-
-      <Table columns={columns} dataSource={members} rowKey="id" />
-
-      <Modal
-        title={editingId ? "Sửa thành viên" : "Thêm thành viên"}
-        open={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        footer={null}
-      >
-        <Form form={form} onFinish={handleSubmit} layout="vertical">
-          <Form.Item
-            name="username"
-            label="Tên người dùng"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[{ required: true, type: "email" }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="phoneNumber"
-            label="Số điện thoại"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item name="name" label="Họ tên" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="gender"
-            label="Giới tính"
-            rules={[{ required: true }]}
-          >
-            <Select>
-              <Option value="Male">Nam</Option>
-              <Option value="Female">Nữ</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="dateOfBirth"
-            label="Ngày sinh"
-            rules={[{ required: true }]}
-          >
-            <DatePicker format="YYYY-MM-DD" />
-          </Form.Item>
-
-          <Form.Item name="address" label="Địa chỉ">
-            <Input />
-          </Form.Item>
-
-          {!editingId && (
-            <Form.Item
-              name="password"
-              label="Mật khẩu"
-              rules={[{ required: true }]}
-            >
-              <Input.Password />
-            </Form.Item>
-          )}
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              {editingId ? "Cập nhật" : "Thêm mới"}
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
+      <Table
+        columns={columns}
+        dataSource={members}
+        rowKey="memberMembershipId"
+      />
     </div>
   );
 };
