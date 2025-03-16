@@ -172,10 +172,10 @@
 .package-btn-homepage {
   margin-top: 8px;
   padding: 0.6rem 1.2rem;
-  background-color: #ff3300;
-  color: #fff;
-  border: none;
+  background-color: #ffffff;
+  color: #000000;
   border-radius: 7px;
+  border-color: #000000;
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.3s ease, transform 0.2s ease;
@@ -185,6 +185,14 @@
   transform: translateY(-2px);
 }
 
+.package-btn-homepage.current-plan:disabled {
+  margin-top: 8px;
+  padding: 0.6rem 1.2rem;
+  background-color: #bcbcbc;
+  color: #ffffff;
+  border-radius: 7px;
+  font-size: 0.9rem;
+}
 /* =========== STEP 1: CHOOSE HOW TO PAY =========== */
 .choose-payment-step .payment-method-options {
   display: flex;

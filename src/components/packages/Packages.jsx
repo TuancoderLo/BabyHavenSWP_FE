@@ -271,7 +271,7 @@ const handleFinish = () => {
                     </div>
                     
                     <button 
-                      className={`package-btn-homepage ${currentPlan?.packageName === 'Free' ? 'current-plan' : ''}`}
+                      className={`package-btn-homepage ${currentPlan?.packageName === 'Free' ? 'current-plan' : 'Free'}`}
                       disabled={currentPlan?.packageName === 'Free'}
                     >
                       {currentPlan?.packageName === 'Free' ? 'YOUR CURRENT PLAN' : 'Free'}
