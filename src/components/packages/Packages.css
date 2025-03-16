@@ -117,10 +117,10 @@
 .package-card {
   flex: 1;
   min-width: 220px;
-  max-width: 260px;
+  max-width: 280px;
   background: #f9f9f9;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1rem;
   text-align: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
@@ -169,18 +169,18 @@
 }
 
 /* Nút Buy Now */
-.package-btn {
+.package-btn-homepage {
   margin-top: 8px;
   padding: 0.6rem 1.2rem;
-  background-color: #00d0bc;
+  background-color: #ff3300;
   color: #fff;
   border: none;
-  border-radius: 20px;
+  border-radius: 7px;
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.3s ease, transform 0.2s ease;
 }
-.package-btn:hover {
+.package-btn-homepage:hover {
   background-color: #00bfa6;
   transform: translateY(-2px);
 }
@@ -668,7 +668,114 @@
   width: auto;
 }
 
-/* Điều chỉnh padding cho container để không bị che bởi logo */
+/* Adjust the packages container and cards to fit better in the modal */
+.packages-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.package-card {
+  flex: 1;
+  min-width: 250px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 30px 20px 10px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.package-card.premium {
+  border-color: #00D0BC;
+  border-width: 3px;
+}
+
+.package-card h3 {
+  font-size: 22px;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.package-description {
+  text-align: center;
+  color: #666;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.feature-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.feature-label {
+  font-size: 13px;
+  color: #666;
+}
+
+.feature-value {
+  font-weight: bold;
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+.package-price {
+  margin: 16px 0;
+  text-align: center;
+}
+
+
+.price-amount {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.price-duration {
+  font-size: 14px;
+  color: #666;
+}
+
+.price-amount.Free,
+.price-duration.Free {
+  visibility: hidden;
+}
+
+.best-service-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background-color: white;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* Adjust modal size */
+.packages-modal {
+  background-color: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 900px;
+  width: 90%;
+  max-height: 95vh;
+  position: relative;
+}
+
+.modal-title {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
 .transaction-step {
   padding-top: 80px;
   position: relative;

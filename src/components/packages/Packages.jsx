@@ -23,6 +23,7 @@ function Packages() {
   const [promoCode, setPromoCode] = useState("");
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [error, setError] = useState("");
+  const [currentPlan, setCurrentPlan] = useState(null);
 
   // Kiểm tra URL param ?paymentStatus=success => Step 3
   useEffect(() => {
@@ -194,6 +195,27 @@ const handleFinish = () => {
 };
 
 
+  // Add new useEffect to get current plan
+  useEffect(() => {
+    const memberId = localStorage.getItem("memberId");
+    if (memberId) {
+      membershipApi
+      .getMemberMembership(memberId)
+      .then((res) => {
+        const data = res.data?.data;
+        if (data && data.isActive === true) {
+          setCurrentPlan(data);
+        } else {
+          setCurrentPlan(null);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching current plan:", err);
+        setCurrentPlan(null);
+      });
+    }
+  }, []);
+
   return (
     <>
       {/* Icon packages ở góc */}
@@ -207,44 +229,154 @@ const handleFinish = () => {
             {/* STEP 0: LIST PACKAGES */}
             {currentStep === 0 && (
               <div className="step0-list-packages">
-                <h2 className="modal-title">Our Packages</h2>
-                <p className="modal-subtitle">
-                  Select the best package for your family
-                </p>
+                <h2 className="modal-title">Explore the different</h2>
 
-                <div className="packages-row">
-                  {packagesData.length > 0 ? (
-                    packagesData.map((pkg, index) => (
-                      <div key={index} className="package-card">
-                        <h3>{pkg.packageName}</h3>
-                        <p className="package-description">{pkg.description}</p>
-                        <div className="package-price">
-                          <span className="price-amount">
-                            {pkg.price.toLocaleString()} {pkg.currency}
-                          </span>
-                          <span className="price-duration">
-                            / {pkg.durationMonths} months
-                          </span>
-                        </div>
-                        <div className="max-children-info">
-                          Max children: {pkg.maxChildrenAllowed}
-                        </div>
-                        <button
-                          className="package-btn"
-                          onClick={() => handleBuyPackage(pkg)}
-                        >
-                          Buy Now
-                        </button>
+                <div className="packages-container">
+                  {/* Free Package */}
+                  <div className="package-card free">
+                    <h3>Free</h3>
+                    <p className="package-description">Free membership with basic features</p>
+                    
+                    <div className="feature-list">
+                      <div className="feature-item">
+                        <span className="feature-label">Support services</span>
+                        <span className="feature-value">Low</span>
                       </div>
-                    ))
-                  ) : (
-                    <p>No available packages</p>
-                  )}
+                      <div className="feature-item">
+                        <span className="feature-label">Max children allowed</span>
+                        <span className="feature-value">1</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-label">Available to make consultation with experts</span>
+                        <span className="feature-value">Not allowed</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-label">Tracking milestones of child</span>
+                        <span className="feature-value">3 milestone per child</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-label">Early warning about child health</span>
+                        <span className="feature-value">Available</span>
+                      </div>
+                    </div>
+
+                    <div className="package-price">
+                      <span className="price-amount Free">
+                        {packagesData.find(p => p.packageName === 'Free')?.price.toLocaleString()}đ
+                      </span>
+                      <span className="price-duration Free">
+                        /{packagesData.find(p => p.packageName === 'Free')?.durationMonths} 
+                      </span>
+                      <span className="price-duration Free"> Months</span>
+                    </div>
+                    
+                    <button 
+                      className={`package-btn-homepage ${currentPlan?.packageName === 'Free' ? 'current-plan' : ''}`}
+                      disabled={currentPlan?.packageName === 'Free'}
+                    >
+                      {currentPlan?.packageName === 'Free' ? 'YOUR CURRENT PLAN' : 'Free'}
+                    </button>
+                  </div>
+
+                  {/* Standard Package */}
+                  <div className="package-card standard">
+                    <h3>STANDARD</h3>
+                    <p className="package-description">Standard membership with advance features</p>
+                    
+                    <div className="feature-list">
+                      <div className="feature-item">
+                        <span className="feature-label">Support services</span>
+                        <span className="feature-value">Medium</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-label">Max children allowed</span>
+                        <span className="feature-value">2</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-label">Available to make consultation with experts</span>
+                        <span className="feature-value">5 consultation per month</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-label">Tracking milestones of child</span>
+                        <span className="feature-value">Unlimited</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-label">Early warning about child health</span>
+                        <span className="feature-value">Available</span>
+                      </div>
+                    </div>
+                    
+                    <div className="package-price">
+                      <span className="price-amount">
+                        {packagesData.find(p => p.packageName === 'Standard')?.price.toLocaleString()}đ
+                      </span>
+                      <span className="price-duration">
+                        /{packagesData.find(p => p.packageName === 'Standard')?.durationMonths} 
+                      </span>
+                      <span className="price-duration"> Months</span>
+                    </div>
+                    
+                    <button 
+                      className={`package-btn-homepage ${currentPlan?.packageName === 'Standard' ? 'current-plan' : 'standard-btn'}`}
+                      onClick={() => currentPlan?.packageName !== 'Standard' && handleBuyPackage(packagesData.find(p => p.packageName === 'Standard'))}
+                      disabled={currentPlan?.packageName === 'Standard'}
+                    >
+                      {currentPlan?.packageName === 'Standard' ? 'YOUR CURRENT PLAN' : 'GO STANDARD'}
+                    </button>
+                  </div>
+
+                  {/* Premium Package */}
+                  <div className="package-card premium">
+                    <div className="best-service-badge">BEST SERVICE</div>
+                    <h3>PREMIUM</h3>
+                    <p className="package-description">Premium membership with full features</p>
+                    
+                    <div className="feature-list">
+                      <div className="feature-item">
+                        <span className="feature-label">Support services</span>
+                        <span className="feature-value">Best</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-label">Max children allowed</span>
+                        <span className="feature-value">6</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-label">Available to make consultation with experts</span>
+                        <span className="feature-value">10 consultation per month</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-label">Tracking milestones of child</span>
+                        <span className="feature-value">Unlimited</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-label">Early warning about child health</span>
+                        <span className="feature-value">Available</span>
+                      </div>
+                    </div>
+                    
+                    <div className="package-price">
+                      <span className="price-amount">
+                        {packagesData.find(p => p.packageName === 'Premium')?.price.toLocaleString()}đ
+                      </span>
+                      <span className="price-duration">
+                        /{packagesData.find(p => p.packageName === 'Premium')?.durationMonths} 
+                      </span>
+                      <span className="price-duration"> Months</span>
+                    </div>
+                    
+                    <button 
+                      className={`package-btn-homepage ${currentPlan?.packageName === 'Premium' ? 'current-plan' : 'premium-btn'}`}
+                      onClick={() => currentPlan?.packageName !== 'Premium' && handleBuyPackage(packagesData.find(p => p.packageName === 'Premium'))}
+                      disabled={currentPlan?.packageName === 'Premium'}
+                    >
+                      {currentPlan?.packageName === 'Premium' ? 'YOUR CURRENT PLAN' : 'GO PREMIUM'}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* STEP 1: CHOOSE HOW TO PAY */}
+            {/* STEP 1, 2, 3 remain unchanged */}
             {currentStep === 1 && selectedPackage && (
               <div className="transaction-step choose-payment-step">
                 <div className="babyhaven-logo">

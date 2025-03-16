@@ -5,7 +5,7 @@
     padding: 20px;
     font-family: "Poppins", sans-serif;
     color: #333;
-    background: linear-gradient(135deg, #e0f7fa, #ffffff 50%);
+    background: white;
     /* pastel xanh-trắng */
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -22,8 +22,8 @@
   
   .history-header h2 {
     font-size: 1.6rem;
-    color: #064f83;
-    font-weight: 600;
+    color: #000000;
+    font-weight: bold;
   }
   
   .history-filter {
@@ -64,7 +64,7 @@
   }
   
   .history-table thead tr {
-    background: #f0fbff; /* pastel xanh nhạt */
+    background: white; /* pastel xanh nhạt */
   }
   
   .history-table th {
@@ -86,7 +86,6 @@
   
   /* Hover row => bay bổng */
   .history-table tr:hover {
-    background: #e8fdfd; /* pastel xanh cực nhạt */
     transform: translateY(-2px);
     transition: all 0.2s ease;
   }
