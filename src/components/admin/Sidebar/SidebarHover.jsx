@@ -14,7 +14,6 @@ import "./SidebarHover.css";
 import { MdArticle } from "react-icons/md"; // ví dụ cho Blog
 import { useNavigate, Link } from "react-router-dom";
 import Logo from "../../../assets/Logo.png";
-import Name from "../../../assets/Name.png";
 
 function SidebarHover() {
   // State: khi hover (hoặc di chuột vào logo) => expanded = true

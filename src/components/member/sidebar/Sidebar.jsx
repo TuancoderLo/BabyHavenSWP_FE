@@ -2,8 +2,8 @@ import React from "react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Sidebar.css";
-import Logo from "../../../assets/logo.png";
-import Name from "../../../assets/NAME.png";
+import Logo from "../../../assets/Logo.png";
+import Name from "../../../assets/Name.png";
 
 function Sidebar() {
   const navigate = useNavigate();

@@ -3,8 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import "./HomePage.css";
 import Header from "../common/Header";
 import Footer from "../common/Footer";
-import Logo from "../../assets/Logo.png";
-import avatar_LOGO from "../../assets/avatar_LOGO.jpg";
 
 import Packages from "../packages/Packages";
 import blogCategoryApi from "../../services/blogCategoryApi";
@@ -27,6 +25,7 @@ function HomePage() {
       setUserData({ name: nameFromLocal });
     }
   }, []);
+  
 
   // Định nghĩa dữ liệu carousel
   const carouselImages = [

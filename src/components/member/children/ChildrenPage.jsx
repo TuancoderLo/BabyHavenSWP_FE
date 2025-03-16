@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ChildrenPage.css";
-import api from "../../../config/axios.js";
+
+import AddMilestone from "./AddMilestone.jsx";
+
 import GrowthChart from "./GrowthChart.jsx";
 import childApi from "../../../services/childApi";
 import AddChild from "./AddChild";
@@ -17,6 +19,16 @@ function ChildrenPage() {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0); // Thêm state để trigger refresh
   const [growthRecords, setGrowthRecords] = useState([]); // Thêm state mới
+
+  //show add milestone
+  const [showAddMilestoneModal, setShowAddMilestoneModal] = useState(false);
+  const handleShowMilestoneModal = () => {
+    setShowAddMilestoneModal(true);
+  };
+
+  const closeMilestoneOverlay = () => {
+    setShowAddMilestoneModal(false);
+  };
 
   // Lấy memberId từ localStorage
   const memberId = localStorage.getItem("memberId");
@@ -391,13 +403,13 @@ function ChildrenPage() {
 
       {/* Milestone section */}
       <div className="milestone-section">
-        <div className="milestone-content">
-          Want to track every precious milestone of your little one?
-        </div>
-        <button className="add-milestone-button">
-          Add Milestone
-        </button>
+      <div className="milestone-content">
+        Want to track every precious milestone of your little one?
       </div>
+      <button className="add-milestone-button" onClick={handleShowMilestoneModal}>
+        Add Milestone
+      </button>
+    </div>
 
       {/* Latest Record Section */}
       <div className="latest-record-section">
@@ -537,8 +549,11 @@ function ChildrenPage() {
           closeOverlay={closeRecordOverlay}
         />
       )}
+       {showAddMilestoneModal && (
+        <AddMilestone closeOverlay={closeMilestoneOverlay} onSuccess={() => { /* refresh data nếu cần */ }} />
+      )}
     </div>
-  );
+  );  
 }
 
 export default ChildrenPage;

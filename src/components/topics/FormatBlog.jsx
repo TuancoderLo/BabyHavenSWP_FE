@@ -21,6 +21,7 @@ function FormatBlog() {
   const [relatedBlogs, setRelatedBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [doctorInfo, setDoctorInfo] = useState(null);
 
   // Kiểm tra trạng thái đăng nhập
   const isLoggedIn = localStorage.getItem("token") !== null;
@@ -69,6 +70,11 @@ function FormatBlog() {
       } else {
         setBlog(blogData);
 
+        // Nếu có email của tác giả, kiểm tra xem có phải là Doctor không
+        if (blogData.email) {
+          fetchDoctorInfo(blogData.email);
+        }
+
         // Sau khi có dữ liệu blog, lấy các bài viết liên quan
         if (blogData.categoryId) {
           fetchRelatedBlogs(blogData.categoryId, id);
@@ -83,6 +89,104 @@ function FormatBlog() {
       setError("Có lỗi xảy ra khi tải bài viết. Vui lòng thử lại sau.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Hàm mới để lấy thông tin Doctor
+  const fetchDoctorInfo = async (authorEmail) => {
+    try {
+      console.log("Fetching doctor information for email:", authorEmail);
+      const response = await api.get("https://localhost:7279/api/Doctors");
+      console.log("Doctors API response:", response);
+
+      // Kiểm tra cấu trúc dữ liệu trả về
+      console.log("Response data type:", typeof response.data);
+      console.log("Response data structure:", response.data);
+
+      let doctorsData = [];
+
+      // Xử lý nhiều trường hợp cấu trúc dữ liệu khác nhau
+      if (response.data) {
+        if (Array.isArray(response.data)) {
+          // Nếu response.data là một mảng
+          doctorsData = response.data;
+        } else if (response.data.data && Array.isArray(response.data.data)) {
+          // Nếu response.data.data là một mảng
+          doctorsData = response.data.data;
+        } else if (typeof response.data === "object") {
+          // Nếu response.data là một object (có thể là một doctor duy nhất)
+          // hoặc là một object chứa danh sách doctors
+
+          // Kiểm tra xem có phải là một doctor duy nhất không
+          if (response.data.email) {
+            doctorsData = [response.data];
+          } else {
+            // Có thể là object chứa danh sách doctors
+            // Thử chuyển các thuộc tính của object thành mảng
+            const possibleDoctors = Object.values(response.data).filter(
+              (item) => item && typeof item === "object" && item.email
+            );
+
+            if (possibleDoctors.length > 0) {
+              doctorsData = possibleDoctors;
+            }
+          }
+        }
+      }
+
+      console.log("Processed doctors data:", doctorsData);
+
+      // Log tất cả email của doctors để debug
+      if (doctorsData.length > 0) {
+        console.log(
+          "Available doctor emails:",
+          doctorsData.map((doc) => doc.email)
+        );
+      } else {
+        console.log("No doctors data found in the response");
+      }
+
+      // Tìm doctor có email trùng với email của tác giả (không phân biệt chữ hoa/chữ thường)
+      const matchedDoctor = doctorsData.find(
+        (doctor) =>
+          doctor &&
+          doctor.email &&
+          doctor.email.toLowerCase() === authorEmail.toLowerCase()
+      );
+
+      console.log("Matched doctor:", matchedDoctor);
+
+      if (matchedDoctor) {
+        console.log("Found matching doctor with email:", matchedDoctor.email);
+        console.log("Doctor degree:", matchedDoctor.degree);
+        console.log("Doctor biography:", matchedDoctor.biography);
+        setDoctorInfo(matchedDoctor);
+      } else {
+        console.log("No matching doctor found with email:", authorEmail);
+
+        // Thử tìm theo tên
+        const nameMatchedDoctor = doctorsData.find(
+          (doctor) =>
+            doctor &&
+            doctor.name &&
+            blog.name &&
+            (doctor.name.toLowerCase().includes(blog.name.toLowerCase()) ||
+              blog.name.toLowerCase().includes(doctor.name.toLowerCase()))
+        );
+
+        if (nameMatchedDoctor) {
+          console.log("Found doctor by name match:", nameMatchedDoctor.name);
+          setDoctorInfo(nameMatchedDoctor);
+        } else {
+          console.log("No matching doctor found by name either");
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching doctor information:", error);
+      console.error("Error details:", {
+        message: error.message,
+        response: error.response?.data,
+      });
     }
   };
 
@@ -172,6 +276,60 @@ function FormatBlog() {
     window.scrollTo(0, 0);
   };
 
+  // Hàm render thông tin tác giả
+  const renderAuthorInfo = () => {
+    if (!blog) return null;
+
+    // Kiểm tra URL ảnh trước khi hiển thị
+    const authorImageUrl = blog.authorImage || blog.imageProfile;
+    const isValidUrl =
+      authorImageUrl &&
+      (authorImageUrl.startsWith("http://") ||
+        authorImageUrl.startsWith("https://"));
+
+    const authorImage = isValidUrl ? authorImageUrl : DEFAULT_AVATAR;
+    const authorName = blog.name || blog.authorName || "Tác giả ẩn danh";
+
+    // Kiểm tra xem có phải là Doctor không (dựa vào doctorInfo)
+    const isDoctorAuthor = doctorInfo !== null;
+
+    // Xác định thông tin hiển thị dựa vào loại tác giả
+    let authorDegree, authorBio;
+
+    if (isDoctorAuthor) {
+      // Nếu là Doctor, lấy thông tin từ doctorInfo
+      authorDegree = doctorInfo.degree || "";
+      authorBio = doctorInfo.biography || "";
+    } else {
+      // Nếu là Admin, để trống cả degree và biography
+      authorDegree = "";
+      authorBio = "";
+    }
+
+    return (
+      <div className="blog-author-card">
+        <div className="author-image">
+          <img
+            src={authorImage}
+            alt={authorName}
+            onError={(e) => {
+              console.log("Sử dụng ảnh mặc định cho tác giả");
+              e.target.onerror = null;
+              e.target.src = DEFAULT_AVATAR;
+            }}
+          />
+        </div>
+        <h3 className="author-name">{authorName}</h3>
+
+        {/* Luôn hiển thị phần degree, nhưng có thể trống */}
+        <div className="author-degree">{authorDegree}</div>
+
+        {/* Luôn hiển thị phần biography, nhưng có thể trống */}
+        <p className="author-bio">{authorBio}</p>
+      </div>
+    );
+  };
+
   return (
     <div className="blog-page">
       {isLoggedIn ? <Header /> : <HeaderGuest />}
@@ -239,51 +397,7 @@ function FormatBlog() {
             </div>
 
             {/* Thông tin tác giả - div7 */}
-            <div className="blog-author-card">
-              <div className="author-image">
-                {/* Kiểm tra URL ảnh trước khi hiển thị */}
-                {(() => {
-                  // Kiểm tra xem URL ảnh có hợp lệ không
-                  const authorImageUrl = blog.authorImage || blog.imageProfile;
-                  const isValidUrl =
-                    authorImageUrl &&
-                    (authorImageUrl.startsWith("http://") ||
-                      authorImageUrl.startsWith("https://"));
-
-                  return (
-                    <img
-                      src={isValidUrl ? authorImageUrl : DEFAULT_AVATAR}
-                      alt={blog.name || blog.authorName || "Tác giả"}
-                      onError={(e) => {
-                        console.log("Sử dụng ảnh mặc định cho tác giả");
-                        e.target.onerror = null;
-                        e.target.src = DEFAULT_AVATAR;
-                      }}
-                    />
-                  );
-                })()}
-              </div>
-              <h3 className="author-name">
-                {blog.name || blog.authorName || "Tác giả ẩn danh"}
-              </h3>
-              <p className="author-bio">
-                {blog.authorBio ||
-                  "Tác giả chưa cập nhật thông tin giới thiệu."}
-              </p>
-              <div className="author-info">
-                {blog.email && (
-                  <p className="author-email">
-                    <strong>Email:</strong> {blog.email}
-                  </p>
-                )}
-                {blog.authorSpecialization && (
-                  <p className="author-specialization">
-                    <strong>Chuyên ngành:</strong> {blog.authorSpecialization}
-                  </p>
-                )}
-              </div>
-              <button className="contact-author-btn">Liên hệ ngay</button>
-            </div>
+            {renderAuthorInfo()}
 
             {/* Các bài viết liên quan - div8-15 */}
             {relatedBlogs.length > 0 ? (
