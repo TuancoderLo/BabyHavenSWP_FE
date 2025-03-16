@@ -73,7 +73,7 @@ function Packages() {
         // Xóa dữ liệu từ sessionStorage để tránh hiển thị lại khi refresh
         sessionStorage.removeItem("completedPayment");
         sessionStorage.removeItem("selectedPackageAfterPayment");
-      }, 5000); // Đợi 500ms
+      }, 700); // Đợi 500ms
       
       return () => clearTimeout(timer);
     }
@@ -309,9 +309,13 @@ const handleFinish = () => {
                         <img src={packagesIcon} alt="Premium" />
                       </div>
                       <div className="package-info">
-                        <div className="package-name">Premium package</div>
-                        <div className="package-price">1.279.000đ/12 months</div>
-                      </div>
+  <div className="package-name">{selectedPackage?.packageName}</div>
+  <div className="package-price">
+    {selectedPackage
+      ? `${selectedPackage.price.toLocaleString()} ${selectedPackage.currency} / ${selectedPackage.durationMonths} months`
+      : ""}
+  </div>
+</div>
                       <button className="change-button" onClick={() => handleCloseOverlay()}>
                         Change
                       </button>
@@ -346,32 +350,50 @@ const handleFinish = () => {
                   </div>
 
                   <div className="subscription-box">
-                    <h3>Your subscription</h3>
-                    <div className="subscription-items">
-                      <div>1. Premium package</div>
-                      <div>2. Family package promotion</div>
-                    </div>
-                    
-                    <div className="subscription-dates">
-                      <div>Start date: 20-10-2024</div>
-                      <div>End date: 20-10-2025</div>
-                    </div>
+  <h3>Your subscription</h3>
+  <div className="subscription-items">
+    <div>1. {selectedPackage?.packageName}</div>
+    {promoCode && <div>2. Promo code applied: {promoCode}</div>}
+  </div>
 
-                    <div className="cost-breakdown">
-                      <div className="cost-row">
-                        <span>Amount</span>
-                        <span className="amount">1.279.000 VND</span>
-                      </div>
-                      <div className="cost-row">
-                        <span>Promotion</span>
-                        <span className="promotion">280.000 VND</span>
-                      </div>
-                      <div className="total-row">
-                        <span>Total</span>
-                        <span className="total">999.000 VND</span>
-                      </div>
-                    </div>
-                  </div>
+  <div className="subscription-dates">
+    <div>Start date: {new Date().toLocaleDateString()}</div>
+    <div>
+      End date:{" "}
+      {new Date(
+        new Date().setMonth(new Date().getMonth() + selectedPackage?.durationMonths)
+      ).toLocaleDateString()}
+    </div>
+  </div>
+
+  <div className="cost-breakdown">
+    <div className="cost-row">
+      <span>Amount</span>
+      <span className="amount">
+        {selectedPackage
+          ? `${selectedPackage.price.toLocaleString()} ${selectedPackage.currency}`
+          : ""}
+      </span>
+    </div>
+    <div className="cost-row">
+      <span>Promotion</span>
+      <span className="promotion">
+        {selectedPackage
+          ? `${discount.toLocaleString()} ${selectedPackage.currency}`
+          : ""}
+      </span>
+    </div>
+    <div className="total-row">
+      <span>Total</span>
+      <span className="total">
+        {selectedPackage
+          ? `${(selectedPackage.price - discount).toLocaleString()} ${selectedPackage.currency}`
+          : ""}
+      </span>
+    </div>
+  </div>
+</div>
+
                 </div>
 
                 <div className="action-buttons">

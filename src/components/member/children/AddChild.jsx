@@ -919,7 +919,7 @@ const AddChild = ({ closeOverlay }) => {
   const handleAddRecordStep1 = useCallback(async () => {
     if (!validateStep1()) return;
     const confirmed = window.confirm(
-"Do you want to create a child? If you click OK, the child will be created and go to the add record step; if you click Cancel, the child will not be created."
+"Create child? OK to create and add record; Cancel to abort."
     );
     if (!confirmed) return;
     try {
