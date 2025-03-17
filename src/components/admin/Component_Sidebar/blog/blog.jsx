@@ -328,6 +328,13 @@ function Blog() {
   // Cấu hình cột cho bảng Categories
   const columns = [
     {
+      title: "No.",
+      key: "index",
+      width: 80,
+      className: "index-column",
+      render: (_, __, index) => index + 1,
+    },
+    {
       title: "Category Name",
       dataIndex: "categoryName",
       key: "categoryName",
@@ -392,6 +399,13 @@ function Blog() {
   // Cấu hình cột cho bảng Blogs
   const blogColumns = [
     {
+      title: "No.",
+      key: "index",
+      width: 80,
+      className: "index-column",
+      render: (_, __, index) => index + 1,
+    },
+    {
       title: "Title",
       dataIndex: "title",
       key: "title",
@@ -409,13 +423,13 @@ function Blog() {
       render: (status) => {
         const statusColors = {
           Draft: "orange",
-          Pending: "blue",
+          PendingApproval: "blue",
           Approved: "green",
           Rejected: "red",
         };
         return (
           <Tag color={statusColors[status] || "default"} className="status-tag">
-            {status || "Không xác định"}
+            {status || "Unknown"}
           </Tag>
         );
       },
@@ -424,7 +438,7 @@ function Blog() {
       title: "Created At",
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (date) => new Date(date).toLocaleDateString("vi-VN"),
+      render: (date) => new Date(date).toLocaleDateString("en-US"),
     },
     {
       title: "Action",

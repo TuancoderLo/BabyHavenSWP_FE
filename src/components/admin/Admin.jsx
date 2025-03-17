@@ -1,41 +1,45 @@
 // src/pages/Admin/Admin.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import SidebarHover from "../../components/admin/Sidebar/SidebarHover";
 import Topbar from "../../components/admin/Topbar/Topbar";
-import ChartCard from "../../components/admin/ChartCard/ChartCard";
 import PackageChart from "../../components/admin/PackageChart/PackageChart";
 import RevenueChart from "../../components/admin/RevenueChart/RevenueChart";
+import MemberChart from "../../components/admin/MemberChart/MemberChart";
 import "./Admin.css";
 
 function Admin() {
-  // State chứa data chart (có trường date)
-  const [chartData, setChartData] = useState([]);
   const location = useLocation();
+  // State để theo dõi biểu đồ đang được hiển thị
+  const [activeChart, setActiveChart] = useState("revenue");
+  // State để lưu trữ dữ liệu từ PackageChart
+  const [packageData, setPackageData] = useState({
+    totalMembers: 0,
+    mostPopularPackage: "N/A",
+    conversionRate: 0,
+  });
 
-  useEffect(() => {
-    // fetch("/api/endpoint")
-    //   .then(res => res.json())
-    //   .then(data => setChartData(data))
-    //   .catch(err => console.error(err));
+  // Sử dụng useCallback để tránh tạo lại hàm mỗi khi component re-render
+  const handlePackageDataLoaded = useCallback((data) => {
+    if (!data || !data.counts) return;
 
-    // Tạm mock data
-    const mockData = [
-      { date: "2023-01-01", sales2022: 400, sales2023: 300 },
-      { date: "2023-02-01", sales2022: 500, sales2023: 400 },
-      { date: "2023-03-01", sales2022: 600, sales2023: 500 },
-      { date: "2023-04-01", sales2022: 700, sales2023: 600 },
-      { date: "2023-05-01", sales2022: 900, sales2023: 750 },
-      { date: "2023-06-01", sales2022: 1000, sales2023: 950 },
-      { date: "2023-07-01", sales2022: 1100, sales2023: 1000 },
-      { date: "2023-08-01", sales2022: 1200, sales2023: 1150 },
-      { date: "2023-09-01", sales2022: 1300, sales2023: 1200 },
-      { date: "2023-10-01", sales2022: 1400, sales2023: 1300 },
-      { date: "2023-11-01", sales2022: 1500, sales2023: 1400 },
-      { date: "2023-12-01", sales2022: 1600, sales2023: 1500 },
-    ];
-    setChartData(mockData);
-  }, []);
+    // Tính tỷ lệ chuyển đổi (người dùng không dùng gói Free)
+    const conversionRate =
+      data.total > 0 ? ((data.total - data.counts.Free) / data.total) * 100 : 0;
+
+    // Tìm gói phổ biến nhất
+    const mostPopularPackage =
+      Object.entries(data.counts || {})
+        .sort((a, b) => b[1] - a[1])
+        .filter(([name, count]) => count > 0)
+        .map(([name]) => name)[0] || "N/A";
+
+    setPackageData({
+      totalMembers: data.total || 0,
+      mostPopularPackage,
+      conversionRate: conversionRate.toFixed(1),
+    });
+  }, []); // Không có dependencies, chỉ tạo một lần
 
   return (
     <div className="admin-container">
@@ -50,29 +54,84 @@ function Admin() {
         <div className="admin-content">
           {/* Hiển thị dashboard khi ở trang admin chính */}
           {location.pathname === "/admin" && (
-            <div className="dashboard-container">
-              <div className="dashboard-charts">
-                {/* Biểu đồ doanh số */}
-                <div className="chart-item">
-                  <ChartCard data={chartData} />
-                </div>
-
-                {/* Biểu đồ phân bố package */}
-                <div className="chart-item">
-                  <PackageChart />
-                </div>
-
-                {/* Biểu đồ doanh thu và thành viên mới */}
-                <div className="chart-item chart-item-full">
-                  <RevenueChart />
-                </div>
+            <div className="admin-dashboard">
+              {/* Nút chuyển đổi biểu đồ */}
+              <div className="chart-tabs">
+                <button
+                  className={`chart-tab ${
+                    activeChart === "revenue" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveChart("revenue")}
+                >
+                  Thống kê doanh thu
+                </button>
+                <button
+                  className={`chart-tab ${
+                    activeChart === "package" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveChart("package")}
+                >
+                  Phân bố gói dịch vụ
+                </button>
+                <button
+                  className={`chart-tab ${
+                    activeChart === "member" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveChart("member")}
+                >
+                  Thống kê thành viên mới
+                </button>
               </div>
 
-              <div className="dashboard-info">
-                {/* Khu vực thông tin bổ sung */}
-                <div className="info-section">
-                  {/* Nội dung thông tin sẽ được thêm sau */}
-                </div>
+              {/* Hiển thị biểu đồ tương ứng */}
+              <div className="chart-container">
+                {activeChart === "revenue" && (
+                  <div className="chart-item active">
+                    <h3>Thống kê doanh thu</h3>
+                    <RevenueChart />
+                  </div>
+                )}
+
+                {activeChart === "package" && (
+                  <div className="chart-item active">
+                    <h3>Phân bố người dùng theo gói dịch vụ</h3>
+                    <PackageChart onDataLoaded={handlePackageDataLoaded} />
+                  </div>
+                )}
+
+                {activeChart === "member" && (
+                  <div className="chart-item active">
+                    <h3>Thống kê thành viên mới</h3>
+                    <MemberChart />
+                  </div>
+                )}
+              </div>
+
+              {/* Thông tin tóm tắt */}
+              <div className="info-grid">
+                {activeChart === "revenue" && (
+                  <div className="info-item">
+                    <h3>Tóm tắt doanh thu</h3>
+                    <p>Doanh thu tháng này: 45,000,000 VND</p>
+                    <p>Tăng trưởng: +15% so với tháng trước</p>
+                  </div>
+                )}
+
+                {activeChart === "package" && (
+                  <div className="info-item">
+                    <h3>Tóm tắt gói dịch vụ</h3>
+                    <p>Gói phổ biến nhất: {packageData.mostPopularPackage}</p>
+                    <p>Tỷ lệ chuyển đổi: {packageData.conversionRate}%</p>
+                  </div>
+                )}
+
+                {activeChart === "member" && (
+                  <div className="info-item">
+                    <h3>Tóm tắt thành viên</h3>
+                    <p>Thành viên mới tháng này: 24</p>
+                    <p>Tổng số thành viên: {packageData.totalMembers}</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -82,7 +141,6 @@ function Admin() {
         </div>
       </div>
     </div>
-    //=======================================================================================================
   );
 }
 

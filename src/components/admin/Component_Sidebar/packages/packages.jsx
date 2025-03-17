@@ -259,7 +259,7 @@ function Packages() {
           color="primary"
           onClick={() => handleOpen()}
         >
-          Add New Package
+          ADD NEW PACKAGE
         </Button>
       </Box>
 
@@ -267,6 +267,7 @@ function Packages() {
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell width="70px">No.</TableCell>
               <TableCell>Package Name</TableCell>
               <TableCell>Description</TableCell>
               <TableCell>Price</TableCell>
@@ -279,6 +280,7 @@ function Packages() {
           <TableBody>
             {packages.map((pkg, index) => (
               <TableRow key={index}>
+                <TableCell>{index + 1}</TableCell>
                 <TableCell>{pkg.packageName}</TableCell>
                 <TableCell>{pkg.description}</TableCell>
                 <TableCell>{`${pkg.price} ${pkg.currency}`}</TableCell>

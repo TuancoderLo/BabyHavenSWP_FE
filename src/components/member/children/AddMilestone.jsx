@@ -5,6 +5,13 @@ import MilestoneApi from "../../../services/milestoneApi";
 import childApi from "../../../services/childApi";
 import BabyGrowth from "../../../assets/baby_growth.png";
 
+// Danh sách các milestone category có sẵn
+const milestoneCategories = [
+  { id: "first_smile", label: "First Smile", minAge: 216, maxAge: 216 },
+  { id: "first_word", label: "First Word", minAge: 216, maxAge: 216 },
+  { id: "first_steps", label: "First Steps", minAge: 216, maxAge: 216 },
+];
+
 const AddMilestone = ({ child, memberId, closeOverlay, onSuccess }) => {
   // Lưu thông tin chi tiết của trẻ
   const [childDetails, setChildDetails] = useState(null);
@@ -26,7 +33,9 @@ const AddMilestone = ({ child, memberId, closeOverlay, onSuccess }) => {
   const [milestoneName, setMilestoneName] = useState("");
   const [description, setDescription] = useState("");
   const [importance, setImportance] = useState("Medium");
+  // Thay đổi category từ input thành select với các option có sẵn
   const [category, setCategory] = useState("");
+  // minAge và maxAge sẽ được set tự động khi chọn category
   const [minAge, setMinAge] = useState("");
   const [maxAge, setMaxAge] = useState("");
   const [error, setError] = useState(null);
@@ -134,32 +143,37 @@ const AddMilestone = ({ child, memberId, closeOverlay, onSuccess }) => {
                   <option value="Low">Low</option>
                 </select>
               </div>
+              {/* Sử dụng select cho Category và tự động cập nhật minAge/maxAge */}
               <div className="form-group">
                 <label>Category</label>
-                <input
-                  type="text"
+                <select
                   value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                />
-              </div>
-              <div className="form-group">
-                <label>Min Age (months)</label>
-                <input
-                  type="number"
-                  value={minAge}
-                  onChange={(e) => setMinAge(e.target.value)}
+                  onChange={(e) => {
+                    const selectedId = e.target.value;
+                    setCategory(selectedId);
+                    const selectedCategory = milestoneCategories.find(
+                      (item) => item.id === selectedId
+                    );
+                    if (selectedCategory) {
+                      setMinAge(selectedCategory.minAge);
+                      setMaxAge(selectedCategory.maxAge);
+                    }
+                  }}
                   required
-                />
+                >
+                  <option value="" disabled>
+                    Select a category
+                  </option>
+                  {milestoneCategories.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <div className="form-group">
-                <label>Max Age (months)</label>
-                <input
-                  type="number"
-                  value={maxAge}
-                  onChange={(e) => setMaxAge(e.target.value)}
-                  required
-                />
-              </div>
+              {/* Các trường minAge và maxAge được ẩn đi */}
+              <input type="hidden" value={minAge} />
+              <input type="hidden" value={maxAge} />
               <button type="submit" className="confirm-button" disabled={loading}>
                 {loading ? "Adding..." : "Add Milestone"}
               </button>

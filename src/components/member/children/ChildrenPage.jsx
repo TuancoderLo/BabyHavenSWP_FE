@@ -12,6 +12,9 @@ import ExpertAdvice from "../../../services/expertAdviceData";
 import AddRecordButton from './common/buttons/AddRecord';
 import AddMilestoneButton from './common/buttons/AddMilestone';
 import AddChildButton from './common/buttons/AddChild';
+import memberShipApi from "../../../services/memberShipApi";
+import alertApi from "../../../services/alertApi";
+import TruncatedAlertList from "./TruncatedAlertList";
 
 function ChildrenPage() {
   const navigate = useNavigate();
@@ -33,8 +36,106 @@ function ChildrenPage() {
     setShowAddMilestoneModal(false);
   };
 
+  //const alert 
+  const [latestAlert, setLatestAlert] = useState(null);
+  
+  function AlertItem({ alert }) {
+    const [expanded, setExpanded] = useState(false);
+    const limit = 80;
+    const truncate = (text) => {
+      if (!text) return "";
+      return text.length > limit ? text.slice(0, limit) + "..." : text;
+    };
+  
+    const messageShort = truncate(alert.message);
+  
+    const openOverlay = () => setExpanded(true);
+    const closeOverlay = () => setExpanded(false);
+  
+    // Xác định lớp CSS dựa theo severityLevel
+    function getSeverityClass(level) {
+      switch (level?.toLowerCase()) {
+        case "low":
+          return "healthy";
+        case "medium":
+          return "warning";
+        case "high":
+          return "alert-high";
+        default:
+          return "healthy";
+      }
+    }
+  
+    // Nếu severity là medium hoặc high, áp dụng thêm lớp fadeable
+    const additionalClass =
+      ["medium", "high"].includes(alert.severityLevel?.toLowerCase())
+        ? "fadeable"
+        : "";
+  
+    return (
+      <>
+        <div
+          className={`health-alert-content ${getSeverityClass(
+            alert.severityLevel
+          )} ${additionalClass}`}
+          onClick={openOverlay}
+          style={{ cursor: "pointer" }}
+        >
+          <p>{messageShort}</p>
+        </div>
+  
+        {expanded && (
+          <div className="modal-overlay" onClick={closeOverlay}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <button className="modal-close" onClick={closeOverlay}>
+                ×
+              </button>
+              <h2>Full Alert Message</h2>
+              <p>{alert.message}</p>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+  
+  
   // Lấy memberId từ localStorage
   const memberId = localStorage.getItem("memberId");
+
+ // Gọi alert khi thay đổi selectedChild
+ useEffect(() => {
+  if (selectedChild && memberId) {
+    alertApi
+      .getAlert(selectedChild.name, selectedChild.dateOfBirth, memberId)
+      .then((res) => {
+        if (res.data && Array.isArray(res.data.data)) {
+          const alerts = res.data.data;
+
+          // 1) Sắp xếp theo alertDate giảm dần
+          alerts.sort((a, b) => new Date(b.alertDate) - new Date(a.alertDate));
+
+          // 2) Tìm alert đầu tiên có isRead = false
+          const newestUnread = alerts.find((alert) => alert.isRead === false);
+
+          // 3) Nếu không có, set null
+          setLatestAlert(newestUnread || null);
+        } else {
+          setLatestAlert(null);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        setLatestAlert(null);
+      });
+  } else {
+    setLatestAlert(null);
+  }
+}, [selectedChild, memberId]);
+
+const handleConnectDoctor = () => {
+  navigate("/member/doctor-consultation");
+};
 
   // Kiểm tra memberId khi component mount
   useEffect(() => {
@@ -129,48 +230,54 @@ function ChildrenPage() {
       setIsLoading(false);
     }
   };
-
-  // Hàm render Alert theo level
-  const renderAlertBox = (level) => {
-    const levels = {
-      low: {
-        text: "Alert low level",
-        className: "low",
-      },
-      medium: {
-        text: "Alert medium level",
-        className: "medium",
-      },
-      high: {
-        text: "Alert high level",
-        className: "high",
-      },
-    };
-
-    if (!levels[level]) return null;
-
-    return (
-      <div className={`alert-box ${levels[level].className}`}>
-        <span>{levels[level].text}</span>
-        <button>Contact to Doctor</button>
-      </div>
-    );
-  };
   // Hàm chuyển sang trang thêm trẻ
   const [showAddChildModal, setShowAddChildModal] = useState(false);
 
-  const handleAddChild = () => {
-    setShowAddChildModal(true);
+  const handleAddChild = async () => {
+    try {
+      // 1) Gọi API lấy thông tin gói membership
+      const membershipRes = await memberShipApi.getMemberMembership(memberId);
+      // Thường trả về dạng { status: 1, message: '...', data: {...} }
+      // Tuỳ backend, bạn kiểm tra membershipRes.data.data hoặc membershipRes.data
+      const membershipData = membershipRes.data?.data;
+  
+      // 2) Giả sử membershipData có trường membershipPackageName = 'Free' | 'Standard' | 'Premium'
+      const membershipPackage = membershipData?.membershipPackageName; 
+      // Hoặc tuỳ API trả về, bạn thay đổi key cho đúng
+  
+      // 3) Xác định giới hạn trẻ
+      let maxChildren = 1; // Mặc định Free = 1
+      if (membershipPackage === "Standard") {
+        maxChildren = 2;
+      } else if (membershipPackage === "Premium") {
+        maxChildren = 6;
+      }
+      // (Nếu membershipPackage là "Free", maxChildren giữ nguyên = 1)
+  
+      // 4) Kiểm tra số trẻ hiện tại
+      if (childrenList.length >= maxChildren) {
+        alert(`You have reached the limit of ${maxChildren} children for the ${membershipPackage} plan. Please upgrade your plan.`);
+
+        return; // Không cho thêm
+      }
+  
+      // 5) Nếu còn slot, mở modal thêm trẻ
+      setShowAddChildModal(true);
+  
+    } catch (error) {
+      console.error("Error checking membership plan:", error);
+      // Tuỳ ý xử lý thêm, ví dụ alert
+      alert("Unable to check membership package. Please try again.");
+    }
   };
+  
 
   const closeOverlay = () => {
     setShowAddChildModal(false);
   };
 
   const [selectedTool, setSelectedTool] = useState("BMI");
-  const handleToolChange = (e) => {
-    setSelectedTool(e.target.value);
-  };
+ 
 
   // State to control the AddRecord overlay
   const [showAddRecordModal, setShowAddRecordModal] = useState(false);
@@ -493,15 +600,18 @@ function ChildrenPage() {
             </div>
           </div>
 
-          {/* Health Alert Section */}
-          <div className="health-alert-section">
-            <div className="health-alert-title">
-              Health Alert
-            </div>
-            <div className={`health-alert-content ${selectedChild?.healthAlert ? 'warning' : 'healthy'}`}>
-              {selectedChild?.healthAlert || "Your child's health is in good condition"}
-            </div>
-          </div>
+{/* Health Alert Section */}
+<div className="health-alert-section">
+  <div className="health-alert-title">Health Alert</div>
+
+  {latestAlert ? (
+    <AlertItem alert={latestAlert} />
+  ) : (
+    <div className="health-alert-content healthy">
+      Your child's health is in good condition
+    </div>
+  )}
+</div>
 
           {/* Growth chart section */}
           <div className="growth-chart-section">
@@ -563,7 +673,7 @@ function ChildrenPage() {
             </div>
           </div>
 
-          {/* Action buttons */}
+          {/* Action buttons
           <button className="action-button child-education-section">
             Child Education
           </button>
@@ -584,7 +694,7 @@ function ChildrenPage() {
             onClick={handleAddRecord}
           >
             Add Growth Record
-          </button>
+          </button> */}
         </>
       )}
 

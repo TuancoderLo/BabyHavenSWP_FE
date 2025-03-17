@@ -485,6 +485,14 @@ function FormatBlog() {
                 <span className="blog-category">{blog.categoryName}</span>
               </div>
 
+              <div className="blog-tags">
+                {renderTags(blog.tags)?.map((tag, index) => (
+                  <span key={index} className="tag">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+
               {blog.imageBlog && (
                 <div className="blog-featured-image">
                   <img
@@ -501,14 +509,6 @@ function FormatBlog() {
 
               <div className="blog-content">
                 <div dangerouslySetInnerHTML={{ __html: blog.content }} />
-              </div>
-
-              <div className="blog-tags">
-                {renderTags(blog.tags)?.map((tag, index) => (
-                  <span key={index} className="tag">
-                    #{tag}
-                  </span>
-                ))}
               </div>
             </div>
 
