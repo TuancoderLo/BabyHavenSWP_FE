@@ -18,6 +18,7 @@ import userAccountsApi from "../../../../services/userAccountsApi";
 import { getAllMembers, updateMember } from "../../../../services/member";
 import moment from "moment";
 import "./members.css";
+import { PlusOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -25,30 +26,30 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 const Members = () => {
-  // State chung
+  // Common state
   const [activeTab, setActiveTab] = useState("1");
   const [loading, setLoading] = useState(false);
 
-  // State cho UserAccounts
+  // State for UserAccounts
   const [userAccounts, setUserAccounts] = useState([]);
   const [userAccountModalVisible, setUserAccountModalVisible] = useState(false);
   const [userAccountForm] = Form.useForm();
   const [editingUserAccount, setEditingUserAccount] = useState(null);
 
-  // State cho Members
+  // State for Members
   const [members, setMembers] = useState([]);
   const [memberModalVisible, setMemberModalVisible] = useState(false);
   const [memberForm] = Form.useForm();
   const [editingMember, setEditingMember] = useState(null);
 
-  // State cho MemberMemberships
+  // State for MemberMemberships
   const [memberships, setMemberships] = useState([]);
   const [membershipModalVisible, setMembershipModalVisible] = useState(false);
   const [membershipForm] = Form.useForm();
   const [editingMembership, setEditingMembership] = useState(null);
   const [membershipPackages, setMembershipPackages] = useState([]);
 
-  // Fetch data khi component mount và khi tab thay đổi
+  // Fetch data when component mounts and when tab changes
   useEffect(() => {
     if (activeTab === "1") {
       fetchUserAccounts();
@@ -64,18 +65,21 @@ const Members = () => {
   const fetchUserAccounts = async () => {
     try {
       setLoading(true);
-      const response = await userAccountsApi.getAll();
-      if (Array.isArray(response.data)) {
-        setUserAccounts(response.data);
-      } else if (response.data && Array.isArray(response.data.data)) {
-        setUserAccounts(response.data.data);
+      // Direct API call to ensure we get all fields
+      const response = await fetch("https://localhost:7279/api/UserAccounts");
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        setUserAccounts(data);
+      } else if (data && Array.isArray(data.data)) {
+        setUserAccounts(data.data);
       } else {
-        console.log("Data is not an array:", response.data);
+        console.log("Data is not an array:", data);
         setUserAccounts([]);
       }
     } catch (error) {
       console.error("Error loading user accounts:", error);
-      message.error("Không thể tải danh sách tài khoản");
+      message.error("Could not load user accounts list");
     } finally {
       setLoading(false);
     }
@@ -84,6 +88,12 @@ const Members = () => {
   const handleAddUserAccount = () => {
     setEditingUserAccount(null);
     userAccountForm.resetFields();
+    // Set default values for required fields
+    userAccountForm.setFieldsValue({
+      status: "Active",
+      roleId: 2, // Default role ID for Member
+      gender: "Male", // Default gender
+    });
     setUserAccountModalVisible(true);
   };
 
@@ -92,6 +102,10 @@ const Members = () => {
     userAccountForm.setFieldsValue({
       ...record,
       dateOfBirth: record.dateOfBirth ? moment(record.dateOfBirth) : null,
+      // Convert status string to number if needed
+      status: record.status,
+      // Set roleId based on roleName if needed
+      roleId: record.roleName === "Admin" ? 1 : 2,
     });
     setUserAccountModalVisible(true);
   };
@@ -99,12 +113,23 @@ const Members = () => {
   const handleDeleteUserAccount = async (userId) => {
     try {
       setLoading(true);
-      await userAccountsApi.delete(userId);
-      message.success("Xóa tài khoản thành công");
-      fetchUserAccounts();
+      // Direct API call
+      const response = await fetch(
+        `https://localhost:7279/api/UserAccounts/${userId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (response.ok) {
+        message.success("User account deleted successfully");
+        fetchUserAccounts();
+      } else {
+        throw new Error("Failed to delete user account");
+      }
     } catch (error) {
       console.error("Error deleting user account:", error);
-      message.error("Không thể xóa tài khoản");
+      message.error("Could not delete user account");
     } finally {
       setLoading(false);
     }
@@ -113,18 +138,77 @@ const Members = () => {
   const handleUserAccountSubmit = async (values) => {
     try {
       setLoading(true);
+
+      // Format the data according to API requirements
+      const formattedData = {
+        username: values.username?.trim(),
+        email: values.email?.trim(),
+        phoneNumber: values.phoneNumber?.trim(),
+        name: values.name?.trim(),
+        gender: values.gender,
+        dateOfBirth: values.dateOfBirth
+          ? values.dateOfBirth.format("YYYY-MM-DD")
+          : null,
+        address: values.address?.trim(),
+        password: values.password,
+        profilePicture: values.profilePicture || null,
+        status:
+          typeof values.status === "string"
+            ? values.status === "Active"
+              ? 0
+              : values.status === "Inactive"
+              ? 1
+              : 2
+            : values.status,
+        roleId: values.roleId || 2, // Default to Member role (2)
+      };
+
       if (editingUserAccount) {
-        await userAccountsApi.update(editingUserAccount.userId, values);
-        message.success("Cập nhật tài khoản thành công");
+        // Update existing user account
+        const response = await fetch(
+          `https://localhost:7279/api/UserAccounts/${editingUserAccount.userId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId: editingUserAccount.userId,
+              ...formattedData,
+            }),
+          }
+        );
+
+        if (response.ok) {
+          message.success("User account updated successfully");
+        } else {
+          throw new Error("Failed to update user account");
+        }
       } else {
-        await userAccountsApi.create(values);
-        message.success("Tạo tài khoản thành công");
+        // Create new user account
+        const response = await fetch(
+          "https://localhost:7279/api/UserAccounts",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formattedData),
+          }
+        );
+
+        if (response.ok) {
+          message.success("User account created successfully");
+        } else {
+          throw new Error("Failed to create user account");
+        }
       }
+
       setUserAccountModalVisible(false);
       fetchUserAccounts();
     } catch (error) {
       console.error("Error saving user account:", error);
-      message.error("Không thể lưu tài khoản");
+      message.error("Could not save user account");
     } finally {
       setLoading(false);
     }
@@ -145,7 +229,7 @@ const Members = () => {
       }
     } catch (error) {
       console.error("Error loading members:", error);
-      message.error("Không thể tải danh sách thành viên");
+      message.error("Could not load members list");
     } finally {
       setLoading(false);
     }
@@ -168,15 +252,15 @@ const Members = () => {
   const handleDeleteMember = async (memberId) => {
     try {
       setLoading(true);
-      // Giả định API xóa member
+      // API call to delete member
       await fetch(`https://localhost:7279/api/Members/${memberId}`, {
         method: "DELETE",
       });
-      message.success("Xóa thành viên thành công");
+      message.success("Member deleted successfully");
       fetchMembers();
     } catch (error) {
       console.error("Error deleting member:", error);
-      message.error("Không thể xóa thành viên");
+      message.error("Could not delete member");
     } finally {
       setLoading(false);
     }
@@ -187,9 +271,9 @@ const Members = () => {
       setLoading(true);
       if (editingMember) {
         await updateMember(editingMember.memberId, values);
-        message.success("Cập nhật thành viên thành công");
+        message.success("Member updated successfully");
       } else {
-        // Giả định API tạo member
+        // API call to create member
         await fetch("https://localhost:7279/api/Members", {
           method: "POST",
           headers: {
@@ -197,13 +281,13 @@ const Members = () => {
           },
           body: JSON.stringify(values),
         });
-        message.success("Tạo thành viên thành công");
+        message.success("Member created successfully");
       }
       setMemberModalVisible(false);
       fetchMembers();
     } catch (error) {
       console.error("Error saving member:", error);
-      message.error("Không thể lưu thành viên");
+      message.error("Could not save member");
     } finally {
       setLoading(false);
     }
@@ -224,7 +308,7 @@ const Members = () => {
       }
     } catch (error) {
       console.error("Error loading memberships:", error);
-      message.error("Không thể tải danh sách gói thành viên");
+      message.error("Could not load membership list");
     } finally {
       setLoading(false);
     }
@@ -242,7 +326,7 @@ const Members = () => {
       }
     } catch (error) {
       console.error("Error loading membership packages:", error);
-      message.error("Không thể tải danh sách gói");
+      message.error("Could not load package list");
     }
   };
 
@@ -266,11 +350,11 @@ const Members = () => {
     try {
       setLoading(true);
       await membershipApi.deleteMembership(memberMembershipId);
-      message.success("Xóa gói thành viên thành công");
+      message.success("Membership deleted successfully");
       fetchMemberships();
     } catch (error) {
       console.error("Error deleting membership:", error);
-      message.error("Không thể xóa gói thành viên");
+      message.error("Could not delete membership");
     } finally {
       setLoading(false);
     }
@@ -280,7 +364,7 @@ const Members = () => {
     try {
       setLoading(true);
       if (editingMembership) {
-        // Giả định API cập nhật membership
+        // API call to update membership
         await fetch(
           `https://localhost:7279/api/MemberMemberships/${editingMembership.memberMembershipId}`,
           {
@@ -291,9 +375,9 @@ const Members = () => {
             body: JSON.stringify(values),
           }
         );
-        message.success("Cập nhật gói thành viên thành công");
+        message.success("Membership updated successfully");
       } else {
-        // Giả định API tạo membership
+        // API call to create membership
         await fetch("https://localhost:7279/api/MemberMemberships", {
           method: "POST",
           headers: {
@@ -301,19 +385,19 @@ const Members = () => {
           },
           body: JSON.stringify(values),
         });
-        message.success("Tạo gói thành viên thành công");
+        message.success("Membership created successfully");
       }
       setMembershipModalVisible(false);
       fetchMemberships();
     } catch (error) {
       console.error("Error saving membership:", error);
-      message.error("Không thể lưu gói thành viên");
+      message.error("Could not save membership");
     } finally {
       setLoading(false);
     }
   };
 
-  // Render status với màu phù hợp
+  // Render status with appropriate color
   const renderStatus = (status) => {
     let className = "";
 
@@ -331,13 +415,13 @@ const Members = () => {
   // ===== COLUMNS DEFINITIONS =====
   const userAccountColumns = [
     {
-      title: "STT",
+      title: "No.",
       key: "index",
       width: 60,
       render: (_, __, index) => index + 1,
     },
     {
-      title: "Tên người dùng",
+      title: "Full Name",
       dataIndex: "name",
       key: "name",
     },
@@ -352,37 +436,84 @@ const Members = () => {
       key: "email",
     },
     {
-      title: "Số điện thoại",
+      title: "Phone Number",
       dataIndex: "phoneNumber",
       key: "phoneNumber",
     },
     {
-      title: "Vai trò",
+      title: "Date of Birth",
+      dataIndex: "dateOfBirth",
+      key: "dateOfBirth",
+      render: (date) => (date ? moment(date).format("DD/MM/YYYY") : "-"),
+    },
+    {
+      title: "Address",
+      dataIndex: "address",
+      key: "address",
+      ellipsis: true,
+    },
+    {
+      title: "Profile Picture",
+      dataIndex: "profilePicture",
+      key: "profilePicture",
+      render: (url) =>
+        url ? (
+          <img
+            src={url}
+            alt="Profile"
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              objectFit: "cover",
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              backgroundColor: "#f0f0f0",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#999",
+            }}
+          >
+            N/A
+          </div>
+        ),
+    },
+    {
+      title: "Role",
       dataIndex: "roleName",
       key: "roleName",
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: renderStatus,
     },
     {
-      title: "Thao tác",
+      title: "Actions",
       key: "action",
+      fixed: "right",
+      width: 150,
       render: (_, record) => (
         <Space>
           <Button type="primary" onClick={() => handleEditUserAccount(record)}>
-            Sửa
+            Edit
           </Button>
           <Popconfirm
-            title="Bạn có chắc muốn xóa tài khoản này?"
+            title="Are you sure you want to delete this account?"
             onConfirm={() => handleDeleteUserAccount(record.userId)}
-            okText="Có"
-            cancelText="Không"
+            okText="Yes"
+            cancelText="No"
           >
             <Button type="primary" danger>
-              Xóa
+              Delete
             </Button>
           </Popconfirm>
         </Space>
@@ -392,49 +523,49 @@ const Members = () => {
 
   const memberColumns = [
     {
-      title: "STT",
+      title: "No.",
       key: "index",
       width: 60,
       render: (_, __, index) => index + 1,
     },
     {
-      title: "Tên thành viên",
+      title: "Member Name",
       dataIndex: "memberName",
       key: "memberName",
     },
     {
-      title: "Liên hệ khẩn cấp",
+      title: "Emergency Contact",
       dataIndex: "emergencyContact",
       key: "emergencyContact",
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: renderStatus,
     },
     {
-      title: "Ghi chú",
+      title: "Notes",
       dataIndex: "notes",
       key: "notes",
       ellipsis: true,
     },
     {
-      title: "Thao tác",
+      title: "Actions",
       key: "action",
       render: (_, record) => (
         <Space>
           <Button type="primary" onClick={() => handleEditMember(record)}>
-            Sửa
+            Edit
           </Button>
           <Popconfirm
-            title="Bạn có chắc muốn xóa thành viên này?"
+            title="Are you sure you want to delete this member?"
             onConfirm={() => handleDeleteMember(record.memberId)}
-            okText="Có"
-            cancelText="Không"
+            okText="Yes"
+            cancelText="No"
           >
             <Button type="primary" danger>
-              Xóa
+              Delete
             </Button>
           </Popconfirm>
         </Space>
@@ -444,55 +575,55 @@ const Members = () => {
 
   const membershipColumns = [
     {
-      title: "STT",
+      title: "No.",
       key: "index",
       width: 60,
       render: (_, __, index) => index + 1,
     },
     {
-      title: "Tên thành viên",
+      title: "Member Name",
       dataIndex: "memberName",
       key: "memberName",
     },
     {
-      title: "Tên gói",
+      title: "Package Name",
       dataIndex: "packageName",
       key: "packageName",
     },
     {
-      title: "Ngày bắt đầu",
+      title: "Start Date",
       dataIndex: "startDate",
       key: "startDate",
       render: (date) => moment(date).format("DD/MM/YYYY"),
     },
     {
-      title: "Ngày kết thúc",
+      title: "End Date",
       dataIndex: "endDate",
       key: "endDate",
       render: (date) => moment(date).format("DD/MM/YYYY"),
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: renderStatus,
     },
     {
-      title: "Thao tác",
+      title: "Actions",
       key: "action",
       render: (_, record) => (
         <Space>
           <Button type="primary" onClick={() => handleEditMembership(record)}>
-            Sửa
+            Edit
           </Button>
           <Popconfirm
-            title="Bạn có chắc muốn xóa gói thành viên này?"
+            title="Are you sure you want to delete this membership?"
             onConfirm={() => handleDeleteMembership(record.memberMembershipId)}
-            okText="Có"
-            cancelText="Không"
+            okText="Yes"
+            cancelText="No"
           >
             <Button type="primary" danger>
-              Xóa
+              Delete
             </Button>
           </Popconfirm>
         </Space>
@@ -504,35 +635,53 @@ const Members = () => {
     <div className="members-container">
       <div className="members-header">
         <Title level={4} className="members-title">
-          Quản lý thành viên
+          Member Management
         </Title>
       </div>
 
       <Tabs activeKey={activeTab} onChange={setActiveTab}>
-        <TabPane tab="Quản lý tài khoản" key="1">
+        <TabPane tab="User Accounts" key="1">
           <div className="tab-header">
-            <Button type="primary" onClick={handleAddUserAccount}>
-              Thêm tài khoản mới
-            </Button>
+            <div className="tab-header-title">User Accounts List</div>
+            <div className="tab-header-actions">
+              <Button
+                type="primary"
+                onClick={handleAddUserAccount}
+                icon={<PlusOutlined />}
+              >
+                Add New Account
+              </Button>
+            </div>
           </div>
           <Table
             columns={userAccountColumns}
             dataSource={userAccounts}
             rowKey="userId"
             loading={loading}
+            scroll={{ x: 1300 }}
             pagination={{
               pageSize: 10,
               showSizeChanger: true,
-              showTotal: (total) => `Tổng ${total} tài khoản`,
+              showTotal: (total) => `Total ${total} accounts`,
+              showQuickJumper: true,
             }}
+            size="middle"
+            bordered
           />
         </TabPane>
 
-        <TabPane tab="Quản lý thành viên" key="2">
+        <TabPane tab="Members" key="2">
           <div className="tab-header">
-            <Button type="primary" onClick={handleAddMember}>
-              Thêm thành viên mới
-            </Button>
+            <div className="tab-header-title">Members List</div>
+            <div className="tab-header-actions">
+              <Button
+                type="primary"
+                onClick={handleAddMember}
+                icon={<PlusOutlined />}
+              >
+                Add New Member
+              </Button>
+            </div>
           </div>
           <Table
             columns={memberColumns}
@@ -542,16 +691,26 @@ const Members = () => {
             pagination={{
               pageSize: 10,
               showSizeChanger: true,
-              showTotal: (total) => `Tổng ${total} thành viên`,
+              showTotal: (total) => `Total ${total} members`,
+              showQuickJumper: true,
             }}
+            size="middle"
+            bordered
           />
         </TabPane>
 
-        <TabPane tab="Quản lý gói thành viên" key="3">
+        <TabPane tab="Memberships" key="3">
           <div className="tab-header">
-            <Button type="primary" onClick={handleAddMembership}>
-              Thêm gói thành viên mới
-            </Button>
+            <div className="tab-header-title">Memberships List</div>
+            <div className="tab-header-actions">
+              <Button
+                type="primary"
+                onClick={handleAddMembership}
+                icon={<PlusOutlined />}
+              >
+                Add New Membership
+              </Button>
+            </div>
           </div>
           <Table
             columns={membershipColumns}
@@ -561,158 +720,190 @@ const Members = () => {
             pagination={{
               pageSize: 10,
               showSizeChanger: true,
-              showTotal: (total) => `Tổng ${total} gói thành viên`,
+              showTotal: (total) => `Total ${total} memberships`,
+              showQuickJumper: true,
             }}
+            size="middle"
+            bordered
           />
         </TabPane>
       </Tabs>
 
-      {/* Modal quản lý tài khoản */}
+      {/* User Account Modal */}
       <Modal
-        title={editingUserAccount ? "Sửa tài khoản" : "Thêm tài khoản mới"}
+        title={editingUserAccount ? "Edit Account" : "Add New Account"}
         visible={userAccountModalVisible}
         onCancel={() => setUserAccountModalVisible(false)}
         footer={null}
+        width={700}
+        destroyOnClose
       >
         <Form
           form={userAccountForm}
           layout="vertical"
           onFinish={handleUserAccountSubmit}
         >
-          <Form.Item
-            name="username"
-            label="Username"
-            rules={[{ required: true, message: "Vui lòng nhập username" }]}
-          >
+          <div className="form-row">
+            <Form.Item
+              name="username"
+              label="Username"
+              className="form-col"
+              rules={[{ required: true, message: "Please enter username" }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="email"
+              label="Email"
+              className="form-col"
+              rules={[
+                { required: true, message: "Please enter email" },
+                { type: "email", message: "Invalid email format" },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+          </div>
+
+          <div className="form-row">
+            <Form.Item
+              name="phoneNumber"
+              label="Phone Number"
+              className="form-col"
+              rules={[{ required: true, message: "Please enter phone number" }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="name"
+              label="Full Name"
+              className="form-col"
+              rules={[{ required: true, message: "Please enter full name" }]}
+            >
+              <Input />
+            </Form.Item>
+          </div>
+
+          <div className="form-row">
+            <Form.Item name="gender" label="Gender" className="form-col">
+              <Select>
+                <Option value="Male">Male</Option>
+                <Option value="Female">Female</Option>
+                <Option value="Other">Other</Option>
+              </Select>
+            </Form.Item>
+            <Form.Item
+              name="dateOfBirth"
+              label="Date of Birth"
+              className="form-col"
+            >
+              <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
+            </Form.Item>
+          </div>
+
+          <Form.Item name="address" label="Address">
             <Input />
           </Form.Item>
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[
-              { required: true, message: "Vui lòng nhập email" },
-              { type: "email", message: "Email không hợp lệ" },
-            ]}
-          >
-            <Input />
+
+          <Form.Item name="profilePicture" label="Profile Picture URL">
+            <Input placeholder="Enter image URL (optional)" />
           </Form.Item>
-          <Form.Item
-            name="phoneNumber"
-            label="Số điện thoại"
-            rules={[{ required: true, message: "Vui lòng nhập số điện thoại" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="name"
-            label="Họ và tên"
-            rules={[{ required: true, message: "Vui lòng nhập họ và tên" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item name="gender" label="Giới tính">
-            <Select>
-              <Option value="Male">Nam</Option>
-              <Option value="Female">Nữ</Option>
-              <Option value="Other">Khác</Option>
-            </Select>
-          </Form.Item>
-          <Form.Item name="dateOfBirth" label="Ngày sinh">
-            <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item name="address" label="Địa chỉ">
-            <Input />
-          </Form.Item>
+
           {!editingUserAccount && (
             <Form.Item
               name="password"
-              label="Mật khẩu"
-              rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
+              label="Password"
+              rules={[{ required: true, message: "Please enter password" }]}
             >
               <Input.Password />
             </Form.Item>
           )}
-          {editingUserAccount && (
-            <Form.Item name="status" label="Trạng thái">
+
+          <div className="form-row">
+            <Form.Item name="status" label="Status" className="form-col">
               <Select>
-                <Option value="Active">Hoạt động</Option>
-                <Option value="Inactive">Không hoạt động</Option>
-                <Option value="Pending">Chờ xác nhận</Option>
+                <Option value="Active">Active</Option>
+                <Option value="Inactive">Inactive</Option>
+                <Option value="Pending">Pending</Option>
               </Select>
             </Form.Item>
-          )}
+
+            <Form.Item name="roleId" label="Role" className="form-col">
+              <Select>
+                <Option value={1}>Admin</Option>
+                <Option value={2}>Member</Option>
+              </Select>
+            </Form.Item>
+          </div>
+
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading}>
-              {editingUserAccount ? "Cập nhật" : "Thêm mới"}
-            </Button>
-            <Button
-              style={{ marginLeft: 8 }}
-              onClick={() => setUserAccountModalVisible(false)}
-            >
-              Hủy
-            </Button>
+            <Space>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                {editingUserAccount ? "Update" : "Add"}
+              </Button>
+              <Button onClick={() => setUserAccountModalVisible(false)}>
+                Cancel
+              </Button>
+            </Space>
           </Form.Item>
         </Form>
       </Modal>
 
-      {/* Modal quản lý thành viên */}
+      {/* Member Modal */}
       <Modal
-        title={editingMember ? "Sửa thành viên" : "Thêm thành viên mới"}
+        title={editingMember ? "Edit Member" : "Add New Member"}
         visible={memberModalVisible}
         onCancel={() => setMemberModalVisible(false)}
         footer={null}
+        destroyOnClose
       >
         <Form form={memberForm} layout="vertical" onFinish={handleMemberSubmit}>
           <Form.Item
             name="memberName"
-            label="Tên thành viên"
-            rules={[
-              { required: true, message: "Vui lòng nhập tên thành viên" },
-            ]}
+            label="Member Name"
+            rules={[{ required: true, message: "Please enter member name" }]}
           >
             <Input />
           </Form.Item>
           <Form.Item
             name="emergencyContact"
-            label="Liên hệ khẩn cấp"
+            label="Emergency Contact"
             rules={[
-              { required: true, message: "Vui lòng nhập liên hệ khẩn cấp" },
+              { required: true, message: "Please enter emergency contact" },
             ]}
           >
-            <Input placeholder="Tên - Số điện thoại" />
+            <Input placeholder="Name - Phone Number" />
           </Form.Item>
-          <Form.Item name="status" label="Trạng thái">
+          <Form.Item name="status" label="Status">
             <Select>
-              <Option value="Active">Hoạt động</Option>
-              <Option value="Inactive">Không hoạt động</Option>
-              <Option value="Pending">Chờ xác nhận</Option>
+              <Option value="Active">Active</Option>
+              <Option value="Inactive">Inactive</Option>
+              <Option value="Pending">Pending</Option>
             </Select>
           </Form.Item>
-          <Form.Item name="notes" label="Ghi chú">
+          <Form.Item name="notes" label="Notes">
             <TextArea rows={4} />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading}>
-              {editingMember ? "Cập nhật" : "Thêm mới"}
-            </Button>
-            <Button
-              style={{ marginLeft: 8 }}
-              onClick={() => setMemberModalVisible(false)}
-            >
-              Hủy
-            </Button>
+            <Space>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                {editingMember ? "Update" : "Add"}
+              </Button>
+              <Button onClick={() => setMemberModalVisible(false)}>
+                Cancel
+              </Button>
+            </Space>
           </Form.Item>
         </Form>
       </Modal>
 
-      {/* Modal quản lý gói thành viên */}
+      {/* Membership Modal */}
       <Modal
-        title={
-          editingMembership ? "Sửa gói thành viên" : "Thêm gói thành viên mới"
-        }
+        title={editingMembership ? "Edit Membership" : "Add New Membership"}
         visible={membershipModalVisible}
         onCancel={() => setMembershipModalVisible(false)}
         footer={null}
+        destroyOnClose
       >
         <Form
           form={membershipForm}
@@ -721,8 +912,8 @@ const Members = () => {
         >
           <Form.Item
             name="memberId"
-            label="Thành viên"
-            rules={[{ required: true, message: "Vui lòng chọn thành viên" }]}
+            label="Member"
+            rules={[{ required: true, message: "Please select a member" }]}
           >
             <Select>
               {members.map((member) => (
@@ -734,9 +925,9 @@ const Members = () => {
           </Form.Item>
           <Form.Item
             name="packageId"
-            label="Gói thành viên"
+            label="Membership Package"
             rules={[
-              { required: true, message: "Vui lòng chọn gói thành viên" },
+              { required: true, message: "Please select a membership package" },
             ]}
           >
             <Select>
@@ -747,37 +938,40 @@ const Members = () => {
               ))}
             </Select>
           </Form.Item>
-          <Form.Item
-            name="startDate"
-            label="Ngày bắt đầu"
-            rules={[{ required: true, message: "Vui lòng chọn ngày bắt đầu" }]}
-          >
-            <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item
-            name="endDate"
-            label="Ngày kết thúc"
-            rules={[{ required: true, message: "Vui lòng chọn ngày kết thúc" }]}
-          >
-            <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item name="status" label="Trạng thái">
+          <div className="form-row">
+            <Form.Item
+              name="startDate"
+              label="Start Date"
+              className="form-col"
+              rules={[{ required: true, message: "Please select start date" }]}
+            >
+              <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
+            </Form.Item>
+            <Form.Item
+              name="endDate"
+              label="End Date"
+              className="form-col"
+              rules={[{ required: true, message: "Please select end date" }]}
+            >
+              <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
+            </Form.Item>
+          </div>
+          <Form.Item name="status" label="Status">
             <Select>
-              <Option value="Active">Hoạt động</Option>
-              <Option value="Inactive">Không hoạt động</Option>
-              <Option value="Pending">Chờ xác nhận</Option>
+              <Option value="Active">Active</Option>
+              <Option value="Inactive">Inactive</Option>
+              <Option value="Pending">Pending</Option>
             </Select>
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading}>
-              {editingMembership ? "Cập nhật" : "Thêm mới"}
-            </Button>
-            <Button
-              style={{ marginLeft: 8 }}
-              onClick={() => setMembershipModalVisible(false)}
-            >
-              Hủy
-            </Button>
+            <Space>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                {editingMembership ? "Update" : "Add"}
+              </Button>
+              <Button onClick={() => setMembershipModalVisible(false)}>
+                Cancel
+              </Button>
+            </Space>
           </Form.Item>
         </Form>
       </Modal>
