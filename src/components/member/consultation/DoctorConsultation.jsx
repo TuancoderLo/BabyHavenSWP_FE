@@ -254,7 +254,6 @@ function DoctorConsultation() {
         return (
           <div className="doctor-consultation-form">
             <div className="doctor-category-container">
-              <div className="doctor-section-title">Select Consultation Category:</div>
               <select
                 className="doctor-category-select"
                 value={selectedCategory}
@@ -384,7 +383,7 @@ function DoctorConsultation() {
       <div className="doctor-grid-container">
         {/* Left Column: Child List */}
         <div className="doctor-child-column">
-          <h2 className="doctor-section-title">Your Children</h2>
+          {/* <h2 className="doctor-section-title">Your Children</h2> */}
           <div className="doctor-sidebar">
             {loading ? (
               <div className="loading-state">
@@ -407,8 +406,10 @@ function DoctorConsultation() {
                   className={`doctor-child-item ${selectedChild?.name === child.name ? "selected" : ""}`}
                   onClick={() => handleChildSelect(child)}
                 >
-                  <div className="doctor-child-icon"><i className="fas fa-child"></i></div>
-                  <div className="doctor-child-label">{child.name}</div>
+<div className="doctor-child-content">
+    <i className="fas fa-child"></i>
+    <span className="doctor-child-label">{child.name}</span>
+  </div>
                 </div>
               ))
             )}
