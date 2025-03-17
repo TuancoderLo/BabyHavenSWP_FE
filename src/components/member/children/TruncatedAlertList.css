@@ -1,0 +1,26 @@
+.truncated-alert-list {
+    position: relative;
+    /* Đảm bảo vùng hiển thị có scroll/ẩn bớt nếu cần */
+    overflow: hidden;
+    height: 100%; /* Chiếm hết chiều cao box cha */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  /* Lớp fade overlay chung ở cuối danh sách */
+  .fade-overlay-list {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(transparent, #fff); 
+    pointer-events: none;
+  }
+  
+  /* Mỗi alert cũng có thể bo góc, tuỳ ý. 
+     .fadeable { ... } 
+     .health-alert-content { ... } 
+  */
+  
