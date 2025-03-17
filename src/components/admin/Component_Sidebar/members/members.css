@@ -221,6 +221,14 @@
     flex-direction: column;
     gap: 0;
   }
+
+  .ant-table-content {
+    overflow-x: auto;
+  }
+
+  .hide-on-mobile {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {
@@ -270,4 +278,47 @@
     padding: 2px 6px;
     font-size: 12px;
   }
+}
+
+/* Styling cho button nhỏ */
+.ant-btn-sm {
+  height: 24px;
+  padding: 0 8px;
+  font-size: 12px;
+  border-radius: 2px;
+}
+
+/* Điều chỉnh khoảng cách trong Space */
+.ant-space-small {
+  gap: 4px !important;
+}
+
+/* Điều chỉnh cột Actions để tránh xuống dòng */
+.ant-table-cell .ant-space {
+  flex-wrap: nowrap;
+}
+
+/* Styling cho action buttons */
+.action-button {
+  height: 28px !important;
+  width: 28px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 4px !important;
+}
+
+.action-button .anticon {
+  font-size: 14px;
+}
+
+/* Điều chỉnh khoảng cách trong Space */
+.ant-space-small {
+  gap: 4px !important;
+}
+
+/* Đảm bảo cột Actions không bị xuống dòng */
+.ant-table-cell .ant-space {
+  flex-wrap: nowrap;
 }

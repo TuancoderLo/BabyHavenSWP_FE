@@ -12,13 +12,20 @@ import {
   Select,
   DatePicker,
   Space,
+  Menu,
+  Dropdown,
 } from "antd";
 import membershipApi from "../../../../services/memberShipApi";
 import userAccountsApi from "../../../../services/userAccountsApi";
 import { getAllMembers, updateMember } from "../../../../services/member";
 import moment from "moment";
 import "./members.css";
-import { PlusOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  MoreOutlined,
+} from "@ant-design/icons";
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -417,18 +424,22 @@ const Members = () => {
     {
       title: "No.",
       key: "index",
-      width: 60,
+      width: 50,
       render: (_, __, index) => index + 1,
     },
     {
-      title: "Full Name",
+      title: "Name",
       dataIndex: "name",
       key: "name",
+      width: 120,
+      ellipsis: true,
     },
     {
       title: "Username",
       dataIndex: "username",
       key: "username",
+      width: 100,
+      ellipsis: true,
     },
     {
       title: "Email",
@@ -450,7 +461,9 @@ const Members = () => {
       title: "Address",
       dataIndex: "address",
       key: "address",
+      width: 150,
       ellipsis: true,
+      className: "hide-on-mobile",
     },
     {
       title: "Profile Picture",
@@ -499,22 +512,29 @@ const Members = () => {
     {
       title: "Actions",
       key: "action",
-      fixed: "right",
-      width: 150,
+      width: 80,
       render: (_, record) => (
-        <Space>
-          <Button type="primary" onClick={() => handleEditUserAccount(record)}>
-            Edit
-          </Button>
+        <Space size="small">
+          <Button
+            type="primary"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => handleEditUserAccount(record)}
+            className="action-button"
+          />
           <Popconfirm
             title="Are you sure you want to delete this account?"
             onConfirm={() => handleDeleteUserAccount(record.userId)}
             okText="Yes"
             cancelText="No"
           >
-            <Button type="primary" danger>
-              Delete
-            </Button>
+            <Button
+              type="primary"
+              danger
+              size="small"
+              icon={<DeleteOutlined />}
+              className="action-button"
+            />
           </Popconfirm>
         </Space>
       ),
@@ -553,20 +573,29 @@ const Members = () => {
     {
       title: "Actions",
       key: "action",
+      width: 80,
       render: (_, record) => (
-        <Space>
-          <Button type="primary" onClick={() => handleEditMember(record)}>
-            Edit
-          </Button>
+        <Space size="small">
+          <Button
+            type="primary"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => handleEditMember(record)}
+            className="action-button"
+          />
           <Popconfirm
             title="Are you sure you want to delete this member?"
             onConfirm={() => handleDeleteMember(record.memberId)}
             okText="Yes"
             cancelText="No"
           >
-            <Button type="primary" danger>
-              Delete
-            </Button>
+            <Button
+              type="primary"
+              danger
+              size="small"
+              icon={<DeleteOutlined />}
+              className="action-button"
+            />
           </Popconfirm>
         </Space>
       ),
@@ -611,20 +640,29 @@ const Members = () => {
     {
       title: "Actions",
       key: "action",
+      width: 80,
       render: (_, record) => (
-        <Space>
-          <Button type="primary" onClick={() => handleEditMembership(record)}>
-            Edit
-          </Button>
+        <Space size="small">
+          <Button
+            type="primary"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => handleEditMembership(record)}
+            className="action-button"
+          />
           <Popconfirm
             title="Are you sure you want to delete this membership?"
             onConfirm={() => handleDeleteMembership(record.memberMembershipId)}
             okText="Yes"
             cancelText="No"
           >
-            <Button type="primary" danger>
-              Delete
-            </Button>
+            <Button
+              type="primary"
+              danger
+              size="small"
+              icon={<DeleteOutlined />}
+              className="action-button"
+            />
           </Popconfirm>
         </Space>
       ),
