@@ -42,6 +42,7 @@ const Members = () => {
   const [userAccountModalVisible, setUserAccountModalVisible] = useState(false);
   const [userAccountForm] = Form.useForm();
   const [editingUserAccount, setEditingUserAccount] = useState(null);
+  const [selectedRole, setSelectedRole] = useState("All");
 
   // State for Members
   const [members, setMembers] = useState([]);
@@ -419,6 +420,21 @@ const Members = () => {
     return <span className={className}>{status}</span>;
   };
 
+  // Thêm hàm render cho cột Role
+  const renderRole = (role) => {
+    let className = "";
+
+    if (role === "Admin") {
+      className = "role-admin";
+    } else if (role === "Doctor") {
+      className = "role-doctor";
+    } else {
+      className = "role-member";
+    }
+
+    return <span className={className}>{role}</span>;
+  };
+
   // ===== COLUMNS DEFINITIONS =====
   const userAccountColumns = [
     {
@@ -502,6 +518,7 @@ const Members = () => {
       title: "Role",
       dataIndex: "roleName",
       key: "roleName",
+      render: renderRole,
     },
     {
       title: "Status",
@@ -669,6 +686,17 @@ const Members = () => {
     },
   ];
 
+  // Thêm hàm để lọc dữ liệu theo role
+  const filteredUserAccounts = userAccounts.filter((account) => {
+    if (selectedRole === "All") return true;
+    return account.roleName === selectedRole;
+  });
+
+  // Thêm hàm xử lý khi thay đổi role
+  const handleRoleChange = (role) => {
+    setSelectedRole(role);
+  };
+
   return (
     <div className="members-container">
       <div className="members-header">
@@ -682,6 +710,36 @@ const Members = () => {
           <div className="tab-header">
             <div className="tab-header-title">User Accounts List</div>
             <div className="tab-header-actions">
+              <div className="role-filter">
+                <Button
+                  type={selectedRole === "All" ? "primary" : "default"}
+                  onClick={() => handleRoleChange("All")}
+                  className="filter-button"
+                >
+                  All
+                </Button>
+                <Button
+                  type={selectedRole === "Member" ? "primary" : "default"}
+                  onClick={() => handleRoleChange("Member")}
+                  className="filter-button"
+                >
+                  Member
+                </Button>
+                <Button
+                  type={selectedRole === "Doctor" ? "primary" : "default"}
+                  onClick={() => handleRoleChange("Doctor")}
+                  className="filter-button"
+                >
+                  Doctor
+                </Button>
+                <Button
+                  type={selectedRole === "Admin" ? "primary" : "default"}
+                  onClick={() => handleRoleChange("Admin")}
+                  className="filter-button"
+                >
+                  Admin
+                </Button>
+              </div>
               <Button
                 type="primary"
                 onClick={handleAddUserAccount}
@@ -693,7 +751,7 @@ const Members = () => {
           </div>
           <Table
             columns={userAccountColumns}
-            dataSource={userAccounts}
+            dataSource={filteredUserAccounts}
             rowKey="userId"
             loading={loading}
             scroll={{ x: 1300 }}
