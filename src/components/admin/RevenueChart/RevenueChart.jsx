@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Line, Bar } from "react-chartjs-2";
+import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
-  BarElement,
   Title,
   Tooltip,
   Legend,
@@ -20,7 +19,6 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
-  BarElement,
   Title,
   Tooltip,
   Legend,
@@ -29,7 +27,6 @@ ChartJS.register(
 
 const RevenueChart = () => {
   const [revenueData, setRevenueData] = useState([]);
-  const [memberData, setMemberData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -46,10 +43,6 @@ const RevenueChart = () => {
         // Giả lập dữ liệu doanh thu theo tháng
         const mockRevenueData = generateMockRevenueData();
         setRevenueData(mockRevenueData);
-
-        // Giả lập dữ liệu thành viên đăng ký theo tháng
-        const mockMemberData = generateMockMemberData();
-        setMemberData(mockMemberData);
 
         setLoading(false);
       } catch (err) {
@@ -95,36 +88,6 @@ const RevenueChart = () => {
     });
   };
 
-  // Tạo dữ liệu giả về số lượng thành viên đăng ký theo tháng
-  const generateMockMemberData = () => {
-    const months = [
-      "01",
-      "02",
-      "03",
-      "04",
-      "05",
-      "06",
-      "07",
-      "08",
-      "09",
-      "10",
-      "11",
-      "12",
-    ];
-    const currentYear = new Date().getFullYear();
-
-    // Tạo dữ liệu cho 12 tháng gần nhất
-    return months.map((month) => {
-      // Tạo số lượng thành viên mới ngẫu nhiên từ 20 đến 150
-      const newMembers = Math.floor(Math.random() * 130) + 20;
-
-      return {
-        month: `${month}/${currentYear}`,
-        newMembers: newMembers,
-      };
-    });
-  };
-
   // Chuẩn bị dữ liệu cho biểu đồ đường (doanh thu)
   const prepareRevenueChartData = () => {
     if (!revenueData.length) return null;
@@ -157,30 +120,10 @@ const RevenueChart = () => {
     };
   };
 
-  // Chuẩn bị dữ liệu cho biểu đồ cột (thành viên mới)
-  const prepareMemberChartData = () => {
-    if (!memberData.length) return null;
-
-    const labels = memberData.map((item) => item.month);
-    const newMembersData = memberData.map((item) => item.newMembers);
-
-    return {
-      labels,
-      datasets: [
-        {
-          label: "Thành viên mới đăng ký",
-          data: newMembersData,
-          backgroundColor: "rgba(75, 192, 192, 0.7)",
-          borderColor: "rgba(75, 192, 192, 1)",
-          borderWidth: 1,
-        },
-      ],
-    };
-  };
-
-  // Tùy chọn cho biểu đồ đường
-  const revenueChartOptions = {
+  // Thêm các tùy chọn này vào biểu đồ Line
+  const commonOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: "top",
@@ -227,30 +170,12 @@ const RevenueChart = () => {
     },
   };
 
-  // Tùy chọn cho biểu đồ cột
-  const memberChartOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top",
-      },
-      title: {
-        display: true,
-        text: "Thành viên mới đăng ký theo tháng",
-        font: {
-          size: 16,
-        },
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-      },
-    },
+  // Áp dụng vào revenueChartOptions
+  const revenueChartOptions = {
+    ...commonOptions,
   };
 
   const revenueChartData = prepareRevenueChartData();
-  const memberChartData = prepareMemberChartData();
 
   if (loading) return <div className="loading">Đang tải dữ liệu...</div>;
   if (error) return <div className="error">{error}</div>;
@@ -262,15 +187,6 @@ const RevenueChart = () => {
         {revenueChartData && (
           <div className="line-chart">
             <Line data={revenueChartData} options={revenueChartOptions} />
-          </div>
-        )}
-      </div>
-
-      <div className="chart-wrapper">
-        <h2>Thống kê thành viên mới</h2>
-        {memberChartData && (
-          <div className="bar-chart">
-            <Bar data={memberChartData} options={memberChartOptions} />
           </div>
         )}
       </div>

@@ -193,6 +193,15 @@ const PackageChart = () => {
 
   const pieChartData = preparePieChartData();
 
+  // Thêm tùy chọn này vào biểu đồ Pie
+  const pieChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false, // Quan trọng: cho phép biểu đồ thay đổi kích thước
+    plugins: {
+      // các tùy chọn khác giữ nguyên
+    },
+  };
+
   if (loading) return <div className="loading">Đang tải dữ liệu...</div>;
   if (error) return <div className="error">{error}</div>;
 
@@ -205,6 +214,7 @@ const PackageChart = () => {
             <Pie
               data={pieChartData}
               options={{
+                ...pieChartOptions,
                 plugins: {
                   tooltip: {
                     callbacks: {
