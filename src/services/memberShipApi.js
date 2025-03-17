@@ -24,6 +24,15 @@ const membershipApi = {
     // DELETE /api/MemberMemberships/{memberMembershipId}
     return api.delete(`MemberMemberships/${memberMembershipId}`);
   },
+
+  // Thêm các hàm mới
+  createMembership: (data) => {
+    return api.post("MemberMemberships", data);
+  },
+
+  updateMembership: (memberMembershipId, data) => {
+    return api.put(`MemberMemberships/${memberMembershipId}`, data);
+  },
 };
 
 export default membershipApi;
