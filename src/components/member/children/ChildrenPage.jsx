@@ -12,7 +12,7 @@ import ExpertAdvice from "../../../services/expertAdviceData";
 import AddRecordButton from './common/buttons/AddRecord';
 import AddMilestoneButton from './common/buttons/AddMilestone';
 import AddChildButton from './common/buttons/AddChild';
-
+import memberShipApi from "../../../services/memberShipApi";
 function ChildrenPage() {
   const navigate = useNavigate();
 
@@ -159,18 +159,51 @@ function ChildrenPage() {
   // Hàm chuyển sang trang thêm trẻ
   const [showAddChildModal, setShowAddChildModal] = useState(false);
 
-  const handleAddChild = () => {
-    setShowAddChildModal(true);
+  const handleAddChild = async () => {
+    try {
+      // 1) Gọi API lấy thông tin gói membership
+      const membershipRes = await memberShipApi.getMemberMembership(memberId);
+      // Thường trả về dạng { status: 1, message: '...', data: {...} }
+      // Tuỳ backend, bạn kiểm tra membershipRes.data.data hoặc membershipRes.data
+      const membershipData = membershipRes.data?.data;
+  
+      // 2) Giả sử membershipData có trường membershipPackageName = 'Free' | 'Standard' | 'Premium'
+      const membershipPackage = membershipData?.membershipPackageName; 
+      // Hoặc tuỳ API trả về, bạn thay đổi key cho đúng
+  
+      // 3) Xác định giới hạn trẻ
+      let maxChildren = 1; // Mặc định Free = 1
+      if (membershipPackage === "Standard") {
+        maxChildren = 2;
+      } else if (membershipPackage === "Premium") {
+        maxChildren = 6;
+      }
+      // (Nếu membershipPackage là "Free", maxChildren giữ nguyên = 1)
+  
+      // 4) Kiểm tra số trẻ hiện tại
+      if (childrenList.length >= maxChildren) {
+        alert(`You have reached the limit of ${maxChildren} children for the ${membershipPackage} plan. Please upgrade your plan.`);
+
+        return; // Không cho thêm
+      }
+  
+      // 5) Nếu còn slot, mở modal thêm trẻ
+      setShowAddChildModal(true);
+  
+    } catch (error) {
+      console.error("Error checking membership plan:", error);
+      // Tuỳ ý xử lý thêm, ví dụ alert
+      alert("Unable to check membership package. Please try again.");
+    }
   };
+  
 
   const closeOverlay = () => {
     setShowAddChildModal(false);
   };
 
   const [selectedTool, setSelectedTool] = useState("BMI");
-  const handleToolChange = (e) => {
-    setSelectedTool(e.target.value);
-  };
+ 
 
   // State to control the AddRecord overlay
   const [showAddRecordModal, setShowAddRecordModal] = useState(false);
