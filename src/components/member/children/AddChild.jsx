@@ -618,37 +618,6 @@ Step2Page3.propTypes = {
   onConfirm: PropTypes.func.isRequired,
   onOtherMeasure: PropTypes.func.isRequired,
 };
-// const Step3 = memo(({ childForm, onClose }) => {
-//   return (
-//     <div className="step3-container">
-//       <div className="step3-content">
-//         <h2>
-//           Congratulation, welcome <span className="baby-name">{childForm.name}</span> to <span className="babyhaven">BabyHaven</span>
-//         </h2>
-//       </div>
-
-//       <div className="step3-image">
-//         <img src={baby} alt="Baby" className="baby-image" />
-//       </div>
-//       <div className="step-buttons">
-//           <button type="button" onClick={onClose}>
-//             Close
-//           </button>
-//           </div>
-//     </div>
-
-//   );
-// });
-
-
-// Step3.displayName = "Step3";
-
-// Step3.propTypes = {
-//   childForm: PropTypes.shape({
-//     name: PropTypes.string,
-//   }).isRequired,
-//   onClose: PropTypes.func.isRequired,
-// };
 
 // ---------------------
 // Main AddChild component
@@ -1059,7 +1028,7 @@ const AddChild = ({ closeOverlay }) => {
             growthForm={growthForm}
             setGrowthForm={setGrowthForm}
             errors={errors}
-            onConfirm={handleConfirmStep1}
+            onConfirm={handleConfirmStep2}
           />
         );
       }
@@ -1070,12 +1039,12 @@ const AddChild = ({ closeOverlay }) => {
   return (
     <div className="add-child-overlay" onClick={handleOverlayClick}>
       <div className="add-child-wizard" onClick={(e) => e.stopPropagation()}>
-        {/* Nếu vẫn muốn nút X ở góc trên bên phải khi bước 3, bạn có thể ẩn/hiện theo ý muốn
+        {/* Nếu vẫn muốn nút X ở góc trên bên phải khi bước 3, bạn có thể ẩn/hiện theo ý muốn */}
         {currentStep !== 3 && (
           <button type="button" className="close-btn" onClick={closeOverlay}>
             ×
           </button>
-        )} */}
+        )}
 
         {/* CỘT TRÁI */}
         <div className="wizard-left">
