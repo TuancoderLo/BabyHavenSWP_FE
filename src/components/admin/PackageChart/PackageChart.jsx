@@ -7,34 +7,43 @@ import membershipApi from "../../../services/memberShipApi";
 // Đăng ký các thành phần cần thiết cho Chart.js
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
-const PackageChart = () => {
+const PackageChart = ({ onDataLoaded }) => {
   const [packageDistribution, setPackageDistribution] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [dataFetched, setDataFetched] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
+    if (!dataFetched) {
+      const fetchData = async () => {
+        try {
+          setLoading(true);
 
-        // Lấy dữ liệu từ API
-        const membershipsResponse = await membershipApi.getAllMemberships();
-        const memberships = membershipsResponse.data?.data || [];
+          // Lấy dữ liệu từ API
+          const membershipsResponse = await membershipApi.getAllMemberships();
+          const memberships = membershipsResponse.data?.data || [];
 
-        // Tính toán phân bố gói thành viên
-        const distribution = calculatePackageDistribution(memberships);
-        setPackageDistribution(distribution);
+          // Tính toán phân bố gói thành viên
+          const distribution = calculatePackageDistribution(memberships);
+          setPackageDistribution(distribution);
 
-        setLoading(false);
-      } catch (err) {
-        console.error("Lỗi khi tải dữ liệu:", err);
-        setError("Lỗi khi tải dữ liệu: " + (err.message || "Không xác định"));
-        setLoading(false);
-      }
-    };
+          // Gửi dữ liệu lên component cha nếu có callback
+          if (onDataLoaded) {
+            onDataLoaded(distribution);
+          }
 
-    fetchData();
-  }, []);
+          setDataFetched(true);
+          setLoading(false);
+        } catch (err) {
+          console.error("Lỗi khi tải dữ liệu:", err);
+          setError("Lỗi khi tải dữ liệu: " + (err.message || "Không xác định"));
+          setLoading(false);
+        }
+      };
+
+      fetchData();
+    }
+  }, [onDataLoaded, dataFetched]);
 
   // Tính toán phân bố gói thành viên
   const calculatePackageDistribution = (memberships) => {
