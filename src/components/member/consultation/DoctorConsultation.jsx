@@ -4,9 +4,7 @@ import childApi from "../../../services/childApi";
 import doctorApi from "../../../services/DoctorApi";
 import TextEditor from "../../../components/admin/Component_Sidebar/blog/textEditor";
 
-
 function ExpandableResponseCard({ response, onClick, limit = 100 }) {
-  // Kết hợp các phần của response thành một chuỗi
   const combinedText = `Date: ${response.responseDate} ${response.doctorName ? "By: " + response.doctorName : ""}. Greetings: ${response.content.greeting}. Approval: ${response.content.approvalMessage}. Advice: ${response.content.advice}. Follow-Up: ${response.content.followUp}`;
   const truncatedText = combinedText.length > limit ? combinedText.slice(0, limit) + "..." : combinedText;
 
@@ -37,8 +35,9 @@ function DoctorConsultation() {
   const [submitError, setSubmitError] = useState(null);
   const steps = ["Enter Information", "Select Doctor", "Confirm"];
   const [consultationResponses, setConsultationResponses] = useState([]);
-  const [selectedResponse, setSelectedResponse] = useState(null); // Để lưu response được chọn cho modal
-
+  const [selectedResponse, setSelectedResponse] = useState(null);
+  // Thêm state cho urgency
+  const [urgency, setUrgency] = useState("Low");
 
   useEffect(() => {
     fetchChildren();
@@ -123,19 +122,15 @@ function DoctorConsultation() {
     }
   };
 
-  // Hàm helper để chuyển content từ string thành object
   const parseContentToObject = (content) => {
     try {
-      // Nếu content là JSON, parse trực tiếp
       return JSON.parse(content);
     } catch (e) {
-      // Nếu không phải JSON, phân tách chuỗi thành object
       const lines = content.split("\r\n\r\n");
       const greeting = lines[0] || "";
       const approvalMessage = lines[1] || "";
       const adviceLines = lines.slice(2, lines.length - 1).join("\n");
       const followUp = lines[lines.length - 1] || "";
-
       return {
         greeting,
         approvalMessage,
@@ -144,30 +139,26 @@ function DoctorConsultation() {
       };
     }
   };
-      // Parse content từ string thành object
-      const fetchConsultationResponses = async () => {
-        try {
-          const res = await doctorApi.getConsultationResponse();
-          console.log("Raw consultation response:", res);
-          let responses = [];
-          if (res && res.data) {
-            responses = Array.isArray(res.data) ? res.data : [res.data];
-          }
-          console.log("All responses:", responses);
-    
-          // Parse content từ string thành object
-          const parsedResponses = responses.map((item) => ({
-            ...item,
-            content: parseContentToObject(item.content),
-          }));
-    
-          // Không lọc, sử dụng toàn bộ parsedResponses
-          console.log("Parsed responses:", parsedResponses);
-          setConsultationResponses(parsedResponses);
-        } catch (error) {
-          console.error("Error fetching consultation responses:", error);
-        }
-      };
+
+  const fetchConsultationResponses = async () => {
+    try {
+      const res = await doctorApi.getConsultationResponse();
+      console.log("Raw consultation response:", res);
+      let responses = [];
+      if (res && res.data) {
+        responses = Array.isArray(res.data) ? res.data : [res.data];
+      }
+      console.log("All responses:", responses);
+      const parsedResponses = responses.map((item) => ({
+        ...item,
+        content: parseContentToObject(item.content),
+      }));
+      console.log("Parsed responses:", parsedResponses);
+      setConsultationResponses(parsedResponses);
+    } catch (error) {
+      console.error("Error fetching consultation responses:", error);
+    }
+  };
 
   const handleChildSelect = (child) => {
     setSelectedChild(child);
@@ -221,8 +212,9 @@ function DoctorConsultation() {
         childBirth: selectedChild.childBirth,
         doctorId: selectedDoctor.doctorId,
         requestDate: requestDate,
-        status: selectedDoctor.status.toLowerCase() === "active" ? 1 : 0,
-        urgency: "high",
+        status: "pending",
+        // Sử dụng state urgency thay cho giá trị cố định
+        urgency: urgency,
         ...(selectedCategory && { category: selectedCategory }),
         description: plainDescription,
       };
@@ -261,13 +253,26 @@ function DoctorConsultation() {
                 disabled={loadingCategories}
               >
                 <option value="">Select category</option>
-                <option value="General Health">General Health</option>
-                <option value="Nutrition">Nutrition</option>
-                <option value="Mental Health">Mental Health</option>
-                <option value="Motor Development">Motor Development</option>
-                <option value="Others">Khác</option>
+                <option value="General Health">Nutrition</option>
+                <option value="Nutrition">Growth</option>
+                <option value="Mental Health">Health</option>
+                <option value="Motor Development">Psychology</option>
+                <option value="Others">Other</option>
               </select>
               {loadingCategories && <div className="loading-spinner-small"></div>}
+            </div>
+            {/* Thêm select cho Urgency */}
+            <div className="doctor-urgency-container">
+              <select
+                className="doctor-urgency-select"
+                value={urgency}
+                onChange={(e) => setUrgency(e.target.value)}
+              >
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="Hight">Hight</option>
+                <option value="Critical">Critical</option>
+              </select>
             </div>
             <div className="doctor-editor-container">
               <div className="doctor-section-title">Consultation Details:</div>
@@ -330,6 +335,9 @@ function DoctorConsultation() {
                   dangerouslySetInnerHTML={{ __html: consultationContent }}
                 />
               </div>
+              <div style={{ marginTop: "15px" }}>
+                <strong>Urgency:</strong> {urgency}
+              </div>
             </div>
             {selectedDoctor && (
               <div className="doctor-review-selection">
@@ -381,9 +389,7 @@ function DoctorConsultation() {
   return (
     <div className="doctor-consultation">
       <div className="doctor-grid-container">
-        {/* Left Column: Child List */}
         <div className="doctor-child-column">
-          {/* <h2 className="doctor-section-title">Your Children</h2> */}
           <div className="doctor-sidebar">
             {loading ? (
               <div className="loading-state">
@@ -406,17 +412,16 @@ function DoctorConsultation() {
                   className={`doctor-child-item ${selectedChild?.name === child.name ? "selected" : ""}`}
                   onClick={() => handleChildSelect(child)}
                 >
-<div className="doctor-child-content">
-    <i className="fas fa-child"></i>
-    <span className="doctor-child-label">{child.name}</span>
-  </div>
+                  <div className="doctor-child-content">
+                    <i className="fas fa-child"></i>
+                    <span className="doctor-child-label">{child.name}</span>
+                  </div>
                 </div>
               ))
             )}
           </div>
         </div>
 
-        {/* Center Column: Request Section */}
         <div className="doctor-request-column">
           <div className="doctor-request">
             <div className="doctor-steps">
@@ -444,7 +449,6 @@ function DoctorConsultation() {
           </div>
         </div>
 
-        {/* Right Column: Response Section */}
         <div className="doctor-response-column">
           <h3 className="section-title">Consultation Responses</h3>
           <div className="doctor-response">
@@ -458,7 +462,6 @@ function DoctorConsultation() {
           </div>
         </div>
       </div>
-      {/* Modal Overlay hiển thị đầy đủ response */}
       {selectedResponse && (
         <div className="modal-overlay" onClick={() => setSelectedResponse(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -478,7 +481,7 @@ function DoctorConsultation() {
           </div>
         </div>
       )}
-      </div>
+    </div>
   );
 }
 
