@@ -1,64 +1,58 @@
-/* Reset */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
 
-body {
-  background: #f8f9fa;
-}
 
 /* Main Container */
 .doctor-consultation {
-  height: calc(100vh - 64px);
+  min-height: calc(100vh - 64px);
   padding: 20px;
-  background: linear-gradient(135deg, #FFF0F5, #F0F7FF);
+  display: flex;
+  flex-direction: column;
 }
 
 /* Grid Container */
 .doctor-grid-container {
+  flex: 1;
   display: grid;
-  grid-template-columns: 250px 1fr 300px;
+  grid-template-columns: 200px 1.2fr 250px;
   gap: 20px;
   height: 100%;
 }
 
 /* Left Column: Child List */
-.doctor-child-column {
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  height: 100%;
-  overflow-y: auto;
-}
-
 .doctor-child-item {
   background: linear-gradient(135deg, #ffffff, #f8fdff);
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 12px;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: grid;
+  gap: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  height: 85px;
+  position: relative;
 }
 
-.doctor-child-item:hover {
-  background: linear-gradient(135deg, #FFB6C1, #FFECF0);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
+/* .doctor-child-item:hover {
+  background: linear-gradient(135deg, #917bff, #f7c3ff);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+} */
 
 .doctor-child-item.selected {
-  border-left: 4px solid #66C7C4;
-  background: #fff;
+  border-color: #064F83;
+  background: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.doctor-child-icon i {
+/* Nếu bạn muốn điều chỉnh lại icon và label bên trong (nếu chưa có) */
+.doctor-child-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.doctor-child-content i {
   font-size: 18px;
-  color: #FF69B4;
+  color: #064F83;
 }
 
 .doctor-child-label {
@@ -67,42 +61,42 @@ body {
   color: #333;
 }
 
+
 /* Center Column: Request Section */
 .doctor-request-column {
+  display: flex;
+  flex-direction: column;
   background: #fff;
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .doctor-request {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
 }
 
 .doctor-steps {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
-  background: #f8f9fa;
-  padding: 10px;
-  border-radius: 8px;
 }
 
 .doctor-step-item {
-  font-size: 14px;
-  color: #666;
+  font-size: 16px;
+  color: #333;
+  font-weight: 500;
   text-align: center;
   flex: 1;
-  padding: 5px 0;
   position: relative;
 }
 
 .doctor-step-item.active {
-  color: #66C7C4;
+  color: #00D0BC;
   font-weight: 600;
 }
 
@@ -117,21 +111,21 @@ body {
 }
 
 .doctor-step-item.active::after {
-  background: #66C7C4;
+  background: #00D0BC;
 }
 
 .doctor-form-content {
   flex: 1;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  overflow-y: auto; /* có thể bật scroll nếu nội dung quá dài */
 }
 
 .doctor-section-title {
   font-size: 18px;
   font-weight: bold;
-  color: #66C7C4;
+  color: #00D0BC;
   margin-bottom: 15px;
 }
 
@@ -145,9 +139,13 @@ body {
 }
 
 .doctor-editor-container {
-  background: #f8f9fa;
+  flex: 1;             /* để tự giãn theo chiều dọc */
+  min-height: 400px;   /* chiều cao tối thiểu, bạn có thể tăng lên 500px,... */
+  background: #f9f9f9;
   padding: 12px;
   border-radius: 6px;
+  overflow-y: auto;
+  margin-top: 12px;        /* Cho phép scroll nếu nội dung vượt quá chiều cao */
 }
 
 /* Doctor Selection */
@@ -171,14 +169,13 @@ body {
 }
 
 .doctor-card.selected {
-  border: 2px solid #66C7C4;
+  border: 2px solid #00D0BC;
 }
 
 /* Navigation Buttons */
 .doctor-navigation-buttons {
   display: flex;
   justify-content: space-between;
-  margin-top: 20px;
 }
 
 .doctor-back-button, .doctor-next-button, .doctor-action-button {
@@ -214,7 +211,7 @@ body {
 .section-title {
   font-size: 18px;
   font-weight: bold;
-  color: #66C7C4;
+  color: #00D0BC;
   margin-bottom: 15px;
 }
 
