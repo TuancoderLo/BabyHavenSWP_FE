@@ -37,6 +37,7 @@ const userAccountsApi = {
       dateOfBirth: data.dateOfBirth,
       address: data.address?.trim(),
       status: data.status || 0,
+      ...(data.password ? { password: data.password } : {}),
     };
 
     return api.put(`UserAccounts/${id}`, formattedData);
@@ -48,6 +49,10 @@ const userAccountsApi = {
 
   getParentCategories: (id) => {
     return api.get(`UserAccounts/${id}`);
+  },
+
+  updateStatus: (id, status) => {
+    return api.patch(`UserAccounts/${id}/status`, { status });
   },
 };
 

@@ -17,7 +17,12 @@ import {
 } from "antd";
 import membershipApi from "../../../../services/memberShipApi";
 import userAccountsApi from "../../../../services/userAccountsApi";
-import { getAllMembers, updateMember } from "../../../../services/member";
+import {
+  getAllMembers,
+  updateMember,
+  deleteMember,
+  createMember,
+} from "../../../../services/member";
 import moment from "moment";
 import "./members.css";
 import {
@@ -73,16 +78,14 @@ const Members = () => {
   const fetchUserAccounts = async () => {
     try {
       setLoading(true);
-      // Direct API call to ensure we get all fields
-      const response = await fetch("https://localhost:7279/api/UserAccounts");
-      const data = await response.json();
+      const response = await userAccountsApi.getAll();
 
-      if (Array.isArray(data)) {
-        setUserAccounts(data);
-      } else if (data && Array.isArray(data.data)) {
-        setUserAccounts(data.data);
+      if (Array.isArray(response.data)) {
+        setUserAccounts(response.data);
+      } else if (response.data && Array.isArray(response.data.data)) {
+        setUserAccounts(response.data.data);
       } else {
-        console.log("Data is not an array:", data);
+        console.log("Data is not an array:", response.data);
         setUserAccounts([]);
       }
     } catch (error) {
@@ -121,20 +124,9 @@ const Members = () => {
   const handleDeleteUserAccount = async (userId) => {
     try {
       setLoading(true);
-      // Direct API call
-      const response = await fetch(
-        `https://localhost:7279/api/UserAccounts/${userId}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (response.ok) {
-        message.success("User account deleted successfully");
-        fetchUserAccounts();
-      } else {
-        throw new Error("Failed to delete user account");
-      }
+      await userAccountsApi.delete(userId);
+      message.success("User account deleted successfully");
+      fetchUserAccounts();
     } catch (error) {
       console.error("Error deleting user account:", error);
       message.error("Could not delete user account");
@@ -159,7 +151,6 @@ const Members = () => {
           : null,
         address: values.address?.trim(),
         password: values.password,
-        profilePicture: values.profilePicture || null,
         status:
           typeof values.status === "string"
             ? values.status === "Active"
@@ -172,51 +163,25 @@ const Members = () => {
       };
 
       if (editingUserAccount) {
-        // Update existing user account
-        const response = await fetch(
-          `https://localhost:7279/api/UserAccounts/${editingUserAccount.userId}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId: editingUserAccount.userId,
-              ...formattedData,
-            }),
-          }
-        );
-
-        if (response.ok) {
-          message.success("User account updated successfully");
-        } else {
-          throw new Error("Failed to update user account");
-        }
+        // Cập nhật tài khoản hiện có
+        await userAccountsApi.update(editingUserAccount.userId, formattedData);
+        message.success("User account updated successfully");
       } else {
-        // Create new user account
-        const response = await fetch(
-          "https://localhost:7279/api/UserAccounts",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formattedData),
-          }
-        );
-
-        if (response.ok) {
-          message.success("User account created successfully");
-        } else {
-          throw new Error("Failed to create user account");
+        // Tạo tài khoản mới
+        if (!values.password) {
+          message.error("Password is required when creating a new account");
+          setLoading(false);
+          return;
         }
+        await userAccountsApi.create(formattedData);
+        message.success("User account created successfully");
       }
 
       setUserAccountModalVisible(false);
       fetchUserAccounts();
     } catch (error) {
       console.error("Error saving user account:", error);
-      message.error("Could not save user account");
+      message.error(error.message || "Could not save user account");
     } finally {
       setLoading(false);
     }
@@ -260,10 +225,7 @@ const Members = () => {
   const handleDeleteMember = async (memberId) => {
     try {
       setLoading(true);
-      // API call to delete member
-      await fetch(`https://localhost:7279/api/Members/${memberId}`, {
-        method: "DELETE",
-      });
+      await deleteMember(memberId);
       message.success("Member deleted successfully");
       fetchMembers();
     } catch (error) {
@@ -278,17 +240,15 @@ const Members = () => {
     try {
       setLoading(true);
       if (editingMember) {
-        await updateMember(editingMember.memberId, values);
+        // Đảm bảo có userId khi cập nhật member
+        const updateData = {
+          ...values,
+          userId: editingMember.userId, // Giữ lại userId từ member hiện tại
+        };
+        await updateMember(editingMember.memberId, updateData);
         message.success("Member updated successfully");
       } else {
-        // API call to create member
-        await fetch("https://localhost:7279/api/Members", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        });
+        await createMember(values);
         message.success("Member created successfully");
       }
       setMemberModalVisible(false);
@@ -372,27 +332,13 @@ const Members = () => {
     try {
       setLoading(true);
       if (editingMembership) {
-        // API call to update membership
-        await fetch(
-          `https://localhost:7279/api/MemberMemberships/${editingMembership.memberMembershipId}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(values),
-          }
+        await membershipApi.updateMembership(
+          editingMembership.memberMembershipId,
+          values
         );
         message.success("Membership updated successfully");
       } else {
-        // API call to create membership
-        await fetch("https://localhost:7279/api/MemberMemberships", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        });
+        await membershipApi.createMembership(values);
         message.success("Membership created successfully");
       }
       setMembershipModalVisible(false);
@@ -905,15 +851,28 @@ const Members = () => {
             <Input placeholder="Enter image URL (optional)" />
           </Form.Item>
 
-          {!editingUserAccount && (
-            <Form.Item
-              name="password"
-              label="Password"
-              rules={[{ required: true, message: "Please enter password" }]}
-            >
-              <Input.Password />
-            </Form.Item>
-          )}
+          <Form.Item
+            name="password"
+            label={
+              editingUserAccount
+                ? "New Password (Leave blank to keep current)"
+                : "Password"
+            }
+            rules={[
+              {
+                required: !editingUserAccount,
+                message: "Please enter password",
+              },
+            ]}
+          >
+            <Input.Password
+              placeholder={
+                editingUserAccount
+                  ? "Enter new password or leave blank"
+                  : "Enter password"
+              }
+            />
+          </Form.Item>
 
           <div className="form-row">
             <Form.Item name="status" label="Status" className="form-col">
