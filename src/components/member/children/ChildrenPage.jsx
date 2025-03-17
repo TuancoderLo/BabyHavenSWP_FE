@@ -673,7 +673,7 @@ const handleConnectDoctor = () => {
             </div>
           </div>
 
-          {/* Action buttons */}
+          {/* Action buttons
           <button className="action-button child-education-section">
             Child Education
           </button>
@@ -694,7 +694,7 @@ const handleConnectDoctor = () => {
             onClick={handleAddRecord}
           >
             Add Growth Record
-          </button>
+          </button> */}
         </>
       )}
 
