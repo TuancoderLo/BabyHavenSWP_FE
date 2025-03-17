@@ -21,6 +21,12 @@
   margin: 0;
 }
 
+.tab-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
 .members-table {
   margin-top: 16px;
 }
@@ -47,16 +53,28 @@
 .status-active {
   color: #52c41a;
   font-weight: 500;
+  padding: 2px 8px;
+  background-color: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 4px;
 }
 
 .status-inactive {
   color: #ff4d4f;
   font-weight: 500;
+  padding: 2px 8px;
+  background-color: #fff1f0;
+  border: 1px solid #ffa39e;
+  border-radius: 4px;
 }
 
 .status-pending {
   color: #faad14;
   font-weight: 500;
+  padding: 2px 8px;
+  background-color: #fffbe6;
+  border: 1px solid #ffe58f;
+  border-radius: 4px;
 }
 
 .member-name {
@@ -71,4 +89,50 @@
 .index-column {
   text-align: center;
   font-weight: 500;
+}
+
+/* Styling cho tabs */
+.ant-tabs-nav {
+  margin-bottom: 20px;
+}
+
+.ant-tabs-tab {
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #1890ff;
+  font-weight: 600;
+}
+
+/* Styling cho form */
+.ant-form-item-label > label {
+  font-weight: 500;
+}
+
+.ant-modal-header {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+.ant-modal-title {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+/* Responsive styling */
+@media (max-width: 768px) {
+  .members-container {
+    padding: 16px;
+  }
+
+  .ant-tabs-tab {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .tab-header {
+    margin-bottom: 12px;
+  }
 }
