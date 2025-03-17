@@ -1,5 +1,5 @@
 // src/pages/Admin/Admin.jsx
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import SidebarHover from "../../components/admin/Sidebar/SidebarHover";
 import Topbar from "../../components/admin/Topbar/Topbar";
@@ -10,6 +10,36 @@ import "./Admin.css";
 
 function Admin() {
   const location = useLocation();
+  // State để theo dõi biểu đồ đang được hiển thị
+  const [activeChart, setActiveChart] = useState("revenue");
+  // State để lưu trữ dữ liệu từ PackageChart
+  const [packageData, setPackageData] = useState({
+    totalMembers: 0,
+    mostPopularPackage: "N/A",
+    conversionRate: 0,
+  });
+
+  // Sử dụng useCallback để tránh tạo lại hàm mỗi khi component re-render
+  const handlePackageDataLoaded = useCallback((data) => {
+    if (!data || !data.counts) return;
+
+    // Tính tỷ lệ chuyển đổi (người dùng không dùng gói Free)
+    const conversionRate =
+      data.total > 0 ? ((data.total - data.counts.Free) / data.total) * 100 : 0;
+
+    // Tìm gói phổ biến nhất
+    const mostPopularPackage =
+      Object.entries(data.counts || {})
+        .sort((a, b) => b[1] - a[1])
+        .filter(([name, count]) => count > 0)
+        .map(([name]) => name)[0] || "N/A";
+
+    setPackageData({
+      totalMembers: data.total || 0,
+      mostPopularPackage,
+      conversionRate: conversionRate.toFixed(1),
+    });
+  }, []); // Không có dependencies, chỉ tạo một lần
 
   return (
     <div className="admin-container">
@@ -25,34 +55,83 @@ function Admin() {
           {/* Hiển thị dashboard khi ở trang admin chính */}
           {location.pathname === "/admin" && (
             <div className="admin-dashboard">
-              <div className="chart-grid">
-                <div className="chart-item">
-                  <h3>Thống kê doanh thu</h3>
-                  <RevenueChart />
-                </div>
-                <div className="chart-item">
-                  <h3>Phân bố người dùng theo gói dịch vụ</h3>
-                  <PackageChart />
-                </div>
-                <div className="chart-item">
-                  <h3>Thống kê thành viên mới</h3>
-                  <MemberChart />
-                </div>
-                <div className="info-item">
-                  <h3>Tóm tắt doanh thu</h3>
-                  <p>Tổng doanh thu tháng này: 50.000.000 VNĐ</p>
-                  <p>Tăng trưởng: +15% so với tháng trước</p>
-                </div>
-                <div className="info-item">
-                  <h3>Tóm tắt gói dịch vụ</h3>
-                  <p>Gói phổ biến nhất: Premium</p>
-                  <p>Tỷ lệ chuyển đổi: 25%</p>
-                </div>
-                <div className="info-item">
-                  <h3>Tóm tắt hoạt động</h3>
-                  <p>Người dùng hoạt động: 1.250</p>
-                  <p>Thời gian trung bình: 45 phút/ngày</p>
-                </div>
+              {/* Nút chuyển đổi biểu đồ */}
+              <div className="chart-tabs">
+                <button
+                  className={`chart-tab ${
+                    activeChart === "revenue" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveChart("revenue")}
+                >
+                  Thống kê doanh thu
+                </button>
+                <button
+                  className={`chart-tab ${
+                    activeChart === "package" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveChart("package")}
+                >
+                  Phân bố gói dịch vụ
+                </button>
+                <button
+                  className={`chart-tab ${
+                    activeChart === "member" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveChart("member")}
+                >
+                  Thống kê thành viên mới
+                </button>
+              </div>
+
+              {/* Hiển thị biểu đồ tương ứng */}
+              <div className="chart-container">
+                {activeChart === "revenue" && (
+                  <div className="chart-item active">
+                    <h3>Thống kê doanh thu</h3>
+                    <RevenueChart />
+                  </div>
+                )}
+
+                {activeChart === "package" && (
+                  <div className="chart-item active">
+                    <h3>Phân bố người dùng theo gói dịch vụ</h3>
+                    <PackageChart onDataLoaded={handlePackageDataLoaded} />
+                  </div>
+                )}
+
+                {activeChart === "member" && (
+                  <div className="chart-item active">
+                    <h3>Thống kê thành viên mới</h3>
+                    <MemberChart />
+                  </div>
+                )}
+              </div>
+
+              {/* Thông tin tóm tắt */}
+              <div className="info-grid">
+                {activeChart === "revenue" && (
+                  <div className="info-item">
+                    <h3>Tóm tắt doanh thu</h3>
+                    <p>Doanh thu tháng này: 45,000,000 VND</p>
+                    <p>Tăng trưởng: +15% so với tháng trước</p>
+                  </div>
+                )}
+
+                {activeChart === "package" && (
+                  <div className="info-item">
+                    <h3>Tóm tắt gói dịch vụ</h3>
+                    <p>Gói phổ biến nhất: {packageData.mostPopularPackage}</p>
+                    <p>Tỷ lệ chuyển đổi: {packageData.conversionRate}%</p>
+                  </div>
+                )}
+
+                {activeChart === "member" && (
+                  <div className="info-item">
+                    <h3>Tóm tắt thành viên</h3>
+                    <p>Thành viên mới tháng này: 24</p>
+                    <p>Tổng số thành viên: {packageData.totalMembers}</p>
+                  </div>
+                )}
               </div>
             </div>
           )}

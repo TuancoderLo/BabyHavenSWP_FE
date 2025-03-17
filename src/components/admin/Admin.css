@@ -224,3 +224,73 @@
   max-height: 100%;
   width: 100%;
 }
+
+/* Nút chuyển đổi biểu đồ */
+.chart-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.chart-tab {
+  padding: 10px 15px;
+  background-color: #f5f5f5;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #555;
+  transition: all 0.3s ease;
+}
+
+.chart-tab:hover {
+  background-color: #e0e0e0;
+}
+
+.chart-tab.active {
+  background-color: #2196f3;
+  color: white;
+}
+
+/* Container cho biểu đồ */
+.chart-container {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+  min-height: 400px;
+}
+
+.chart-item {
+  display: none;
+}
+
+.chart-item.active {
+  display: block;
+}
+
+/* Thông tin tóm tắt */
+.info-grid {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .chart-tabs {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .chart-tab {
+    width: 100%;
+    text-align: center;
+  }
+}
