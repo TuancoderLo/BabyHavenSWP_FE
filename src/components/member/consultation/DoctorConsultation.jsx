@@ -212,7 +212,7 @@ function DoctorConsultation() {
         childBirth: selectedChild.childBirth,
         doctorId: selectedDoctor.doctorId,
         requestDate: requestDate,
-        status: "pending",
+         status: "pending",
         // Sử dụng state urgency thay cho giá trị cố định
         urgency: urgency,
         ...(selectedCategory && { category: selectedCategory }),
@@ -246,19 +246,18 @@ function DoctorConsultation() {
         return (
           <div className="doctor-consultation-form">
             <div className="doctor-category-container">
-              <select
-                className="doctor-category-select"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                disabled={loadingCategories}
-              >
-                <option value="">Select category</option>
-                <option value="General Health">Nutrition</option>
-                <option value="Nutrition">Growth</option>
-                <option value="Mental Health">Health</option>
-                <option value="Motor Development">Psychology</option>
-                <option value="Others">Other</option>
-              </select>
+            <select
+  className="doctor-category-select"
+  value={selectedCategory}
+  onChange={(e) => setSelectedCategory(e.target.value)}
+>
+  <option value="">Select category</option>
+  <option value="Nutrition">Nutrition</option>
+  <option value="Growth">Growth</option>
+  <option value="Health">Health</option>
+  <option value="Psychology">Psychology</option>
+  <option value="Other">Other</option>
+</select>
               {loadingCategories && <div className="loading-spinner-small"></div>}
             </div>
             {/* Thêm select cho Urgency */}
