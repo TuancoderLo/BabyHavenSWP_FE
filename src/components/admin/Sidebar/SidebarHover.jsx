@@ -16,24 +16,17 @@ import { useNavigate, Link } from "react-router-dom";
 import Logo from "../../../assets/Logo.png";
 
 function SidebarHover() {
-  // State: khi hover (hoặc di chuột vào logo) => expanded = true
-  const [expanded, setExpanded] = useState(false);
+  const [activeItem, setActiveItem] = useState(window.location.pathname);
   const navigate = useNavigate();
-
-  const handleMouseEnter = () => setExpanded(true);
-  const handleMouseLeave = () => setExpanded(false);
 
   const handleLogout = () => {
     console.log("Sign out clicked");
     localStorage.clear();
-    navigate("/login"); // hoặc navigate("/")
+    navigate("/login");
   };
+
   return (
-    <div
-      className={`admin-sidebar-hover ${expanded ? "expanded" : ""}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
+    <div className="admin-sidebar-hover">
       {/* Logo */}
       <div className="sidebar-logo">
         <img src={Logo} alt="BabyHaven" />
@@ -41,57 +34,69 @@ function SidebarHover() {
 
       {/* Menu */}
       <ul className="admin-sidebar-menu">
-        <li>
-          <Link to="/homepage">
+        <li className={activeItem === "/homepage" ? "active" : ""}>
+          <Link to="/homepage" onClick={() => setActiveItem("/homepage")}>
             <FaHome className="admin-icon" />
-            {expanded && <span>Home</span>}
+            <span>Trang chủ</span>
           </Link>
         </li>
-        <li>
-          <Link to="/admin">
+        <li className={activeItem === "/admin" ? "active" : ""}>
+          <Link to="/admin" onClick={() => setActiveItem("/admin")}>
             <FaChartLine className="admin-icon" />
-            {expanded && <span>Dashboard</span>}
+            <span>Dashboard</span>
           </Link>
         </li>
-        <li>
-          <Link to="/admin/blog">
+        <li className={activeItem === "/admin/blog" ? "active" : ""}>
+          <Link to="/admin/blog" onClick={() => setActiveItem("/admin/blog")}>
             <MdArticle className="admin-icon" />
-            {expanded && <span>Blog</span>}
+            <span>Bài viết</span>
           </Link>
         </li>
-        <li>
-          <Link to="/admin/members">
+        <li className={activeItem === "/admin/members" ? "active" : ""}>
+          <Link
+            to="/admin/members"
+            onClick={() => setActiveItem("/admin/members")}
+          >
             <FaUsers className="admin-icon" />
-            {expanded && <span>Members</span>}
+            <span>Thành viên</span>
           </Link>
         </li>
-        <li>
-          <Link to="/admin/packages">
+        <li className={activeItem === "/admin/packages" ? "active" : ""}>
+          <Link
+            to="/admin/packages"
+            onClick={() => setActiveItem("/admin/packages")}
+          >
             <FaBox className="admin-icon" />
-            {expanded && <span>Packages</span>}
+            <span>Gói dịch vụ</span>
           </Link>
         </li>
-        <li>
-          <Link to="/admin/inbox">
+        <li className={activeItem === "/admin/inbox" ? "active" : ""}>
+          <Link to="/admin/inbox" onClick={() => setActiveItem("/admin/inbox")}>
             <FaEnvelope className="admin-icon" />
-            {expanded && <span>Inbox</span>}
+            <span>Hộp thư</span>
           </Link>
         </li>
-        <li>
-          <Link to="/admin/notifications">
+        <li className={activeItem === "/admin/notifications" ? "active" : ""}>
+          <Link
+            to="/admin/notifications"
+            onClick={() => setActiveItem("/admin/notifications")}
+          >
             <FaBell className="admin-icon" />
-            {expanded && <span>Notifications</span>}
+            <span>Thông báo</span>
           </Link>
         </li>
-        <li>
-          <Link to="/admin/settings">
+        <li className={activeItem === "/admin/settings" ? "active" : ""}>
+          <Link
+            to="/admin/settings"
+            onClick={() => setActiveItem("/admin/settings")}
+          >
             <FaCog className="admin-icon" />
-            {expanded && <span>Settings</span>}
+            <span>Cài đặt</span>
           </Link>
         </li>
-        <li onClick={handleLogout}>
+        <li className="signout-item" onClick={handleLogout}>
           <FaSignOutAlt className="admin-icon-signout" />
-          {expanded && <span>Sign Out</span>}
+          <span>Đăng xuất</span>
         </li>
       </ul>
     </div>

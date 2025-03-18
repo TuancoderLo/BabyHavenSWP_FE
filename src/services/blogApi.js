@@ -22,6 +22,7 @@ const blogApi = {
       tags: data.tags?.trim() || "",
       referenceSources: data.referenceSources?.trim() || "",
       status: data.status || "Draft",
+      rejectionReason: data.rejectionReason?.trim() || "",
     };
     console.log("Formatted create blog data:", blogData);
     return api.post("Blog", blogData);
@@ -40,6 +41,7 @@ const blogApi = {
       tags: data.tags?.trim() || "",
       referenceSources: data.referenceSources?.trim() || "",
       status: data.status || "Draft",
+      rejectionReason: data.rejectionReason?.trim() || "",
     };
     console.log("Formatted update blog data:", blogData);
     return api.put(`Blog/${id}`, blogData);
