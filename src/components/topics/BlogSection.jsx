@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import blogCategoryApi from "../../services/blogCategoryApi";
 import blogApi from "../../services/blogApi";
 import "./BlogSection.css";
+import { useNavigate } from "react-router-dom";
 
 const BlogSection = ({ parentCategoryId }) => {
   const [parentCategory, setParentCategory] = useState(null);
@@ -9,6 +10,7 @@ const BlogSection = ({ parentCategoryId }) => {
   const [blogs, setBlogs] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   // Fetch parent category info và child categories
   useEffect(() => {
@@ -95,10 +97,17 @@ const BlogSection = ({ parentCategoryId }) => {
       {/* Blog Cards */}
       <div className="blog-cards">
         {loading ? (
-          <div>Loading...</div>
+          <div className="loading-indicator">
+            <div className="loader"></div>
+            <p>Đang tải bài viết...</p>
+          </div>
         ) : (
           blogs.map((blog) => (
-            <div key={blog.blogId} className="blog-card">
+            <div
+              key={blog.blogId}
+              className="blog-card"
+              onClick={() => navigate(`/blog/${blog.blogId}`)}
+            >
               <div className="blog-image">
                 <img
                   src={blog.imageBlog || "/placeholder-image.jpg"}
@@ -107,15 +116,47 @@ const BlogSection = ({ parentCategoryId }) => {
                     e.target.src = "/placeholder-image.jpg";
                   }}
                 />
+                <span className="blog-category-tag">
+                  {blog.categoryName || "Technology"}
+                </span>
               </div>
               <div className="blog-content">
                 <h3 className="blog-title">{blog.title}</h3>
+                <p className="blog-description">
+                  {blog.content
+                    ? blog.content.length > 80
+                      ? blog.content.substring(0, 80).replace(/<[^>]*>/g, "") +
+                        "..."
+                      : blog.content.replace(/<[^>]*>/g, "")
+                    : "An exploration into the topic's design."}
+                </p>
                 <div className="blog-metadata">
-                  <p className="blog-author">
-                    {blog.authorName
-                      ? `Tác giả: ${blog.authorName}`
-                      : "Tác giả: Ẩn danh"}
-                  </p>
+                  <div className="blog-author-avatar">
+                    <img
+                      src={blog.authorAvatar || "/default-avatar.jpg"}
+                      alt={blog.authorName}
+                      onError={(e) => {
+                        e.target.src = "/default-avatar.jpg";
+                      }}
+                    />
+                  </div>
+                  <div className="blog-author-info">
+                    <p className="blog-author">
+                      {blog.authorName ? blog.authorName : "Ẩn danh"}
+                    </p>
+                    <p className="blog-date">
+                      {blog.updatedAt
+                        ? new Date(blog.updatedAt).getTime() >
+                          Date.now() - 86400000
+                          ? `${Math.floor(
+                              (Date.now() -
+                                new Date(blog.updatedAt).getTime()) /
+                                3600000
+                            )} giờ trước`
+                          : new Date(blog.updatedAt).toLocaleDateString("vi-VN")
+                        : "2 giờ trước"}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
