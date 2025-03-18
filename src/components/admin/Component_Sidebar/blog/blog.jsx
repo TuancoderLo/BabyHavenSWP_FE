@@ -269,18 +269,23 @@ function Blog() {
           ? JSON.stringify(values.content) // Chuyển object thành chuỗi JSON
           : values.content?.getData?.() || values.content || ""; // Nếu là CKEditor instance hoặc string
 
+      // Luôn đảm bảo rejectionReason có giá trị, ngay cả khi không có trong form
       const submitData = {
         title: values.title,
-        content: content, // Gửi dưới dạng string theo yêu cầu của back-end
+        content: content,
         categoryId: values.categoryId,
         categoryName:
           categories.find((cat) => cat.categoryId === values.categoryId)
             ?.categoryName || "",
-        email: email || "", // Sử dụng email từ localStorage
+        email: email || "",
         imageBlog: values.imageBlog || "",
         tags: values.tags || "",
         referenceSources: values.referenceSources || "",
         status: values.status || "Draft",
+        rejectionReason:
+          values.status === "Rejected"
+            ? values.rejectionReason || "No reason provided"
+            : values.rejectionReason || "",
       };
 
       console.log("Submitting blog data:", submitData);
@@ -519,7 +524,7 @@ function Blog() {
     return selectedCategory.categoryName;
   };
 
-  // Cập nhật handleEditBlog để set tags tự động
+  // Cập nhật handleEditBlog để set rejectionReason
   const handleEditBlog = async (record) => {
     setEditingBlogId(record.blogId);
     const tags = getTagsFromCategory(record.categoryId);
@@ -531,6 +536,7 @@ function Blog() {
       tags: tags,
       referenceSources: record.referenceSources,
       status: record.status,
+      rejectionReason: record.rejectionReason || "",
     });
     setBlogModalVisible(true);
   };
@@ -805,32 +811,35 @@ function Blog() {
                 </Select>
               </Form.Item>
 
-              {/* Rejection reason field */}
+              {/* Luôn hiển thị trường rejectionReason */}
               <Form.Item
                 noStyle
                 shouldUpdate={(prevValues, currentValues) =>
                   prevValues.status !== currentValues.status
                 }
               >
-                {({ getFieldValue }) =>
-                  getFieldValue("status") === "Rejected" ? (
-                    <Form.Item
-                      name="rejectionReason"
-                      label="Rejection Reason"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please enter rejection reason",
-                        },
-                      ]}
-                    >
-                      <Input.TextArea
-                        rows={3}
-                        placeholder="Enter reason for rejection"
-                      />
-                    </Form.Item>
-                  ) : null
-                }
+                {({ getFieldValue }) => (
+                  <Form.Item
+                    name="rejectionReason"
+                    label="Rejection Reason"
+                    rules={[
+                      {
+                        required: getFieldValue("status") === "Rejected",
+                        message:
+                          "Rejection reason is required when status is Rejected",
+                      },
+                    ]}
+                  >
+                    <Input.TextArea
+                      rows={3}
+                      placeholder={
+                        getFieldValue("status") === "Rejected"
+                          ? "Please enter rejection reason (required)"
+                          : "Rejection reason (optional)"
+                      }
+                    />
+                  </Form.Item>
+                )}
               </Form.Item>
 
               <div className="blog-form-footer">
