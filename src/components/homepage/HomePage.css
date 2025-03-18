@@ -529,7 +529,8 @@ nav {
 
 .category-meta {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: left;
   font-size: 0.75rem;
   color: #666;
 }
@@ -1154,6 +1155,14 @@ features-section,
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
+}
+
+.blog-tags-homepage {
+  display: flex;
+}
+
+.blog-tags-homepage span{
+  font-size: 10px;
 }
 
 .doctor-card {

@@ -169,8 +169,8 @@ function Header() {
               alt="User Avatar"
             />
           </div>
-          <span className="avatar-chip-text">
-            {userData ? userData.name : "Name"}
+          <span className="avatar-chip-name">
+            {userData ? userData.name : localStorage.getItem("name")}
           </span>
           {menuOpen && (
             <div>
