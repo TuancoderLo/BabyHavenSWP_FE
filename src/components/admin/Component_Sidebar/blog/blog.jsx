@@ -524,21 +524,41 @@ function Blog() {
     return selectedCategory.categoryName;
   };
 
-  // Cập nhật handleEditBlog để set rejectionReason
+  // Cập nhật handleEditBlog để lấy dữ liệu chi tiết từ API
   const handleEditBlog = async (record) => {
-    setEditingBlogId(record.blogId);
-    const tags = getTagsFromCategory(record.categoryId);
-    blogForm.setFieldsValue({
-      title: record.title,
-      content: record.content,
-      categoryId: record.categoryId,
-      imageBlog: record.imageBlog,
-      tags: tags,
-      referenceSources: record.referenceSources,
-      status: record.status,
-      rejectionReason: record.rejectionReason || "",
-    });
-    setBlogModalVisible(true);
+    try {
+      setLoading(true);
+      setEditingBlogId(record.blogId);
+
+      // Gọi API để lấy thông tin chi tiết của blog theo ID
+      const response = await blogApi.getById(record.blogId);
+
+      if (response?.data?.status === 1) {
+        const blogData = response.data.data;
+
+        // Ánh xạ dữ liệu từ API vào cấu trúc phù hợp với form
+        blogForm.setFieldsValue({
+          title: blogData.title,
+          content: blogData.content,
+          categoryId: blogData.categoryId, // Lấy từ response hoặc lưu từ record
+          imageBlog: blogData.imageBlog,
+          tags: blogData.tags,
+          referenceSources: blogData.referenceSources,
+          status: blogData.status,
+          rejectionReason: blogData.rejectionReason || "",
+        });
+
+        // Mở modal chỉnh sửa
+        setBlogModalVisible(true);
+      } else {
+        message.error("Không thể tải thông tin bài viết");
+      }
+    } catch (error) {
+      message.error("Lỗi khi tải thông tin bài viết: " + error.message);
+      console.error("Error fetching blog details:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Xử lý xóa blog
