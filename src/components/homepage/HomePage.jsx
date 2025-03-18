@@ -6,6 +6,7 @@ import Footer from "../common/Footer";
 
 import Packages from "../packages/Packages";
 import blogCategoryApi from "../../services/blogCategoryApi";
+import blogApi from "../../services/blogApi"; // Add this import
 import BlogSection from "../topics/BlogSection";
 
 function HomePage() {
@@ -13,6 +14,7 @@ function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [parentCategories, setParentCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [latestBlogs, setLatestBlogs] = useState([]); // Add this state
 
   // Tạo state cho userName
   const [userData, setUserData] = useState(null);
@@ -113,6 +115,24 @@ function HomePage() {
     fetchParentCategories();
   }, []);
 
+  // Fetch latest blogs
+  useEffect(() => {
+    const fetchLatestBlogs = async () => {
+      try {
+        console.log("Fetching blogs..."); // Kiểm tra hàm có chạy không
+        const response = await blogApi.getOrderBy("CreatedAt", "desc");
+        console.log("API response:", response.data); // Kiểm tra dữ liệu trả về
+  
+        setLatestBlogs(response.data.slice(0, 6));
+      } catch (error) {
+        console.error("Error fetching latest blogs:", error);
+      }
+    };
+  
+    fetchLatestBlogs();
+  }, []);
+  
+
   return (
     <div className="homepage">
       <Header />
@@ -171,128 +191,24 @@ function HomePage() {
         <section className="categories-section">
           <h2>Popular Blogs</h2>
           <div className="categories-grid">
-            {/* Card 1 */}
-            <a
-              href="https://merinokids.co.uk/blogs/merino/the-importance-of-temperature-regulation-in-babies"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="category-card"
-            >
-              <img
-                src="https://res.cloudinary.com/djpfqveyz/image/upload/merino-kids-all-in-one-button-through-bodysuit-misty-rose-bodysuits-misty-rose-0-3m-9420056108900-2_74b489b8-3301-46cc-a1c3-1599c2230e73_yn7j19.jpg"
-                alt="Product 1"
-              />
-              <div className="category-content">
-                <h3>The importance of temperature regulation in babies</h3>
-                <div className="category-meta">
-                  <span className="author">Author: Merinokids</span>
-                  <span className="tag">#Health</span>
+            {latestBlogs.map((blog, index) => (
+              <a
+                key={index}
+                href={blog.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="category-card"
+              >
+                <img src={blog.imageBlog} alt={blog.title} />
+                <div className="category-content">
+                  <h3>{blog.title}</h3>
+                  <div className="category-meta">
+                    <span className="author">Author: {blog.authorName}</span>
+                    <span className="tag">#{blog.tags}</span>
+                  </div>
                 </div>
-              </div>
-            </a>
-
-            {/* Card 2 */}
-            <a
-              href="https://thoughtfulparent.com/what-is-positive-parenting.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="category-card"
-            >
-              <img
-                src="https://res.cloudinary.com/djpfqveyz/image/upload/Copy-of-October-2020-33-1_slcseu.png"
-                alt="Product 2"
-              />
-              <div className="category-content">
-                <h3>
-                  Why is Positive Parenting Important and How Does it Help My
-                  Child?
-                </h3>
-                <div className="category-meta">
-                  <span className="author">Author: thoughtfulparent</span>
-                  <span className="tag">#Knowledge</span>
-                </div>
-              </div>
-            </a>
-
-            {/* Card 3 */}
-            <a
-              href="https://www.science-sparks.com/making-a-bottle-rocket/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="category-card"
-            >
-              <img
-                src="https://res.cloudinary.com/djpfqveyz/image/upload/Child-with-water-bottle-rocket-899x1024_oe5cal.jpg"
-                alt="Breastfeeding"
-              />
-              <div className="category-content">
-                <h3>How to make a Bottle Rocket?</h3>
-                <div className="category-meta">
-                  <span className="author">Author: Emma Vanstone</span>
-                  <span className="tag">#Play</span>
-                </div>
-              </div>
-            </a>
-
-            {/* Card 4 */}
-            <a
-              href="https://babymori.com/blogs/baby-stories/how-to-use-a-baby-sleeping-bag"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="category-card"
-            >
-              <img
-                src="https://res.cloudinary.com/djpfqveyz/image/upload/merino-kids-cocooi-sleeping-bag-dark-slate-sleeping-bags-dark-slate-0-3m-9420056108788-2_9873a0c6-8ba1-49b0-b17d-39d2164326d8_480x480_sdn2y2.webp"
-                alt="Baby Care"
-              />
-              <div className="category-content">
-                <h3>How to use a baby sleeping bag?</h3>
-                <div className="category-meta">
-                  <span className="author">Author: babymori</span>
-                  <span className="tag">#Knowledge</span>
-                </div>
-              </div>
-            </a>
-
-            {/* Card 5 */}
-            <a
-              href="https://childdevelopmentinfo.com/child-psychology/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="category-card"
-            >
-              <img
-                src="https://res.cloudinary.com/djpfqveyz/image/upload/Depositphotos_73212229_L-1_cjcuju.jpg"
-                alt="Growing Toddlers"
-              />
-              <div className="category-content">
-                <h3>How to understand child psychology</h3>
-                <div className="category-meta">
-                  <span className="author">Author: Childdevelopmentinfo</span>
-                  <span className="tag">#Parenting</span>
-                </div>
-              </div>
-            </a>
-
-            {/* Card 6 */}
-            <a
-              href="https://www.betterhealth.vic.gov.au/health/healthyliving/pregnancy-week-by-week"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="category-card"
-            >
-              <img
-                src="https://res.cloudinary.com/djpfqveyz/image/upload/pregnancy_675x386_o7wbpl.jpg"
-                alt="Pregnancy"
-              />
-              <div className="category-content">
-                <h3>Pregnancy - week by week</h3>
-                <div className="category-meta">
-                  <span className="author">Author: Betterhealth</span>
-                  <span className="tag">#Knowledge</span>
-                </div>
-              </div>
-            </a>
+              </a>
+            ))}
           </div>
         </section>
 
