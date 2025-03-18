@@ -9,6 +9,14 @@ const blogApi = {
     return api.get(`Blog/${id}`);
   },
 
+  getOrderBy: (name, order) => {
+    return api.get(`/Blog/odata?$orderby=${name} ${order}`);
+  },
+
+  getFilteredBlog: (name, value) => {
+    return api.get(`/Blog/odata?$filter=${name} eq '${value}'`);
+  },
+
   create: (data) => {
     console.log("Creating blog with data:", data);
     const blogData = {

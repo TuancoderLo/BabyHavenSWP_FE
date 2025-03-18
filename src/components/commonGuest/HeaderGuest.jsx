@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
-import Logo from "../../assets/Logo.png";
-import Name from "../../assets/Name.png";
+import Logo from "../../assets/full_logo.png";
 import api from "../../config/axios";
 import "./HeaderGuest.css";
 
@@ -75,7 +74,6 @@ function HeaderGuest() {
         <div className="logo">
           <div onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
             <img src={Logo} alt="Logo" />
-            <img src={Name} alt="Name" />
           </div>
         </div>
 
@@ -140,7 +138,7 @@ function HeaderGuest() {
           <NavLink className="join-btn" to={"/register"}>
             Join
           </NavLink>
-          <button className="logout-btn" onClick={() => navigate("/login")}>
+          <button className="sign-in-btn" onClick={() => navigate("/login")}>
             Sign In
           </button>
         </div>
