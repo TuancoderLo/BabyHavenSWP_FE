@@ -2,7 +2,7 @@ import api from "../config/axios";
 
 const blogApi = {
   getAll: () => {
-    return api.get("Blog");
+    return api.get(`Blog`);
   },
 
   getById: (id) => {

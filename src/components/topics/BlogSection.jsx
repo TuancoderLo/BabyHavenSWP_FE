@@ -116,18 +116,16 @@ const BlogSection = ({ parentCategoryId }) => {
                   <img
                     src={blog.imageBlog || "/placeholder-image.jpg"}
                     alt={blog.title}
+                    
                     onError={(e) => {
                       console.log("Image error, using placeholder");
                       e.target.src = "/placeholder-image.jpg";
                     }}
                   />
-                  <span className="blog-category-tag">
-                    {blog.categoryName || "Technology"}
-                  </span>
                 </div>
-                <div className="blog-content">
+                <div className="blog-content0-homepage">
                   <div>
-                    <h3 className="blog-title">
+                    <h3 className="blog-title-homepage">
                       {blog.title || "Tiêu đề không có sẵn"}
                     </h3>
                     <p className="blog-description">
@@ -138,16 +136,7 @@ const BlogSection = ({ parentCategoryId }) => {
                         : "Xem thêm chi tiết về bài viết này..."}
                     </p>
                   </div>
-                  <div className="blog-metadata">
-                    <div className="blog-author-avatar">
-                      <img
-                        src={blog.authorAvatar || "/default-avatar.jpg"}
-                        alt={blog.authorName}
-                        onError={(e) => {
-                          e.target.src = "/default-avatar.jpg";
-                        }}
-                      />
-                    </div>
+                  <div className="blog-metadata-homepage">
                     <div className="blog-author-info">
                       <p className="blog-author">
                         {blog.authorName ? blog.authorName : "Ẩn danh"}

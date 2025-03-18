@@ -541,7 +541,7 @@ function FormatBlog() {
                     <p className="related-blog-author">
                       {relatedBlog.name ||
                         relatedBlog.authorName ||
-                        "Tác giả ẩn danh"}
+                        "Unknown"}
                     </p>
                   </div>
                 </div>

@@ -19,6 +19,12 @@ function HomePage() {
   // Tạo state cho userName
   const [userData, setUserData] = useState(null);
 
+  // Hàm xử lý tags
+  const renderTags = (tags) => {
+    if (!tags) return null;
+    return tags.split(",").map((tag) => tag.trim());
+  };
+
   // Lấy dữ liệu từ localStorage khi HomePage mount
   useEffect(() => {
     const nameFromLocal = localStorage.getItem("name"); // "Thao" chẳng hạn
@@ -204,7 +210,13 @@ function HomePage() {
                   <h3>{blog.title}</h3>
                   <div className="category-meta">
                     <span className="author">Author: {blog.authorName}</span>
-                    <span className="tag">#{blog.tags}</span>
+                    <div className="blog-tags-homepage">
+                      {renderTags(blog.tags)?.map((tag, index) => (
+                        <span key={index} className="tag">
+                          #{tag ? tag.replace(/<[^>]*>/g, "").substring(0, 8) + "..." : "..."}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </a>
