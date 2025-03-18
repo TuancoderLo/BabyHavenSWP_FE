@@ -141,7 +141,11 @@ function CategoryPage() {
           <>
             <div className="blogs-container">
               {getCurrentBlogs().map((blog) => (
-                <div key={blog.title} className="blog-card">
+                <div
+                  key={blog.blogId || blog.id || blog.title}
+                  className="blog-card"
+                  onClick={() => handleReadMore(blog)}
+                >
                   <div className="blog-image">
                     <img
                       src={blog.imageBlog || "/placeholder-image.jpg"}
@@ -150,7 +154,11 @@ function CategoryPage() {
                         e.target.src = "/placeholder-image.jpg";
                       }}
                     />
+                    <div className="blog-category-label">
+                      {blog.categoryName}
+                    </div>
                   </div>
+
                   <div className="blog-content">
                     <h2 className="blog-title">{blog.title}</h2>
 
