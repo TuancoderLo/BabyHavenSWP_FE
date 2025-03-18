@@ -113,8 +113,8 @@ const BlogSection = ({ parentCategoryId }) => {
                 <div className="blog-metadata">
                   <p className="blog-author">
                     {blog.authorName
-                      ? `Tác giả: ${blog.authorName}`
-                      : "Tác giả: Ẩn danh"}
+                      ? `Author: ${blog.authorName}`
+                      : "Author: Unknown"}
                   </p>
                 </div>
               </div>

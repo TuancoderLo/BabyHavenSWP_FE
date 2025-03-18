@@ -1167,8 +1167,6 @@ features-section,
 
 .doctor-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 208, 188, 0.15);
-  border-color: rgba(0, 208, 188, 0.3);
 }
 
 .doctor-image {
