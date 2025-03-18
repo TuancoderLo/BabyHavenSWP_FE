@@ -175,8 +175,10 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
   }, [child, memberId, growthForm, currentStep, validateGrowthForm, closeOverlay]);
 
   const handlePrevious = useCallback(() => {
-    if (subStep2 > 1) setSubStep2((prev) => prev - 1);
-  }, [subStep2]);
+    if (currentStep > 1) {
+      setCurrentStep((prev) => prev - 1);
+    }
+  }, [currentStep]);
 
   const handleClose = useCallback(() => {
     closeOverlay();

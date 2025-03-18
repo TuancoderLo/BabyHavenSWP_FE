@@ -1,42 +1,29 @@
+// Doctor.jsx
 import React, { useState, useEffect } from "react";
-import {
-  Layout,
-  Menu,
-  Avatar,
-  Typography,
-  Badge,
-  Tabs,
-  Spin,
-  message,
-} from "antd";
-import {
-  UserOutlined,
-  CalendarOutlined,
-  MessageOutlined,
-  FileOutlined,
-  BellOutlined,
-  LogoutOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  EditOutlined,
-} from "@ant-design/icons";
+import { Typography, Badge, Spin, message } from "antd";
+import { BellOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+
+// Các component con
 import Bio from "./DashBoardDoctor/Bio";
 import Request from "./DashBoardDoctor/Request";
 import Response from "./DashBoardDoctor/Response";
 import RecordRequest from "./DashBoardDoctor/RecordRequest";
 import DoctorBlog from "./DashBoardDoctor/DoctorBlog";
+
+// Import Sidebar
+import Sidebar from "../Doctor/Sidebar/Sidebar";
+
 import "./Doctor.css";
 
-const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
-const { TabPane } = Tabs;
 
 const Doctor = () => {
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState("1");
+  const [activeTab, setActiveTab] = useState("bio");
   const [loading, setLoading] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+
   const [doctorInfo, setDoctorInfo] = useState({
     name: "",
     specialty: "",
@@ -45,175 +32,91 @@ const Doctor = () => {
   });
 
   useEffect(() => {
+    // Kiểm tra role
     const isAuthenticated = localStorage.getItem("isAuthenticated");
     const role = localStorage.getItem("role");
 
     if (!isAuthenticated || role !== "2") {
-      message.error("You don't have permission to access this page");
+      message.error("Bạn không có quyền truy cập trang này!");
       navigate("/login");
       return;
     }
 
-    const name = localStorage.getItem("name") || "Doctor";
+    // Giả lập lấy thông tin
+    const name = localStorage.getItem("name") || "Doctor Strange";
     const profilePicture = localStorage.getItem("profilePicture") || "";
 
     setDoctorInfo({
-      name: name,
+      name,
       specialty: "Pediatrics",
-      profilePicture: profilePicture,
-      notifications: 5,
+      profilePicture,
+      notifications: 3,
     });
   }, [navigate]);
 
+  // Đổi tab
   const handleTabChange = (key) => {
     setActiveTab(key);
   };
 
+  // Đóng/mở sidebar
+  const toggleCollapse = () => {
+    setCollapsed(!collapsed);
+  };
+
+  // Logout
   const handleLogout = () => {
     localStorage.clear();
     navigate("/login");
   };
 
-  const menuItems = [
-    {
-      key: "1",
-      icon: <UserOutlined />,
-      label: "Personal Information",
-    },
-    {
-      key: "2",
-      icon: <CalendarOutlined />,
-      label: "Consultation Requests",
-    },
-    {
-      key: "3",
-      icon: <MessageOutlined />,
-      label: "Consultation Responses",
-    },
-    {
-      key: "4",
-      icon: <FileOutlined />,
-      label: "Record Requests",
-    },
-    {
-      key: "5",
-      icon: <EditOutlined />,
-      label: "Blog Management",
-    },
-    {
-      key: "logout",
-      icon: <LogoutOutlined />,
-      label: "Logout",
-      danger: true,
-      onClick: handleLogout,
-    },
-  ];
-
   return (
-    <Layout className="doctor-dashboard">
-      <Sider
-        trigger={null}
-        collapsible
+    <div className={`doctor-layout ${collapsed ? "sidebar-collapsed" : ""}`}>
+      {/* SIDEBAR */}
+      <Sidebar
+        doctorInfo={doctorInfo}
+        activeTab={activeTab}
+        handleTabChange={handleTabChange}
+        handleLogout={handleLogout}
         collapsed={collapsed}
-        className="doctor-sider"
-        width={280}
-      >
-        <div className="logo-container">
-          <div className="doctor-logo">{collapsed ? "BH" : "Baby Haven"}</div>
-        </div>
+        toggleCollapse={toggleCollapse}
+      />
 
-        <div className="doctor-profile">
-          <div className="avatar-container">
-            <Avatar
-              size={collapsed ? 60 : 100}
-              src={doctorInfo.profilePicture || null}
-              icon={<UserOutlined />}
-              className="doctor-avatar"
-            />
-          </div>
-          {!collapsed && (
-            <div className="doctor-info">
-              <Title level={4} className="doctor-name">
-                {doctorInfo.name}
-              </Title>
-              <Text className="doctor-specialty">{doctorInfo.specialty}</Text>
-            </div>
-          )}
-        </div>
-
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={[activeTab]}
-          onClick={({ key }) => setActiveTab(key)}
-          items={menuItems}
-          className="doctor-menu"
-        />
-      </Sider>
-
-      <Layout className="doctor-main-layout">
-        <Header className="doctor-header">
-          <div className="header-left">
-            {collapsed ? (
-              <MenuUnfoldOutlined
-                className="trigger"
-                onClick={() => setCollapsed(false)}
-              />
-            ) : (
-              <MenuFoldOutlined
-                className="trigger"
-                onClick={() => setCollapsed(true)}
-              />
-            )}
-            <Title level={4} className="dashboard-title">
-              Doctor Dashboard
+      {/* MAIN */}
+      <main className="doctor-main">
+        {/* Topbar */}
+        <header className="doctor-topbar">
+          <div className="topbar-left">
+            <Title level={3} style={{ margin: 0 }}>
+              Welcome Back, Dr. {doctorInfo.name}!
             </Title>
+            <Text type="secondary">Have a nice day!</Text>
           </div>
-          <div className="header-right">
-            <Badge
-              count={doctorInfo.notifications}
-              overflowCount={99}
-              className="notification-badge"
-            >
-              <BellOutlined className="notification-icon" />
+          <div className="topbar-right">
+            <Badge count={doctorInfo.notifications} className="badge-notif">
+              <BellOutlined className="icon-notif" />
             </Badge>
           </div>
-        </Header>
+        </header>
 
-        <Content className="doctor-content">
+        {/* Content */}
+        <section className="doctor-dashboard">
           {loading ? (
             <div className="loading-container">
               <Spin size="large" />
             </div>
           ) : (
-            <div className="content-wrapper">
-              <Tabs
-                activeKey={activeTab}
-                onChange={handleTabChange}
-                className="doctor-tabs"
-                type="card"
-              >
-                <TabPane tab="Personal Information" key="1">
-                  <Bio />
-                </TabPane>
-                <TabPane tab="Consultation Requests" key="2">
-                  <Request />
-                </TabPane>
-                <TabPane tab="Consultation Responses" key="3">
-                  <Response />
-                </TabPane>
-                <TabPane tab="Record Requests" key="4">
-                  <RecordRequest />
-                </TabPane>
-                <TabPane tab="Blog Management" key="5">
-                  <DoctorBlog />
-                </TabPane>
-              </Tabs>
-            </div>
+            <>
+              {activeTab === "bio" && <Bio />}
+              {activeTab === "requests" && <Request />}
+              {activeTab === "responses" && <Response />}
+              {activeTab === "record" && <RecordRequest />}
+              {activeTab === "blog" && <DoctorBlog />}
+            </>
           )}
-        </Content>
-      </Layout>
-    </Layout>
+        </section>
+      </main>
+    </div>
   );
 };
 

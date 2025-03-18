@@ -730,18 +730,7 @@ growth-chart-box card {
   cursor: pointer;        /* gợi ý người dùng có thể click xem thêm */
 }
 
-/* Tạo lớp mờ ở cuối */
-.health-alert-content.warning.fadeable::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 40px; /* chiều cao vùng fade */
-  /* Gradient mờ từ trong suốt -> màu nền (white hoặc rgba(...) tuỳ nền) */
-  background: linear-gradient(transparent, #fff);
-  pointer-events: none; /* cho phép click xuyên qua lớp fade */
-}
+
 .health-alert-content.healthy::before {
     content: '✨';
 }
@@ -1172,6 +1161,12 @@ growth-chart-box card {
   color: #f44336; /* hoặc #FF6B6B tuỳ ý */
   background: rgba(244, 67, 54, 0.1);
   font-weight: 600;
+}
+.health-alert-content.alert-high.fadeable {
+  position: relative;     /* cho phép pseudo-element ::after chồng lên */
+  max-height: 60px;       /* chiều cao tối đa vùng hiển thị */
+  overflow: hidden;       /* ẩn phần nội dung vượt quá */
+  cursor: pointer;        /* gợi ý người dùng có thể click xem thêm */
 }
 
 /* Overlay toàn màn hình */

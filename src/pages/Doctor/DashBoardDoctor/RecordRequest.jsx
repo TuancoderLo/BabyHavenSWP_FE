@@ -12,30 +12,20 @@ import {
   Tabs,
   Space,
   Tooltip,
-  Spin,
   Drawer,
   Descriptions,
   Avatar,
   Divider,
-  Timeline,
   List,
   Card,
   Empty,
   Badge,
 } from "antd";
-import {
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  EyeOutlined,
-  FileOutlined,
-  UserOutlined,
-  MedicineBoxOutlined,
-  FileTextOutlined,
-  FileSearchOutlined,
-} from "@ant-design/icons";
+import { EyeOutlined, FileSearchOutlined, UserOutlined, FileTextOutlined } from "@ant-design/icons";
 import moment from "moment";
+import "./RecordRequest.css"; // Import file CSS
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -55,10 +45,9 @@ const RecordRequest = () => {
 
   const fetchRecordRequests = () => {
     setLoading(true);
-
-    // Giả lập API call để lấy danh sách yêu cầu xem hồ sơ
+    // Giả lập API call
     setTimeout(() => {
-      // Dữ liệu mẫu
+      // Mock data
       const mockData = [
         {
           id: 1,
@@ -68,79 +57,22 @@ const RecordRequest = () => {
           childAge: "2 tuổi",
           requestDate: "2023-11-15T08:30:00",
           status: "pending",
-          reason:
-            "Cần thông tin về lịch sử tiêm chủng của bé để chuẩn bị cho việc nhập học mẫu giáo.",
+          reason: "Cần thông tin về lịch sử tiêm chủng...",
           recordType: "vaccination",
         },
-        {
-          id: 2,
-          parentName: "Trần Thị B",
-          parentAvatar: "https://randomuser.me/api/portraits/women/44.jpg",
-          childName: "Bé Bin",
-          childAge: "6 tháng",
-          requestDate: "2023-11-14T10:15:00",
-          status: "pending",
-          reason:
-            "Muốn xem lại kết quả khám sức khỏe gần đây nhất của bé để theo dõi sự phát triển.",
-          recordType: "health_check",
-        },
-        {
-          id: 3,
-          parentName: "Lê Văn C",
-          parentAvatar: "https://randomuser.me/api/portraits/men/62.jpg",
-          childName: "Bé Cu",
-          childAge: "1 tuổi",
-          requestDate: "2023-11-13T14:45:00",
-          status: "approved",
-          reason:
-            "Cần thông tin về tình trạng dị ứng của bé để chuẩn bị cho việc ăn dặm.",
-          recordType: "allergy",
-          responseDate: "2023-11-14T09:20:00",
-          approvalNote:
-            "Đã cung cấp thông tin về tình trạng dị ứng của bé. Bé có dị ứng nhẹ với trứng và sữa bò.",
-        },
-        {
-          id: 4,
-          parentName: "Phạm Thị D",
-          parentAvatar: "https://randomuser.me/api/portraits/women/22.jpg",
-          childName: "Bé Đậu",
-          childAge: "3 tuổi",
-          requestDate: "2023-11-12T11:30:00",
-          status: "rejected",
-          reason: "Muốn xem toàn bộ hồ sơ y tế của bé.",
-          recordType: "full_record",
-          responseDate: "2023-11-13T15:45:00",
-          rejectReason:
-            "Yêu cầu xem toàn bộ hồ sơ y tế cần được thực hiện trực tiếp tại phòng khám với giấy tờ xác nhận phụ huynh.",
-        },
-        {
-          id: 5,
-          parentName: "Hoàng Văn E",
-          parentAvatar: "https://randomuser.me/api/portraits/men/92.jpg",
-          childName: "Bé Em",
-          childAge: "4 tuổi",
-          requestDate: "2023-11-11T09:00:00",
-          status: "approved",
-          reason:
-            "Cần thông tin về lịch sử bệnh hen suyễn của bé để cung cấp cho trường mầm non.",
-          recordType: "medical_history",
-          responseDate: "2023-11-12T10:30:00",
-          approvalNote:
-            "Đã cung cấp thông tin về lịch sử bệnh hen suyễn của bé, bao gồm các đợt điều trị và thuốc đã sử dụng.",
-        },
+        // ...
       ];
 
-      // Lọc dữ liệu theo tab đang active
       let filteredData = [];
       switch (activeTab) {
         case "pending":
-          filteredData = mockData.filter((item) => item.status === "pending");
+          filteredData = mockData.filter((i) => i.status === "pending");
           break;
         case "approved":
-          filteredData = mockData.filter((item) => item.status === "approved");
+          filteredData = mockData.filter((i) => i.status === "approved");
           break;
         case "rejected":
-          filteredData = mockData.filter((item) => item.status === "rejected");
+          filteredData = mockData.filter((i) => i.status === "rejected");
           break;
         default:
           filteredData = mockData;
@@ -148,7 +80,7 @@ const RecordRequest = () => {
 
       setRecordRequests(filteredData);
       setLoading(false);
-    }, 1000);
+    }, 800);
   };
 
   const handleViewDetail = (record) => {
@@ -164,50 +96,26 @@ const RecordRequest = () => {
 
   const handleResponseSubmit = (values) => {
     setLoading(true);
-
-    // Chuẩn bị dữ liệu để gửi lên server
-    const responseData = {
-      requestId: selectedRequest.id,
-      status: values.action,
-      note:
-        values.action === "approved"
-          ? values.approvalNote
-          : values.rejectReason,
-    };
-
-    // Giả lập API call
     setTimeout(() => {
-      console.log("Response data:", responseData);
-
-      // Cập nhật trạng thái của yêu cầu trong danh sách
-      const updatedRequests = recordRequests.map((req) => {
-        if (req.id === selectedRequest.id) {
-          return {
-            ...req,
-            status: values.action,
-            responseDate: moment().format("YYYY-MM-DDTHH:mm:ss"),
-            approvalNote:
-              values.action === "approved" ? values.approvalNote : null,
-            rejectReason:
-              values.action === "rejected" ? values.rejectReason : null,
-          };
-        }
-        return req;
-      });
-
-      setRecordRequests(updatedRequests);
+      const updated = recordRequests.map((req) =>
+        req.id === selectedRequest.id
+          ? {
+              ...req,
+              status: values.action,
+              responseDate: moment().format("YYYY-MM-DD HH:mm:ss"),
+            }
+          : req
+      );
+      setRecordRequests(updated);
       setResponseVisible(false);
       setLoading(false);
-
       message.success(
         values.action === "approved"
           ? "Record request approved"
           : "Record request rejected"
       );
-
-      // Refresh danh sách
       fetchRecordRequests();
-    }, 1000);
+    }, 800);
   };
 
   const getStatusTag = (status) => {
@@ -246,9 +154,9 @@ const RecordRequest = () => {
       dataIndex: "parentName",
       key: "parentName",
       render: (text, record) => (
-        <div style={{ display: "flex", alignItems: "center" }}>
+        <div className="record-parent-info">
           <Avatar src={record.parentAvatar} icon={<UserOutlined />} />
-          <span style={{ marginLeft: 8 }}>{text}</span>
+          <span className="record-parent-name">{text}</span>
         </div>
       ),
     },
@@ -267,7 +175,7 @@ const RecordRequest = () => {
       title: "Record Type",
       dataIndex: "recordType",
       key: "recordType",
-      render: (type) => getRecordTypeTag(type),
+      render: getRecordTypeTag,
     },
     {
       title: "Request Date",
@@ -279,7 +187,7 @@ const RecordRequest = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (status) => getStatusTag(status),
+      render: getStatusTag,
     },
     {
       title: "Actions",
@@ -287,10 +195,7 @@ const RecordRequest = () => {
       render: (_, record) => (
         <Space>
           <Tooltip title="View details">
-            <Button
-              icon={<EyeOutlined />}
-              onClick={() => handleViewDetail(record)}
-            />
+            <Button icon={<EyeOutlined />} onClick={() => handleViewDetail(record)} />
           </Tooltip>
 
           {record.status === "pending" && (
@@ -307,7 +212,7 @@ const RecordRequest = () => {
     },
   ];
 
-  // Danh sách các loại hồ sơ y tế mẫu
+  // Giả lập data cho MedicalRecords
   const getMedicalRecords = (childName) => [
     {
       id: 1,
@@ -315,145 +220,71 @@ const RecordRequest = () => {
       type: "vaccination",
       lastUpdated: "2023-10-15",
       content: [
-        {
-          date: "2023-09-10",
-          description: "Vaccine MMR (Sởi, Quai bị, Rubella)",
-        },
-        {
-          date: "2023-06-15",
-          description: "Vaccine DPT (Bạch hầu, Ho gà, Uốn ván)",
-        },
-        { date: "2023-03-20", description: "Vaccine Cúm mùa" },
-        { date: "2022-12-05", description: "Vaccine Viêm gan B" },
+        { date: "2023-09-10", description: "Vaccine MMR" },
+        // ...
       ],
     },
-    {
-      id: 2,
-      title: "Khám sức khỏe định kỳ",
-      type: "health_check",
-      lastUpdated: "2023-11-01",
-      content: [
-        {
-          date: "2023-11-01",
-          description:
-            "Chiều cao: 85cm, Cân nặng: 12kg, Phát triển bình thường",
-        },
-        {
-          date: "2023-08-01",
-          description:
-            "Chiều cao: 83cm, Cân nặng: 11.5kg, Phát triển bình thường",
-        },
-        {
-          date: "2023-05-01",
-          description:
-            "Chiều cao: 80cm, Cân nặng: 11kg, Phát triển bình thường",
-        },
-      ],
-    },
-    {
-      id: 3,
-      title: "Thông tin dị ứng",
-      type: "allergy",
-      lastUpdated: "2023-07-20",
-      content: [
-        { date: "2023-07-20", description: "Dị ứng nhẹ với trứng và sữa bò" },
-        { date: "2023-04-10", description: "Test dị ứng thực phẩm" },
-      ],
-    },
-    {
-      id: 4,
-      title: "Lịch sử bệnh",
-      type: "medical_history",
-      lastUpdated: "2023-10-25",
-      content: [
-        {
-          date: "2023-10-20",
-          description: "Viêm họng, điều trị bằng kháng sinh trong 5 ngày",
-        },
-        {
-          date: "2023-08-15",
-          description: "Sốt phát ban, nghỉ ngơi và uống nhiều nước",
-        },
-        {
-          date: "2023-05-30",
-          description: "Hen suyễn nhẹ, sử dụng thuốc xịt khi cần",
-        },
-      ],
-    },
+    // ...
   ];
 
   return (
-    <div className="tab-container">
-      <Title level={4} className="section-title">
-        Medical Record Request
-      </Title>
+    <div className="record-request-container">
+      <Card className="record-request-card">
+        <Title level={3} className="record-request-title">
+          Medical Record Request
+        </Title>
 
-      <Tabs
-        activeKey={activeTab}
-        onChange={setActiveTab}
-        tabBarExtraContent={
-          <Button
-            type="primary"
-            onClick={fetchRecordRequests}
-            loading={loading}
-          >
-            Refresh
-          </Button>
-        }
-      >
-        <TabPane
-          tab={
-            <Badge
-              count={
-                recordRequests.filter((r) => r.status === "pending").length
-              }
-              offset={[10, 0]}
-            >
-              Pending
-            </Badge>
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          tabBarExtraContent={
+            <Button type="primary" onClick={fetchRecordRequests} loading={loading}>
+              Refresh
+            </Button>
           }
-          key="pending"
         >
-          <Table
-            columns={columns}
-            dataSource={recordRequests}
-            rowKey="id"
-            loading={loading}
-            pagination={{ pageSize: 5 }}
-            locale={{
-              emptyText: <Empty description="No pending record requests" />,
-            }}
-          />
-        </TabPane>
+          <TabPane tab="Pending" key="pending">
+            <Table
+              columns={columns}
+              dataSource={recordRequests}
+              rowKey="id"
+              loading={loading}
+              pagination={{ pageSize: 5 }}
+              locale={{
+                emptyText: <Empty description="No pending record requests" />,
+              }}
+            />
+          </TabPane>
 
-        <TabPane tab="Approved" key="approved">
-          <Table
-            columns={columns}
-            dataSource={recordRequests}
-            rowKey="id"
-            loading={loading}
-            pagination={{ pageSize: 5 }}
-            locale={{
-              emptyText: <Empty description="No approved record requests" />,
-            }}
-          />
-        </TabPane>
+          <TabPane tab="Approved" key="approved">
+            <Table
+              columns={columns}
+              dataSource={recordRequests}
+              rowKey="id"
+              loading={loading}
+              pagination={{ pageSize: 5 }}
+              locale={{
+                emptyText: <Empty description="No approved record requests" />,
+              }}
+            />
+          </TabPane>
 
-        <TabPane tab="Rejected" key="rejected">
-          <Table
-            columns={columns}
-            dataSource={recordRequests}
-            rowKey="id"
-            loading={loading}
-            pagination={{ pageSize: 5 }}
-            locale={{
-              emptyText: <Empty description="No rejected record requests" />,
-            }}
-          />
-        </TabPane>
-      </Tabs>
+          <TabPane tab="Rejected" key="rejected">
+            <Table
+              columns={columns}
+              dataSource={recordRequests}
+              rowKey="id"
+              loading={loading}
+              pagination={{ pageSize: 5 }}
+              locale={{
+                emptyText: <Empty description="No rejected record requests" />,
+              }}
+            />
+          </TabPane>
+        </Tabs>
+      </Card>
 
-      {/* Modal phản hồi yêu cầu */}
+      {/* Modal phản hồi */}
       <Modal
         title="Respond to Medical Record Request"
         open={responseVisible}
@@ -468,12 +299,7 @@ const RecordRequest = () => {
             onFinish={handleResponseSubmit}
             initialValues={{ action: "approved" }}
           >
-            <Descriptions
-              title="Request Information"
-              bordered
-              size="small"
-              column={1}
-            >
+            <Descriptions bordered size="small" column={1}>
               <Descriptions.Item label="Parent">
                 {selectedRequest.parentName}
               </Descriptions.Item>
@@ -494,15 +320,17 @@ const RecordRequest = () => {
             <Divider />
 
             <Title level={5}>Related Medical Records</Title>
-            <List
-              dataSource={getMedicalRecords(selectedRequest.childName).filter(
-                (record) =>
-                  record.type === selectedRequest.recordType ||
-                  selectedRequest.recordType === "full_record"
-              )}
-              renderItem={(item) => (
-                <List.Item>
+            {/* Giả lập hiển thị data */}
+            <div className="record-related-list">
+              {getMedicalRecords(selectedRequest.childName)
+                .filter(
+                  (r) =>
+                    r.type === selectedRequest.recordType ||
+                    selectedRequest.recordType === "full_record"
+                )
+                .map((item) => (
                   <Card
+                    key={item.id}
                     title={
                       <div style={{ display: "flex", alignItems: "center" }}>
                         <FileTextOutlined style={{ marginRight: 8 }} />
@@ -511,7 +339,7 @@ const RecordRequest = () => {
                     }
                     extra={getRecordTypeTag(item.type)}
                     size="small"
-                    style={{ width: "100%", marginBottom: 8 }}
+                    style={{ marginBottom: 8 }}
                   >
                     <p>
                       <strong>Last Updated:</strong> {item.lastUpdated}
@@ -519,17 +347,15 @@ const RecordRequest = () => {
                     <List
                       size="small"
                       dataSource={item.content}
-                      renderItem={(record) => (
+                      renderItem={(c) => (
                         <List.Item>
-                          <Text type="secondary">{record.date}:</Text>{" "}
-                          {record.description}
+                          <Text type="secondary">{c.date}:</Text> {c.description}
                         </List.Item>
                       )}
                     />
                   </Card>
-                </List.Item>
-              )}
-            />
+                ))}
+            </div>
 
             <Divider />
 
@@ -544,20 +370,13 @@ const RecordRequest = () => {
               </Select>
             </Form.Item>
 
-            <Form.Item
-              noStyle
-              shouldUpdate={(prevValues, currentValues) =>
-                prevValues.action !== currentValues.action
-              }
-            >
+            <Form.Item noStyle shouldUpdate>
               {({ getFieldValue }) =>
                 getFieldValue("action") === "approved" ? (
                   <Form.Item
                     name="approvalNote"
                     label="Approval Note"
-                    rules={[
-                      { required: true, message: "Please enter approval note" },
-                    ]}
+                    rules={[{ required: true, message: "Please enter note" }]}
                   >
                     <TextArea rows={4} placeholder="Enter approval note" />
                   </Form.Item>
@@ -565,12 +384,7 @@ const RecordRequest = () => {
                   <Form.Item
                     name="rejectReason"
                     label="Reject Reason"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Please enter reject reason",
-                      },
-                    ]}
+                    rules={[{ required: true, message: "Please enter reason" }]}
                   >
                     <TextArea rows={4} placeholder="Enter reject reason" />
                   </Form.Item>
@@ -579,12 +393,8 @@ const RecordRequest = () => {
             </Form.Item>
 
             <Form.Item>
-              <div
-                style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}
-              >
-                <Button onClick={() => setResponseVisible(false)}>
-                  Cancel
-                </Button>
+              <div className="record-modal-buttons">
+                <Button onClick={() => setResponseVisible(false)}>Cancel</Button>
                 <Button type="primary" htmlType="submit" loading={loading}>
                   Submit
                 </Button>
@@ -594,7 +404,7 @@ const RecordRequest = () => {
         )}
       </Modal>
 
-      {/* Drawer xem chi tiết */}
+      {/* Drawer chi tiết */}
       <Drawer
         title="Medical Record Request Details"
         placement="right"
@@ -609,11 +419,9 @@ const RecordRequest = () => {
                 {getStatusTag(selectedRequest.status)}
               </Descriptions.Item>
               <Descriptions.Item label="Parent">
-                <div style={{ display: "flex", alignItems: "center" }}>
+                <div className="record-drawer-parent">
                   <Avatar src={selectedRequest.parentAvatar} size="small" />
-                  <span style={{ marginLeft: 8 }}>
-                    {selectedRequest.parentName}
-                  </span>
+                  <span>{selectedRequest.parentName}</span>
                 </div>
               </Descriptions.Item>
               <Descriptions.Item label="Child">
@@ -628,76 +436,10 @@ const RecordRequest = () => {
               <Descriptions.Item label="Request Date">
                 {moment(selectedRequest.requestDate).format("DD/MM/YYYY HH:mm")}
               </Descriptions.Item>
-
-              {selectedRequest.responseDate && (
-                <Descriptions.Item label="Response Date">
-                  {moment(selectedRequest.responseDate).format(
-                    "DD/MM/YYYY HH:mm"
-                  )}
-                </Descriptions.Item>
-              )}
-
-              {selectedRequest.approvalNote && (
-                <Descriptions.Item label="Approval Note">
-                  {selectedRequest.approvalNote}
-                </Descriptions.Item>
-              )}
-
-              {selectedRequest.rejectReason && (
-                <Descriptions.Item label="Reject Reason">
-                  {selectedRequest.rejectReason}
-                </Descriptions.Item>
-              )}
             </Descriptions>
 
-            {selectedRequest.status === "approved" && (
-              <>
-                <Divider orientation="left">Provided Medical Records</Divider>
-                <List
-                  dataSource={getMedicalRecords(
-                    selectedRequest.childName
-                  ).filter(
-                    (record) =>
-                      record.type === selectedRequest.recordType ||
-                      selectedRequest.recordType === "full_record"
-                  )}
-                  renderItem={(item) => (
-                    <List.Item>
-                      <Card
-                        title={
-                          <div
-                            style={{ display: "flex", alignItems: "center" }}
-                          >
-                            <FileTextOutlined style={{ marginRight: 8 }} />
-                            {item.title}
-                          </div>
-                        }
-                        extra={getRecordTypeTag(item.type)}
-                        size="small"
-                        style={{ width: "100%", marginBottom: 8 }}
-                      >
-                        <p>
-                          <strong>Last Updated:</strong> {item.lastUpdated}
-                        </p>
-                        <List
-                          size="small"
-                          dataSource={item.content}
-                          renderItem={(record) => (
-                            <List.Item>
-                              <Text type="secondary">{record.date}:</Text>{" "}
-                              {record.description}
-                            </List.Item>
-                          )}
-                        />
-                      </Card>
-                    </List.Item>
-                  )}
-                />
-              </>
-            )}
-
             {selectedRequest.status === "pending" && (
-              <div style={{ marginTop: 16, textAlign: "right" }}>
+              <div className="record-drawer-action">
                 <Button
                   type="primary"
                   onClick={() => {

@@ -1,0 +1,52 @@
+.record-request-container {
+    background: #f7f9fc;
+    padding: 16px;
+  }
+  
+  .record-request-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 20px;
+  }
+  
+  .record-request-title {
+    color: #4eaef7;
+    margin-bottom: 24px;
+  }
+  
+  /* Parent info */
+  .record-parent-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .record-parent-name {
+    margin-left: 8px;
+  }
+  
+  /* Liệt kê medical records */
+  .record-related-list {
+    margin-bottom: 16px;
+  }
+  
+  /* Modal buttons */
+  .record-modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  
+  /* Drawer parent info */
+  .record-drawer-parent {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .record-drawer-action {
+    margin-top: 16px;
+    text-align: right;
+  }
+  

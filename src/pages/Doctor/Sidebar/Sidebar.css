@@ -1,0 +1,94 @@
+/* ========== Sidebar.css ========== */
+
+/* Sidebar bao quanh */
+.doctor-sidebar {
+  width: 260px;
+  background: #fff;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Khi collapsed, thu hẹp sidebar */
+.doctor-sidebar.collapsed {
+  width: 80px;
+}
+
+/* Nút toggle ở trên đầu sidebar */
+.sidebar-toggle {
+  padding: 16px;
+  font-size: 18px;
+  color: #4eaef7;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+/* Profile card */
+.doctor-profile-card {
+  padding: 16px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.doctor-avatar {
+  margin-bottom: 8px;
+}
+
+.doctor-name {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.doctor-specialty {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+/* Ẩn profile khi collapsed */
+.doctor-sidebar.collapsed .doctor-profile-card {
+  display: none;
+}
+
+/* Tabs dọc */
+.doctor-tabs {
+  flex: 1;
+  /* Chiều cao 100% để cuộn khi nội dung nhiều */
+  .ant-tabs-nav-list {
+    width: 100%;
+  }
+}
+
+.doctor-tabs .ant-tabs-tab {
+  padding: 12px 16px;
+}
+
+/* Căn trái icon + text */
+.doctor-tabs .ant-tabs-left > .ant-tabs-nav .ant-tabs-tab {
+  justify-content: flex-start;
+}
+
+/* Khi collapsed, chỉ hiện icon, ẩn text */
+.doctor-sidebar.collapsed .ant-tabs-left > .ant-tabs-nav .ant-tabs-tab {
+  padding: 12px 0;
+  justify-content: center;
+}
+.doctor-sidebar.collapsed .ant-tabs-left > .ant-tabs-nav .ant-tabs-tab .anticon + span {
+  display: none; /* ẩn text, chỉ hiện icon */
+}
+
+/* Nút Logout */
+.doctor-logout {
+  padding: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.logout-btn {
+  width: 100%;
+  border-radius: 4px;
+}

@@ -15,7 +15,6 @@ import {
   Badge,
   Space,
   Tooltip,
-  Spin,
   Drawer,
   Descriptions,
   Avatar,
@@ -23,19 +22,17 @@ import {
 } from "antd";
 import {
   CheckCircleOutlined,
-  CloseCircleOutlined,
   EyeOutlined,
   MessageOutlined,
-  CalendarOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
+import "./Request.css"; // Import file CSS mới
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 const { TabPane } = Tabs;
-const { RangePicker } = DatePicker;
 
 const Request = () => {
   const [loading, setLoading] = useState(false);
@@ -52,10 +49,9 @@ const Request = () => {
 
   const fetchConsultRequests = () => {
     setLoading(true);
-
-    // Giả lập API call để lấy danh sách yêu cầu tư vấn
+    // Giả lập API call
     setTimeout(() => {
-      // Dữ liệu mẫu
+      // Mock data
       const mockData = [
         {
           id: 1,
@@ -72,79 +68,9 @@ const Request = () => {
           contactMethod: "video",
           preferredTime: "2023-11-20T15:00:00",
         },
-        {
-          id: 2,
-          parentName: "Trần Văn Hiếu",
-          parentAvatar: "https://randomuser.me/api/portraits/women/44.jpg",
-          childName: "Hoàng",
-          childAge: "6 tháng",
-          requestDate: "2023-11-14T10:15:00",
-          status: "pending",
-          topic: "Dinh dưỡng",
-          description:
-            "Con tôi bắt đầu ăn dặm nhưng thường xuyên từ chối thức ăn. Tôi cần tư vấn về cách khuyến khích bé ăn và các loại thực phẩm phù hợp.",
-          urgency: "high",
-          contactMethod: "chat",
-          preferredTime: "2023-11-18T09:00:00",
-        },
-        {
-          id: 3,
-          parentName: "Lê Văn C",
-          parentAvatar: "https://randomuser.me/api/portraits/men/62.jpg",
-          childName: "Bé Cu",
-          childAge: "1 tuổi",
-          requestDate: "2023-11-13T14:45:00",
-          status: "accepted",
-          topic: "Phát triển",
-          description:
-            "Con tôi 1 tuổi nhưng vẫn chưa biết đi. Tôi muốn biết đây có phải là vấn đề đáng lo ngại không và có cách nào giúp bé phát triển kỹ năng vận động tốt hơn.",
-          urgency: "normal",
-          contactMethod: "video",
-          preferredTime: "2023-11-19T16:30:00",
-          responseDate: "2023-11-14T09:20:00",
-          appointmentDate: "2023-11-19T16:30:00",
-        },
-        {
-          id: 4,
-          parentName: "Phạm Thị D",
-          parentAvatar: "https://randomuser.me/api/portraits/women/22.jpg",
-          childName: "Bé Đậu",
-          childAge: "3 tuổi",
-          requestDate: "2023-11-12T11:30:00",
-          status: "rejected",
-          topic: "Hành vi",
-          description:
-            "Con tôi hay cáu gắt và khóc khi không được như ý. Tôi muốn biết cách xử lý tình huống này một cách hiệu quả.",
-          urgency: "low",
-          contactMethod: "chat",
-          preferredTime: "2023-11-17T10:00:00",
-          responseDate: "2023-11-13T15:45:00",
-          rejectReason:
-            "Tôi không chuyên về tư vấn hành vi trẻ em. Tôi đề xuất bạn liên hệ với bác sĩ tâm lý trẻ em để được hỗ trợ tốt hơn.",
-        },
-        {
-          id: 5,
-          parentName: "Hoàng Văn E",
-          parentAvatar: "https://randomuser.me/api/portraits/men/92.jpg",
-          childName: "Bé Em",
-          childAge: "4 tuổi",
-          requestDate: "2023-11-11T09:00:00",
-          status: "completed",
-          topic: "Sức khỏe",
-          description:
-            "Con tôi thường xuyên bị ho vào ban đêm. Tôi muốn biết nguyên nhân và cách điều trị.",
-          urgency: "high",
-          contactMethod: "video",
-          preferredTime: "2023-11-15T14:00:00",
-          responseDate: "2023-11-12T10:30:00",
-          appointmentDate: "2023-11-15T14:00:00",
-          completedDate: "2023-11-15T15:00:00",
-          notes:
-            "Bé có dấu hiệu của hen suyễn nhẹ. Đã tư vấn cách sử dụng thuốc và theo dõi. Hẹn tái khám sau 2 tuần.",
-        },
+        // ...
       ];
 
-      // Lọc dữ liệu theo tab đang active
       let filteredData = [];
       switch (activeTab) {
         case "pending":
@@ -165,7 +91,7 @@ const Request = () => {
 
       setConsultRequests(filteredData);
       setLoading(false);
-    }, 1000);
+    }, 800);
   };
 
   const handleViewDetail = (record) => {
@@ -181,77 +107,46 @@ const Request = () => {
 
   const handleResponseSubmit = (values) => {
     setLoading(true);
-
-    // Chuẩn bị dữ liệu để gửi lên server
-    const responseData = {
-      requestId: selectedRequest.id,
-      response: values.response,
-      status: values.action,
-      appointmentDate: values.appointmentDate
-        ? values.appointmentDate.format("YYYY-MM-DDTHH:mm:ss")
-        : null,
-      rejectReason: values.rejectReason,
-    };
-
-    // Giả lập API call
+    // Mock update
     setTimeout(() => {
-      console.log("Response data:", responseData);
-
-      // Cập nhật trạng thái của yêu cầu trong danh sách
-      const updatedRequests = consultRequests.map((req) => {
-        if (req.id === selectedRequest.id) {
-          return {
-            ...req,
-            status: values.action,
-            responseDate: moment().format("YYYY-MM-DDTHH:mm:ss"),
-            appointmentDate: values.appointmentDate
-              ? values.appointmentDate.format("YYYY-MM-DDTHH:mm:ss")
-              : null,
-            rejectReason: values.rejectReason,
-          };
-        }
-        return req;
-      });
-
-      setConsultRequests(updatedRequests);
+      const updated = consultRequests.map((req) =>
+        req.id === selectedRequest.id
+          ? {
+              ...req,
+              status: values.action,
+              responseDate: moment().format("YYYY-MM-DD HH:mm:ss"),
+            }
+          : req
+      );
+      setConsultRequests(updated);
       setResponseVisible(false);
       setLoading(false);
-
       message.success(
         values.action === "accepted"
           ? "Consultation request accepted"
           : "Consultation request rejected"
       );
-
-      // Refresh danh sách
       fetchConsultRequests();
-    }, 1000);
+    }, 800);
   };
 
   const handleComplete = (record) => {
     setLoading(true);
-
-    // Giả lập API call
     setTimeout(() => {
-      // Cập nhật trạng thái của yêu cầu trong danh sách
-      const updatedRequests = consultRequests.map((req) => {
-        if (req.id === record.id) {
-          return {
-            ...req,
-            status: "completed",
-            completedDate: moment().format("YYYY-MM-DDTHH:mm:ss"),
-          };
-        }
-        return req;
-      });
-
-      setConsultRequests(updatedRequests);
+      const updated = consultRequests.map((req) =>
+        req.id === record.id
+          ? {
+              ...req,
+              status: "completed",
+              completedDate: moment().format("YYYY-MM-DD HH:mm:ss"),
+            }
+          : req
+      );
+      setConsultRequests(updated);
       setLoading(false);
       message.success("Consultation completed");
-
-      // Refresh danh sách
       fetchConsultRequests();
-    }, 1000);
+    }, 800);
   };
 
   const getStatusTag = (status) => {
@@ -288,9 +183,9 @@ const Request = () => {
       dataIndex: "parentName",
       key: "parentName",
       render: (text, record) => (
-        <div style={{ display: "flex", alignItems: "center" }}>
+        <div className="request-parent-info">
           <Avatar src={record.parentAvatar} icon={<UserOutlined />} />
-          <span style={{ marginLeft: 8 }}>{text}</span>
+          <span className="request-parent-name">{text}</span>
         </div>
       ),
     },
@@ -314,7 +209,7 @@ const Request = () => {
       title: "Priority",
       dataIndex: "urgency",
       key: "urgency",
-      render: (urgency) => getUrgencyTag(urgency),
+      render: getUrgencyTag,
     },
     {
       title: "Request Date",
@@ -326,7 +221,7 @@ const Request = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (status) => getStatusTag(status),
+      render: getStatusTag,
     },
     {
       title: "Actions",
@@ -334,12 +229,8 @@ const Request = () => {
       render: (_, record) => (
         <Space>
           <Tooltip title="View details">
-            <Button
-              icon={<EyeOutlined />}
-              onClick={() => handleViewDetail(record)}
-            />
+            <Button icon={<EyeOutlined />} onClick={() => handleViewDetail(record)} />
           </Tooltip>
-
           {record.status === "pending" && (
             <Tooltip title="Respond">
               <Button
@@ -349,7 +240,6 @@ const Request = () => {
               />
             </Tooltip>
           )}
-
           {record.status === "accepted" && (
             <Tooltip title="Complete">
               <Button
@@ -365,78 +255,64 @@ const Request = () => {
   ];
 
   return (
-    <div className="tab-container">
-      <Title level={4} className="section-title">
-        Consultation Requests
-      </Title>
+    <div className="request-container">
+      <Card className="request-card">
+        <Title level={3} className="request-title">
+          Consultation Requests
+        </Title>
 
-      <Tabs
-        activeKey={activeTab}
-        onChange={setActiveTab}
-        tabBarExtraContent={
-          <Button
-            type="primary"
-            onClick={fetchConsultRequests}
-            loading={loading}
-          >
-            Refresh
-          </Button>
-        }
-      >
-        <TabPane
-          tab={
-            <Badge
-              count={
-                consultRequests.filter((r) => r.status === "pending").length
-              }
-              offset={[10, 0]}
-            >
-              Pending
-            </Badge>
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          tabBarExtraContent={
+            <Button type="primary" onClick={fetchConsultRequests} loading={loading}>
+              Refresh
+            </Button>
           }
-          key="pending"
         >
-          <Table
-            columns={columns}
-            dataSource={consultRequests}
-            rowKey="id"
-            loading={loading}
-            pagination={{ pageSize: 5 }}
-          />
-        </TabPane>
+          <TabPane tab="Pending" key="pending">
+            <Table
+              columns={columns}
+              dataSource={consultRequests}
+              rowKey="id"
+              loading={loading}
+              pagination={{ pageSize: 5 }}
+            />
+          </TabPane>
 
-        <TabPane tab="Accepted" key="accepted">
-          <Table
-            columns={columns}
-            dataSource={consultRequests}
-            rowKey="id"
-            loading={loading}
-            pagination={{ pageSize: 5 }}
-          />
-        </TabPane>
+          <TabPane tab="Accepted" key="accepted">
+            <Table
+              columns={columns}
+              dataSource={consultRequests}
+              rowKey="id"
+              loading={loading}
+              pagination={{ pageSize: 5 }}
+            />
+          </TabPane>
 
-        <TabPane tab="Completed" key="completed">
-          <Table
-            columns={columns}
-            dataSource={consultRequests}
-            rowKey="id"
-            loading={loading}
-            pagination={{ pageSize: 5 }}
-          />
-        </TabPane>
+          <TabPane tab="Completed" key="completed">
+            <Table
+              columns={columns}
+              dataSource={consultRequests}
+              rowKey="id"
+              loading={loading}
+              pagination={{ pageSize: 5 }}
+            />
+          </TabPane>
 
-        <TabPane tab="Rejected" key="rejected">
-          <Table
-            columns={columns}
-            dataSource={consultRequests}
-            rowKey="id"
-            loading={loading}
-            pagination={{ pageSize: 5 }}
-          />
-        </TabPane>
-      </Tabs>
+          <TabPane tab="Rejected" key="rejected">
+            <Table
+              columns={columns}
+              dataSource={consultRequests}
+              rowKey="id"
+              loading={loading}
+              pagination={{ pageSize: 5 }}
+            />
+          </TabPane>
+        </Tabs>
+      </Card>
 
-      {/* Modal phản hồi yêu cầu */}
+      {/* Modal phản hồi */}
       <Modal
         title="Respond to Consultation Request"
         open={responseVisible}
@@ -451,12 +327,7 @@ const Request = () => {
             onFinish={handleResponseSubmit}
             initialValues={{ action: "accepted" }}
           >
-            <Descriptions
-              title="Request Information"
-              bordered
-              size="small"
-              column={1}
-            >
+            <Descriptions bordered size="small" column={1}>
               <Descriptions.Item label="Parent">
                 {selectedRequest.parentName}
               </Descriptions.Item>
@@ -470,14 +341,7 @@ const Request = () => {
                 {selectedRequest.description}
               </Descriptions.Item>
               <Descriptions.Item label="Contact Method">
-                {selectedRequest.contactMethod === "video"
-                  ? "Video Call"
-                  : "Chat"}
-              </Descriptions.Item>
-              <Descriptions.Item label="Preferred Time">
-                {moment(selectedRequest.preferredTime).format(
-                  "DD/MM/YYYY HH:mm"
-                )}
+                {selectedRequest.contactMethod === "video" ? "Video Call" : "Chat"}
               </Descriptions.Item>
             </Descriptions>
 
@@ -494,41 +358,25 @@ const Request = () => {
               </Select>
             </Form.Item>
 
-            <Form.Item
-              noStyle
-              shouldUpdate={(prevValues, currentValues) =>
-                prevValues.action !== currentValues.action
-              }
-            >
+            <Form.Item noStyle shouldUpdate>
               {({ getFieldValue }) =>
                 getFieldValue("action") === "accepted" ? (
                   <Form.Item
                     name="appointmentDate"
                     label="Appointment Date"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Please select an appointment date",
-                      },
-                    ]}
+                    rules={[{ required: true, message: "Please select date/time" }]}
                   >
                     <DatePicker
                       showTime
                       format="DD/MM/YYYY HH:mm"
                       style={{ width: "100%" }}
-                      placeholder="Select appointment date"
                     />
                   </Form.Item>
                 ) : (
                   <Form.Item
                     name="rejectReason"
                     label="Reject Reason"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Please enter reject reason",
-                      },
-                    ]}
+                    rules={[{ required: true, message: "Please enter reason" }]}
                   >
                     <TextArea rows={4} placeholder="Enter reject reason" />
                   </Form.Item>
@@ -545,12 +393,8 @@ const Request = () => {
             </Form.Item>
 
             <Form.Item>
-              <div
-                style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}
-              >
-                <Button onClick={() => setResponseVisible(false)}>
-                  Cancel
-                </Button>
+              <div className="request-modal-buttons">
+                <Button onClick={() => setResponseVisible(false)}>Cancel</Button>
                 <Button type="primary" htmlType="submit" loading={loading}>
                   Send Response
                 </Button>
@@ -560,7 +404,7 @@ const Request = () => {
         )}
       </Modal>
 
-      {/* Drawer xem chi tiết */}
+      {/* Drawer chi tiết */}
       <Drawer
         title="Consultation Request Details"
         placement="right"
@@ -575,11 +419,9 @@ const Request = () => {
                 {getStatusTag(selectedRequest.status)}
               </Descriptions.Item>
               <Descriptions.Item label="Parent">
-                <div style={{ display: "flex", alignItems: "center" }}>
+                <div className="request-drawer-parent">
                   <Avatar src={selectedRequest.parentAvatar} size="small" />
-                  <span style={{ marginLeft: 8 }}>
-                    {selectedRequest.parentName}
-                  </span>
+                  <span>{selectedRequest.parentName}</span>
                 </div>
               </Descriptions.Item>
               <Descriptions.Item label="Child">
@@ -594,59 +436,10 @@ const Request = () => {
               <Descriptions.Item label="Description">
                 {selectedRequest.description}
               </Descriptions.Item>
-              <Descriptions.Item label="Contact Method">
-                {selectedRequest.contactMethod === "video"
-                  ? "Video Call"
-                  : "Chat"}
-              </Descriptions.Item>
-              <Descriptions.Item label="Preferred Time">
-                {moment(selectedRequest.preferredTime).format(
-                  "DD/MM/YYYY HH:mm"
-                )}
-              </Descriptions.Item>
-              <Descriptions.Item label="Request Date">
-                {moment(selectedRequest.requestDate).format("DD/MM/YYYY HH:mm")}
-              </Descriptions.Item>
-
-              {selectedRequest.responseDate && (
-                <Descriptions.Item label="Response Date">
-                  {moment(selectedRequest.responseDate).format(
-                    "DD/MM/YYYY HH:mm"
-                  )}
-                </Descriptions.Item>
-              )}
-
-              {selectedRequest.appointmentDate && (
-                <Descriptions.Item label="Appointment Date">
-                  {moment(selectedRequest.appointmentDate).format(
-                    "DD/MM/YYYY HH:mm"
-                  )}
-                </Descriptions.Item>
-              )}
-
-              {selectedRequest.completedDate && (
-                <Descriptions.Item label="Completed Date">
-                  {moment(selectedRequest.completedDate).format(
-                    "DD/MM/YYYY HH:mm"
-                  )}
-                </Descriptions.Item>
-              )}
-
-              {selectedRequest.rejectReason && (
-                <Descriptions.Item label="Reject Reason">
-                  {selectedRequest.rejectReason}
-                </Descriptions.Item>
-              )}
-
-              {selectedRequest.notes && (
-                <Descriptions.Item label="Notes">
-                  {selectedRequest.notes}
-                </Descriptions.Item>
-              )}
             </Descriptions>
 
             {selectedRequest.status === "pending" && (
-              <div style={{ marginTop: 16, textAlign: "right" }}>
+              <div className="request-drawer-action">
                 <Button
                   type="primary"
                   onClick={() => {
