@@ -102,65 +102,76 @@ const BlogSection = ({ parentCategoryId }) => {
             <p>Đang tải bài viết...</p>
           </div>
         ) : (
-          blogs.map((blog) => (
-            <div
-              key={blog.blogId}
-              className="blog-card"
-              onClick={() => navigate(`/blog/${blog.blogId}`)}
-            >
-              <div className="blog-image">
-                <img
-                  src={blog.imageBlog || "/placeholder-image.jpg"}
-                  alt={blog.title}
-                  onError={(e) => {
-                    e.target.src = "/placeholder-image.jpg";
-                  }}
-                />
-                <span className="blog-category-tag">
-                  {blog.categoryName || "Technology"}
-                </span>
-              </div>
-              <div className="blog-content">
-                <h3 className="blog-title">{blog.title}</h3>
-                <p className="blog-description">
-                  {blog.content
-                    ? blog.content.length > 80
-                      ? blog.content.substring(0, 80).replace(/<[^>]*>/g, "") +
-                        "..."
-                      : blog.content.replace(/<[^>]*>/g, "")
-                    : "An exploration into the topic's design."}
-                </p>
-                <div className="blog-metadata">
-                  <div className="blog-author-avatar">
-                    <img
-                      src={blog.authorAvatar || "/default-avatar.jpg"}
-                      alt={blog.authorName}
-                      onError={(e) => {
-                        e.target.src = "/default-avatar.jpg";
-                      }}
-                    />
+          blogs.map((blog) => {
+            // Log để kiểm tra
+            console.log("Blog image:", blog.imageBlog);
+
+            return (
+              <div
+                key={blog.blogId}
+                className="blog-card"
+                onClick={() => navigate(`/blog/${blog.blogId}`)}
+              >
+                <div className="blog-image">
+                  <img
+                    src={blog.imageBlog || "/placeholder-image.jpg"}
+                    alt={blog.title}
+                    onError={(e) => {
+                      console.log("Image error, using placeholder");
+                      e.target.src = "/placeholder-image.jpg";
+                    }}
+                  />
+                  <span className="blog-category-tag">
+                    {blog.categoryName || "Technology"}
+                  </span>
+                </div>
+                <div className="blog-content">
+                  <div>
+                    <h3 className="blog-title">
+                      {blog.title || "Tiêu đề không có sẵn"}
+                    </h3>
+                    <p className="blog-description">
+                      {blog.content
+                        ? blog.content
+                            .replace(/<[^>]*>/g, "")
+                            .substring(0, 80) + "..."
+                        : "Xem thêm chi tiết về bài viết này..."}
+                    </p>
                   </div>
-                  <div className="blog-author-info">
-                    <p className="blog-author">
-                      {blog.authorName ? blog.authorName : "Ẩn danh"}
-                    </p>
-                    <p className="blog-date">
-                      {blog.updatedAt
-                        ? new Date(blog.updatedAt).getTime() >
-                          Date.now() - 86400000
-                          ? `${Math.floor(
-                              (Date.now() -
-                                new Date(blog.updatedAt).getTime()) /
-                                3600000
-                            )} giờ trước`
-                          : new Date(blog.updatedAt).toLocaleDateString("vi-VN")
-                        : "2 giờ trước"}
-                    </p>
+                  <div className="blog-metadata">
+                    <div className="blog-author-avatar">
+                      <img
+                        src={blog.authorAvatar || "/default-avatar.jpg"}
+                        alt={blog.authorName}
+                        onError={(e) => {
+                          e.target.src = "/default-avatar.jpg";
+                        }}
+                      />
+                    </div>
+                    <div className="blog-author-info">
+                      <p className="blog-author">
+                        {blog.authorName ? blog.authorName : "Ẩn danh"}
+                      </p>
+                      <p className="blog-date">
+                        {blog.updatedAt
+                          ? new Date(blog.updatedAt).getTime() >
+                            Date.now() - 86400000
+                            ? `${Math.floor(
+                                (Date.now() -
+                                  new Date(blog.updatedAt).getTime()) /
+                                  3600000
+                              )} giờ trước`
+                            : new Date(blog.updatedAt).toLocaleDateString(
+                                "vi-VN"
+                              )
+                          : "2 giờ trước"}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>
