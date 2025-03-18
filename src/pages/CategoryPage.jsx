@@ -141,7 +141,11 @@ function CategoryPage() {
           <>
             <div className="blogs-container">
               {getCurrentBlogs().map((blog) => (
-                <div key={blog.title} className="blog-card">
+                <div
+                  key={blog.blogId || blog.id || blog.title}
+                  className="blog-card"
+                  onClick={() => handleReadMore(blog)}
+                >
                   <div className="blog-image">
                     <img
                       src={blog.imageBlog || "/placeholder-image.jpg"}
@@ -150,19 +154,17 @@ function CategoryPage() {
                         e.target.src = "/placeholder-image.jpg";
                       }}
                     />
+                    <div className="blog-category-label">
+                      {blog.categoryName}
+                    </div>
                   </div>
+
                   <div className="blog-content">
                     <h2 className="blog-title">{blog.title}</h2>
 
-                    <div className="blog-metadata">
-                      <p className="blog-author">
-                        {blog.authorName
-                          ? `Tác giả: ${blog.authorName}`
-                          : "Tác giả: Ẩn danh"}
-                      </p>
-                      <p className="blog-category">
-                        Danh mục: {blog.categoryName}
-                      </p>
+                    <div className="blog-author">
+                      <i className="fas fa-user-circle"></i>
+                      {blog.name || blog.authorName || "Ẩn danh"}
                     </div>
 
                     <div className="blog-tags">
@@ -174,19 +176,12 @@ function CategoryPage() {
                     </div>
 
                     <p className="blog-excerpt">
-                      {blog.content?.length > 200
-                        ? `${blog.content.substring(0, 200)}...`
-                        : blog.content}
+                      {blog.content
+                        ? blog.content.length > 150
+                          ? `${blog.content.substring(0, 150)}...`
+                          : blog.content
+                        : "Không có mô tả cho bài viết này"}
                     </p>
-
-                    {blog.status === "Approved" && (
-                      <button
-                        className="read-more-btn"
-                        onClick={() => handleReadMore(blog)}
-                      >
-                        Đọc thêm
-                      </button>
-                    )}
                   </div>
                 </div>
               ))}
