@@ -10,6 +10,9 @@ import vnpay from "../../assets/vnpay.jpg";
 import visa from "../../assets/visa.jpg";
 import logo from "../../assets/Logo.png";
 import name from "../../assets/Name.png";
+import api from "../../config/axios";
+import packageApi from "../../services/packageApi";
+import vnpayApi from "../../services/vnpayApi";
 
 function Packages() {
   const [showOverlay, setShowOverlay] = useState(false);
@@ -27,32 +30,37 @@ function Packages() {
 
   // Kiểm tra URL param ?paymentStatus=success => Step 3
   useEffect(() => {
-    try {
+    const processPayment = async () => {
       const params = new URLSearchParams(window.location.search);
-      const token = params.get("token");
-
-      if (typeof token === "string" && token.trim() !== "") {
-        const tokenPayload = jwtDecode(token);
-        const paymentStatus = tokenPayload["Status"];
-        console.log(paymentStatus);
-        if (paymentStatus === "Completed") {
-          // Lưu thông tin vào sessionStorage để dùng sau khi redirect
-          const pkgJSON = localStorage.getItem("selectedPackage");
-          if (pkgJSON) {
-            sessionStorage.setItem("completedPayment", "true");
-            sessionStorage.setItem("selectedPackageAfterPayment", pkgJSON);
+      const status = params.get("vnp_TransactionStatus"); // "00" là thành công
+    
+      if (status === "00") {
+        console.log("Thanh toán thành công!");
+  
+        // Lưu vào sessionStorage
+        const pkgJSON = localStorage.getItem("selectedPackage");
+        if (pkgJSON) {
+          sessionStorage.setItem("completedPayment", "true");
+          sessionStorage.setItem("selectedPackageAfterPayment", pkgJSON);
+  
+          try {
+            // Gọi API để xác nhận thanh toán
+            const result = await vnpayApi.paymentConfirm(Object.fromEntries(params.entries()));
+            sessionStorage.setItem("result", result)
+            console.log("Kết quả từ API:", result);
+  
             // Redirect về homepage
             window.location.href = "/homepage";
+          } catch (error) {
+            console.error("Lỗi khi gửi yêu cầu xác nhận thanh toán:", error);
           }
         }
       } else {
-        setError("Invalid or missing token");
-        console.error("Invalid or missing token");
+        console.error("Thanh toán thất bại hoặc không xác định.");
       }
-    } catch (error) {
-      // Xử lý lỗi nếu không có token hoặc token không hợp lệ
-      console.error("Error during payment:", error);
-    }
+    };
+    processPayment();
+    console.log(sessionStorage.getItem("result"));
   }, []);
 
   // Thêm useEffect mới để kiểm tra trạng thái thanh toán đã hoàn tất
