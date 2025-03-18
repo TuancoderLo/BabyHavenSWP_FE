@@ -242,7 +242,7 @@ const handleConnectDoctor = () => {
       const membershipData = membershipRes.data?.data;
   
       // 2) Giả sử membershipData có trường membershipPackageName = 'Free' | 'Standard' | 'Premium'
-      const membershipPackage = membershipData?.membershipPackageName; 
+      const membershipPackage = membershipData?.packageName; 
       // Hoặc tuỳ API trả về, bạn thay đổi key cho đúng
   
       // 3) Xác định giới hạn trẻ
