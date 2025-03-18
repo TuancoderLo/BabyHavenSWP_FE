@@ -141,7 +141,7 @@ function HeaderGuest() {
             Join
           </NavLink>
           <button className="logout-btn" onClick={() => navigate("/login")}>
-            Sign Up
+            Sign In
           </button>
         </div>
       </nav>
