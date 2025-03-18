@@ -71,7 +71,7 @@ function CategoryPage() {
       console.log("Processed blogs data:", blogsData);
 
       if (blogsData.length === 0) {
-        setError("Không có bài viết nào trong danh mục này");
+        setError("Category is empty");
       }
 
       setBlogs(blogsData);
@@ -81,7 +81,7 @@ function CategoryPage() {
         message: error.message,
         response: error.response?.data,
       });
-      setError("Có lỗi xảy ra khi tải bài viết. Vui lòng thử lại sau.");
+      setError("Error fetching blogs");
       setBlogs([]);
     } finally {
       setLoading(false);
@@ -130,11 +130,11 @@ function CategoryPage() {
 
       <main className="category-content">
         {categoryName && (
-          <h1 className="category-title">Danh mục: {categoryName}</h1>
+          <h1 className="category-title">Category: {categoryName}</h1>
         )}
 
         {loading ? (
-          <div className="loading">Đang tải bài viết...</div>
+          <div className="loading">Loading blogs...</div>
         ) : error ? (
           <div className="error">{error}</div>
         ) : (
@@ -162,9 +162,15 @@ function CategoryPage() {
                   <div className="blog-content">
                     <h2 className="blog-title">{blog.title}</h2>
 
-                    <div className="blog-author">
-                      <i className="fas fa-user-circle"></i>
-                      {blog.name || blog.authorName || "Ẩn danh"}
+                    <div className="blog-metadata">
+                      <p className="blog-author">
+                        {blog.authorName
+                          ? `Author: ${blog.authorName}`
+                          : "Author: Unknown"}
+                      </p>
+                      <p className="blog-category">
+                        Category: {blog.categoryName}
+                      </p>
                     </div>
 
                     <div className="blog-tags">
@@ -176,12 +182,19 @@ function CategoryPage() {
                     </div>
 
                     <p className="blog-excerpt">
-                      {blog.content
-                        ? blog.content.length > 150
-                          ? `${blog.content.substring(0, 150)}...`
-                          : blog.content
-                        : "Không có mô tả cho bài viết này"}
+                      {blog.content?.length > 200
+                        ? `${blog.content.substring(0, 200)}...`
+                        : blog.content}
                     </p>
+
+                    {blog.status === "Approved" && (
+                      <button
+                        className="read-more-btn"
+                        onClick={() => handleReadMore(blog)}
+                      >
+                        Read more
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -214,7 +227,7 @@ function CategoryPage() {
                   disabled={currentPage === totalPages}
                   className="pagination-btn"
                 >
-                  Sau
+                  Next
                 </button>
               </div>
             )}
