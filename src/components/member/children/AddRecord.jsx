@@ -223,23 +223,18 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
           {/* Date Section */}
           <div className="form-section date-section">
             <h4>Record Date</h4>
-            <ReactDatePicker
-              selected={
-                growthForm.createdAt ? new Date(growthForm.createdAt) : null
-              }
-              onChange={(date) =>
+            <input
+              type="date"
+              value={growthForm.createdAt || ""}
+              onChange={(e) => {
                 setGrowthForm((prev) => ({
                   ...prev,
-                  createdAt: date ? date.toISOString() : "",
-                }))
-              }
-              dateFormat="dd/MM/yyyy"
-              placeholderText="Select record date"
+                  createdAt: e.target.value, // Lưu đúng định dạng yyyy-MM-dd
+                }));
+              }}
               className={errors.createdAt ? "error-input" : ""}
             />
-            {errors.createdAt && (
-              <p className="error-text">{errors.createdAt}</p>
-            )}
+            {errors.createdAt && <p className="error-text">{errors.createdAt}</p>}
           </div>
 
           {/* Measurements Section */}
