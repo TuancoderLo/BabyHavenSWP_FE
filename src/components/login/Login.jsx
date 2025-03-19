@@ -170,7 +170,7 @@ function Login({ onLoginSuccess }) {
       // Gửi yêu cầu đến backend để lấy URL Google login
       // Redirect người dùng đến Google login
       window.location.href =
-        "https://localhost:7279/api/GoogleAuth/signin-google";
+        "https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/GoogleAuth/signin-google";
     } catch (error) {
       // Xử lý lỗi nếu có
       if (error.response) {
