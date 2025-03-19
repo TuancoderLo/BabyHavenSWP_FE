@@ -5,6 +5,7 @@ import HeaderGuest from "../components/commonGuest/HeaderGuest";
 import Footer from "../components/common/Footer";
 import api from "../config/axios";
 import "./CategoryPage.css";
+import parse from "html-react-parser";
 
 function CategoryPage() {
   const { categoryId } = useParams();
@@ -111,6 +112,21 @@ function CategoryPage() {
     return tags.split(",").map((tag) => tag.trim());
   };
 
+  // Thêm hàm để lọc bỏ thẻ HTML
+  const stripHtmlTags = (html) => {
+    if (!html) return "";
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    return tempDiv.textContent || tempDiv.innerText || "";
+  };
+
+  // Phương pháp 2: Sử dụng thư viện html-react-parser
+  const renderHtmlContent = (html) => {
+    if (!html) return "";
+    // Chuyển đổi HTML thành các phần tử React
+    return parse(html);
+  };
+
   // Hàm xử lý khi nhấp vào "Đọc thêm"
   const handleReadMore = (blog) => {
     const blogId = blog.blogId || blog.id;
@@ -173,9 +189,11 @@ function CategoryPage() {
 
                     {/* Hiển thị phần tóm tắt bài viết ngắn gọn hơn */}
                     <p className="blog-excerpt">
-                      {blog.content?.length > 80
-                        ? `${blog.content.substring(0, 80)}...`
-                        : blog.content}
+                      {blog.content
+                        ? stripHtmlTags(blog.content).length > 80
+                          ? `${stripHtmlTags(blog.content).substring(0, 80)}...`
+                          : stripHtmlTags(blog.content)
+                        : ""}
                     </p>
 
                     <div className="blog-info">
