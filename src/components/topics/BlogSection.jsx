@@ -41,22 +41,28 @@ const BlogSection = ({ parentCategoryId }) => {
     const fetchBlogs = async () => {
       setLoading(true);
       try {
-        let response;
+        let blogsData = [];
+
         if (selectedCategory === "all") {
-          // Khi chọn "All", lấy tất cả bài viết của category cha (bao gồm cả bài viết của category con)
-          response = await blogApi.getByCategoryId(parentCategoryId);
+          // Khi chọn "All", giữ nguyên cách lấy tất cả bài viết của category cha
+          const response = await blogApi.getByCategoryId(parentCategoryId);
+          if (response?.data?.status === 1) {
+            blogsData = response.data.data;
+          }
         } else {
-          // Khi chọn category con, chỉ lấy bài viết của category đó
-          response = await blogApi.getByCategoryId(selectedCategory);
+          // Khi chọn category con, sử dụng API mới để lấy thông tin category và danh sách blog
+          const response = await blogCategoryApi.getById(selectedCategory);
+          if (response?.data?.status === 1) {
+            // Trích xuất danh sách blogs từ phản hồi API
+            blogsData = response.data.data.blogs || [];
+          }
         }
 
-        if (response?.data?.status === 1) {
-          // Sắp xếp theo thời gian và giới hạn 4 bài
-          const sortedBlogs = response.data.data
-            .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-            .slice(0, 4);
-          setBlogs(sortedBlogs);
-        }
+        // Sắp xếp theo thời gian và giới hạn 4 bài
+        const sortedBlogs = blogsData
+          .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+          .slice(0, 4);
+        setBlogs(sortedBlogs);
       } catch (error) {
         console.error("Error fetching blogs:", error);
       } finally {
@@ -116,7 +122,6 @@ const BlogSection = ({ parentCategoryId }) => {
                   <img
                     src={blog.imageBlog || "/placeholder-image.jpg"}
                     alt={blog.title}
-                    
                     onError={(e) => {
                       console.log("Image error, using placeholder");
                       e.target.src = "/placeholder-image.jpg";
