@@ -60,7 +60,6 @@ const DoctorBlog = () => {
         setBlogs(doctorBlogs.map((blog) => ({ ...blog, key: blog.blogId })));
       }
     } catch (error) {
-      console.error("Error fetching blogs:", error);
       message.error("Không thể tải danh sách bài viết");
     } finally {
       setLoading(false);
@@ -76,7 +75,6 @@ const DoctorBlog = () => {
         setCategories(response.data.data);
       }
     } catch (error) {
-      console.error("Error fetching categories:", error);
       message.error("Không thể tải danh sách danh mục");
     }
   };
@@ -124,9 +122,8 @@ const DoctorBlog = () => {
       form.resetFields();
       setContent("");
       fetchBlogs();
-      setActiveTab("2"); // Chuyển sang tab danh sách sau khi tạo thành công
+      setActiveTab("2");
     } catch (error) {
-      console.error("Error submitting blog:", error);
       message.error("Không thể lưu bài viết");
     } finally {
       setLoading(false);
@@ -139,7 +136,6 @@ const DoctorBlog = () => {
       message.success("Xóa bài viết thành công");
       fetchBlogs();
     } catch (error) {
-      console.error("Error deleting blog:", error);
       message.error("Không thể xóa bài viết");
     }
   };
@@ -162,9 +158,9 @@ const DoctorBlog = () => {
       key: "status",
       render: (status) => {
         const statusColors = {
-          0: "orange", // Pending
-          1: "green", // Approved
-          2: "red", // Rejected
+          0: "orange",
+          1: "green",
+          2: "red",
         };
         const statusText = {
           0: "Chờ duyệt",
@@ -209,9 +205,9 @@ const DoctorBlog = () => {
   ];
 
   return (
-    <div className="blog-container">
-      <Card bordered={false}>
-        <Title level={4} style={{ marginBottom: 24 }}>
+    <div className="doctor-blog-container">
+      <Card bordered={false} className="doctor-blog-card">
+        <Title level={3} className="doctor-blog-title">
           Quản lý Blog
         </Title>
         <Tabs activeKey={activeTab} onChange={setActiveTab}>
@@ -226,9 +222,7 @@ const DoctorBlog = () => {
                 <div className="input-row">
                   <Form.Item
                     name="title"
-                    rules={[
-                      { required: true, message: "Vui lòng nhập tiêu đề" },
-                    ]}
+                    rules={[{ required: true, message: "Vui lòng nhập tiêu đề" }]}
                     className="input-item"
                   >
                     <Input placeholder="Title" className="blog-input" />
@@ -236,9 +230,7 @@ const DoctorBlog = () => {
 
                   <Form.Item
                     name="tags"
-                    rules={[
-                      { required: true, message: "Tags sẽ được tự động điền" },
-                    ]}
+                    rules={[{ required: true, message: "Tags tự động điền" }]}
                     className="input-item"
                   >
                     <Input
@@ -323,9 +315,7 @@ const DoctorBlog = () => {
                   </div>
                   <div className="content-body">
                     <Form.Item
-                      rules={[
-                        { required: true, message: "Vui lòng nhập nội dung" },
-                      ]}
+                      rules={[{ required: true, message: "Vui lòng nhập nội dung" }]}
                     >
                       <CustomEditor
                         value={content}

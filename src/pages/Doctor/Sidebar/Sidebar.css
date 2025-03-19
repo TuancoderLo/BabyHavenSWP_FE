@@ -1,0 +1,99 @@
+.layout-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.children-sidebar {
+  background-color: #ffffff;
+  height: 100vh;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  left: 0;
+  top: 0;
+  padding: 16px 8px;
+  overflow: hidden;
+  z-index: 100;
+  transition: width 0.3s ease;
+}
+
+/* Sidebar khi mở */
+.children-sidebar.open {
+  width: 200px;  /* Chiều rộng khi sidebar mở */
+}
+
+/* Sidebar khi đóng */
+.children-sidebar.closed {
+  width: 70px;  /* Chiều rộng khi sidebar đóng */
+}
+
+.main-content {
+  flex: 1;
+  min-height: 100vh;
+  background-color: #ffffff;
+  margin-left: 70px;
+  transition: margin-left 0.3s ease;
+}
+
+.children-sidebar:hover ~ .main-content {
+  margin-left: 200px;
+}
+
+/* Các item và màu sắc khi hover hoặc được chọn */
+.children-sidebar-nav li {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  cursor: pointer;
+  border-radius: 8px;
+  position: relative;
+  margin: 0 4px;
+  transition: background-color 0.3s ease;
+}
+
+.children-sidebar-nav li i {
+  font-size: 20px;
+  width: 32px;
+  text-align: center;
+  margin-right: 12px;
+  color: #000000;
+}
+
+.children-sidebar-nav li span {
+  color: #000000;
+  font-weight: 500;
+  font-size: 15px;
+  opacity: 0;
+  white-space: nowrap;
+}
+
+.children-sidebar-nav li:hover {
+  background-color: #2196F3;
+}
+
+.children-sidebar-nav li.active {
+  background-color: #2196F3;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.children-sidebar-nav li.active i,
+.children-sidebar-nav li.active span {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.menu-item {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  color: inherit;
+}
+
+.children-sidebar-nav li:last-child {
+  margin-top: 24px;
+}
+
+.children-sidebar-nav li:last-child i {
+  color: #DC3545;
+}

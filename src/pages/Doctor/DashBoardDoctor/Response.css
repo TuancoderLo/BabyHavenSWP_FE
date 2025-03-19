@@ -1,0 +1,34 @@
+.response-container {
+    background: #f7f9fc;
+    padding: 16px;
+  }
+  
+  .response-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 20px;
+  }
+  
+  .response-title {
+    color: #4eaef7;
+    margin-bottom: 24px;
+  }
+  
+  /* Parent info trong bảng */
+  .response-parent-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .response-parent-name {
+    margin-left: 8px;
+  }
+  
+  /* Drawer parent info */
+  .response-drawer-parent {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  

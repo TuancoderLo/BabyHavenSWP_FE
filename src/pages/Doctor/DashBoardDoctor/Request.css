@@ -1,0 +1,47 @@
+.request-container {
+    background: #f7f9fc;
+    padding: 16px;
+  }
+  
+  .request-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 20px;
+  }
+  
+  .request-title {
+    color: #4eaef7;
+    margin-bottom: 24px;
+  }
+  
+  /* Parent info trong bảng */
+  .request-parent-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .request-parent-name {
+    margin-left: 8px;
+  }
+  
+  /* Modal buttons */
+  .request-modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  
+  /* Drawer parent info */
+  .request-drawer-parent {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .request-drawer-action {
+    margin-top: 16px;
+    text-align: right;
+  }
+  

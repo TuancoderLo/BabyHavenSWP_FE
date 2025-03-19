@@ -1,0 +1,68 @@
+/* Home.css */
+.doctor-home-container {
+  background: #f7f9fc;
+  padding: 16px;
+  height: 100%; /* Tận dụng chiều cao của doctor-main-content */
+  overflow-y: auto; /* Cuộn nếu nội dung dài */
+}
+
+.home-profile-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.home-greeting h2 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.home-greeting p {
+  font-size: 16px;
+}
+
+.home-doctor-info {
+  display: flex;
+  align-items: center;
+}
+
+.home-doctor-info img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin-right: 16px;
+}
+
+.doctor-details h3 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.doctor-details p {
+  font-size: 14px;
+}
+
+.home-stat-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+}
+
+.home-plans-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.home-calendar-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  margin-top: 20px;
+}

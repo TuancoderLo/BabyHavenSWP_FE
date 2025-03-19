@@ -5,7 +5,6 @@ const doctorApi = {
     const response = await api.get("/Doctors");
     return response.data;
   },
-
   getDoctorSpecializations: async (doctorId) => {
     const response = await api.get(`/Specializations/${doctorId}`);
     return response.data;

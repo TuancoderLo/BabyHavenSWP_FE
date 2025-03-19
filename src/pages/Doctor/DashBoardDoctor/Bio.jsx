@@ -23,6 +23,7 @@ import {
 import moment from "moment";
 import locale from "antd/es/date-picker/locale/vi_VN";
 import axios from "axios";
+import "./Bio.css"; // Đảm bảo import CSS mới
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -54,7 +55,6 @@ const Bio = () => {
       try {
         setLoading(true);
         const email = localStorage.getItem("email");
-
         if (!email) {
           message.error("Không tìm thấy thông tin email!");
           setLoading(false);
@@ -63,28 +63,23 @@ const Bio = () => {
 
         // Gọi API để lấy danh sách tất cả bác sĩ
         const response = await axios.get("https://localhost:7279/api/Doctors");
-        console.log("API Response:", response.data);
-
         if (response.data.status !== 1 || !Array.isArray(response.data.data)) {
-          console.error("Invalid response format:", response.data);
           message.error("Dữ liệu không đúng định dạng!");
           setLoading(false);
           return;
         }
 
         const doctor = response.data.data.find((doc) => doc.email === email);
-        console.log("Found Doctor:", doctor);
-
         if (!doctor) {
           message.error("Không tìm thấy thông tin bác sĩ!");
           setLoading(false);
           return;
         }
 
-        // Lưu doctorId vào state
+        // Lưu doctorId
         setDoctorId(doctor.doctorId);
 
-        // Lấy thông tin từ đối tượng doctor
+        // Kết hợp dữ liệu
         const combinedData = {
           name: doctor.name || "",
           email: doctor.email || "",
@@ -98,17 +93,15 @@ const Bio = () => {
             ? moment(doctor.user.dateOfBirth)
             : null,
           profilePicture: doctor.user?.profilePicture || "",
-          specializationName: "", // Sẽ được cập nhật từ API specialization
-          description: "", // Sẽ được cập nhật từ API specialization
+          specializationName: "",
+          description: "",
         };
 
-        // Gọi API để lấy thông tin chuyên khoa
+        // Lấy thông tin chuyên khoa
         try {
           const specialization = await axios.get(
             `https://localhost:7279/api/Specializations/${doctor.doctorId}`
           );
-          console.log("Specialization Data:", specialization.data);
-
           if (specialization.data.status === 1 && specialization.data.data) {
             combinedData.specializationName =
               specialization.data.data.specializationName || "";
@@ -116,7 +109,6 @@ const Bio = () => {
               specialization.data.data.description || "";
           }
         } catch (error) {
-          console.error("Error fetching specialization:", error);
           message.warning("Không thể tải thông tin chuyên khoa");
         }
 
@@ -124,10 +116,9 @@ const Bio = () => {
         setImageUrl(doctor.user?.profilePicture || "");
         form.setFieldsValue({
           ...combinedData,
-          dateOfBirth: combinedData.dateOfBirth, // Đã được chuyển đổi sang moment ở trên
+          dateOfBirth: combinedData.dateOfBirth,
         });
       } catch (error) {
-        console.error("Error fetching doctor data:", error);
         message.error("Có lỗi xảy ra khi tải thông tin bác sĩ!");
       } finally {
         setLoading(false);
@@ -144,14 +135,13 @@ const Bio = () => {
   const handleSave = async (values) => {
     try {
       setLoading(true);
-
       if (!doctorId) {
         message.error("Không tìm thấy ID bác sĩ!");
         return;
       }
 
       // Chuẩn bị dữ liệu cho API Doctors
-      const doctorData = {
+      const doctorDataToUpdate = {
         userName: values.userName || "",
         name: values.name,
         email: values.email,
@@ -169,43 +159,35 @@ const Bio = () => {
         description: values.description,
       };
 
-      // Gọi API cập nhật thông tin bác sĩ
+      // Cập nhật doctor
       try {
-        const doctorResponse = await axios.put(
+        await axios.put(
           `https://localhost:7279/api/Doctors/${doctorId}`,
-          doctorData
+          doctorDataToUpdate
         );
-        console.log("Doctor update response:", doctorResponse.data);
       } catch (error) {
-        console.error("Error updating doctor:", error);
         message.error("Cập nhật thông tin bác sĩ thất bại!");
         return;
       }
 
-      // Gọi API cập nhật thông tin chuyên khoa
+      // Cập nhật specialization
       try {
-        const specializationResponse = await axios.put(
+        await axios.put(
           `https://localhost:7279/api/Specializations/${doctorId}`,
           specializationData
         );
-        console.log(
-          "Specialization update response:",
-          specializationResponse.data
-        );
       } catch (error) {
-        console.error("Error updating specialization:", error);
         message.warning("Cập nhật thông tin chuyên khoa thất bại!");
       }
 
       // Cập nhật state và UI
       setDoctorData({
-        ...doctorData,
+        ...doctorDataToUpdate,
         ...specializationData,
       });
       setEditing(false);
       message.success("Cập nhật thông tin thành công!");
     } catch (error) {
-      console.error("Error in handleSave:", error);
       message.error("Có lỗi xảy ra khi cập nhật thông tin!");
     } finally {
       setLoading(false);
@@ -215,7 +197,7 @@ const Bio = () => {
   const handleCancel = () => {
     form.setFieldsValue({
       ...doctorData,
-      dateOfBirth: doctorData.dateOfBirth, // Đã là moment object
+      dateOfBirth: doctorData.dateOfBirth,
     });
     setEditing(false);
   };
@@ -237,8 +219,7 @@ const Bio = () => {
       return;
     }
     if (info.file.status === "done") {
-      // Trong thực tế, URL sẽ được trả về từ response của API upload
-      // Ở đây tôi giả lập bằng cách đọc file local
+      // Lấy URL từ file local (giả lập)
       getBase64(info.file.originFileObj, (url) => {
         setImageUrl(url);
       });
@@ -260,15 +241,15 @@ const Bio = () => {
 
   if (loading && !editing) {
     return (
-      <div style={{ textAlign: "center", padding: "50px" }}>
+      <div className="bio-loading-container">
         <Spin size="large" />
       </div>
     );
   }
 
   return (
-    <div className="tab-container">
-      <Title level={4} className="section-title">
+    <div className="bio-container">
+      <Title level={3} className="bio-title">
         Thông tin cá nhân
       </Title>
 
@@ -277,12 +258,12 @@ const Bio = () => {
         layout="vertical"
         onFinish={handleSave}
         initialValues={doctorData}
-        className="form-container"
+        className="bio-form"
       >
         <Row gutter={24}>
           <Col xs={24} md={8}>
-            <Card>
-              <div className="upload-container">
+            <Card className="bio-card">
+              <div className="bio-avatar-upload">
                 <Upload
                   name="avatar"
                   listType="picture-card"
@@ -303,7 +284,9 @@ const Bio = () => {
                     uploadButton
                   )}
                 </Upload>
-                <Text strong>{doctorData.name}</Text>
+                <Text strong className="bio-doctor-name">
+                  {doctorData.name}
+                </Text>
                 <Text type="secondary">{doctorData.specializationName}</Text>
               </div>
 
@@ -313,9 +296,9 @@ const Bio = () => {
                   icon={<EditOutlined />}
                   onClick={handleEdit}
                   block
-                  style={{ marginTop: 16 }}
+                  className="bio-edit-btn"
                 >
-                  Chỉnh sửa thông tin
+                  Chỉnh sửa
                 </Button>
               ) : (
                 <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
@@ -329,7 +312,7 @@ const Bio = () => {
                     loading={loading}
                     block
                   >
-                    Lưu thông tin
+                    Lưu
                   </Button>
                 </div>
               )}
@@ -337,19 +320,14 @@ const Bio = () => {
           </Col>
 
           <Col xs={24} md={16}>
-            <Card>
+            <Card className="bio-card">
               <Title level={5}>Thông tin cơ bản</Title>
               <Row gutter={16}>
                 <Col xs={24} md={12}>
                   <Form.Item
                     name="name"
                     label="Họ và tên"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Vui lòng nhập họ và tên",
-                      },
-                    ]}
+                    rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
                   >
                     <Input prefix={<UserOutlined />} disabled={!editing} />
                   </Form.Item>

@@ -1,123 +1,49 @@
-.profile-header {
-  margin-bottom: 32px;
-}
-
-.upload-section {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 20px;
-  background: #f8f9fa;
+/* Bio.css */
+.bio-container {
+  background: #f7f9fc;
+  padding: 16px;
   border-radius: 8px;
 }
 
-.upload-avatar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+.bio-title {
+  color: #4eaef7 !important;
+  margin-bottom: 16px;
 }
 
-.doctor-basic-info {
-  flex-grow: 1;
+.bio-form {
+  margin-top: 16px;
 }
 
-.doctor-basic-info h3 {
-  margin: 0;
-  color: #1890ff;
-  font-size: 20px;
+.bio-card {
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 16px;
 }
 
-.edit-button {
-  background: #1890ff;
-  border-radius: 6px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.bio-avatar-upload {
+  text-align: center;
+  margin-bottom: 16px;
 }
 
-.profile-content {
-  padding: 24px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+.bio-doctor-name {
+  display: block;
+  margin-top: 8px;
+  font-size: 1rem;
 }
 
-.profile-content h2 {
-  color: #262626;
-  margin-bottom: 24px;
-  font-size: 18px;
+.bio-edit-btn {
+  background: #4eaef7;
+  border-color: #4eaef7;
+  border-radius: 20px;
   font-weight: 500;
 }
 
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-bottom: 24px;
+.bio-edit-btn:hover {
+  background: #3594dc;
+  border-color: #3594dc;
 }
 
-.form-item {
-  margin-bottom: 0 !important;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .upload-section {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .doctor-basic-info {
-    margin: 16px 0;
-  }
-}
-
-/* Input Styling */
-.ant-input,
-.ant-select-selector,
-.ant-picker {
-  border-radius: 6px !important;
-  border-color: #d9d9d9 !important;
-  transition: all 0.3s ease !important;
-}
-
-.ant-input:hover,
-.ant-select-selector:hover,
-.ant-picker:hover {
-  border-color: #40a9ff !important;
-}
-
-.ant-input:focus,
-.ant-select-selector:focus,
-.ant-picker-focused {
-  border-color: #1890ff !important;
-  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
-}
-
-/* Form Label Styling */
-.ant-form-item-label > label {
-  color: #262626;
-  font-weight: 500;
-}
-
-.ant-form-item-required::before {
-  color: #ff4d4f !important;
-}
-
-/* Button Hover Effects */
-.edit-button:hover {
-  background: #40a9ff !important;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.2);
-}
-
-.edit-button:active {
-  transform: translateY(0);
+.bio-loading-container {
+  text-align: center;
+  padding: 50px;
 }

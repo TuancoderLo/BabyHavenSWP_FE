@@ -14,7 +14,6 @@ import AddMilestoneButton from './common/buttons/AddMilestone';
 import AddChildButton from './common/buttons/AddChild';
 import memberShipApi from "../../../services/memberShipApi";
 import alertApi from "../../../services/alertApi";
-import TruncatedAlertList from "./TruncatedAlertList";
 
 function ChildrenPage() {
   const navigate = useNavigate();
@@ -133,9 +132,6 @@ function ChildrenPage() {
   }
 }, [selectedChild, memberId]);
 
-const handleConnectDoctor = () => {
-  navigate("/member/doctor-consultation");
-};
 
   // Kiểm tra memberId khi component mount
   useEffect(() => {
@@ -237,8 +233,6 @@ const handleConnectDoctor = () => {
     try {
       // 1) Gọi API lấy thông tin gói membership
       const membershipRes = await memberShipApi.getMemberMembership(memberId);
-      // Thường trả về dạng { status: 1, message: '...', data: {...} }
-      // Tuỳ backend, bạn kiểm tra membershipRes.data.data hoặc membershipRes.data
       const membershipData = membershipRes.data?.data;
   
       // 2) Giả sử membershipData có trường membershipPackageName = 'Free' | 'Standard' | 'Premium'
