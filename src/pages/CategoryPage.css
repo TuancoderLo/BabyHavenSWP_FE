@@ -397,7 +397,9 @@
 }
 
 .blog-read-more {
-  display: none;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 
 .read-more-btn {

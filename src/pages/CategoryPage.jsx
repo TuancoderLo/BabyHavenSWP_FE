@@ -208,6 +208,19 @@ function CategoryPage() {
                           : ""}
                       </div>
                     </div>
+
+                    {/* Thêm nút "Đọc thêm" */}
+                    <div className="blog-read-more">
+                      <button
+                        className="read-more-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleReadMore(blog);
+                        }}
+                      >
+                        Đọc thêm
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

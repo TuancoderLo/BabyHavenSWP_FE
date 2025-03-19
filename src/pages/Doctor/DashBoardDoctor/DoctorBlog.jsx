@@ -16,6 +16,8 @@ import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import TextEditor from "../../../components/admin/Component_Sidebar/blog/textEditor";
 import axios from "axios";
 import "./DoctorBlog.css";
+import blogApi from "../../../services/blogApi";
+import blogCategoryApi from "../../../services/blogCategoryApi";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -52,7 +54,7 @@ const DoctorBlog = () => {
     try {
       setLoading(true);
       const email = localStorage.getItem("email");
-      const response = await axios.get(`https://localhost:7279/api/Blog`);
+      const response = await blogApi.getAll();
       if (response.data.status === 1) {
         const doctorBlogs = response.data.data.filter(
           (blog) => blog.email === email
@@ -68,9 +70,7 @@ const DoctorBlog = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(
-        "https://localhost:7279/api/BlogCategories"
-      );
+      const response = await blogCategoryApi.getAll();
       if (response.data.status === 1) {
         setCategories(response.data.data);
       }
@@ -117,7 +117,7 @@ const DoctorBlog = () => {
         status: 0, // Pending approval
       };
 
-      await axios.post("https://localhost:7279/api/Blog", blogData);
+      await blogApi.create(blogData);
       message.success("Tạo bài viết mới thành công");
       form.resetFields();
       setContent("");
@@ -132,7 +132,7 @@ const DoctorBlog = () => {
 
   const handleDelete = async (blogId) => {
     try {
-      await axios.delete(`https://localhost:7279/api/Blog/${blogId}`);
+      await blogApi.delete(blogId);
       message.success("Xóa bài viết thành công");
       fetchBlogs();
     } catch (error) {
@@ -222,7 +222,9 @@ const DoctorBlog = () => {
                 <div className="input-row">
                   <Form.Item
                     name="title"
-                    rules={[{ required: true, message: "Vui lòng nhập tiêu đề" }]}
+                    rules={[
+                      { required: true, message: "Vui lòng nhập tiêu đề" },
+                    ]}
                     className="input-item"
                   >
                     <Input placeholder="Title" className="blog-input" />
@@ -315,7 +317,9 @@ const DoctorBlog = () => {
                   </div>
                   <div className="content-body">
                     <Form.Item
-                      rules={[{ required: true, message: "Vui lòng nhập nội dung" }]}
+                      rules={[
+                        { required: true, message: "Vui lòng nhập nội dung" },
+                      ]}
                     >
                       <CustomEditor
                         value={content}
