@@ -1008,7 +1008,7 @@ const AddChild = ({ closeOverlay }) => {
             growthForm={growthForm}
             setGrowthForm={setGrowthForm}
             errors={errors}
-            onConfirm={handleConfirmStep1}
+            onConfirm={handleConfirmStep2}
             onOtherMeasure={handleOtherMeasure}
           />
         );
@@ -1018,7 +1018,7 @@ const AddChild = ({ closeOverlay }) => {
             growthForm={growthForm}
             setGrowthForm={setGrowthForm}
             errors={errors}
-            onConfirm={handleConfirmStep1}
+            onConfirm={handleConfirmStep2}
             onOtherMeasure={handleOtherMeasure}
           />
         );

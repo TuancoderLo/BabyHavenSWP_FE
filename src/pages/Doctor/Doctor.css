@@ -69,16 +69,6 @@
 
 /* Responsive */
 @media (max-width: 992px) {
-  .doctor-layout {
-    flex-direction: column;
-  }
-
-  .doctor-topbar {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-
   .doctor-dashboard {
     flex-direction: column;
   }

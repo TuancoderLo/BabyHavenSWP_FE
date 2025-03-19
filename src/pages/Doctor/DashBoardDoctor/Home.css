@@ -1,0 +1,17 @@
+/* Home.css */
+.home-container {
+    /* nền trắng, padding, vv. */
+    background: #f7f9fc;
+    padding: 16px;
+  }
+  
+  .home-welcome-card,
+  .home-latest-results,
+  .home-profile-card,
+  .home-calendar-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 20px;
+  }
+  

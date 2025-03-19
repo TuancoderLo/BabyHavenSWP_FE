@@ -5,6 +5,7 @@ import { BellOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
 // Các component con
+import Home from "./DashBoardDoctor/Home";
 import Bio from "./DashBoardDoctor/Bio";
 import Request from "./DashBoardDoctor/Request";
 import Response from "./DashBoardDoctor/Response";
@@ -20,7 +21,7 @@ const { Title, Text } = Typography;
 
 const Doctor = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("bio");
+  const [activeTab, setActiveTab] = useState("home"); // Mặc định "home"
   const [loading, setLoading] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
@@ -42,7 +43,7 @@ const Doctor = () => {
       return;
     }
 
-    // Giả lập lấy thông tin
+    //lấy thông tin doctor từ localStorage
     const name = localStorage.getItem("name") || "Doctor Strange";
     const profilePicture = localStorage.getItem("profilePicture") || "";
 
@@ -84,21 +85,6 @@ const Doctor = () => {
 
       {/* MAIN */}
       <main className="doctor-main">
-        {/* Topbar */}
-        <header className="doctor-topbar">
-          <div className="topbar-left">
-            <Title level={3} style={{ margin: 0 }}>
-              Welcome Back, Dr. {doctorInfo.name}!
-            </Title>
-            <Text type="secondary">Have a nice day!</Text>
-          </div>
-          <div className="topbar-right">
-            <Badge count={doctorInfo.notifications} className="badge-notif">
-              <BellOutlined className="icon-notif" />
-            </Badge>
-          </div>
-        </header>
-
         {/* Content */}
         <section className="doctor-dashboard">
           {loading ? (
@@ -107,6 +93,7 @@ const Doctor = () => {
             </div>
           ) : (
             <>
+              {activeTab === "home" && <Home doctorInfo={doctorInfo} />}
               {activeTab === "bio" && <Bio />}
               {activeTab === "requests" && <Request />}
               {activeTab === "responses" && <Response />}

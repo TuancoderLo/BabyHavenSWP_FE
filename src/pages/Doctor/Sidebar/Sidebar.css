@@ -3,7 +3,7 @@
 /* Sidebar bao quanh */
 .doctor-sidebar {
   width: 260px;
-  background: #fff;
+  background:#EAF4FF;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
