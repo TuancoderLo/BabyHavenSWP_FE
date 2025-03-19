@@ -171,10 +171,17 @@ function CategoryPage() {
                       </span>
                     </div>
 
+                    {/* Hiển thị phần tóm tắt bài viết ngắn gọn hơn */}
+                    <p className="blog-excerpt">
+                      {blog.content?.length > 80
+                        ? `${blog.content.substring(0, 80)}...`
+                        : blog.content}
+                    </p>
+
                     <div className="blog-info">
                       <div className="blog-author-info">
                         <i className="fas fa-user"></i>
-                        {blog.authorName || "Unknown Author"}
+                        {blog.authorName || "Unknown"}
                       </div>
                       <div className="blog-date-info">
                         <i className="far fa-calendar-alt"></i>
