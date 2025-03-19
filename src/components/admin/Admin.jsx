@@ -106,33 +106,6 @@ function Admin() {
                   </div>
                 )}
               </div>
-
-              {/* Thông tin tóm tắt */}
-              <div className="info-grid">
-                {activeChart === "revenue" && (
-                  <div className="info-item">
-                    <h3>Tóm tắt doanh thu</h3>
-                    <p>Doanh thu tháng này: 45,000,000 VND</p>
-                    <p>Tăng trưởng: +15% so với tháng trước</p>
-                  </div>
-                )}
-
-                {activeChart === "package" && (
-                  <div className="info-item">
-                    <h3>Tóm tắt gói dịch vụ</h3>
-                    <p>Gói phổ biến nhất: {packageData.mostPopularPackage}</p>
-                    <p>Tỷ lệ chuyển đổi: {packageData.conversionRate}%</p>
-                  </div>
-                )}
-
-                {activeChart === "member" && (
-                  <div className="info-item">
-                    <h3>Tóm tắt thành viên</h3>
-                    <p>Thành viên mới tháng này: 24</p>
-                    <p>Tổng số thành viên: {packageData.totalMembers}</p>
-                  </div>
-                )}
-              </div>
             </div>
           )}
 
