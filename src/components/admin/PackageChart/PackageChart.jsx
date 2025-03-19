@@ -82,24 +82,25 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
       (member) => member.status === "Active"
     );
 
-    // Đếm số lượng thành viên theo từng gói
+    // Đếm số lượng thành viên theo từng gói - chỉ giữ lại 3 gói chính
     const packageCounts = {
       Free: 0,
       Standard: 0,
       Premium: 0,
-      Other: 0,
     };
 
     activeMembers.forEach((member) => {
+      // Chỉ tính 3 gói chính, bỏ qua các gói khác
       if (packageCounts.hasOwnProperty(member.packageName)) {
         packageCounts[member.packageName]++;
-      } else {
-        packageCounts.Other++;
       }
     });
 
     // Tính tổng số thành viên
-    const totalMembers = activeMembers.length;
+    const totalMembers = Object.values(packageCounts).reduce(
+      (a, b) => a + b,
+      0
+    );
 
     // Tính phần trăm
     const packagePercentages = {};
@@ -134,8 +135,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
         Free: 0,
         Standard: 0,
         Premium: 0,
-        Other: 0,
-        total: 0,
+        total: 0, // Loại bỏ phần "Other"
       };
     }
 
@@ -155,12 +155,15 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
 
         // Nếu thời gian đăng ký bao gồm tháng này
         if (startDate <= checkDate && endDate >= checkDate) {
-          if (monthlyData[monthKey].hasOwnProperty(member.packageName)) {
+          // Chỉ tính 3 gói chính
+          if (
+            member.packageName === "Free" ||
+            member.packageName === "Standard" ||
+            member.packageName === "Premium"
+          ) {
             monthlyData[monthKey][member.packageName]++;
-          } else {
-            monthlyData[monthKey].Other++;
+            monthlyData[monthKey].total++;
           }
-          monthlyData[monthKey].total++;
         }
       });
     });
@@ -178,33 +181,29 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
     if (!packageDistribution.percentages) return null;
 
     return {
-      labels: ["Free", "Standard", "Premium", "Khác"],
+      labels: ["Free", "Standard", "Premium"], // Loại bỏ "Khác"
       datasets: [
         {
           data: [
             packageDistribution.counts.Free,
             packageDistribution.counts.Standard,
             packageDistribution.counts.Premium,
-            packageDistribution.counts.Other,
           ],
           backgroundColor: [
             "rgba(77, 144, 254, 0.8)",
             "rgba(255, 193, 7, 0.8)",
             "rgba(0, 200, 151, 0.8)",
-            "rgba(156, 39, 176, 0.7)",
           ],
           borderColor: [
             "rgba(77, 144, 254, 1)",
             "rgba(255, 193, 7, 1)",
             "rgba(0, 200, 151, 1)",
-            "rgba(156, 39, 176, 1)",
           ],
           borderWidth: 1,
           hoverBackgroundColor: [
             "rgba(77, 144, 254, 1)",
             "rgba(255, 193, 7, 1)",
             "rgba(0, 200, 151, 1)",
-            "rgba(156, 39, 176, 1)",
           ],
           hoverBorderWidth: 2,
         },
@@ -225,7 +224,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
       return `Tháng ${month}/${year}`;
     });
 
-    // Dữ liệu cho từng gói
+    // Dữ liệu cho từng gói - chỉ giữ lại 3 gói chính
     const freeCounts = sortedMonths.map((month) => monthlyStats[month].Free);
     const standardCounts = sortedMonths.map(
       (month) => monthlyStats[month].Standard
@@ -233,7 +232,6 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
     const premiumCounts = sortedMonths.map(
       (month) => monthlyStats[month].Premium
     );
-    const otherCounts = sortedMonths.map((month) => monthlyStats[month].Other);
 
     return {
       labels,
@@ -277,24 +275,11 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
           tension: 0.3,
           fill: true,
         },
-        {
-          label: "Khác",
-          data: otherCounts,
-          backgroundColor: "rgba(156, 39, 176, 0.2)",
-          borderColor: "rgba(156, 39, 176, 1)",
-          borderWidth: 2,
-          pointBackgroundColor: "rgba(156, 39, 176, 1)",
-          pointBorderColor: "#fff",
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          tension: 0.3,
-          fill: true,
-        },
       ],
     };
   };
 
-  // Tùy chọn cho biểu đồ tròn - thêm hiển thị nhãn phần trăm
+  // Tùy chọn cho biểu đồ tròn - giữ hiển thị nhãn phần trăm
   const packageDistributionOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -345,13 +330,13 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
           },
         },
       },
-      // Thêm plugin datalabels để hiển thị nhãn phần trăm trực tiếp trên biểu đồ
+      // Giữ lại plugin datalabels để hiển thị nhãn phần trăm trực tiếp trên biểu đồ
       datalabels: {
         display: true,
         color: "#fff",
         font: {
           weight: "bold",
-          size: 14,
+          size: 16, // Tăng kích thước để dễ đọc hơn
           family: "'Roboto', 'Helvetica', 'Arial', sans-serif",
         },
         textStrokeColor: "rgba(0, 0, 0, 0.5)",
@@ -664,37 +649,6 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
                 </div>
               </div>
             </div>
-
-            {packageDistribution.counts.Other > 0 && (
-              <div className="package-stat-card other">
-                <div className="package-stat-header">
-                  <div className="package-stat-icon"></div>
-                  <h3 className="package-name">Khác</h3>
-                </div>
-                <div className="package-stat-body">
-                  <div className="stat-number">
-                    {packageDistribution.counts.Other}
-                  </div>
-                  <div className="stat-label">thành viên</div>
-                </div>
-                <div className="package-stat-footer">
-                  <div className="percentage-bar">
-                    <div
-                      className="percentage-value"
-                      style={{
-                        width: `${packageDistribution.percentages.Other.percentage}%`,
-                      }}
-                    ></div>
-                  </div>
-                  <div className="percentage-text">
-                    {packageDistribution.percentages.Other.percentage.toFixed(
-                      1
-                    )}
-                    %
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>
