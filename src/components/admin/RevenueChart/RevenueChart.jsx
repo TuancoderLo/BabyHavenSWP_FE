@@ -34,6 +34,10 @@ const RevenueChart = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview"); // Tab mặc định là overview
+  const [showDetailModal, setShowDetailModal] = useState(false); // State điều khiển modal chi tiết
+  const [transactions, setTransactions] = useState([]); // State lưu trữ các giao dịch
+  const [transactionType, setTransactionType] = useState("all"); // Lọc theo loại gói: all, standard, premium
+  const [statusFilter, setStatusFilter] = useState("all"); // Lọc theo trạng thái: all, completed, pending, failed, cancelled
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,10 +48,13 @@ const RevenueChart = () => {
         const transactionsResponse = await transactionApi.getAllTransactions();
 
         // Kiểm tra dữ liệu trả về
-        const transactions = transactionsResponse.data?.data || [];
+        const allTransactions = transactionsResponse.data?.data || [];
+
+        // Lưu lại tất cả các giao dịch để hiển thị trong chi tiết
+        setTransactions(allTransactions);
 
         // Lọc chỉ lấy các giao dịch đã hoàn thành (Completed)
-        const completedTransactions = transactions.filter(
+        const completedTransactions = allTransactions.filter(
           (transaction) => transaction.paymentStatus === "Completed"
         );
 
@@ -361,6 +368,27 @@ const RevenueChart = () => {
       </div>
     );
 
+  // Lọc giao dịch theo loại gói và trạng thái
+  const getFilteredTransactions = () => {
+    let filtered = [...transactions];
+
+    // Lọc theo gói
+    if (transactionType === "standard") {
+      filtered = filtered.filter((t) => t.packageName === "Standard");
+    } else if (transactionType === "premium") {
+      filtered = filtered.filter((t) => t.packageName === "Premium");
+    }
+
+    // Lọc theo trạng thái
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(
+        (t) => t.paymentStatus.toLowerCase() === statusFilter
+      );
+    }
+
+    return filtered;
+  };
+
   // Tính tổng doanh thu
   const totalRevenue = revenueData.reduce((sum, item) => sum + item.revenue, 0);
   const totalLastYearRevenue = revenueData.reduce(
@@ -371,6 +399,46 @@ const RevenueChart = () => {
   const revenueChangePercentage = totalLastYearRevenue
     ? (revenueChange / totalLastYearRevenue) * 100
     : 0;
+
+  // Format ngày tháng
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("vi-VN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(date);
+  };
+
+  // Đơn giản hóa hàm renderPaymentStatus - sử dụng cùng thiết kế cho tất cả trạng thái
+  const renderPaymentStatus = (status) => {
+    // Chuẩn hóa status thành lowercase để tránh lỗi
+    const statusLower = status ? status.toLowerCase() : "";
+
+    // Xác định nội dung hiển thị dựa trên trạng thái
+    let text = "";
+    switch (statusLower) {
+      case "completed":
+        text = "Hoàn thành";
+        break;
+      case "pending":
+        text = "Đang xử lý";
+        break;
+      case "failed":
+        text = "Thất bại";
+        break;
+      case "cancelled":
+        text = "Đã hủy";
+        break;
+      default:
+        text = status || "Không xác định";
+    }
+
+    // Sử dụng thiết kế đơn giản, đồng nhất cho tất cả trạng thái
+    return <span className="simple-status">{text}</span>;
+  };
 
   return (
     <div className="revenue-dashboard">
@@ -464,7 +532,7 @@ const RevenueChart = () => {
         </div>
       </div>
 
-      {/* Chart navigation */}
+      {/* Chart navigation với nút Chi Tiết */}
       <div className="chart-navigation">
         <button
           className={activeTab === "overview" ? "active" : ""}
@@ -483,6 +551,12 @@ const RevenueChart = () => {
           onClick={() => setActiveTab("comparison")}
         >
           <i className="fas fa-balance-scale"></i> So sánh
+        </button>
+        <button
+          className={activeTab === "details" ? "active" : ""}
+          onClick={() => setActiveTab("details")}
+        >
+          <i className="fas fa-list-ul"></i> Chi Tiết
         </button>
       </div>
 
@@ -536,6 +610,93 @@ const RevenueChart = () => {
                     options={packageTotalChartOptions}
                   />
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab Chi Tiết đơn giản hóa */}
+        {activeTab === "details" && (
+          <div className="chart-panel">
+            <div className="chart-card simple-detail">
+              <h3>
+                <i className="fas fa-file-invoice-dollar"></i> Chi tiết giao
+                dịch
+              </h3>
+
+              {/* Bộ lọc đơn giản */}
+              <div className="simple-filter">
+                <div className="filter-row">
+                  <label>Gói dịch vụ:</label>
+                  <select
+                    value={transactionType}
+                    onChange={(e) => setTransactionType(e.target.value)}
+                  >
+                    <option value="all">Tất cả</option>
+                    <option value="standard">Standard</option>
+                    <option value="premium">Premium</option>
+                  </select>
+                </div>
+
+                <div className="filter-row">
+                  <label>Trạng thái:</label>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                  >
+                    <option value="all">Tất cả</option>
+                    <option value="completed">Hoàn thành</option>
+                    <option value="pending">Đang xử lý</option>
+                    <option value="failed">Thất bại</option>
+                    <option value="cancelled">Đã hủy</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Bảng đơn giản */}
+              <div className="simple-table-container">
+                <table className="simple-table">
+                  <thead>
+                    <tr>
+                      <th>Khách hàng</th>
+                      <th>Gói dịch vụ</th>
+                      <th>Số tiền</th>
+                      <th>Loại giao dịch</th>
+                      <th>Phương thức</th>
+                      <th>Ngày giao dịch</th>
+                      <th>Trạng thái</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {getFilteredTransactions().length > 0 ? (
+                      getFilteredTransactions().map((transaction, index) => (
+                        <tr key={index}>
+                          <td>{transaction.fullName}</td>
+                          <td>{transaction.packageName}</td>
+                          <td>
+                            {new Intl.NumberFormat("vi-VN", {
+                              style: "currency",
+                              currency: transaction.currency || "VND",
+                            }).format(transaction.amount)}
+                          </td>
+                          <td>{transaction.transactionType}</td>
+                          <td>{transaction.paymentMethod}</td>
+                          <td>{formatDate(transaction.transactionDate)}</td>
+                          <td>
+                            {renderPaymentStatus(transaction.paymentStatus)}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="7" className="no-data">
+                          <i className="fas fa-info-circle"></i> Không có dữ
+                          liệu phù hợp với bộ lọc
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

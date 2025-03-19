@@ -409,3 +409,312 @@
     font-size: 18px;
   }
 }
+
+/* Thêm styles cho Chi Tiết tab */
+
+/* Filter buttons trong tab Chi Tiết */
+.filter-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eaedf3;
+}
+
+.filter-buttons button {
+  padding: 8px 15px;
+  border: none;
+  background-color: #f5f7fa;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #5a6474;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-buttons button:hover {
+  background-color: #e8eef7;
+}
+
+.filter-buttons button.active {
+  background-color: #4361ee;
+  color: white;
+}
+
+.filter-buttons button i {
+  font-size: 14px;
+}
+
+/* Bảng giao dịch */
+.transaction-table-container {
+  overflow-x: auto;
+  margin-top: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.transaction-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.transaction-table th,
+.transaction-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #eaedf3;
+}
+
+.transaction-table th {
+  background-color: #f8f9fa;
+  color: #5a6474;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.transaction-table tbody tr {
+  transition: background-color 0.2s;
+}
+
+.transaction-table tbody tr:hover {
+  background-color: #f5f7fa;
+}
+
+.transaction-table .package {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.transaction-table .package.standard {
+  background-color: rgba(60, 174, 163, 0.1);
+  color: #3caea3;
+}
+
+.transaction-table .package.premium {
+  background-color: rgba(246, 174, 45, 0.1);
+  color: #f6ae2d;
+}
+
+.transaction-table .amount {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* Thiết kế chung cho tất cả trạng thái - đảm bảo đồng nhất và ưu tiên cao hơn */
+.transaction-table .status {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  padding: 6px 12px !important;
+  border-radius: 50px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  min-width: 110px !important;
+  box-shadow: none !important;
+  border: none !important;
+  text-align: center !important;
+}
+
+/* Hoàn thành */
+.transaction-table .status.completed {
+  background-color: rgba(46, 204, 113, 0.1) !important;
+  color: #2ecc71 !important;
+}
+.transaction-table .status.completed i {
+  color: #2ecc71 !important;
+}
+
+/* Đang xử lý */
+.transaction-table .status.pending {
+  background-color: rgba(243, 156, 18, 0.1) !important;
+  color: #f39c12 !important;
+}
+.transaction-table .status.pending i {
+  color: #f39c12 !important;
+}
+
+/* Thất bại */
+.transaction-table .status.failed {
+  background-color: rgba(231, 76, 60, 0.1) !important;
+  color: #e74c3c !important;
+}
+.transaction-table .status.failed i {
+  color: #e74c3c !important;
+}
+
+/* Đã hủy */
+.transaction-table .status.cancelled {
+  background-color: rgba(127, 140, 141, 0.1) !important;
+  color: #7f8c8d !important;
+}
+.transaction-table .status.cancelled i {
+  color: #7f8c8d !important;
+}
+
+/* Đảm bảo icon có kiểu dáng đồng nhất */
+.transaction-table .status i {
+  font-size: 14px !important;
+  margin-right: 5px !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .filter-buttons {
+    flex-wrap: wrap;
+  }
+
+  .transaction-table {
+    font-size: 13px;
+  }
+
+  .transaction-table th,
+  .transaction-table td {
+    padding: 10px;
+  }
+}
+
+/* Định nghĩa lại trạng thái thanh toán với độ ưu tiên cao */
+/* Sử dụng một class duy nhất và bỏ qua class `.transaction-table` để tránh xung đột */
+.payment-status {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  padding: 6px 12px !important;
+  border-radius: 50px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  min-width: 110px !important;
+  box-shadow: none !important;
+  border: none !important;
+  text-align: center !important;
+}
+
+.payment-status.completed {
+  background-color: rgba(46, 204, 113, 0.1) !important;
+  color: #2ecc71 !important;
+}
+.payment-status.completed i {
+  color: #2ecc71 !important;
+}
+
+.payment-status.pending {
+  background-color: rgba(243, 156, 18, 0.1) !important;
+  color: #f39c12 !important;
+}
+.payment-status.pending i {
+  color: #f39c12 !important;
+}
+
+.payment-status.failed {
+  background-color: rgba(231, 76, 60, 0.1) !important;
+  color: #e74c3c !important;
+}
+.payment-status.failed i {
+  color: #e74c3c !important;
+}
+
+.payment-status.cancelled {
+  background-color: rgba(127, 140, 141, 0.1) !important;
+  color: #7f8c8d !important;
+}
+.payment-status.cancelled i {
+  color: #7f8c8d !important;
+}
+
+.payment-status i {
+  font-size: 14px !important;
+  margin-right: 5px !important;
+}
+
+/* Thiết kế đơn giản cho các trạng thái thanh toán */
+.simple-status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  background-color: #f5f7fa;
+  color: #5a6474;
+  text-align: center;
+}
+
+/* Tab Chi Tiết đơn giản */
+.simple-detail {
+  padding: 20px;
+}
+
+/* Bộ lọc đơn giản */
+.simple-filter {
+  display: flex;
+  margin-bottom: 20px;
+  gap: 20px;
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-row label {
+  font-weight: 500;
+  color: #5a6474;
+}
+
+.filter-row select {
+  padding: 8px 12px;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Bảng đơn giản */
+.simple-table-container {
+  overflow-x: auto;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+}
+
+.simple-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.simple-table th,
+.simple-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.simple-table th {
+  background-color: #f8f9fa;
+  font-weight: 500;
+}
+
+.simple-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+.no-data {
+  text-align: center;
+  padding: 20px;
+  color: #5a6474;
+}
