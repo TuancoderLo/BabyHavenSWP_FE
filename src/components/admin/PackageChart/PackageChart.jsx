@@ -11,10 +11,11 @@ import {
   PointElement,
   LineElement,
 } from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
 import "./PackageChart.css";
 import { FaUsers, FaAward, FaChartPie, FaChartLine } from "react-icons/fa";
 
-// Đăng ký các thành phần cần thiết cho Chart.js
+// Đăng ký các thành phần cần thiết cho Chart.js và plugin datalabels
 ChartJS.register(
   ArcElement,
   Tooltip,
@@ -23,7 +24,8 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement,
-  LineElement
+  LineElement,
+  ChartDataLabels
 );
 
 const PackageChart = ({ onDataLoaded, period = "all" }) => {
@@ -292,7 +294,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
     };
   };
 
-  // Tùy chọn cho biểu đồ tròn
+  // Tùy chọn cho biểu đồ tròn - thêm hiển thị nhãn phần trăm
   const packageDistributionOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -342,6 +344,26 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
             return `${label}: ${value} (${percentage}%)`;
           },
         },
+      },
+      // Thêm plugin datalabels để hiển thị nhãn phần trăm trực tiếp trên biểu đồ
+      datalabels: {
+        display: true,
+        color: "#fff",
+        font: {
+          weight: "bold",
+          size: 14,
+          family: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+        },
+        textStrokeColor: "rgba(0, 0, 0, 0.5)",
+        textStrokeWidth: 2,
+        formatter: (value, ctx) => {
+          const dataset = ctx.chart.data.datasets[0];
+          const sum = dataset.data.reduce((a, b) => a + b, 0);
+          const percentage = ((value / sum) * 100).toFixed(1) + "%";
+          return percentage;
+        },
+        align: "center",
+        anchor: "center",
       },
     },
     cutout: "60%",
