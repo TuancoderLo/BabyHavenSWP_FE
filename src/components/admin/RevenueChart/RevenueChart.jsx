@@ -412,32 +412,63 @@ const RevenueChart = () => {
     }).format(date);
   };
 
-  // Đơn giản hóa hàm renderPaymentStatus - sử dụng cùng thiết kế cho tất cả trạng thái
+  // Cải tiến hàm renderPaymentStatus với các trạng thái có màu sắc riêng
   const renderPaymentStatus = (status) => {
-    // Chuẩn hóa status thành lowercase để tránh lỗi
     const statusLower = status ? status.toLowerCase() : "";
-
-    // Xác định nội dung hiển thị dựa trên trạng thái
+    let statusClass = "simple-status";
     let text = "";
+
     switch (statusLower) {
       case "completed":
+        statusClass += " completed";
         text = "Hoàn thành";
         break;
       case "pending":
+        statusClass += " pending";
         text = "Đang xử lý";
         break;
       case "failed":
+        statusClass += " failed";
         text = "Thất bại";
         break;
       case "cancelled":
+        statusClass += " cancelled";
         text = "Đã hủy";
         break;
       default:
         text = status || "Không xác định";
     }
 
-    // Sử dụng thiết kế đơn giản, đồng nhất cho tất cả trạng thái
-    return <span className="simple-status">{text}</span>;
+    return <span className={statusClass}>{text}</span>;
+  };
+
+  // Thêm hàm render gói dịch vụ
+  const renderPackageBadge = (packageName) => {
+    if (packageName === "Premium") {
+      return (
+        <span className="package-badge premium">
+          <i className="fas fa-crown"></i> Premium
+        </span>
+      );
+    } else {
+      return (
+        <span className="package-badge standard">
+          <i className="fas fa-box"></i> Standard
+        </span>
+      );
+    }
+  };
+
+  // Hàm format số tiền
+  const formatAmount = (amount, currency = "VND") => {
+    return (
+      <span className="amount-value">
+        {new Intl.NumberFormat("vi-VN", {
+          style: "currency",
+          currency: currency,
+        }).format(amount)}
+      </span>
+    );
   };
 
   return (
@@ -615,7 +646,7 @@ const RevenueChart = () => {
           </div>
         )}
 
-        {/* Tab Chi Tiết đơn giản hóa */}
+        {/* Tab Chi Tiết đã cải tiến */}
         {activeTab === "details" && (
           <div className="chart-panel">
             <div className="chart-card simple-detail">
@@ -624,7 +655,7 @@ const RevenueChart = () => {
                 dịch
               </h3>
 
-              {/* Bộ lọc đơn giản */}
+              {/* Bộ lọc cải tiến */}
               <div className="simple-filter">
                 <div className="filter-row">
                   <label>Gói dịch vụ:</label>
@@ -632,19 +663,19 @@ const RevenueChart = () => {
                     value={transactionType}
                     onChange={(e) => setTransactionType(e.target.value)}
                   >
-                    <option value="all">Tất cả</option>
+                    <option value="all">Tất cả các gói</option>
                     <option value="standard">Standard</option>
                     <option value="premium">Premium</option>
                   </select>
                 </div>
 
                 <div className="filter-row">
-                  <label>Trạng thái:</label>
+                  <label>Trạng thái thanh toán:</label>
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
                   >
-                    <option value="all">Tất cả</option>
+                    <option value="all">Tất cả trạng thái</option>
                     <option value="completed">Hoàn thành</option>
                     <option value="pending">Đang xử lý</option>
                     <option value="failed">Thất bại</option>
@@ -653,7 +684,7 @@ const RevenueChart = () => {
                 </div>
               </div>
 
-              {/* Bảng đơn giản */}
+              {/* Bảng cải tiến */}
               <div className="simple-table-container">
                 <table className="simple-table">
                   <thead>
@@ -672,12 +703,12 @@ const RevenueChart = () => {
                       getFilteredTransactions().map((transaction, index) => (
                         <tr key={index}>
                           <td>{transaction.fullName}</td>
-                          <td>{transaction.packageName}</td>
+                          <td>{renderPackageBadge(transaction.packageName)}</td>
                           <td>
-                            {new Intl.NumberFormat("vi-VN", {
-                              style: "currency",
-                              currency: transaction.currency || "VND",
-                            }).format(transaction.amount)}
+                            {formatAmount(
+                              transaction.amount,
+                              transaction.currency || "VND"
+                            )}
                           </td>
                           <td>{transaction.transactionType}</td>
                           <td>{transaction.paymentMethod}</td>
