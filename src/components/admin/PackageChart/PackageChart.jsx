@@ -116,12 +116,15 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
   // Tính toán thống kê theo tháng
   const calculateMonthlyStats = (memberships) => {
     const monthlyData = {};
-    const currentDate = new Date();
 
-    // Tạo mảng cho 12 tháng gần nhất
-    for (let i = 0; i < 12; i++) {
-      const date = new Date(currentDate);
-      date.setMonth(currentDate.getMonth() - i);
+    // Thay đổi từ ngày hiện tại sang ngày trong tương lai để phù hợp với dữ liệu
+    // Vì dữ liệu bắt đầu từ 2025-03-18, nên lấy thời điểm đó làm mốc
+    const futureDate = new Date("2025-09-18"); // 6 tháng sau ngày bắt đầu
+
+    // Tạo mảng cho 12 tháng, bao gồm trước và sau thời điểm startDate
+    for (let i = -6; i < 6; i++) {
+      const date = new Date(futureDate);
+      date.setMonth(futureDate.getMonth() + i);
       const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`;
       monthlyData[monthKey] = {
         Free: 0,
@@ -449,7 +452,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
             <FaUsers />
           </div>
           <div className="summary-content">
-            <h3>Tổng số thành viên</h3>
+            <h3>Tổng số thành viên đang hoạt động</h3>
             <p className="summary-value">{packageDistribution.total || 0}</p>
           </div>
         </div>
