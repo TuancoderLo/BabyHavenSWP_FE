@@ -37,7 +37,7 @@ function FormatBlog() {
       console.log("Fetching blog with ID:", currentBlogId);
       fetchBlogDetails(currentBlogId);
     } else {
-      setError("Không tìm thấy ID bài viết");
+      setError("ID not found");
       setLoading(false);
     }
   }, [blogId]);
@@ -84,7 +84,7 @@ function FormatBlog() {
         message: error.message,
         response: error.response?.data,
       });
-      setError("Có lỗi xảy ra khi tải bài viết. Vui lòng thử lại sau.");
+      setError("Error fetching blog details");
     } finally {
       setLoading(false);
     }
@@ -94,7 +94,7 @@ function FormatBlog() {
   const fetchDoctorInfo = async (authorEmail) => {
     try {
       console.log("Fetching doctor information for email:", authorEmail);
-      const response = await api.get("https://localhost:7279/api/Doctors");
+      const response = await api.get("https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/Doctors");
       console.log("Doctors API response:", response);
 
       // Kiểm tra cấu trúc dữ liệu trả về
@@ -210,7 +210,7 @@ function FormatBlog() {
 
       // Gọi API để lấy tất cả các bài viết
       console.log("Fetching all blogs for tag comparison");
-      const response = await api.get("https://localhost:7279/api/Blog");
+      const response = await api.get("https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/Blog");
       console.log("All blogs API response:", response);
 
       // Xử lý dữ liệu trả về
@@ -404,7 +404,7 @@ function FormatBlog() {
         authorImageUrl.startsWith("https://"));
 
     const authorImage = isValidUrl ? authorImageUrl : DEFAULT_AVATAR;
-    const authorName = blog.name || blog.authorName || "Tác giả ẩn danh";
+    const authorName = blog.name || blog.authorName || "Unknow Author";
 
     // Kiểm tra xem có phải là Doctor không (dựa vào doctorInfo)
     const isDoctorAuthor = doctorInfo !== null;
@@ -457,15 +457,15 @@ function FormatBlog() {
           </button>
           <div className="breadcrumbs">
             <span>Trang chủ</span> &gt;
-            <span>{blog?.categoryName || "Danh mục"}</span> &gt;
-            <span className="current-page">{blog?.title || "Bài viết"}</span>
+            <span>{blog?.categoryName || "Category"}</span> &gt;
+            <span className="current-page">{blog?.title || "Blog"}</span>
           </div>
         </div>
       </div>
 
       {loading ? (
         <div className="loading-container">
-          <div className="loading">Đang tải bài viết...</div>
+          <div className="loading">Loading blogs...</div>
         </div>
       ) : error ? (
         <div className="error-container">
@@ -541,21 +541,21 @@ function FormatBlog() {
                     <p className="related-blog-author">
                       {relatedBlog.name ||
                         relatedBlog.authorName ||
-                        "Tác giả ẩn danh"}
+                        "Unknown"}
                     </p>
                   </div>
                 </div>
               ))
             ) : (
               <div className="no-related-blogs">
-                <p>Không có bài viết liên quan</p>
+                <p>No available blogs</p>
               </div>
             )}
           </div>
         </main>
       ) : (
         <div className="error-container">
-          <div className="error">Không tìm thấy bài viết</div>
+          <div className="error">Blog not found</div>
         </div>
       )}
 

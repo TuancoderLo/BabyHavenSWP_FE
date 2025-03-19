@@ -18,7 +18,9 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
           <div className="notification-board">
             <h2>No Child Selected</h2>
             <p>Please select a child or add a new child to continue.</p>
-            <button type="button" onClick={closeOverlay}>Close</button>
+            <button type="button" onClick={closeOverlay}>
+              Close
+            </button>
           </div>
         </div>
       </div>
@@ -26,7 +28,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
   }
   // Fetch child details using GET /api/Children/{childId}
   const setChildDetails = useState(null);
- 
+
   useEffect(() => {
     const fetchChildDetails = async () => {
       try {
@@ -76,11 +78,14 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     height: "",
   });
 
-    const handleOverlayClick = useCallback((e) => {
+  const handleOverlayClick = useCallback(
+    (e) => {
       if (e.target === e.currentTarget) {
         closeOverlay();
       }
-    }, [closeOverlay]);
+    },
+    [closeOverlay]
+  );
   // Step management: 1 = record entry (split in 3 substeps), 2 = success message
   const [currentStep, setCurrentStep] = useState(1);
   // subStep2: 1, 2, or 3 corresponding to the multi-page form
@@ -116,13 +121,13 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
   const handleConfirmGrowthRecord = useCallback(async () => {
     // Only validate on step 1
     if (currentStep === 1 && !validateGrowthForm()) return;
-    
+
     // If we're on steps 1 or 2, just advance to the next step
     if (currentStep < 3) {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev) => prev + 1);
       return;
     }
-    
+
     // If we're on step 3, submit the data
     try {
       const growthPayload = {
@@ -156,15 +161,13 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
         developmentalMilestones: growthForm.developmentalMilestones,
       };
 
-
-  
       const growthRes = await childApi.createGrowthRecord(growthPayload);
       console.log("Growth record created:", growthRes.data);
-      
+
       // Show notification and close overlay
       setShowNotification(true);
       closeOverlay();
-      
+
       // Hide notification after 3 seconds
       setTimeout(() => {
         setShowNotification(false);
@@ -172,7 +175,14 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     } catch (err) {
       console.error("Error saving growth record:", err);
     }
-  }, [child, memberId, growthForm, currentStep, validateGrowthForm, closeOverlay]);
+  }, [
+    child,
+    memberId,
+    growthForm,
+    currentStep,
+    validateGrowthForm,
+    closeOverlay,
+  ]);
 
   const handlePrevious = useCallback(() => {
     if (currentStep > 1) {
@@ -193,14 +203,23 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
           <div className="child-info-card">
             <h3>Child Information</h3>
             <div className="child-info-details">
-              <p><strong>Name:</strong> {child.name}</p>
+              <p>
+                <strong>Name:</strong> {child.name}
+              </p>
               <div className="info-row">
-                <p><strong>Date of Birth:</strong> {new Date(child.dateOfBirth).toLocaleDateString()}</p>
-                {child.gender && <p className={`gender-tag ${child.gender.toLowerCase()}`}>{child.gender}</p>}
+                <p>
+                  <strong>Date of Birth:</strong>{" "}
+                  {new Date(child.dateOfBirth).toLocaleDateString()}
+                </p>
+                {child.gender && (
+                  <p className={`gender-tag ${child.gender.toLowerCase()}`}>
+                    {child.gender}
+                  </p>
+                )}
               </div>
             </div>
           </div>
-          
+
           {/* Date Section */}
           <div className="form-section date-section">
             <h4>Record Date</h4>
@@ -240,9 +259,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                   }
                   className={errors.weight ? "error-input" : ""}
                 />
-                {errors.weight && (
-                  <p className="error-text">{errors.weight}</p>
-                )}
+                {errors.weight && <p className="error-text">{errors.weight}</p>}
               </div>
               <div>
                 <label>Baby's height (cm)</label>
@@ -257,9 +274,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                   }
                   className={errors.height ? "error-input" : ""}
                 />
-                {errors.height && (
-                  <p className="error-text">{errors.height}</p>
-                )}
+                {errors.height && <p className="error-text">{errors.height}</p>}
               </div>
               <div>
                 <label>Head circumference (cm)</label>
@@ -276,10 +291,14 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               </div>
               <div>
                 <label>BMI (kg/m2)</label>
-                <input type="number" readOnly value={calculateBMI(growthForm.weight, growthForm.height)} />
+                <input
+                  type="number"
+                  readOnly
+                  value={calculateBMI(growthForm.weight, growthForm.height)}
+                />
               </div>
             </div>
-            
+
             <div className="notes-section">
               <label>Notes</label>
               <input
@@ -295,13 +314,17 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
             </div>
           </div>
 
-          <button type="button" className="confirm-button" onClick={handleConfirmGrowthRecord}>
+          <button
+            type="button"
+            className="confirm-button"
+            onClick={handleConfirmGrowthRecord}
+          >
             Confirm
           </button>
         </div>
       );
     }
-    
+
     // Step 2: Fields from old substep 2
     if (currentStep === 2) {
       return (
@@ -310,14 +333,23 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
           <div className="child-info-card">
             <h3>Child Information</h3>
             <div className="child-info-details">
-              <p><strong>Name:</strong> {child.name}</p>
-              <p><strong>Date of Birth:</strong> {new Date(child.dateOfBirth).toLocaleDateString()}</p>
-              {child.gender && <p><strong>Gender:</strong> {child.gender}</p>}
+              <p>
+                <strong>Name:</strong> {child.name}
+              </p>
+              <p>
+                <strong>Date of Birth:</strong>{" "}
+                {new Date(child.dateOfBirth).toLocaleDateString()}
+              </p>
+              {child.gender && (
+                <p>
+                  <strong>Gender:</strong> {child.gender}
+                </p>
+              )}
             </div>
           </div>
-          
+
           <h2>Recommendations for Your Baby</h2>
-          
+
           {/* Nutritional Information Section */}
           <div className="form-section">
             <h4>Nutritional Information</h4>
@@ -350,7 +382,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               </div>
             </div>
           </div>
-          
+
           {/* Blood Metrics Section */}
           <div className="form-section">
             <h4>Blood Metrics</h4>
@@ -409,19 +441,27 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               </div>
             </div>
           </div>
-          
+
           <div className="step-buttons">
-            <button type="button" className="previous-btn" onClick={handlePrevious}>
+            <button
+              type="button"
+              className="previous-btn"
+              onClick={handlePrevious}
+            >
               Previous
             </button>
-            <button type="button" className="confirm-button" onClick={handleConfirmGrowthRecord}>
+            <button
+              type="button"
+              className="confirm-button"
+              onClick={handleConfirmGrowthRecord}
+            >
               Continue to Other Measurements
             </button>
           </div>
         </div>
       );
     }
-    
+
     // Step 3: Fields from old substep 3
     if (currentStep === 3) {
       return (
@@ -430,15 +470,24 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
           <div className="child-info-card">
             <h3>Child Information</h3>
             <div className="child-info-details">
-              <p><strong>Name:</strong> {child.name}</p>
-              <p><strong>Date of Birth:</strong> {new Date(child.dateOfBirth).toLocaleDateString()}</p>
-              {child.gender && <p><strong>Gender:</strong> {child.gender}</p>}
+              <p>
+                <strong>Name:</strong> {child.name}
+              </p>
+              <p>
+                <strong>Date of Birth:</strong>{" "}
+                {new Date(child.dateOfBirth).toLocaleDateString()}
+              </p>
+              {child.gender && (
+                <p>
+                  <strong>Gender:</strong> {child.gender}
+                </p>
+              )}
             </div>
           </div>
-          
+
           <h2>Additional Health Measurements</h2>
           <p>Please provide any additional measurements you have:</p>
-          
+
           {/* Vital Signs Section */}
           <div className="form-section">
             <h4>Vital Signs</h4>
@@ -497,7 +546,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               </div>
             </div>
           </div>
-          
+
           {/* Development Metrics Section */}
           <div className="form-section">
             <h4>Development Metrics</h4>
@@ -530,7 +579,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               </div>
             </div>
           </div>
-          
+
           {/* Sensory and Health Status Section */}
           <div className="form-section">
             <h4>Sensory and Health Status</h4>
@@ -589,7 +638,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               </div>
             </div>
           </div>
-          
+
           {/* Cognitive Development Section */}
           <div className="form-section">
             <h4>Cognitive Development</h4>
@@ -621,7 +670,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 />
               </div>
             </div>
-            
+
             <div className="notes-section">
               <label>Developmental milestones</label>
               <input
@@ -638,17 +687,24 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
           </div>
 
           <div className="step-buttons">
-            <button type="button" className="previous-btn" onClick={handlePrevious}>
+            <button
+              type="button"
+              className="previous-btn"
+              onClick={handlePrevious}
+            >
               Previous
             </button>
-            <button type="button" className="confirm-button" onClick={handleConfirmGrowthRecord}>
+            <button
+              type="button"
+              className="confirm-button"
+              onClick={handleConfirmGrowthRecord}
+            >
               Submit Record
             </button>
           </div>
         </div>
       );
     }
-    
 
     return null;
   }, [
@@ -663,46 +719,65 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
 
   return (
     <div className="add-record-overlay" onClick={handleClose}>
-    <div className="add-record-wizard" onClick={(e) => e.stopPropagation()}>
-      {/* Cột trái: Hiển thị thông tin các bước */}
-      <div className="wizard-left">
-        <div className="blue-bar"></div>
-        <div className="wizard-left-content">
-          <h1 className="main-title">Enter a new growth record to track your baby's health automatically</h1>
-          <div className="babygrowth-img">
-            <img src={BabyGrowth} alt="Baby Growth" />
-          </div>
-          <div className="step-progress">
-            <div className="step-item">
-              <div className={`step-circle ${currentStep > 1 ? 'completed' : currentStep === 1 ? 'active' : ''}`}>
-                {currentStep > 1 ? <span className="checkmark">✓</span> : '1'}
-              </div>
-              <div className="step-label">Add Record</div>
+      <div className="add-record-wizard" onClick={(e) => e.stopPropagation()}>
+        {/* Cột trái: Hiển thị thông tin các bước */}
+        <div className="wizard-left">
+          <div className="blue-bar"></div>
+          <div className="wizard-left-content">
+            <h1 className="main-title">
+              Enter a new growth record to track your baby's health
+              automatically
+            </h1>
+            <div className="babygrowth-img">
+              <img src={BabyGrowth} alt="Baby Growth" />
             </div>
-            <div className="step-connector"></div>
-            <div className="step-item">
-              <div className={`step-circle ${currentStep > 2 ? 'completed' : currentStep === 2 ? 'active' : ''}`}>
-                {currentStep > 2 ? <span className="checkmark">✓</span> : '2'}
+            <div className="step-progress">
+              <div className="step-item">
+                <div
+                  className={`step-circle ${
+                    currentStep > 1
+                      ? "completed"
+                      : currentStep === 1
+                      ? "active"
+                      : ""
+                  }`}
+                >
+                  {currentStep > 1 ? <span className="checkmark">✓</span> : "1"}
+                </div>
+                <div className="step-label">Add Record</div>
               </div>
-              <div className="step-label">Recommendations for your baby</div>
-            </div>
-            <div className="step-connector"></div>
-            <div className="step-item">
-              <div className={`step-circle ${currentStep === 3 ? 'active' : ''}`}>
-                3
+              <div className="step-connector"></div>
+              <div className="step-item">
+                <div
+                  className={`step-circle ${
+                    currentStep > 2
+                      ? "completed"
+                      : currentStep === 2
+                      ? "active"
+                      : ""
+                  }`}
+                >
+                  {currentStep > 2 ? <span className="checkmark">✓</span> : "2"}
+                </div>
+                <div className="step-label">Recommendations for your baby</div>
               </div>
-              <div className="step-label">Other measurements</div>
+              <div className="step-connector"></div>
+              <div className="step-item">
+                <div
+                  className={`step-circle ${currentStep === 3 ? "active" : ""}`}
+                >
+                  3
+                </div>
+                <div className="step-label">Other measurements</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      {/* Cột phải: Hiển thị nội dung form */}
-      <div className="wizard-content">
-        {renderStepContent}
+        {/* Cột phải: Hiển thị nội dung form */}
+        <div className="wizard-content">{renderStepContent}</div>
       </div>
     </div>
-  </div>
-  );  
+  );
 };
 
 AddRecord.propTypes = {

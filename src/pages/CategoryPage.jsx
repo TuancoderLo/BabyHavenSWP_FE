@@ -71,7 +71,7 @@ function CategoryPage() {
       console.log("Processed blogs data:", blogsData);
 
       if (blogsData.length === 0) {
-        setError("Không có bài viết nào trong danh mục này");
+        setError("Category is empty");
       }
 
       setBlogs(blogsData);
@@ -81,7 +81,7 @@ function CategoryPage() {
         message: error.message,
         response: error.response?.data,
       });
-      setError("Có lỗi xảy ra khi tải bài viết. Vui lòng thử lại sau.");
+      setError("Error fetching blogs");
       setBlogs([]);
     } finally {
       setLoading(false);
@@ -130,18 +130,22 @@ function CategoryPage() {
 
       <main className="category-content">
         {categoryName && (
-          <h1 className="category-title">Danh mục: {categoryName}</h1>
+          <h1 className="category-title">Category: {categoryName}</h1>
         )}
 
         {loading ? (
-          <div className="loading">Đang tải bài viết...</div>
+          <div className="loading">Loading blogs...</div>
         ) : error ? (
           <div className="error">{error}</div>
         ) : (
           <>
             <div className="blogs-container">
               {getCurrentBlogs().map((blog) => (
-                <div key={blog.title} className="blog-card">
+                <div
+                  key={blog.blogId || blog.id || blog.title}
+                  className="blog-card"
+                  onClick={() => handleReadMore(blog)}
+                >
                   <div className="blog-image">
                     <img
                       src={blog.imageBlog || "/placeholder-image.jpg"}
@@ -150,43 +154,35 @@ function CategoryPage() {
                         e.target.src = "/placeholder-image.jpg";
                       }}
                     />
+                    <div className="blog-category-label">
+                      {blog.categoryName}
+                    </div>
                   </div>
+
                   <div className="blog-content">
                     <h2 className="blog-title">{blog.title}</h2>
 
                     <div className="blog-metadata">
-                      <p className="blog-author">
-                        {blog.authorName
-                          ? `Tác giả: ${blog.authorName}`
-                          : "Tác giả: Ẩn danh"}
-                      </p>
-                      <p className="blog-category">
-                        Danh mục: {blog.categoryName}
-                      </p>
+                      {blog.status === "New" && (
+                        <span className="blog-tag-highlight tag-new">NEW</span>
+                      )}
+                      <span className="blog-tag-highlight">
+                        {blog.categoryName}
+                      </span>
                     </div>
 
-                    <div className="blog-tags">
-                      {renderTags(blog.tags)?.map((tag, index) => (
-                        <span key={index} className="tag">
-                          #{tag}
-                        </span>
-                      ))}
+                    <div className="blog-info">
+                      <div className="blog-author-info">
+                        <i className="fas fa-user"></i>
+                        {blog.authorName || "Unknown Author"}
+                      </div>
+                      <div className="blog-date-info">
+                        <i className="far fa-calendar-alt"></i>
+                        {blog.createdAt
+                          ? new Date(blog.createdAt).toLocaleDateString()
+                          : ""}
+                      </div>
                     </div>
-
-                    <p className="blog-excerpt">
-                      {blog.content?.length > 200
-                        ? `${blog.content.substring(0, 200)}...`
-                        : blog.content}
-                    </p>
-
-                    {blog.status === "Approved" && (
-                      <button
-                        className="read-more-btn"
-                        onClick={() => handleReadMore(blog)}
-                      >
-                        Đọc thêm
-                      </button>
-                    )}
                   </div>
                 </div>
               ))}
@@ -219,7 +215,7 @@ function CategoryPage() {
                   disabled={currentPage === totalPages}
                   className="pagination-btn"
                 >
-                  Sau
+                  Next
                 </button>
               </div>
             )}

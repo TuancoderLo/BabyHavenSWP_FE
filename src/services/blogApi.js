@@ -2,11 +2,19 @@ import api from "../config/axios";
 
 const blogApi = {
   getAll: () => {
-    return api.get("Blog");
+    return api.get(`Blog`);
   },
 
   getById: (id) => {
     return api.get(`Blog/${id}`);
+  },
+
+  getOrderBy: (name, order) => {
+    return api.get(`/Blog/odata?$orderby=${name} ${order}`);
+  },
+
+  getFilteredBlog: (name, value) => {
+    return api.get(`/Blog/odata?$filter=${name} eq '${value}'`);
   },
 
   create: (data) => {
@@ -22,6 +30,7 @@ const blogApi = {
       tags: data.tags?.trim() || "",
       referenceSources: data.referenceSources?.trim() || "",
       status: data.status || "Draft",
+      rejectionReason: data.rejectionReason?.trim() || "",
     };
     console.log("Formatted create blog data:", blogData);
     return api.post("Blog", blogData);
@@ -40,6 +49,7 @@ const blogApi = {
       tags: data.tags?.trim() || "",
       referenceSources: data.referenceSources?.trim() || "",
       status: data.status || "Draft",
+      rejectionReason: data.rejectionReason?.trim() || "",
     };
     console.log("Formatted update blog data:", blogData);
     return api.put(`Blog/${id}`, blogData);

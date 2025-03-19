@@ -2,32 +2,30 @@
 
 /* Sidebar trái (trong layout flex) */
 .admin-sidebar-hover {
-  width: 60px; /* khi thu gọn */
-  background: #ffffff;
-  border-right: 1px solid #ddd;
-  transition: width 0.3s;
+  width: 240px; /* luôn hiển thị với kích thước đầy đủ */
+  background: #f8f9fa;
+  border-right: 1px solid #e9ecef;
   display: flex;
   flex-direction: column;
-  position: relative; /* relative, ko fixed */
+  position: relative;
   z-index: 10;
-}
-
-.admin-sidebar-hover.expanded {
-  width: 200px; /* khi hover mở rộng */
+  height: 100vh;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 /* Logo */
 .sidebar-logo {
   width: 100%;
-  height: 70px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #e9ecef;
+  padding: 15px 0;
 }
 
 .sidebar-logo img {
-  max-width: 40px;
+  max-width: 55px;
   height: auto;
 }
 
@@ -35,31 +33,20 @@
 .admin-sidebar-menu {
   list-style: none;
   padding: 0;
-  margin-top: 10px;
+  margin-top: 20px;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .admin-sidebar-menu li {
-  padding: 0; /* Bỏ padding ở li */
-  color: #333;
+  padding: 0;
+  color: #495057;
   cursor: pointer;
-}
-
-.admin-icon {
-  font-size: 18px;
-  min-width: 18px; /* Thêm min-width để giữ khoảng cách */
-  margin-right: 12px;
-}
-
-.admin-icon-signout {
-  font-size: 18px;
-  min-width: 30px; /* Thêm min-width để giữ khoảng cách */
-  margin-right: 25px;
-  margin-top: 10px;
-}
-
-.admin-sidebar-footer:hover {
-  background: #f2f2f2;
+  margin: 0 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
 }
 
 .admin-sidebar-menu li a {
@@ -68,10 +55,57 @@
   text-decoration: none;
   color: inherit;
   width: 100%;
-  padding: 10px 15px; /* Chuyển padding từ li sang a */
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.admin-icon {
+  font-size: 20px;
+  min-width: 20px;
+  margin-right: 15px;
+  color: #6c757d;
+}
+
+.admin-icon-signout {
+  font-size: 20px;
+  min-width: 20px;
+  margin-right: 15px;
+  color: #dc3545;
 }
 
 .admin-sidebar-menu li:hover,
 .admin-sidebar-menu li a:hover {
-  background: #f2f2f2;
+  background: #e9ecef;
+  color: #212529;
+}
+
+.admin-sidebar-menu li:hover .admin-icon,
+.admin-sidebar-menu li a:hover .admin-icon {
+  color: #0d6efd;
+}
+
+/* Phần Sign Out ở cuối */
+.admin-sidebar-menu li.signout-item {
+  margin-top: auto;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.admin-sidebar-menu li.signout-item:hover .admin-icon-signout {
+  color: #c82333;
+}
+
+/* Active item */
+.admin-sidebar-menu li.active {
+  background: #e7f1ff;
+}
+
+.admin-sidebar-menu li.active a {
+  color: #0d6efd;
+}
+
+.admin-sidebar-menu li.active .admin-icon {
+  color: #0d6efd;
 }

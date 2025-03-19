@@ -63,7 +63,7 @@ function Admin() {
                   }`}
                   onClick={() => setActiveChart("revenue")}
                 >
-                  Thống kê doanh thu
+                  <i className="fas fa-chart-line"></i> Thống kê doanh thu
                 </button>
                 <button
                   className={`chart-tab ${
@@ -71,7 +71,7 @@ function Admin() {
                   }`}
                   onClick={() => setActiveChart("package")}
                 >
-                  Phân bố gói dịch vụ
+                  <i className="fas fa-box"></i> Phân bố gói dịch vụ
                 </button>
                 <button
                   className={`chart-tab ${
@@ -79,7 +79,7 @@ function Admin() {
                   }`}
                   onClick={() => setActiveChart("member")}
                 >
-                  Thống kê thành viên mới
+                  <i className="fas fa-users"></i> Thống kê thành viên mới
                 </button>
               </div>
 
@@ -103,33 +103,6 @@ function Admin() {
                   <div className="chart-item active">
                     <h3>Thống kê thành viên mới</h3>
                     <MemberChart />
-                  </div>
-                )}
-              </div>
-
-              {/* Thông tin tóm tắt */}
-              <div className="info-grid">
-                {activeChart === "revenue" && (
-                  <div className="info-item">
-                    <h3>Tóm tắt doanh thu</h3>
-                    <p>Doanh thu tháng này: 45,000,000 VND</p>
-                    <p>Tăng trưởng: +15% so với tháng trước</p>
-                  </div>
-                )}
-
-                {activeChart === "package" && (
-                  <div className="info-item">
-                    <h3>Tóm tắt gói dịch vụ</h3>
-                    <p>Gói phổ biến nhất: {packageData.mostPopularPackage}</p>
-                    <p>Tỷ lệ chuyển đổi: {packageData.conversionRate}%</p>
-                  </div>
-                )}
-
-                {activeChart === "member" && (
-                  <div className="info-item">
-                    <h3>Tóm tắt thành viên</h3>
-                    <p>Thành viên mới tháng này: 24</p>
-                    <p>Tổng số thành viên: {packageData.totalMembers}</p>
                   </div>
                 )}
               </div>

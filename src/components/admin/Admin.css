@@ -4,7 +4,9 @@
 .admin-container {
   display: flex; /* quan trọng: flex layout */
   min-height: 100vh; /* full màn hình */
-  background: #ebf3fc; /* nền pastel */
+  background: #f7f9fc; /* nền nhẹ nhàng hơn */
+  color: #333;
+  font-family: "Roboto", sans-serif;
 }
 
 /* Khu vực chính (bên phải) */
@@ -12,11 +14,12 @@
   flex: 1; /* chiếm phần còn lại */
   display: flex;
   flex-direction: column;
+  transition: all 0.3s ease;
 }
 
 /* Vùng content */
 .admin-content {
-  padding: 15px;
+  padding: 20px;
   width: 100%;
   height: calc(100vh - 60px); /* Giả sử topbar cao 60px */
   overflow: auto;
@@ -25,9 +28,11 @@
 .admin-header {
   margin-bottom: 20px;
 }
+
 .admin-header h2 {
-  font-size: 1.2rem;
-  color: #444;
+  font-size: 1.4rem;
+  color: #2c3e50;
+  font-weight: 500;
 }
 
 .admin-charts {
@@ -115,8 +120,8 @@
 }
 
 .admin-dashboard {
-  padding: 15px;
-  background-color: #f5f5f5;
+  padding: 0;
+  background-color: transparent;
   height: 100%;
   overflow: auto; /* Cho phép cuộn toàn bộ dashboard */
 }
@@ -228,42 +233,59 @@
 /* Nút chuyển đổi biểu đồ */
 .chart-tabs {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 24px;
   background-color: #fff;
-  padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.chart-tab {
-  padding: 10px 15px;
-  background-color: #f5f5f5;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: 500;
-  color: #555;
+  padding: 12px 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
 }
 
+.chart-tab {
+  padding: 12px 20px;
+  background-color: #f5f7fa;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #5a6474;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
 .chart-tab:hover {
-  background-color: #e0e0e0;
+  background-color: #e8eef7;
+  transform: translateY(-2px);
 }
 
 .chart-tab.active {
-  background-color: #2196f3;
+  background-color: #4361ee;
   color: white;
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+}
+
+/* Biểu tượng trong nút tab */
+.chart-tab i {
+  font-size: 16px;
 }
 
 /* Container cho biểu đồ */
 .chart-container {
   background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  margin-bottom: 20px;
-  min-height: 400px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  margin-bottom: 24px;
+  min-height: 450px;
+  transition: all 0.3s ease;
+}
+
+.chart-container:hover {
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
 }
 
 .chart-item {
@@ -272,6 +294,27 @@
 
 .chart-item.active {
   display: block;
+  animation: fadeIn 0.5s ease;
+}
+
+.chart-item h3 {
+  font-size: 18px;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eaedf3;
+  font-weight: 500;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Thông tin tóm tắt */
@@ -286,11 +329,27 @@
 @media (max-width: 768px) {
   .chart-tabs {
     flex-direction: column;
-    gap: 5px;
+    gap: 8px;
   }
 
   .chart-tab {
     width: 100%;
-    text-align: center;
+    justify-content: center;
+    padding: 10px 15px;
+  }
+
+  .admin-content {
+    padding: 15px;
+  }
+
+  .chart-container {
+    padding: 16px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .chart-tab {
+    font-size: 13px;
+    padding: 10px 15px;
   }
 }

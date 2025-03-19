@@ -113,12 +113,12 @@ nav {
 
 .join-btn {
   text-decoration: none;
-  font-weight: Bold;
+  font-weight: 800;
   border-radius: 4px;
   transition: all 0.3s ease;
 }
 
-.logout-btn {
+.sign-in-btn {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -128,7 +128,7 @@ nav {
   border: none;
   border-radius: 20px;
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 900;
   cursor: pointer;
   transition: all 0.3s ease;
 }

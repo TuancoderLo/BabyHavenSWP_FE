@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Logo from "../../assets/Logo.png";
-import Name from "../../assets/Name.png";
+import Logo from "../../assets/full_logo.png";
 import avatar_LOGO from "../../assets/avatar_LOGO.jpg";
 import api from "../../config/axios";
 import Sidebar from "./SidebarHeader";
@@ -99,7 +98,6 @@ function Header() {
             style={{ cursor: "pointer"}}
           >
             <img src={Logo} alt="Logo" className="logo-img" />
-            <img src={Name} alt="Name" className="logo-name" />
           </div>
         </div>
 
@@ -171,8 +169,8 @@ function Header() {
               alt="User Avatar"
             />
           </div>
-          <span className="avatar-chip-text">
-            {userData ? userData.name : "Name"}
+          <span className="avatar-chip-name">
+            {userData ? userData.name : localStorage.getItem("name")}
           </span>
           {menuOpen && (
             <div>
