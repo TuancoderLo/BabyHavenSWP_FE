@@ -8,6 +8,11 @@ import Packages from "../packages/Packages";
 import blogCategoryApi from "../../services/blogCategoryApi";
 import blogApi from "../../services/blogApi"; // Add this import
 import BlogSection from "../topics/BlogSection";
+import TrackConfident from "../../assets/Monthly_users_resized.svg";
+import Medical from "../../assets/ic_med-advisers_dm_rejv.svg"
+import Alert from "../../assets/Expert_articles_resized.svg"
+import GrowthTrack from "../../assets/GrowthTracker-nov-2023.svg"
+import Milestone from "../../assets/ChildHeightPredictor.svg"
 
 function HomePage() {
   const navigate = useNavigate();
@@ -233,29 +238,37 @@ function HomePage() {
 
             <div className="feature-cards">
               <div className="feature-highlight-card">
-                <h3>Track Your Child's Growth with Confidence</h3>
-                <p>
-                  Monitor and analyze your child's development using
-                  internationally recognized standards, ensuring they are on the
-                  right path.
-                </p>
+                <img src={TrackConfident} alt="track your child"/>
+                <div>
+                  <h3>Track Your Child's Growth with Confidence</h3>
+                  <p>
+                    Monitor and analyze your child's development using
+                    internationally recognized standards
+                  </p>
+                </div>
               </div>
 
               <div className="feature-highlight-card">
-                <h3>Access Trusted Advice from Pediatric Experts</h3>
-                <p>
-                  Instantly connect with experienced doctors and child care
-                  specialists for expert guidance whenever you need it.
-                </p>
+                <img src={Medical} alt="medical from expert"/>
+                <div>
+                  <h3>Access Trusted Advice from Pediatric Experts</h3>
+                  <p>
+                    Instantly connect with experienced doctors and child care
+                    specialists for expert guidance whenever you need it.
+                  </p>
+                </div>
               </div>
 
               <div className="feature-highlight-card">
-                <h3>Personalized Insights & Smart Alerts</h3>
-                <p>
-                  Stay informed with customized recommendations and real-time
-                  alerts to address your child's unique health and developmental
-                  needs.
-                </p>
+                <img src={Alert} alt="smart alerts"/>
+                <div>
+                  <h3>Personalized Insights & Smart Alerts</h3>
+                  <p>
+                    Stay informed with customized recommendations and real-time
+                    alerts to address your child's unique health and developmental
+                    needs.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -292,33 +305,18 @@ function HomePage() {
                 {[
                   {
                     image:
-                      "https://img.freepik.com/free-photo/mother-measuring-temperature-sick-daughter_23-2148867372.jpg",
-                    title: "Health Tracker",
-                  },
-                  {
-                    image:
-                      "https://img.freepik.com/free-photo/mother-feeding-her-baby_23-2148867369.jpg",
-                    title: "Feeding Guide",
-                  },
-                  {
-                    image:
-                      "https://img.freepik.com/free-photo/baby-sleeping-his-crib_23-2148867367.jpg",
-                    title: "Sleep Tracker",
-                  },
-                  {
-                    image:
-                      "https://img.freepik.com/free-photo/mother-playing-with-her-baby_23-2148867374.jpg",
-                    title: "Development",
-                  },
-                  {
-                    image:
-                      "https://img.freepik.com/free-photo/mother-taking-care-her-baby_23-2148867373.jpg",
-                    title: "Care Guide",
-                  },
-                  {
-                    image:
-                      "https://img.freepik.com/free-photo/mother-measuring-baby-growth_23-2148867371.jpg",
+                    GrowthTrack,
                     title: "Growth Tracker",
+                  },
+                  {
+                    image:
+                    Medical,
+                    title: "Consultation with Experts",
+                  },
+                  {
+                    image:
+                    Milestone,
+                    title: "Milestone Records",
                   },
                   {
                     image:
@@ -330,9 +328,14 @@ function HomePage() {
                       "https://img.freepik.com/free-photo/mother-consulting-doctor-about-her-baby_23-2148867368.jpg",
                     title: "Expert Advice",
                   },
+                  {
+                    image:
+                      "https://img.freepik.com/free-photo/mother-taking-care-her-baby_23-2148867373.jpg",
+                    title: "Health Analyze With AI",
+                  },
                 ].map((tool, index) => (
                   <a key={index} href="#" className="tool-card">
-                    <div className="tool-image">
+                    <div className="tool-image-homepage">
                       <img src={tool.image} alt={tool.title} />
                     </div>
                     <span className="tool-title">{tool.title}</span>

@@ -60,7 +60,7 @@ function ChildrenPage() {
         case "medium":
           return "warning";
         case "high":
-          return "alert-high";
+          return "warning";
         default:
           return "healthy";
       }
@@ -81,7 +81,7 @@ function ChildrenPage() {
           onClick={openOverlay}
           style={{ cursor: "pointer" }}
         >
-          <p>{messageShort}</p>
+          <p>Your child has {alert.severityLevel} alert warning</p>
         </div>
   
         {expanded && (
@@ -242,7 +242,7 @@ const handleConnectDoctor = () => {
       const membershipData = membershipRes.data?.data;
   
       // 2) Giả sử membershipData có trường membershipPackageName = 'Free' | 'Standard' | 'Premium'
-      const membershipPackage = membershipData?.packageName; 
+      const membershipPackage = membershipData?.PackageName; 
       // Hoặc tuỳ API trả về, bạn thay đổi key cho đúng
   
       // 3) Xác định giới hạn trẻ
@@ -426,31 +426,45 @@ const handleConnectDoctor = () => {
   };
 
   const renderGrowthAnalysis = () => {
-    if (!selectedChild || !selectedRecord) return null;
 
     // Lấy 2 record gần nhất từ state growthRecords
     const records = growthRecords.slice(0, 2);
 
-    const changes = calculateGrowthChange(records);
-    if (!changes) return null;
-
+    // Sử dụng let thay vì const để có thể gán lại giá trị
+    let changes = calculateGrowthChange(records);
+    if (!changes) {
+      changes = {
+        weight: {
+          change: 'N/A',
+          trend: null
+        },
+        height: {
+          change: 'N/A',
+          trend: null
+        },
+        bmi: {
+          change: 'N/A',
+          trend: null
+        }
+      };
+    }
     return (
       <div className="growth-analysis-section">
         <h3>Growth Analysis</h3>
         <div className="analysis-content">
-          <div className={`analysis-item ${changes.weight.trend}`}>
+          <div className={`analysis-item ${changes.weight.trend !== null ? changes.weight.trend : "--"}`}>
             <span className="analysis-label">Weight Change:</span>
             <span className="analysis-value">
-              {changes.weight.change > 0 ? '+' : ''}{changes.weight.change} kg
+              {changes.weight.change !== 'N/A' && changes.weight.change > 0 ? '+' : ''}{changes.weight.change} kg
             </span>
           </div>
-          <div className={`analysis-item ${changes.height.trend}`}>
+          <div className={`analysis-item ${changes.height.trend !== null ? changes.height.trend : "--"}`}>
             <span className="analysis-label">Height Change:</span>
             <span className="analysis-value">
-              {changes.height.change > 0 ? '+' : ''}{changes.height.change} cm
+              {changes.height.change !== 'N/A' && changes.height.change > 0 ? '+' : ''}{changes.height.change} cm
             </span>
           </div>
-          <div className={`analysis-item ${changes.bmi.trend}`}>
+          <div className={`analysis-item ${changes.bmi.trend !== null ? changes.bmi.trend : "--"}`}>
             <span className="analysis-label">BMI Change:</span>
             <span className="analysis-value">
               {changes.bmi.change !== 'N/A' ? (changes.bmi.change > 0 ? '+' : '') + changes.bmi.change : 'N/A'}
@@ -535,7 +549,7 @@ const handleConnectDoctor = () => {
           <div className="child-details-section">
             {selectedChild ? (
               <>
-                <h2>{selectedChild.name}</h2>
+                <h2 className={`child-name ${selectedChild.gender === 'Male' ? "male" : "female"} `}>{selectedChild.name}</h2>
                 <div className="child-details-content">
                   <div className="detail-row">
                     <span className="detail-label">Age:</span>
@@ -543,7 +557,15 @@ const handleConnectDoctor = () => {
                   </div>
                   <div className="detail-row">
                     <span className="detail-label">Date of Birth:</span>
-                    <span className="detail-value">{selectedChild.dateOfBirth || 'Not set'}</span>
+                    <span className="detail-value">
+                      {selectedChild.dateOfBirth 
+                        ? new Date(selectedChild.dateOfBirth).toLocaleDateString('en-GB', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                          })
+                        : 'Not set'}
+                    </span>
                   </div>
                   <div className="detail-row">
                     <span className="detail-label">Gender:</span>
@@ -600,18 +622,18 @@ const handleConnectDoctor = () => {
             </div>
           </div>
 
-{/* Health Alert Section */}
-<div className="health-alert-section">
-  <div className="health-alert-title">Health Alert</div>
+          {/* Health Alert Section */}
+          <div className="health-alert-section">
+            <div className="health-alert-title">Health Alert</div>
 
-  {latestAlert ? (
-    <AlertItem alert={latestAlert} />
-  ) : (
-    <div className="health-alert-content healthy">
-      Your child's health is in good condition
-    </div>
-  )}
-</div>
+            {latestAlert ? (
+              <AlertItem alert={latestAlert} />
+            ) : (
+              <div className="health-alert-content healthy">
+                Your child's health is in good condition
+              </div>
+            )}
+          </div>
 
           {/* Growth chart section */}
           <div className="growth-chart-section">

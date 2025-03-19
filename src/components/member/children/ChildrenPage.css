@@ -462,12 +462,12 @@ growth-chart-box card {
 
 .child-slot:not(.selected):hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s ease;
+  background: #e4e4e4;
+  transition: rgb(236, 236, 236)s ease;
 }
 
 .child-slot:not(.selected):hover .child-name,
-.child-slot:not(.selected):hover .child-age,
-.child-slot:not(.selected):hover .gender-icon {
+.child-slot:not(.selected):hover .child-age {
   color: #000000;
 }
 
@@ -530,6 +530,10 @@ growth-chart-box card {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
+.child-details-section:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
 .child-details-section h2 {
   position: sticky;
   top: 0;
@@ -538,6 +542,14 @@ growth-chart-box card {
   margin-bottom: 12px;
   border-bottom: 1px solid #eee;
   z-index: 1;
+}
+
+.child-name.male {
+  color:#008cff;
+}
+
+.child-name.female {
+  color:#ff007b;
 }
 
 /* Latest record section */
@@ -645,11 +657,6 @@ growth-chart-box card {
   border-radius: 8px;
   padding: 16px;
 
-  /* Flex để canh giữa */
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* canh giữa ngang */
-  justify-content: center; /* canh giữa dọc */
 
   gap: 12px;
   position: relative;
@@ -660,46 +667,45 @@ growth-chart-box card {
   font-size: 16px;
   color: #333;
   font-weight: 600;
+  margin-bottom: 10px;
   display: flex;
-  align-items: center;
   gap: 8px;
 }
 
 .health-alert-content {
   color: #00a36c;
   background: rgba(0, 163, 108, 0.1);
-  font-weight: 600;
   border-radius: 6px;
-  padding: 12px;
-  font-size: 14px;
+  padding: 10px;
   line-height: 1.5;
   max-height: 150px;
   /* Flex để canh giữa text */
   display: flex;
   align-items: center; /* canh giữa dọc */
   justify-content: center; /* canh giữa ngang */
+}
 
-  text-align: center;
+.health-alert-content p {
+  text-align: left;
+  font-size: 14px;
 }
 
 .health-alert-content.warning {
   color: #ff6b6b;
   background: rgba(255, 107, 107, 0.1);
-  font-weight: 600;
   border-radius: 6px;
   padding: 12px;
-  font-size: 14px;
   line-height: 1.5;
   max-height: 150px;
+  font-weight: 800;
   /* Flex để canh giữa text */
   display: flex;
   align-items: center; /* canh giữa dọc */
   justify-content: center; /* canh giữa ngang */
-
   text-align: center;
 }
 
-.health-alert-content::before {
+.health-alert-content.warning::before {
   content: "⚠️";
   margin-right: 8px;
   font-weight: 600;
@@ -718,17 +724,11 @@ growth-chart-box card {
 /* Vùng alert rút gọn, hiển thị mờ ở cuối */
 .health-alert-content.warning.fadeable {
   position: relative; /* cho phép ::after chồng lên */
-  max-height: 60px; /* chiều cao tối đa vùng rút gọn */
+  max-height: 80px; /* chiều cao tối đa vùng rút gọn */
   overflow: hidden; /* ẩn phần text vượt quá */
   cursor: pointer; /* gợi ý người dùng có thể click xem thêm */
 }
 
-.health-alert-content.alert-high.fadeable {
-  position: relative; /* cho phép pseudo-element ::after chồng lên */
-  max-height: 60px; /* chiều cao tối đa vùng hiển thị */
-  overflow: hidden; /* ẩn phần nội dung vượt quá */
-  cursor: pointer; /* gợi ý người dùng có thể click xem thêm */
-}
 /* Growth chart section */
 .growth-chart-section {
   grid-area: 3 / 3 / 8 / 6;
@@ -840,12 +840,13 @@ growth-chart-box card {
 
 .detail-label {
   color: #666;
+  font-weight: bold;
   font-size: 14px;
 }
 
 .detail-value {
   color: #333;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 14px;
 }
 
@@ -1057,6 +1058,7 @@ growth-chart-box card {
   gap: 8px;
   box-shadow: 0 2px 4px rgba(0, 208, 188, 0.2);
   margin-top: auto;
+  margin-bottom: 10px;
 }
 
 .connect-doctor-button:hover {
