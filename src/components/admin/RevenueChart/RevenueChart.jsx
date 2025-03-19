@@ -33,6 +33,7 @@ const RevenueChart = () => {
   const [packageRevenueData, setPackageRevenueData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("overview"); // Tab mặc định là overview
 
   useEffect(() => {
     const fetchData = async () => {
@@ -347,8 +348,18 @@ const RevenueChart = () => {
   const packageRevenueChartData = preparePackageRevenueChartData();
   const packageTotalChartData = preparePackageTotalChartData();
 
-  if (loading) return <div className="loading">Đang tải dữ liệu...</div>;
-  if (error) return <div className="error">{error}</div>;
+  if (loading)
+    return (
+      <div className="loading-container">
+        <div className="loader"></div> <span>Đang tải dữ liệu...</span>
+      </div>
+    );
+  if (error)
+    return (
+      <div className="error-container">
+        <i className="fas fa-exclamation-circle"></i> {error}
+      </div>
+    );
 
   // Tính tổng doanh thu
   const totalRevenue = revenueData.reduce((sum, item) => sum + item.revenue, 0);
@@ -362,77 +373,171 @@ const RevenueChart = () => {
     : 0;
 
   return (
-    <div className="revenue-chart-container">
-      <div className="revenue-summary">
-        <div className="summary-item">
-          <h3>Tổng doanh thu năm nay</h3>
-          <p className="amount">
-            {new Intl.NumberFormat("vi-VN", {
-              style: "currency",
-              currency: "VND",
-            }).format(totalRevenue)}
-          </p>
+    <div className="revenue-dashboard">
+      {/* Card summaries */}
+      <div className="summary-cards">
+        <div className="summary-card total-revenue">
+          <div className="card-icon">
+            <i className="fas fa-money-bill-wave"></i>
+          </div>
+          <div className="card-content">
+            <h4>Tổng doanh thu</h4>
+            <div className="card-value">
+              {new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(totalRevenue)}
+            </div>
+            <div
+              className={`change-indicator ${
+                revenueChange >= 0 ? "positive" : "negative"
+              }`}
+            >
+              <i
+                className={`fas ${
+                  revenueChange >= 0 ? "fa-arrow-up" : "fa-arrow-down"
+                }`}
+              ></i>
+              {revenueChangePercentage.toFixed(1)}% so với năm trước
+            </div>
+          </div>
         </div>
-        <div className="summary-item">
-          <h3>So với năm trước</h3>
-          <p
-            className={`change ${revenueChange >= 0 ? "positive" : "negative"}`}
-          >
-            {revenueChange >= 0 ? "+" : ""}
-            {new Intl.NumberFormat("vi-VN", {
-              style: "currency",
-              currency: "VND",
-            }).format(revenueChange)}{" "}
-            ({revenueChangePercentage >= 0 ? "+" : ""}
-            {revenueChangePercentage.toFixed(2)}%)
-          </p>
+
+        <div className="summary-card standard-revenue">
+          <div className="card-icon">
+            <i className="fas fa-box"></i>
+          </div>
+          <div className="card-content">
+            <h4>Gói Standard</h4>
+            <div className="card-value">
+              {new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(packageRevenueData.Standard || 0)}
+            </div>
+            <div className="package-percentage">
+              {packageRevenueData.Standard
+                ? ((packageRevenueData.Standard / totalRevenue) * 100).toFixed(
+                    1
+                  )
+                : 0}
+              % tổng doanh thu
+            </div>
+          </div>
         </div>
-        <div className="summary-item">
-          <h3>Gói Standard</h3>
-          <p className="amount">
-            {new Intl.NumberFormat("vi-VN", {
-              style: "currency",
-              currency: "VND",
-            }).format(packageRevenueData.Standard || 0)}
-          </p>
+
+        <div className="summary-card premium-revenue">
+          <div className="card-icon">
+            <i className="fas fa-crown"></i>
+          </div>
+          <div className="card-content">
+            <h4>Gói Premium</h4>
+            <div className="card-value">
+              {new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(packageRevenueData.Premium || 0)}
+            </div>
+            <div className="package-percentage">
+              {packageRevenueData.Premium
+                ? ((packageRevenueData.Premium / totalRevenue) * 100).toFixed(1)
+                : 0}
+              % tổng doanh thu
+            </div>
+          </div>
         </div>
-        <div className="summary-item">
-          <h3>Gói Premium</h3>
-          <p className="amount">
-            {new Intl.NumberFormat("vi-VN", {
-              style: "currency",
-              currency: "VND",
-            }).format(packageRevenueData.Premium || 0)}
-          </p>
+
+        <div className="summary-card monthly-average">
+          <div className="card-icon">
+            <i className="fas fa-calendar-alt"></i>
+          </div>
+          <div className="card-content">
+            <h4>Doanh thu trung bình/tháng</h4>
+            <div className="card-value">
+              {new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(totalRevenue / 12)}
+            </div>
+            <div className="package-percentage">Dựa trên 12 tháng gần nhất</div>
+          </div>
         </div>
       </div>
-      <div className="chart-wrapper">
-        <h2>Thống kê doanh thu</h2>
-        {revenueChartData && (
-          <div className="line-chart">
-            <Line data={revenueChartData} options={revenueChartOptions} />
+
+      {/* Chart navigation */}
+      <div className="chart-navigation">
+        <button
+          className={activeTab === "overview" ? "active" : ""}
+          onClick={() => setActiveTab("overview")}
+        >
+          <i className="fas fa-chart-line"></i> Tổng quan
+        </button>
+        <button
+          className={activeTab === "packages" ? "active" : ""}
+          onClick={() => setActiveTab("packages")}
+        >
+          <i className="fas fa-boxes"></i> Phân tích gói
+        </button>
+        <button
+          className={activeTab === "comparison" ? "active" : ""}
+          onClick={() => setActiveTab("comparison")}
+        >
+          <i className="fas fa-balance-scale"></i> So sánh
+        </button>
+      </div>
+
+      {/* Charts container */}
+      <div className="revenue-charts">
+        {activeTab === "overview" && (
+          <div className="chart-panel">
+            <div className="chart-card">
+              <h3>
+                <i className="fas fa-chart-line"></i> Biểu đồ doanh thu theo
+                tháng
+              </h3>
+              <div className="chart-area">
+                {revenueChartData && (
+                  <Line data={revenueChartData} options={revenueChartOptions} />
+                )}
+              </div>
+            </div>
           </div>
         )}
-      </div>
-      <div className="chart-wrapper">
-        <h2>Phân tích doanh thu theo gói</h2>
-        {packageRevenueChartData && (
-          <div className="line-chart">
-            <Line
-              data={packageRevenueChartData}
-              options={packageRevenueChartOptions}
-            />
+
+        {activeTab === "packages" && (
+          <div className="chart-panel">
+            <div className="chart-card">
+              <h3>
+                <i className="fas fa-boxes"></i> Doanh thu theo gói dịch vụ
+              </h3>
+              <div className="chart-area">
+                {packageRevenueChartData && (
+                  <Line
+                    data={packageRevenueChartData}
+                    options={packageRevenueChartOptions}
+                  />
+                )}
+              </div>
+            </div>
           </div>
         )}
-      </div>
-      <div className="chart-wrapper">
-        <h2>Tổng doanh thu theo gói</h2>
-        {packageTotalChartData && (
-          <div className="bar-chart">
-            <Bar
-              data={packageTotalChartData}
-              options={packageTotalChartOptions}
-            />
+
+        {activeTab === "comparison" && (
+          <div className="chart-panel">
+            <div className="chart-card">
+              <h3>
+                <i className="fas fa-balance-scale"></i> So sánh doanh thu theo
+                gói
+              </h3>
+              <div className="chart-area">
+                {packageTotalChartData && (
+                  <Bar
+                    data={packageTotalChartData}
+                    options={packageTotalChartOptions}
+                  />
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>

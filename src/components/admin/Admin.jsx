@@ -63,7 +63,7 @@ function Admin() {
                   }`}
                   onClick={() => setActiveChart("revenue")}
                 >
-                  Thống kê doanh thu
+                  <i className="fas fa-chart-line"></i> Thống kê doanh thu
                 </button>
                 <button
                   className={`chart-tab ${
@@ -71,7 +71,7 @@ function Admin() {
                   }`}
                   onClick={() => setActiveChart("package")}
                 >
-                  Phân bố gói dịch vụ
+                  <i className="fas fa-box"></i> Phân bố gói dịch vụ
                 </button>
                 <button
                   className={`chart-tab ${
@@ -79,7 +79,7 @@ function Admin() {
                   }`}
                   onClick={() => setActiveChart("member")}
                 >
-                  Thống kê thành viên mới
+                  <i className="fas fa-users"></i> Thống kê thành viên mới
                 </button>
               </div>
 
