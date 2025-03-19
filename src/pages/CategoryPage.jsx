@@ -163,38 +163,26 @@ function CategoryPage() {
                     <h2 className="blog-title">{blog.title}</h2>
 
                     <div className="blog-metadata">
-                      <p className="blog-author">
-                        {blog.authorName
-                          ? `Author: ${blog.authorName}`
-                          : "Author: Unknown"}
-                      </p>
-                      <p className="blog-category">
-                        Category: {blog.categoryName}
-                      </p>
+                      {blog.status === "New" && (
+                        <span className="blog-tag-highlight tag-new">NEW</span>
+                      )}
+                      <span className="blog-tag-highlight">
+                        {blog.categoryName}
+                      </span>
                     </div>
 
-                    <div className="blog-tags">
-                      {renderTags(blog.tags)?.map((tag, index) => (
-                        <span key={index} className="tag">
-                          #{tag}
-                        </span>
-                      ))}
+                    <div className="blog-info">
+                      <div className="blog-author-info">
+                        <i className="fas fa-user"></i>
+                        {blog.authorName || "Unknown Author"}
+                      </div>
+                      <div className="blog-date-info">
+                        <i className="far fa-calendar-alt"></i>
+                        {blog.createdAt
+                          ? new Date(blog.createdAt).toLocaleDateString()
+                          : ""}
+                      </div>
                     </div>
-
-                    <p className="blog-excerpt">
-                      {blog.content?.length > 200
-                        ? `${blog.content.substring(0, 200)}...`
-                        : blog.content}
-                    </p>
-
-                    {blog.status === "Approved" && (
-                      <button
-                        className="read-more-btn"
-                        onClick={() => handleReadMore(blog)}
-                      >
-                        Read more
-                      </button>
-                    )}
                   </div>
                 </div>
               ))}
