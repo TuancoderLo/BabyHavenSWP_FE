@@ -1,75 +1,32 @@
-/* ========== Doctor.css ========== */
-
-/* Layout tổng */
-.doctor-layout {
+.doctor-page {
   display: flex;
   min-height: 100vh;
-  background: #f7f9fc; /* nền xám nhạt */
-  transition: all 0.3s ease;
+  width: 100%;
+  background: linear-gradient(135deg, #e2f1ff, #fff9fc 50%, #fff1f9 100%);
+  position: relative;
 }
 
-/* MAIN content */
 .doctor-main {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  transition: all 0.3s ease;
+  margin-left: 70px;
+  min-height: 100vh;
+  width: calc(100% - 70px);
+  background: transparent;
 }
 
-/* TOPBAR */
-.doctor-topbar {
-  background: linear-gradient(90deg, #f0f9ff 0%, #ffffff 70%);
-  padding: 16px 24px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  display: flex;
-  justify-content: space-between;
-  align-items: center; /* canh giữa theo chiều dọc */
-  transition: all 0.3s ease;
-}
-
-.topbar-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-/* Notification badge */
-.badge-notif .ant-badge-count {
-  background-color: #4eaef7;
-  box-shadow: 0 0 0 2px #fff;
-  font-weight: 500;
-}
-.icon-notif {
-  font-size: 18px;
-  color: #888;
-  cursor: pointer;
-}
-
-/* Khu vực nội dung chính (dashboard) */
-.doctor-dashboard {
-  flex: 1;
-  padding: 24px;
+.doctor-main-content {
+  padding: 20px;
+  height: 100%;
   overflow-y: auto;
-  display: block; /* hoặc flex tuỳ bạn */
+  transition: all 0.3s ease;
+  position: relative;
 }
 
-/* Loading spinner */
-.loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 400px;
-}
-
-/* Responsive */
-@media (max-width: 992px) {
-  .doctor-dashboard {
-    flex-direction: column;
-  }
+.doctor-content {
+  padding: 20px;
+  width: 100%;
+  height: 100%;
+  background-color: #f5f5f5;
+  position: relative;
+  z-index: 1;
 }

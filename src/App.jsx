@@ -103,7 +103,7 @@ function App() {
           }
         />
         <Route
-          path="/doctor"
+          path="/doctor/*"
           element={
             <ProtectedRoute roles={["2"]}>
               <Doctor />

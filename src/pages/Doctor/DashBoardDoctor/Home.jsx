@@ -1,64 +1,87 @@
-// Home.jsx
 import React from "react";
-import { Row, Col, Card, Typography, Avatar } from "antd";
-import { UserOutlined } from "@ant-design/icons";
-import DoctorCalendar from "../../Doctor/DashBoardDoctor/DoctorCalendar";
-import "./Home.css"; // file CSS riêng cho Home
+import { Card, Col, Row, Statistic, Progress, Timeline } from "antd";
+import { CalendarOutlined, UserOutlined, FileTextOutlined } from "@ant-design/icons";
+import "./Home.css";
 
-const { Title, Text } = Typography;
-
-const Home = ({ doctorInfo }) => {
+const Home = () => {
   return (
-    <div className="home-container">
-      <Row gutter={16}>
-        {/* Cột trái */}
-        <Col xs={24} md={16}>
-          <Card className="home-welcome-card">
-            <Title level={2} style={{ marginBottom: 8 }}>
-              Hello, {doctorInfo.name}!
-            </Title>
-            <Text type="secondary">
-              {/* ví dụ: Ngày giờ hiện tại, hoặc status */}
-              Today is {new Date().toLocaleDateString()} — Hope you have a good day!
-            </Text>
-            {/* Thêm card diagnosis, tests, drugs, ... tuỳ ý */}
-          </Card>
-
-          <Card className="home-latest-results" style={{ marginTop: 16 }}>
-            <Title level={4} style={{ marginBottom: 8 }}>
-              Latest Results
-            </Title>
-            <Text>• Diagnosis: ...</Text> <br />
-            <Text>• Tests: ...</Text> <br />
-            <Text>• Drugs: ...</Text>
+    <div className="doctor-home-container">
+      <Row gutter={24}>
+        {/* Profile and Greeting */}
+        <Col span={8}>
+          <Card className="home-profile-card">
+            <div className="home-greeting">
+              <h2>Good Day, Dr. Nicholls!</h2>
+              <p>Have a Nice Monday!</p>
+            </div>
+            <div className="home-doctor-info">
+              <img src="/path-to-profile-picture.jpg" alt="Doctor" />
+              <div className="doctor-details">
+                <h3>Dr. Alisha Nicholls</h3>
+                <p>Dermatologist | Bottrop, Germany</p>
+                <p>Blood Type: (A)(II) Rh+</p>
+                <p>Working Hours: 9pm - 5am</p>
+              </div>
+            </div>
           </Card>
         </Col>
 
-        {/* Cột phải */}
-        <Col xs={24} md={8}>
-          {/* Profile Card (avatar, specialty, v.v.) */}
-          <Card className="home-profile-card">
-            <Avatar
-              size={80}
-              src={doctorInfo.profilePicture}
-              icon={<UserOutlined />}
-              style={{ marginBottom: 8 }}
-            />
-            <Title level={4} style={{ margin: 0 }}>
-              {doctorInfo.name}
-            </Title>
-            <Text type="secondary">{doctorInfo.specialty}</Text>
-          </Card>
+        {/* Statistics Section */}
+        <Col span={16}>
+          <Row gutter={24}>
+            <Col span={8}>
+              <Card className="home-stat-card">
+                <Statistic title="Scheduled Consultations" value={25} prefix={<UserOutlined />} />
+              </Card>
+            </Col>
+            <Col span={8}>
+              <Card className="home-stat-card">
+                <Statistic title="Appointments" value={9} prefix={<CalendarOutlined />} />
+              </Card>
+            </Col>
+            <Col span={8}>
+              <Card className="home-stat-card">
+                <Statistic title="Pending Record Requests" value={5} prefix={<FileTextOutlined />} />
+              </Card>
+            </Col>
+          </Row>
 
-          {/* Calendar */}
-          <Card className="home-calendar-card" style={{ marginTop: 16 }}>
-            <Title level={5} style={{ marginBottom: 16 }}>
-              Appointment Calendar
-            </Title>
-            <DoctorCalendar />
+          {/* Plans Section */}
+          <Card className="home-plans-card">
+            <h4>My Plans for Today</h4>
+            <Row gutter={24}>
+              <Col span={8}>
+                <Statistic title="Consultations" value={25} suffix="/" precision={2} />
+                <Progress percent={64} size="small" />
+              </Col>
+              <Col span={8}>
+                <Statistic title="Analysis" value={10} suffix="/" precision={2} />
+                <Progress percent={33} size="small" />
+              </Col>
+              <Col span={8}>
+                <Statistic title="Meetings" value={3} suffix="/" precision={2} />
+                <Progress percent={55} size="small" />
+              </Col>
+            </Row>
           </Card>
         </Col>
       </Row>
+
+      {/* Calendar Section */}
+      <Card className="home-calendar-card">
+        <h4>My Calendar</h4>
+        <Timeline mode="left">
+          <Timeline.Item color="green">
+            2:00 pm - Meeting with Chief Physician Dr. Williams
+          </Timeline.Item>
+          <Timeline.Item color="blue">
+            3:00 pm - Consultation with Mr. White
+          </Timeline.Item>
+          <Timeline.Item color="red">
+            3:30 pm - Consultation with Mrs. Maisy
+          </Timeline.Item>
+        </Timeline>
+      </Card>
     </div>
   );
 };
