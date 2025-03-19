@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Pie, Bar } from "react-chartjs-2";
+import { Pie, Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -8,10 +8,11 @@ import {
   Title,
   CategoryScale,
   LinearScale,
-  BarElement,
+  PointElement,
+  LineElement,
 } from "chart.js";
 import "./PackageChart.css";
-import { FaUsers, FaAward, FaChartPie, FaCalendarAlt } from "react-icons/fa";
+import { FaUsers, FaAward, FaChartPie, FaChartLine } from "react-icons/fa";
 
 // Đăng ký các thành phần cần thiết cho Chart.js
 ChartJS.register(
@@ -21,7 +22,8 @@ ChartJS.register(
   Title,
   CategoryScale,
   LinearScale,
-  BarElement
+  PointElement,
+  LineElement
 );
 
 const PackageChart = ({ onDataLoaded, period = "all" }) => {
@@ -237,30 +239,54 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
         {
           label: "Free",
           data: freeCounts,
-          backgroundColor: "rgba(77, 144, 254, 0.6)",
+          backgroundColor: "rgba(77, 144, 254, 0.2)",
           borderColor: "rgba(77, 144, 254, 1)",
-          borderWidth: 1,
+          borderWidth: 2,
+          pointBackgroundColor: "rgba(77, 144, 254, 1)",
+          pointBorderColor: "#fff",
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          tension: 0.3,
+          fill: true,
         },
         {
           label: "Standard",
           data: standardCounts,
-          backgroundColor: "rgba(255, 193, 7, 0.6)",
+          backgroundColor: "rgba(255, 193, 7, 0.2)",
           borderColor: "rgba(255, 193, 7, 1)",
-          borderWidth: 1,
+          borderWidth: 2,
+          pointBackgroundColor: "rgba(255, 193, 7, 1)",
+          pointBorderColor: "#fff",
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          tension: 0.3,
+          fill: true,
         },
         {
           label: "Premium",
           data: premiumCounts,
-          backgroundColor: "rgba(0, 200, 151, 0.6)",
+          backgroundColor: "rgba(0, 200, 151, 0.2)",
           borderColor: "rgba(0, 200, 151, 1)",
-          borderWidth: 1,
+          borderWidth: 2,
+          pointBackgroundColor: "rgba(0, 200, 151, 1)",
+          pointBorderColor: "#fff",
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          tension: 0.3,
+          fill: true,
         },
         {
           label: "Khác",
           data: otherCounts,
-          backgroundColor: "rgba(156, 39, 176, 0.6)",
+          backgroundColor: "rgba(156, 39, 176, 0.2)",
           borderColor: "rgba(156, 39, 176, 1)",
-          borderWidth: 1,
+          borderWidth: 2,
+          pointBackgroundColor: "rgba(156, 39, 176, 1)",
+          pointBorderColor: "#fff",
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          tension: 0.3,
+          fill: true,
         },
       ],
     };
@@ -325,13 +351,12 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
     },
   };
 
-  // Tùy chọn cho biểu đồ tháng
+  // Tùy chọn cho biểu đồ tháng - điều chỉnh thang đo trục Y
   const monthlyChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
       x: {
-        stacked: true,
         grid: {
           display: false,
         },
@@ -340,11 +365,13 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
             family: "'Roboto', 'Helvetica', 'Arial', sans-serif",
             size: 11,
           },
+          maxRotation: 45,
+          minRotation: 45,
         },
       },
       y: {
-        stacked: true,
         beginAtZero: true,
+        suggestedMax: 100, // Điều chỉnh thang đo tối đa lên 100
         grid: {
           color: "rgba(0, 0, 0, 0.05)",
         },
@@ -352,6 +379,10 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
           font: {
             family: "'Roboto', 'Helvetica', 'Arial', sans-serif",
             size: 12,
+          },
+          stepSize: 10, // Khoảng cách giữa các mốc là 10
+          callback: function (value) {
+            return value + ""; // Hiển thị giá trị số nguyên
           },
         },
       },
@@ -372,7 +403,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
       },
       title: {
         display: true,
-        text: "Số lượng người dùng theo tháng",
+        text: "Xu hướng gói thành viên theo tháng",
         font: {
           family: "'Roboto', 'Helvetica', 'Arial', sans-serif",
           size: 16,
@@ -395,10 +426,32 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
           family: "'Roboto', 'Helvetica', 'Arial', sans-serif",
           size: 13,
         },
+        callbacks: {
+          label: function (context) {
+            let label = context.dataset.label || "";
+            if (label) {
+              label += ": ";
+            }
+            if (context.parsed.y !== null) {
+              label += context.parsed.y + " thành viên";
+            }
+            return label;
+          },
+        },
       },
     },
-    animation: {
-      duration: 1000,
+    animations: {
+      tension: {
+        duration: 1000,
+        easing: "linear",
+        from: 0.5,
+        to: 0.3,
+      },
+    },
+    interaction: {
+      mode: "nearest",
+      axis: "x",
+      intersect: false,
     },
   };
 
@@ -491,12 +544,12 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
 
         <div className="chart-card">
           <div className="chart-header">
-            <FaCalendarAlt className="chart-icon" />
+            <FaChartLine className="chart-icon" />
             <h2>Xu hướng theo tháng</h2>
           </div>
           {monthlyChartData && (
-            <div className="bar-chart-container">
-              <Bar data={monthlyChartData} options={monthlyChartOptions} />
+            <div className="line-chart-container">
+              <Line data={monthlyChartData} options={monthlyChartOptions} />
             </div>
           )}
         </div>

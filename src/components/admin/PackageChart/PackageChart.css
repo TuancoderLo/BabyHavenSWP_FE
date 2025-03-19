@@ -221,7 +221,7 @@
 }
 
 .pie-chart-container,
-.bar-chart-container {
+.line-chart-container {
   height: 380px;
   width: 100%;
   position: relative;
@@ -555,7 +555,7 @@
   }
 
   .pie-chart-container,
-  .bar-chart-container {
+  .line-chart-container {
     height: 300px;
   }
 
