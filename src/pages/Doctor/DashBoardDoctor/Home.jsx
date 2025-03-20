@@ -36,37 +36,20 @@ const Home = () => {
           return;
         }
 
-        // Gọi API để lấy danh sách tất cả bác sĩ
-        const doctorsResponse = await doctorApi.getAllDoctors();
-        console.log('Doctors response:', doctorsResponse);
+        // Gọi API để lấy thông tin bác sĩ theo userId
+        const doctorResponse = await doctorApi.getDoctorByUserId(userId);
+        const doctor = doctorResponse.data; // Assuming the API returns { data: {...} }
 
-        // Kiểm tra xem dữ liệu trả về có phải là mảng không
-        let doctors = doctorsResponse;
-        if (!Array.isArray(doctorsResponse)) {
-          // Nếu API trả về một object có chứa mảng, ví dụ: { data: [...] }
-          if (doctorsResponse && doctorsResponse.data) {
-            doctors = doctorsResponse.data;
-          } else {
-            throw new Error('API response is not an array');
-          }
-        }
-
-        // Kiểm tra lại lần nữa sau khi xử lý
-        if (!Array.isArray(doctors)) {
-          throw new Error('Doctors data is not an array after processing');
-        }
-
-        // Tìm bác sĩ có userId khớp
-        const matchedDoctor = doctors.find(doctor => doctor.userId === userId);
-        if (matchedDoctor) {
-          // Lưu doctorId vào localStorage
-          localStorage.setItem('doctorId', matchedDoctor.doctorId);
-          setDoctorInfo(matchedDoctor); // Lưu thông tin bác sĩ để hiển thị nếu cần
-        } else {
+        if (!doctor) {
           console.error('Doctor not found for this userId:', userId);
+          return;
         }
+
+        // Lưu doctorId vào localStorage
+        localStorage.setItem('doctorId', doctor.doctorId);
+        setDoctorInfo(doctor); // Lưu thông tin bác sĩ để hiển thị
       } catch (error) {
-        console.error('Error fetching doctors:', error);
+        console.error('Error fetching doctor:', error);
       }
     };
 

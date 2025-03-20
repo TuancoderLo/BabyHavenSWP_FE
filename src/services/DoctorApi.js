@@ -5,6 +5,16 @@ const doctorApi = {
     const response = await api.get("/Doctors");
     return response.data;
   },
+
+  getDoctorByUserId: async (userId) => {
+    const response = await api.get(`/Doctors/doctor/${userId}`);
+    return response.data;
+  },
+  getConsultationRequestsById: async (id) => {
+    const response = await api.get(`/ConsultationRequests/${id}`);
+    return response.data;
+  },
+
   getDoctorSpecializations: async (doctorId) => {
     const response = await api.get(`/Specializations/${doctorId}`);
     return response.data;
@@ -17,6 +27,11 @@ const doctorApi = {
 
   createConsultationRequest: async (data) => {
     const response = await api.post("/ConsultationRequests", data);
+    return response.data;
+  },
+
+  createConsultationResponse: async (data) => {
+    const response = await api.post("/ConsultationResponses", data);
     return response.data;
   },
 
