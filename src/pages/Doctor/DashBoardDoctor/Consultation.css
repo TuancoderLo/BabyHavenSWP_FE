@@ -42,15 +42,16 @@
 
 /* Refresh button styling */
 .consult-refresh-btn {
-  background: #FF6F91 !important; /* Pink accent for the refresh button */
-  border-color: #FF6F91 !important;
+  background: none !important; /* Pink accent for the refresh button */
+  border-color: #02dcf4 !important;
+  color:#020af4a9 !important;
   border-radius: 10px !important;
   font-weight: 500;
 }
 
 .consult-refresh-btn:hover {
-  background: #FF5A7F !important; /* Slightly darker pink on hover */
-  border-color: #FF5A7F !important;
+  background: #02dcf4 !important; /* Slightly darker pink on hover */
+  border-color: #02dcf4 !important;
 }
 
 /* Parent info in table */
@@ -138,12 +139,12 @@
 }
 
 .ant-tabs-tab-active {
-  color: #FF6F91 !important; /* Pink for active tab */
+  color: #e92121 !important; /* Pink for active tab */
   font-weight: 600 !important;
 }
 
 .ant-tabs-ink-bar {
-  background: #FF6F91 !important; /* Pink underline for active tab */
+  background: #e92121 !important; /* Pink underline for active tab */
 }
 
 /* Tag styling */
