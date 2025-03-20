@@ -94,7 +94,9 @@ function FormatBlog() {
   const fetchDoctorInfo = async (authorEmail) => {
     try {
       console.log("Fetching doctor information for email:", authorEmail);
-      const response = await api.get("https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/Doctors");
+      const response = await api.get(
+        "https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/Doctors"
+      );
       console.log("Doctors API response:", response);
 
       // Kiểm tra cấu trúc dữ liệu trả về
@@ -210,7 +212,9 @@ function FormatBlog() {
 
       // Gọi API để lấy tất cả các bài viết
       console.log("Fetching all blogs for tag comparison");
-      const response = await api.get("https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/Blog");
+      const response = await api.get(
+        "https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/Blog"
+      );
       console.log("All blogs API response:", response);
 
       // Xử lý dữ liệu trả về
@@ -517,38 +521,64 @@ function FormatBlog() {
 
             {/* Các bài viết liên quan - div8-15 */}
             {relatedBlogs.length > 0 ? (
-              relatedBlogs.map((relatedBlog, index) => (
-                <div
-                  key={relatedBlog.blogId || relatedBlog.id || index}
-                  className={`related-blog-card related-blog-${index + 1}`}
-                  onClick={() => handleReadMore(relatedBlog)}
-                >
-                  <div className="related-blog-image">
-                    <img
-                      src={relatedBlog.imageBlog || DEFAULT_IMAGE}
-                      alt={relatedBlog.title}
-                      onError={(e) => {
-                        console.log(
-                          "Sử dụng ảnh mặc định cho bài viết liên quan"
-                        );
-                        e.target.onerror = null;
-                        e.target.src = DEFAULT_IMAGE;
-                      }}
-                    />
-                  </div>
-                  <div className="related-blog-content">
-                    <h3 className="related-blog-title">{relatedBlog.title}</h3>
-                    <p className="related-blog-author">
-                      {relatedBlog.name ||
-                        relatedBlog.authorName ||
-                        "Unknown"}
-                    </p>
-                  </div>
+              <div className="related-blogs-section">
+                <h2 className="related-blogs-title">Bài viết liên quan</h2>
+                <div className="related-blogs-grid">
+                  {relatedBlogs.map((relatedBlog, index) => (
+                    <div
+                      key={relatedBlog.blogId || relatedBlog.id || index}
+                      className="related-blog-card"
+                      onClick={() => handleReadMore(relatedBlog)}
+                    >
+                      <div className="related-blog-image">
+                        <img
+                          src={relatedBlog.imageBlog || DEFAULT_IMAGE}
+                          alt={relatedBlog.title}
+                          onError={(e) => {
+                            console.log(
+                              "Sử dụng ảnh mặc định cho bài viết liên quan"
+                            );
+                            e.target.onerror = null;
+                            e.target.src = DEFAULT_IMAGE;
+                          }}
+                        />
+                      </div>
+                      <div className="related-blog-content">
+                        <h3 className="related-blog-title">
+                          {relatedBlog.title}
+                        </h3>
+                        <div className="related-blog-info">
+                          <p className="related-blog-author">
+                            {relatedBlog.name ||
+                              relatedBlog.authorName ||
+                              "Unknown"}
+                          </p>
+                          <p className="related-blog-date">
+                            {formatDate(
+                              relatedBlog.createdAt || relatedBlog.createdDate
+                            )}
+                          </p>
+                        </div>
+                        {relatedBlog.tags && (
+                          <div className="related-blog-tags">
+                            {renderTags(relatedBlog.tags)
+                              .slice(0, 2)
+                              .map((tag, idx) => (
+                                <span key={idx} className="related-tag">
+                                  #{tag}
+                                </span>
+                              ))}
+                          </div>
+                        )}
+                        <button className="read-more-btn">Đọc thêm</button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))
+              </div>
             ) : (
               <div className="no-related-blogs">
-                <p>No available blogs</p>
+                <p>Không có bài viết liên quan</p>
               </div>
             )}
           </div>
