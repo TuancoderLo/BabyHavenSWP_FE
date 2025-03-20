@@ -5,6 +5,8 @@ import HeaderGuest from "../commonGuest/HeaderGuest";
 import Footer from "../common/Footer";
 import api from "../../config/axios";
 import "./FormatBlog.css";
+import blogApi from "../../services/blogApi";
+import doctorApi from "../../services/DoctorApi";
 // Import ảnh mặc định từ public thay vì assets
 // import avatar_LOGO from "../../assets/avatar_LOGO.jpg";
 
@@ -47,8 +49,8 @@ function FormatBlog() {
       setLoading(true);
       setError(null);
 
-      console.log(`Calling API: Blog/${id}`);
-      const response = await api.get(`Blog/${id}`);
+      console.log(`Fetching blog with ID: ${id}`);
+      const response = await blogApi.getById(id);
       console.log("Blog API response:", response);
 
       // Kiểm tra cấu trúc response
@@ -94,9 +96,7 @@ function FormatBlog() {
   const fetchDoctorInfo = async (authorEmail) => {
     try {
       console.log("Fetching doctor information for email:", authorEmail);
-      const response = await api.get(
-        "https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/Doctors"
-      );
+      const response = await doctorApi.getDoctorsFromEndpoint();
       console.log("Doctors API response:", response);
 
       // Kiểm tra cấu trúc dữ liệu trả về
@@ -212,9 +212,7 @@ function FormatBlog() {
 
       // Gọi API để lấy tất cả các bài viết
       console.log("Fetching all blogs for tag comparison");
-      const response = await api.get(
-        "https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/Blog"
-      );
+      const response = await blogApi.getAll();
       console.log("All blogs API response:", response);
 
       // Xử lý dữ liệu trả về
@@ -283,8 +281,8 @@ function FormatBlog() {
           "Not enough related blogs by tags, fetching more from same category"
         );
         try {
-          const categoryResponse = await api.get(
-            `Blog/blogs/${blog.categoryId}`
+          const categoryResponse = await blogApi.getByCategoryId(
+            blog.categoryId
           );
           let categoryBlogs = [];
 

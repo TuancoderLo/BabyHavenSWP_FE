@@ -24,6 +24,11 @@ const doctorApi = {
     const response = await api.get("/ConsultationResponses");
     return response.data;
   },
+
+  getDoctorsFromEndpoint: async () => {
+    const response = await api.get("/Doctors");
+    return response.data;
+  },
 };
 
 export default doctorApi;

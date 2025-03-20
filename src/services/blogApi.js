@@ -62,6 +62,12 @@ const blogApi = {
   getByCategoryId: (categoryId) => {
     return api.get(`Blog/blogs/${categoryId}`);
   },
+
+  // Phương thức mới - lấy tất cả blogs từ endpoint cụ thể
+  getAllFromEndpoint: async () => {
+    const response = await api.get("/Blog");
+    return response.data;
+  },
 };
 
 export default blogApi;
