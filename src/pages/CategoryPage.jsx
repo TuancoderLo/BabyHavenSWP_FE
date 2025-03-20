@@ -14,7 +14,7 @@ function CategoryPage() {
   const [error, setError] = useState(null);
   const [categoryName, setCategoryName] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [blogsPerPage] = useState(6);
+  const [blogsPerPage] = useState(8);
   const navigate = useNavigate();
   const [category, setCategory] = useState(null);
 
@@ -24,6 +24,8 @@ function CategoryPage() {
   useEffect(() => {
     if (categoryId) {
       console.log("Loading category:", categoryId);
+      // Đặt lại currentPage về 1 mỗi khi categoryId thay đổi
+      setCurrentPage(1);
       checkCategoryType();
     }
   }, [categoryId]);

@@ -95,7 +95,7 @@ function Header() {
         <div className="logo">
           <div
             onClick={() => navigate("/homepage")}
-            style={{ cursor: "pointer"}}
+            style={{ cursor: "pointer" }}
           >
             <img src={Logo} alt="Logo" className="logo-img" />
           </div>
@@ -160,7 +160,7 @@ function Header() {
 
         <div
           className="avatar-sidebar-container"
-          onClick = {() => setMenuOpen(!menuOpen)}
+          onClick={() => setMenuOpen(!menuOpen)}
           onMouseLeave={handleMouseLeave}
         >
           <div className="avatar-chip-img">
@@ -174,7 +174,7 @@ function Header() {
           </span>
           {menuOpen && (
             <div>
-              <Sidebar 
+              <Sidebar
                 userData={userData}
                 navigate={navigate}
                 handleLogout={handleLogout}
