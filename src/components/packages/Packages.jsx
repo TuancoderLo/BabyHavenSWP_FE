@@ -221,6 +221,8 @@ const handleFinish = () => {
         console.error("Error fetching current plan:", err);
         setCurrentPlan(null);
       });
+    } else {
+      setCurrentPlan(null);
     }
   }, []);
 
@@ -241,7 +243,7 @@ const handleFinish = () => {
 
                 <div className="packages-container">
                   {/* Free Package */}
-                  <div className="package-card free">
+                  <div className="package-card-homepage free">
                     <h3>Free</h3>
                     <p className="package-description">Free membership with basic features</p>
                     
@@ -287,7 +289,7 @@ const handleFinish = () => {
                   </div>
 
                   {/* Standard Package */}
-                  <div className="package-card standard">
+                  <div className="package-card-homepage standard">
                   <div className="best-service-badge">POPULAR</div>
                     <h3>STANDARD</h3>
                     <p className="package-description">Standard membership with advance features</p>
@@ -326,7 +328,7 @@ const handleFinish = () => {
                     </div>
                     
                     <button 
-                      className={`package-btn-homepage ${currentPlan?.packageName === 'Standard' ? 'current-plan' : 'standard-btn'}`}
+                      className={`package-btn-homepage ${currentPlan?.packageName === 'Standard' ? 'current-plan' : 'standard'}`}
                       onClick={() => currentPlan?.packageName !== 'Standard' && handleBuyPackage(packagesData.find(p => p.packageName === 'Standard'))}
                       disabled={currentPlan?.packageName === 'Standard'}
                     >
@@ -337,7 +339,7 @@ const handleFinish = () => {
                   
 
                   {/* Premium Package */}
-                  <div className="package-card premium">
+                  <div className="package-card-homepage premium">
                     <div className="premium-icon">
                       <img src={packagesIcon} alt="Packages Icon"/>
                     </div>
