@@ -11,10 +11,10 @@ import "./Doctor.css";
 
 function Doctor() {
   return (
-    <div className="doctor-page">
+    <div className="doctor-page-doctor">
       <Sidebar />
-      <div className="doctor-main">
-        <div className="doctor-main-content">
+      <div className="doctor-main-doctor">
+        <div className="doctor-main-content-doctor">
           <Routes>
             <Route path="/" element={<Navigate to="home" replace />} />
             <Route path="home" element={<Home />} />

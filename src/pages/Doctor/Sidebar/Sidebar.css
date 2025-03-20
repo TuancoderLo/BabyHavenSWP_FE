@@ -1,99 +1,134 @@
 .layout-container {
-  display: flex;
-  min-height: 100vh;
-  width: 100%;
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+/* ---- Sidebar mặc định ---- */
+.doctor-sidebar-doctor {
+    background-color: #ffffff;
+    width: 70px;
+    height: 100vh;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding: 16px 8px;
+    overflow: hidden;
+    z-index: 100;
+}
+/* Khi hover thì sidebar mở rộng */
+.doctor-sidebar-doctor:hover {
+    width: 200px; /* Chiều rộng khi mở */
 }
 
-.doctor-sidebar {
-  background-color: #ffffff;
-  height: 100vh;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-  position: fixed;
-  left: 0;
-  top: 0;
-  padding: 16px 8px;
-  overflow: hidden;
-  z-index: 100;
-  transition: width 0.3s ease;
+/* Header logo trong sidebar (cùng hàng) */
+.doctor-sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 80px;
+    margin-bottom: 24px;
 }
 
-/* Sidebar khi mở */
-.doctor-sidebar.open {
-  width: 200px;  /* Chiều rộng khi sidebar mở */
+/* Logo to hơn */
+.sidebar-logo-icon {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    padding: 4px;
 }
 
-/* Sidebar khi đóng */
-.doctor-sidebar.closed {
-  width: 70px;  /* Chiều rộng khi sidebar đóng */
+/* Text logo to hơn */
+.sidebar-logo-text {
+    width: 90px;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 0.1s ease;
 }
 
-.main-content {
-  flex: 1;
-  min-height: 100vh;
-  background-color: #ffffff;
-  margin-left: 70px;
-  transition: margin-left 0.3s ease;
+.doctor-sidebar-doctor:hover .sidebar-logo-icon {
+    width: 50px;
+    height: 50px;
+} 
+/* Hover vào sidebar thì mới hiện chữ logo */
+.doctor-sidebar-doctor:hover .sidebar-logo-text {
+  opacity: 1;
 }
 
-.doctor-sidebar:hover ~ .main-content {
-  margin-left: 200px;
+/* ---- Menu navigation ---- */
+.doctor-sidebar-nav {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    overflow: hidden;
 }
 
-/* Các item và màu sắc khi hover hoặc được chọn */
+
+/* Mỗi item */
 .doctor-sidebar-nav li {
-  display: flex;
-  align-items: center;
-  padding: 12px;
-  cursor: pointer;
-  border-radius: 8px;
-  position: relative;
-  margin: 0 4px;
-  transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 8px;
+    position: relative;
+    margin: 0 4px;
 }
 
+/* Icon */
 .doctor-sidebar-nav li i {
-  font-size: 20px;
-  width: 32px;
-  text-align: center;
-  margin-right: 12px;
-  color: #000000;
+  color: #2C3E50;
+      font-size: 20px;
+    width: 32px;
+    text-align: center;
+    margin-right: 12px;
 }
 
+/* Text menu (ẩn khi đóng) */
 .doctor-sidebar-nav li span {
-  color: #000000;
-  font-weight: 500;
-  font-size: 15px;
-  opacity: 0;
-  white-space: nowrap;
+    color: #2C3E50;
+    font-weight: 500;
+    font-size: 15px;
+    opacity: 0;
+    white-space: nowrap;
 }
 
+/* Hover vào sidebar mới hiện text */
+.doctor-sidebar-doctor:hover .doctor-sidebar-nav li span {
+  opacity: 1;
+}
+
+/* Hover item đổi màu */
 .doctor-sidebar-nav li:hover {
-  background-color: #2196F3;
+  background-color: #357ABD;
 }
 
+.doctor-sidebar-nav li:hover i {
+  transform: scale(1.1);
+}
+.doctor-sidebar-nav:hover li span {
+    opacity: 1;
+}
+
+/* Khi item active */
 .doctor-sidebar-nav li.active {
-  background-color: #2196F3;
+  background-color: #4A90E2;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.doctor-sidebar-nav li.active i,
+.doctor-sidebar-nav li.active i {
+  transform: scale(1.1);
+}
 .doctor-sidebar-nav li.active span {
   color: #ffffff;
   font-weight: 600;
 }
 
+/* Link menu item */
 .doctor-menu-item {
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  color: inherit;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    color: inherit;
 }
-
-/* .children-sidebar-nav li:last-child {
-  margin-top: 24px;
-}
-
-.children-sidebar-nav li:last-child i {
-  color: #DC3545;
-} */
