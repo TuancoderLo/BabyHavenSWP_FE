@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom"; // Để điều hướng người dùng
 import { jwtDecode } from "jwt-decode";
+import api from "../../config/axios";
 import "./GoogleCallback.css";
 
 const GoogleCallback = () => {
