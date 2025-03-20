@@ -37,7 +37,7 @@ function SidebarHover() {
         <li className={activeItem === "/homepage" ? "active" : ""}>
           <Link to="/homepage" onClick={() => setActiveItem("/homepage")}>
             <FaHome className="admin-icon" />
-            <span>Trang chủ</span>
+            <span>Home</span>
           </Link>
         </li>
         <li className={activeItem === "/admin" ? "active" : ""}>
@@ -49,7 +49,7 @@ function SidebarHover() {
         <li className={activeItem === "/admin/blog" ? "active" : ""}>
           <Link to="/admin/blog" onClick={() => setActiveItem("/admin/blog")}>
             <MdArticle className="admin-icon" />
-            <span>Bài viết</span>
+            <span>Blogs</span>
           </Link>
         </li>
         <li className={activeItem === "/admin/members" ? "active" : ""}>
@@ -58,7 +58,7 @@ function SidebarHover() {
             onClick={() => setActiveItem("/admin/members")}
           >
             <FaUsers className="admin-icon" />
-            <span>Thành viên</span>
+            <span>Members</span>
           </Link>
         </li>
         <li className={activeItem === "/admin/packages" ? "active" : ""}>
@@ -67,13 +67,13 @@ function SidebarHover() {
             onClick={() => setActiveItem("/admin/packages")}
           >
             <FaBox className="admin-icon" />
-            <span>Gói dịch vụ</span>
+            <span>Service Packages</span>
           </Link>
         </li>
         <li className={activeItem === "/admin/inbox" ? "active" : ""}>
           <Link to="/admin/inbox" onClick={() => setActiveItem("/admin/inbox")}>
             <FaEnvelope className="admin-icon" />
-            <span>Hộp thư</span>
+            <span>Inbox</span>
           </Link>
         </li>
         <li className={activeItem === "/admin/notifications" ? "active" : ""}>
@@ -82,7 +82,7 @@ function SidebarHover() {
             onClick={() => setActiveItem("/admin/notifications")}
           >
             <FaBell className="admin-icon" />
-            <span>Thông báo</span>
+            <span>Notifications</span>
           </Link>
         </li>
         <li className={activeItem === "/admin/settings" ? "active" : ""}>
@@ -91,12 +91,12 @@ function SidebarHover() {
             onClick={() => setActiveItem("/admin/settings")}
           >
             <FaCog className="admin-icon" />
-            <span>Cài đặt</span>
+            <span>Settings</span>
           </Link>
         </li>
         <li className="signout-item" onClick={handleLogout}>
           <FaSignOutAlt className="admin-icon-signout" />
-          <span>Đăng xuất</span>
+          <span>Sign Out</span>
         </li>
       </ul>
     </div>

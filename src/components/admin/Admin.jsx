@@ -63,7 +63,7 @@ function Admin() {
                   }`}
                   onClick={() => setActiveChart("revenue")}
                 >
-                  <i className="fas fa-chart-line"></i> Thống kê doanh thu
+                  <i className="fas fa-chart-line"></i> Revenue Statistics
                 </button>
                 <button
                   className={`chart-tab ${
@@ -71,7 +71,7 @@ function Admin() {
                   }`}
                   onClick={() => setActiveChart("package")}
                 >
-                  <i className="fas fa-box"></i> Phân bố gói dịch vụ
+                  <i className="fas fa-box"></i> Service Package Distribution
                 </button>
                 <button
                   className={`chart-tab ${
@@ -79,7 +79,7 @@ function Admin() {
                   }`}
                   onClick={() => setActiveChart("member")}
                 >
-                  <i className="fas fa-users"></i> Thống kê thành viên mới
+                  <i className="fas fa-users"></i> New Member Statistics
                 </button>
               </div>
 
@@ -87,21 +87,21 @@ function Admin() {
               <div className="chart-container">
                 {activeChart === "revenue" && (
                   <div className="chart-item active">
-                    <h3>Thống kê doanh thu</h3>
+                    <h3>Revenue Statistics</h3>
                     <RevenueChart />
                   </div>
                 )}
 
                 {activeChart === "package" && (
                   <div className="chart-item active">
-                    <h3>Phân bố người dùng theo gói dịch vụ</h3>
+                    <h3>User Distribution by Service Package</h3>
                     <PackageChart onDataLoaded={handlePackageDataLoaded} />
                   </div>
                 )}
 
                 {activeChart === "member" && (
                   <div className="chart-item active">
-                    <h3>Thống kê thành viên mới</h3>
+                    <h3>New Member Statistics</h3>
                     <MemberChart />
                   </div>
                 )}

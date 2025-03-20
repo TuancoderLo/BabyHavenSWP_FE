@@ -42,22 +42,22 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
         try {
           setLoading(true);
 
-          // Sử dụng URL API trực tiếp
+          // Use direct API URL
           const response = await fetch(
             "https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/MemberMemberships"
           );
           const responseData = await response.json();
           const memberships = responseData.data || [];
 
-          // Tính toán phân bố gói thành viên
+          // Calculate membership package distribution
           const distribution = calculatePackageDistribution(memberships);
           setPackageDistribution(distribution);
 
-          // Tính toán thống kê theo tháng
+          // Calculate monthly statistics
           const monthStats = calculateMonthlyStats(memberships);
           setMonthlyStats(monthStats);
 
-          // Gửi dữ liệu lên component cha nếu có callback
+          // Send data to parent component if callback exists
           if (onDataLoaded) {
             onDataLoaded(distribution);
           }
@@ -65,8 +65,8 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
           setDataFetched(true);
           setLoading(false);
         } catch (err) {
-          console.error("Lỗi khi tải dữ liệu:", err);
-          setError("Lỗi khi tải dữ liệu: " + (err.message || "Không xác định"));
+          console.error("Error loading data:", err);
+          setError("Error loading data: " + (err.message || "Unknown"));
           setLoading(false);
         }
       };
@@ -215,16 +215,16 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
   const prepareMonthlyChartData = () => {
     if (!monthlyStats || Object.keys(monthlyStats).length === 0) return null;
 
-    // Sắp xếp các tháng theo thứ tự
+    // Sort months in order
     const sortedMonths = Object.keys(monthlyStats).sort();
 
-    // Danh sách các tháng để hiển thị (format lại để đẹp hơn)
+    // List of months to display (formatted for better display)
     const labels = sortedMonths.map((monthKey) => {
       const [year, month] = monthKey.split("-");
-      return `Tháng ${month}/${year}`;
+      return `Month ${month}/${year}`;
     });
 
-    // Dữ liệu cho từng gói - chỉ giữ lại 3 gói chính
+    // Data for each package - keep only the 3 main packages
     const freeCounts = sortedMonths.map((month) => monthlyStats[month].Free);
     const standardCounts = sortedMonths.map(
       (month) => monthlyStats[month].Standard
@@ -298,7 +298,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
       },
       title: {
         display: true,
-        text: "Phân bố gói thành viên đang hoạt động",
+        text: "Active Member Package Distribution",
         font: {
           family: "'Roboto', 'Helvetica', 'Arial', sans-serif",
           size: 16,
@@ -410,7 +410,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
       },
       title: {
         display: true,
-        text: "Xu hướng gói thành viên theo tháng",
+        text: "Monthly Member Package Trends",
         font: {
           family: "'Roboto', 'Helvetica', 'Arial', sans-serif",
           size: 16,
@@ -440,7 +440,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
               label += ": ";
             }
             if (context.parsed.y !== null) {
-              label += context.parsed.y + " thành viên";
+              label += context.parsed.y + " members";
             }
             return label;
           },
@@ -469,7 +469,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
     return (
       <div className="loading-container">
         <div className="loading-spinner"></div>
-        <p className="loading-text">Đang tải dữ liệu...</p>
+        <p className="loading-text">Loading data...</p>
       </div>
     );
 
@@ -504,7 +504,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
 
   return (
     <div className="package-chart-container">
-      <h1 className="dashboard-title">Thống kê gói thành viên</h1>
+      <h1 className="dashboard-title">Member Package Statistics</h1>
 
       <div className="dashboard-summary">
         <div className="summary-card total-members">
@@ -512,7 +512,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
             <FaUsers />
           </div>
           <div className="summary-content">
-            <h3>Tổng số thành viên đang hoạt động</h3>
+            <h3>Total Active Members</h3>
             <p className="summary-value">{packageDistribution.total || 0}</p>
           </div>
         </div>
@@ -522,7 +522,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
             <FaAward />
           </div>
           <div className="summary-content">
-            <h3>Gói phổ biến nhất</h3>
+            <h3>Most Popular Package</h3>
             <p
               className="summary-value"
               style={{ color: getPackageColor(mostPopularPackage) }}
@@ -537,7 +537,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
         <div className="chart-card">
           <div className="chart-header">
             <FaChartPie className="chart-icon" />
-            <h2>Phân bố gói thành viên</h2>
+            <h2>Member Package Distribution</h2>
           </div>
           {packageDistributionData && (
             <div className="pie-chart-container">
@@ -552,7 +552,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
         <div className="chart-card">
           <div className="chart-header">
             <FaChartLine className="chart-icon" />
-            <h2>Xu hướng theo tháng</h2>
+            <h2>Monthly Trends</h2>
           </div>
           {monthlyChartData && (
             <div className="line-chart-container">
@@ -563,7 +563,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
       </div>
 
       <div className="stats-card">
-        <h2 className="stats-title">Chi tiết từng gói thành viên</h2>
+        <h2 className="stats-title">Member Package Details</h2>
         {packageDistribution.percentages && (
           <div className="package-stats-grid">
             <div className="package-stat-card free">
@@ -575,7 +575,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
                 <div className="stat-number">
                   {packageDistribution.counts.Free}
                 </div>
-                <div className="stat-label">thành viên</div>
+                <div className="stat-label">members</div>
               </div>
               <div className="package-stat-footer">
                 <div className="percentage-bar">
@@ -601,7 +601,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
                 <div className="stat-number">
                   {packageDistribution.counts.Standard}
                 </div>
-                <div className="stat-label">thành viên</div>
+                <div className="stat-label">members</div>
               </div>
               <div className="package-stat-footer">
                 <div className="percentage-bar">
@@ -630,7 +630,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
                 <div className="stat-number">
                   {packageDistribution.counts.Premium}
                 </div>
-                <div className="stat-label">thành viên</div>
+                <div className="stat-label">members</div>
               </div>
               <div className="package-stat-footer">
                 <div className="percentage-bar">

@@ -33,36 +33,36 @@ const RevenueChart = () => {
   const [packageRevenueData, setPackageRevenueData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("overview"); // Tab mặc định là overview
-  const [showDetailModal, setShowDetailModal] = useState(false); // State điều khiển modal chi tiết
-  const [transactions, setTransactions] = useState([]); // State lưu trữ các giao dịch
-  const [transactionType, setTransactionType] = useState("all"); // Lọc theo loại gói: all, standard, premium
-  const [statusFilter, setStatusFilter] = useState("all"); // Lọc theo trạng thái: all, completed, pending, failed, cancelled
+  const [activeTab, setActiveTab] = useState("overview"); // Default tab is overview
+  const [showDetailModal, setShowDetailModal] = useState(false); // State controlling detail modal
+  const [transactions, setTransactions] = useState([]); // State storing transactions
+  const [transactionType, setTransactionType] = useState("all"); // Filter by package type: all, standard, premium
+  const [statusFilter, setStatusFilter] = useState("all"); // Filter by status: all, completed, pending, failed, cancelled
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
 
-        // Lấy dữ liệu từ API Transactions
+        // Get data from Transactions API
         const transactionsResponse = await transactionApi.getAllTransactions();
 
-        // Kiểm tra dữ liệu trả về
+        // Check returned data
         const allTransactions = transactionsResponse.data?.data || [];
 
-        // Lưu lại tất cả các giao dịch để hiển thị trong chi tiết
+        // Save all transactions to display in details
         setTransactions(allTransactions);
 
-        // Lọc chỉ lấy các giao dịch đã hoàn thành (Completed)
+        // Filter to get only Completed transactions
         const completedTransactions = allTransactions.filter(
           (transaction) => transaction.paymentStatus === "Completed"
         );
 
-        // Tính toán doanh thu theo tháng
+        // Calculate revenue by month
         const revenueByMonth = calculateRevenueByMonth(completedTransactions);
         setRevenueData(revenueByMonth);
 
-        // Tính toán doanh thu theo gói
+        // Calculate revenue by package
         const revenueByPackage = calculateRevenueByPackage(
           completedTransactions
         );
@@ -70,8 +70,8 @@ const RevenueChart = () => {
 
         setLoading(false);
       } catch (err) {
-        console.error("Lỗi khi tải dữ liệu:", err);
-        setError("Lỗi khi tải dữ liệu: " + (err.message || "Không xác định"));
+        console.error("Error loading data:", err);
+        setError("Error loading data: " + (err.message || "Unknown"));
         setLoading(false);
       }
     };
@@ -191,7 +191,7 @@ const RevenueChart = () => {
       labels,
       datasets: [
         {
-          label: "Doanh thu năm nay",
+          label: "Revenue this year",
           data: currentYearData,
           borderColor: "rgba(53, 162, 235, 1)",
           backgroundColor: "rgba(53, 162, 235, 0.5)",
@@ -199,7 +199,7 @@ const RevenueChart = () => {
           fill: false,
         },
         {
-          label: "Doanh thu năm trước",
+          label: "Revenue last year",
           data: lastYearData,
           borderColor: "rgba(255, 99, 132, 1)",
           backgroundColor: "rgba(255, 99, 132, 0.5)",
@@ -223,14 +223,14 @@ const RevenueChart = () => {
       labels,
       datasets: [
         {
-          label: "Gói Standard",
+          label: "Standard Package",
           data: standardData,
           borderColor: "rgba(75, 192, 192, 1)",
           backgroundColor: "rgba(75, 192, 192, 0.5)",
           tension: 0.4,
         },
         {
-          label: "Gói Premium",
+          label: "Premium Package",
           data: premiumData,
           borderColor: "rgba(153, 102, 255, 1)",
           backgroundColor: "rgba(153, 102, 255, 0.5)",
@@ -249,7 +249,7 @@ const RevenueChart = () => {
       labels: ["Standard", "Premium"],
       datasets: [
         {
-          label: "Doanh thu theo gói",
+          label: "Revenue by Package",
           data: [packageRevenueData.Standard, packageRevenueData.Premium],
           backgroundColor: [
             "rgba(75, 192, 192, 0.7)",
@@ -312,7 +312,7 @@ const RevenueChart = () => {
       ...commonOptions.plugins,
       title: {
         display: true,
-        text: "Doanh thu theo tháng",
+        text: "Monthly Revenue",
         font: {
           size: 16,
         },
@@ -327,7 +327,7 @@ const RevenueChart = () => {
       ...commonOptions.plugins,
       title: {
         display: true,
-        text: "Doanh thu theo gói theo tháng",
+        text: "Monthly Revenue by Package",
         font: {
           size: 16,
         },
@@ -342,7 +342,7 @@ const RevenueChart = () => {
       ...commonOptions.plugins,
       title: {
         display: true,
-        text: "Tổng doanh thu theo gói",
+        text: "Total Revenue by Package",
         font: {
           size: 16,
         },
@@ -358,7 +358,7 @@ const RevenueChart = () => {
   if (loading)
     return (
       <div className="loading-container">
-        <div className="loader"></div> <span>Đang tải dữ liệu...</span>
+        <div className="loader"></div> <span>Loading data...</span>
       </div>
     );
   if (error)
@@ -421,22 +421,22 @@ const RevenueChart = () => {
     switch (statusLower) {
       case "completed":
         statusClass += " completed";
-        text = "Hoàn thành";
+        text = "Completed";
         break;
       case "pending":
         statusClass += " pending";
-        text = "Đang xử lý";
+        text = "Pending";
         break;
       case "failed":
         statusClass += " failed";
-        text = "Thất bại";
+        text = "Failed";
         break;
       case "cancelled":
         statusClass += " cancelled";
-        text = "Đã hủy";
+        text = "Cancelled";
         break;
       default:
-        text = status || "Không xác định";
+        text = status || "Unknown";
     }
 
     return <span className={statusClass}>{text}</span>;
@@ -480,7 +480,7 @@ const RevenueChart = () => {
             <i className="fas fa-money-bill-wave"></i>
           </div>
           <div className="card-content">
-            <h4>Tổng doanh thu</h4>
+            <h4>Total Revenue</h4>
             <div className="card-value">
               {new Intl.NumberFormat("vi-VN", {
                 style: "currency",
@@ -497,7 +497,7 @@ const RevenueChart = () => {
                   revenueChange >= 0 ? "fa-arrow-up" : "fa-arrow-down"
                 }`}
               ></i>
-              {revenueChangePercentage.toFixed(1)}% so với năm trước
+              {revenueChangePercentage.toFixed(1)}% compared to last year
             </div>
           </div>
         </div>
@@ -507,7 +507,7 @@ const RevenueChart = () => {
             <i className="fas fa-box"></i>
           </div>
           <div className="card-content">
-            <h4>Gói Standard</h4>
+            <h4>Standard Package</h4>
             <div className="card-value">
               {new Intl.NumberFormat("vi-VN", {
                 style: "currency",
@@ -520,7 +520,7 @@ const RevenueChart = () => {
                     1
                   )
                 : 0}
-              % tổng doanh thu
+              % of total revenue
             </div>
           </div>
         </div>
@@ -530,7 +530,7 @@ const RevenueChart = () => {
             <i className="fas fa-crown"></i>
           </div>
           <div className="card-content">
-            <h4>Gói Premium</h4>
+            <h4>Premium Package</h4>
             <div className="card-value">
               {new Intl.NumberFormat("vi-VN", {
                 style: "currency",
@@ -541,7 +541,7 @@ const RevenueChart = () => {
               {packageRevenueData.Premium
                 ? ((packageRevenueData.Premium / totalRevenue) * 100).toFixed(1)
                 : 0}
-              % tổng doanh thu
+              % of total revenue
             </div>
           </div>
         </div>
@@ -551,43 +551,43 @@ const RevenueChart = () => {
             <i className="fas fa-calendar-alt"></i>
           </div>
           <div className="card-content">
-            <h4>Doanh thu trung bình/tháng</h4>
+            <h4>Average Monthly Revenue</h4>
             <div className="card-value">
               {new Intl.NumberFormat("vi-VN", {
                 style: "currency",
                 currency: "VND",
               }).format(totalRevenue / 12)}
             </div>
-            <div className="package-percentage">Dựa trên 12 tháng gần nhất</div>
+            <div className="package-percentage">Based on last 12 months</div>
           </div>
         </div>
       </div>
 
-      {/* Chart navigation với nút Chi Tiết */}
+      {/* Chart navigation with Detail button */}
       <div className="chart-navigation">
         <button
           className={activeTab === "overview" ? "active" : ""}
           onClick={() => setActiveTab("overview")}
         >
-          <i className="fas fa-chart-line"></i> Tổng quan
+          <i className="fas fa-chart-line"></i> Overview
         </button>
         <button
           className={activeTab === "packages" ? "active" : ""}
           onClick={() => setActiveTab("packages")}
         >
-          <i className="fas fa-boxes"></i> Phân tích gói
+          <i className="fas fa-boxes"></i> Package Analysis
         </button>
         <button
           className={activeTab === "comparison" ? "active" : ""}
           onClick={() => setActiveTab("comparison")}
         >
-          <i className="fas fa-balance-scale"></i> So sánh
+          <i className="fas fa-balance-scale"></i> Comparison
         </button>
         <button
           className={activeTab === "details" ? "active" : ""}
           onClick={() => setActiveTab("details")}
         >
-          <i className="fas fa-list-ul"></i> Chi Tiết
+          <i className="fas fa-list-ul"></i> Details
         </button>
       </div>
 
@@ -597,8 +597,7 @@ const RevenueChart = () => {
           <div className="chart-panel">
             <div className="chart-card">
               <h3>
-                <i className="fas fa-chart-line"></i> Biểu đồ doanh thu theo
-                tháng
+                <i className="fas fa-chart-line"></i> Monthly Revenue Chart
               </h3>
               <div className="chart-area">
                 {revenueChartData && (
@@ -613,7 +612,7 @@ const RevenueChart = () => {
           <div className="chart-panel">
             <div className="chart-card">
               <h3>
-                <i className="fas fa-boxes"></i> Doanh thu theo gói dịch vụ
+                <i className="fas fa-boxes"></i> Revenue by Service Package
               </h3>
               <div className="chart-area">
                 {packageRevenueChartData && (
@@ -631,8 +630,8 @@ const RevenueChart = () => {
           <div className="chart-panel">
             <div className="chart-card">
               <h3>
-                <i className="fas fa-balance-scale"></i> So sánh doanh thu theo
-                gói
+                <i className="fas fa-balance-scale"></i> Package Revenue
+                Comparison
               </h3>
               <div className="chart-area">
                 {packageTotalChartData && (
@@ -646,56 +645,56 @@ const RevenueChart = () => {
           </div>
         )}
 
-        {/* Tab Chi Tiết đã cải tiến */}
+        {/* Improved Detail tab */}
         {activeTab === "details" && (
           <div className="chart-panel">
             <div className="chart-card simple-detail">
               <h3>
-                <i className="fas fa-file-invoice-dollar"></i> Chi tiết giao
-                dịch
+                <i className="fas fa-file-invoice-dollar"></i> Transaction
+                Details
               </h3>
 
-              {/* Bộ lọc cải tiến */}
+              {/* Improved filters */}
               <div className="simple-filter">
                 <div className="filter-row">
-                  <label>Gói dịch vụ:</label>
+                  <label>Service Package:</label>
                   <select
                     value={transactionType}
                     onChange={(e) => setTransactionType(e.target.value)}
                   >
-                    <option value="all">Tất cả các gói</option>
+                    <option value="all">All Packages</option>
                     <option value="standard">Standard</option>
                     <option value="premium">Premium</option>
                   </select>
                 </div>
 
                 <div className="filter-row">
-                  <label>Trạng thái thanh toán:</label>
+                  <label>Payment Status:</label>
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
                   >
-                    <option value="all">Tất cả trạng thái</option>
-                    <option value="completed">Hoàn thành</option>
-                    <option value="pending">Đang xử lý</option>
-                    <option value="failed">Thất bại</option>
-                    <option value="cancelled">Đã hủy</option>
+                    <option value="all">All Statuses</option>
+                    <option value="completed">Completed</option>
+                    <option value="pending">Pending</option>
+                    <option value="failed">Failed</option>
+                    <option value="cancelled">Cancelled</option>
                   </select>
                 </div>
               </div>
 
-              {/* Bảng cải tiến */}
+              {/* Improved table */}
               <div className="simple-table-container">
                 <table className="simple-table">
                   <thead>
                     <tr>
-                      <th>Khách hàng</th>
-                      <th>Gói dịch vụ</th>
-                      <th>Số tiền</th>
-                      <th>Loại giao dịch</th>
-                      <th>Phương thức</th>
-                      <th>Ngày giao dịch</th>
-                      <th>Trạng thái</th>
+                      <th>Customer</th>
+                      <th>Package</th>
+                      <th>Amount</th>
+                      <th>Transaction Type</th>
+                      <th>Method</th>
+                      <th>Date</th>
+                      <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -721,8 +720,8 @@ const RevenueChart = () => {
                     ) : (
                       <tr>
                         <td colSpan="7" className="no-data">
-                          <i className="fas fa-info-circle"></i> Không có dữ
-                          liệu phù hợp với bộ lọc
+                          <i className="fas fa-info-circle"></i> No data
+                          matching the filter criteria
                         </td>
                       </tr>
                     )}
