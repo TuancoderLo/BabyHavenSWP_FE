@@ -237,7 +237,7 @@ function FormatBlog() {
       console.log("All blogs count:", allBlogs.length);
 
       // Lọc các bài viết có tags trùng với bài viết hiện tại
-      const matchedBlogs = allBlogs.filter((blog) => {
+      let matchedBlogs = allBlogs.filter((blog) => {
         // Bỏ qua bài viết hiện tại
         if (
           blog.blogId === parseInt(currentBlogId) ||
@@ -246,7 +246,7 @@ function FormatBlog() {
           return false;
         }
 
-        // Bỏ qua các bài viết không được phê duyệt
+        // Chỉ lấy các bài viết có status là "Approved"
         if (blog.status !== "Approved") {
           return false;
         }
@@ -270,7 +270,14 @@ function FormatBlog() {
         );
       });
 
-      console.log("Matched blogs by tags:", matchedBlogs);
+      // Sắp xếp theo thời gian tạo mới nhất
+      matchedBlogs = matchedBlogs.sort((a, b) => {
+        const dateA = new Date(a.createdAt || a.createdDate || 0);
+        const dateB = new Date(b.createdAt || b.createdDate || 0);
+        return dateB - dateA; // Sắp xếp giảm dần (mới nhất trước)
+      });
+
+      console.log("Matched blogs by tags (sorted by date):", matchedBlogs);
 
       // Giới hạn số lượng bài viết liên quan
       const limitedMatchedBlogs = matchedBlogs.slice(0, 8);
@@ -299,7 +306,8 @@ function FormatBlog() {
           }
 
           // Lọc bỏ các bài viết đã có trong limitedMatchedBlogs và bài viết hiện tại
-          const additionalBlogs = categoryBlogs.filter((catBlog) => {
+          // Và chỉ lấy các bài viết có status "Approved"
+          let additionalBlogs = categoryBlogs.filter((catBlog) => {
             // Bỏ qua bài viết hiện tại
             if (
               catBlog.blogId === parseInt(currentBlogId) ||
@@ -308,7 +316,7 @@ function FormatBlog() {
               return false;
             }
 
-            // Bỏ qua các bài viết không được phê duyệt
+            // Chỉ lấy các bài viết có status là "Approved"
             if (catBlog.status !== "Approved") {
               return false;
             }
@@ -319,12 +327,19 @@ function FormatBlog() {
             );
           });
 
+          // Sắp xếp theo thời gian tạo mới nhất
+          additionalBlogs = additionalBlogs.sort((a, b) => {
+            const dateA = new Date(a.createdAt || a.createdDate || 0);
+            const dateB = new Date(b.createdAt || b.createdDate || 0);
+            return dateB - dateA; // Sắp xếp giảm dần (mới nhất trước)
+          });
+
           // Thêm các bài viết từ cùng danh mục vào danh sách bài viết liên quan
           const remainingSlots = 8 - limitedMatchedBlogs.length;
           const additionalBlogsToAdd = additionalBlogs.slice(0, remainingSlots);
 
           console.log(
-            "Additional blogs from same category:",
+            "Additional blogs from same category (sorted by date):",
             additionalBlogsToAdd
           );
 
@@ -517,7 +532,7 @@ function FormatBlog() {
             {/* Thông tin tác giả - div7 */}
             {renderAuthorInfo()}
 
-            {/* Các bài viết liên quan - div8-15 */}
+            {/* Các bài viết liên quan */}
             {relatedBlogs.length > 0 ? (
               <div className="related-blogs-section">
                 <h2 className="related-blogs-title">Bài viết liên quan</h2>
