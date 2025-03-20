@@ -23,7 +23,6 @@ nav {
   padding: 0.8rem 2rem;
 }
 
-
 .avatar-chip {
   display: inline-flex;
   align-items: center;
@@ -54,7 +53,7 @@ nav {
   object-fit: cover;
 }
 
-/* Text “Name” */
+/* Text "Name" */
 .avatar-chip-text {
   color: #fff; /* Màu trắng nổi bật trên nền hồng */
   font-weight: 600;
@@ -68,7 +67,6 @@ nav {
   align-items: center;
   margin-left: 1rem; /* cách logout 1 chút */
 }
-
 
 /* Sidebar glass effect */
 .sidebar-menu {
@@ -547,7 +545,6 @@ nav {
   font-size: 0.7rem;
 }
 
-
 /* Features Section */
 features-section,
 .features-grid,
@@ -740,7 +737,7 @@ features-section,
   align-items: center;
 }
 
-.feature-highlight-card  img {
+.feature-highlight-card img {
   width: 60px;
   height: 60px;
   margin-right: 10px;
@@ -1167,7 +1164,7 @@ features-section,
   display: flex;
 }
 
-.blog-tags-homepage span{
+.blog-tags-homepage span {
   font-size: 10px;
 }
 
@@ -1366,4 +1363,20 @@ features-section,
   .trust-card p {
     font-size: 1.1rem;
   }
+}
+
+.doctor-info span {
+  display: block;
+  font-size: 14px;
+  color: #666;
+  margin-top: 5px;
+}
+
+.doctor-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.doctor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
