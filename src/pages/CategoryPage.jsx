@@ -107,8 +107,13 @@ function CategoryPage() {
         // Lặp qua từng danh mục con
         categories.forEach((category) => {
           if (category.blogs && Array.isArray(category.blogs)) {
+            // Lọc blog có status là "Approved"
+            const approvedBlogs = category.blogs.filter(
+              (blog) => blog.status === "Approved"
+            );
+
             // Chuẩn hóa dữ liệu blog từ mỗi danh mục con
-            const formattedBlogs = category.blogs.map((blog) => ({
+            const formattedBlogs = approvedBlogs.map((blog) => ({
               blogId: blog.blogId,
               title: blog.title,
               content: blog.content,
@@ -132,7 +137,7 @@ function CategoryPage() {
       console.log("Processed blogs data (Parent):", blogsData);
 
       if (blogsData.length === 0) {
-        setError("No blogs found in this category");
+        setError("No approved blogs found in this category");
       }
 
       setBlogs(blogsData);
@@ -162,8 +167,13 @@ function CategoryPage() {
         const blogs = categoryData.blogs;
 
         if (blogs && Array.isArray(blogs)) {
+          // Lọc blog có status là "Approved"
+          const approvedBlogs = blogs.filter(
+            (blog) => blog.status === "Approved"
+          );
+
           // Chuẩn hóa dữ liệu blog từ danh mục con
-          blogsData = blogs.map((blog) => ({
+          blogsData = approvedBlogs.map((blog) => ({
             blogId: blog.blogId,
             title: blog.title,
             content: blog.content,
@@ -183,7 +193,7 @@ function CategoryPage() {
       console.log("Processed blogs data (Child):", blogsData);
 
       if (blogsData.length === 0) {
-        setError("No blogs found in this category");
+        setError("No approved blogs found in this category");
       }
 
       setBlogs(blogsData);
