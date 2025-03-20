@@ -6,7 +6,7 @@ import "./GoogleCallback.css";
 const GoogleCallback = () => {
     const navigate = useNavigate();
     const [error, setError] = useState("");
-    useEffect(() => {
+    useEffect( async () => {
         try {
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get("token"); // Lấy token từ query string
@@ -22,14 +22,24 @@ const GoogleCallback = () => {
                     profilePicture: tokenPayload["ProfileImage"],
                     isVerifed: tokenPayload["IsVerified"]
                 };
+
+                if (user.roleId === "1") {
+                    //Nếu là role member thì lưu memberId vào localStorage
+                    try {
+                      const member = await api.get("Members/member/" + user.userId);
+                      localStorage.setItem("memberId", member.data.data.memberId);
+                    } catch (error) {
+                      console.error("Error fetching member:", error);
+                    }
+                  }
+
                 localStorage.setItem("isAuthenticated", "true");
                 localStorage.setItem("role", user.roleId);
 
                 // Lưu thông tin từ token payload
                 localStorage.setItem("email", user.email);
+                localStorage.setItem("userId", user.userId);
                 localStorage.setItem("name", user.name);
-                localStorage.setItem("profilePicture", user.profilePicture);
-                localStorage.setItem("isVerified", user.isVerifed);
 
                 console.log(tokenPayload);
 
