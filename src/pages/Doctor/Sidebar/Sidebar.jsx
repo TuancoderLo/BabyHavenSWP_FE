@@ -4,27 +4,16 @@ import "./Sidebar.css";
 import Logo from "../../../assets/Logo.png";
 import Name from "../../../assets/Name.png";
 
-function DoctorSidebar() {
+function Sidebar() {
   const navigate = useNavigate();
-  
-  // State để điều khiển việc mở/đóng sidebar
-  const [isOpen, setIsOpen] = useState(true);
   const [activePath, setActivePath] = useState(location.pathname);
-
-  // Hàm để xử lý mở/đóng sidebar khi nhấp vào sidebar
-  const handleSidebarClick = () => {
-    setIsOpen(prevState => !prevState);  // Đổi trạng thái giữa mở và đóng
-  };
 
   const handleSignOut = () => {
     navigate("/login");
   };
 
   return (
-    <aside
-      className={`doctor-sidebar ${isOpen ? "open" : "closed"}`}
-      onClick={handleSidebarClick}  // Khi nhấp vào sidebar, sẽ chuyển trạng thái mở/đóng
-    >
+    <aside className="doctor-sidebar-doctor">
       <div
         className="doctor-sidebar-header"
         onClick={() => navigate("/doctor/home")}
@@ -106,4 +95,4 @@ function DoctorSidebar() {
   );
 }
 
-export default DoctorSidebar;
+export default Sidebar;
