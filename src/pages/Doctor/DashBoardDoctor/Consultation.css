@@ -1,0 +1,174 @@
+/* General container styling */
+.consult-container {
+  padding: 24px;
+  min-height: 100vh;
+  background: #E6F0FA; /* Soft blue background like the dashboard */
+}
+
+/* Card styling */
+.consult-card {
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  background: #FFFFFF; /* White card background */
+}
+
+/* Title styling */
+.consult-title {
+  color: #4A90E2 !important; /* Keep the blue for the title */
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+/* Header with search and refresh */
+.consult-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Search input styling */
+.consult-search {
+  border-radius: 10px !important;
+  border: 1px solid #D9E4F5 !important;
+  background: #F9FBFF !important;
+}
+
+.consult-search:hover,
+.consult-search:focus {
+  border-color: #4AC1E2 !important; /* Teal accent on hover/focus */
+  box-shadow: 0 0 0 3px rgba(74, 193, 226, 0.2) !important;
+}
+
+/* Refresh button styling */
+.consult-refresh-btn {
+  background: #FF6F91 !important; /* Pink accent for the refresh button */
+  border-color: #FF6F91 !important;
+  border-radius: 10px !important;
+  font-weight: 500;
+}
+
+.consult-refresh-btn:hover {
+  background: #FF5A7F !important; /* Slightly darker pink on hover */
+  border-color: #FF5A7F !important;
+}
+
+/* Parent info in table */
+.consult-parent-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.consult-parent-info .ant-avatar {
+  border: 2px solid #A29BFE; /* Purple border for avatars */
+}
+
+/* Child age text */
+.consult-child-age {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+/* Action buttons */
+.consult-action-btn {
+  border-radius: 10px !important;
+  transition: all 0.3s ease;
+}
+
+.consult-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Modal buttons */
+.consult-modal-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.consult-modal-buttons .ant-btn-primary {
+  background: #4AC1E2 !important; /* Teal for primary buttons in modal */
+  border-color: #4AC1E2 !important;
+}
+
+.consult-modal-buttons .ant-btn-primary:hover {
+  background: #3AB0D2 !important;
+  border-color: #3AB0D2 !important;
+}
+
+/* Drawer parent info */
+.consult-drawer-parent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.consult-drawer-parent .ant-avatar {
+  border: 2px solid #A29BFE; /* Purple border for avatars in drawer */
+}
+
+/* Table styling */
+.ant-table-thead > tr > th {
+  background: #F0F5FF !important; /* Light blue header background */
+  color: #4A90E2 !important; /* Blue text for headers */
+  font-weight: 600;
+  border-bottom: 2px solid #D9E4F5 !important;
+}
+
+.ant-table-row {
+  transition: all 0.3s ease;
+}
+
+.ant-table-row:hover {
+  background: #F9FBFF !important; /* Very light blue on hover */
+  transform: scale(1.01);
+}
+
+/* Tabs styling */
+.ant-tabs-nav {
+  margin-bottom: 20px !important;
+}
+
+.ant-tabs-tab {
+  padding: 10px 20px !important;
+  font-size: 16px !important;
+  color: #666 !important;
+}
+
+.ant-tabs-tab-active {
+  color: #FF6F91 !important; /* Pink for active tab */
+  font-weight: 600 !important;
+}
+
+.ant-tabs-ink-bar {
+  background: #FF6F91 !important; /* Pink underline for active tab */
+}
+
+/* Tag styling */
+.ant-tag {
+  border-radius: 6px !important;
+  font-weight: 500;
+}
+
+/* Timeline styling */
+.ant-timeline-item-tail {
+  border-left: 2px dashed #D9E4F5 !important;
+}
+
+.ant-timeline-item-head {
+  background: #FFFFFF !important;
+  border: 2px solid #4AC1E2 !important; /* Teal dot for timeline */
+}
+
+/* Card in timeline */
+.ant-card {
+  border-radius: 10px !important;
+  border: 1px solid #D9E4F5 !important;
+}
+
+/* Rate stars */
+.ant-rate-star {
+  color: #ffd050 !important; /* Purple stars for rating */
+}
