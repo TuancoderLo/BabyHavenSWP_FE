@@ -1,9 +1,7 @@
-
-
 /* Main Container */
 .doctor-consultation {
   min-height: calc(100vh - 64px);
-  padding: 20px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
 }
@@ -12,64 +10,61 @@
 .doctor-grid-container {
   flex: 1;
   display: grid;
-  grid-template-columns: 200px 1.2fr 250px;
-  gap: 20px;
+  grid-template-columns: 220px 1.5fr 300px;
+  gap: 24px;
   height: 100%;
 }
 
 /* Left Column: Child List */
-.doctor-child-item {
-  background: linear-gradient(135deg, #ffffff, #f8fdff);
-  border-radius: 12px;
+.doctor-child-column {
+  border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: grid;
-  gap: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 2px solid transparent;
-  height: 85px;
-  position: relative;
+  overflow-y: auto;
 }
 
-/* .doctor-child-item:hover {
-  background: linear-gradient(135deg, #917bff, #f7c3ff);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-} */
-
-.doctor-child-item.selected {
-  border-color: #064F83;
-  background: white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* Nếu bạn muốn điều chỉnh lại icon và label bên trong (nếu chưa có) */
-.doctor-child-content {
+.doctor-child-item {
+  background: #F9FBFF;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.doctor-child-item:hover {
+  background: #E6F0FA;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.doctor-child-item.selected {
+  border-color: #FF6F91; /* Pink border for selected item */
+  background: #FFF5F7;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .doctor-child-content i {
-  font-size: 18px;
-  color: #064F83;
+  font-size: 20px;
+  color: #4A90E2; /* Blue icon */
 }
 
 .doctor-child-label {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   color: #333;
 }
-
 
 /* Center Column: Request Section */
 .doctor-request-column {
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   height: 100%;
   overflow: hidden;
 }
@@ -83,35 +78,39 @@
 .doctor-steps {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  background: #F9FBFF;
+  padding: 12px;
+  border-radius: 12px;
 }
 
 .doctor-step-item {
   font-size: 16px;
-  color: #333;
+  color: #666;
   font-weight: 500;
   text-align: center;
   flex: 1;
   position: relative;
+  transition: all 0.3s ease;
 }
 
 .doctor-step-item.active {
-  color: #00D0BC;
+  color: #FF6F91; /* Pink for active step */
   font-weight: 600;
 }
 
 .doctor-step-item::after {
   content: '';
   position: absolute;
-  bottom: -5px;
+  bottom: -8px;
   left: 0;
   width: 100%;
-  height: 2px;
-  background: #ddd;
+  height: 3px;
+  background: #E6E6E6;
 }
 
 .doctor-step-item.active::after {
-  background: #00D0BC;
+  background: #FF6F91;
 }
 
 .doctor-form-content {
@@ -119,165 +118,180 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  overflow-y: auto; /* có thể bật scroll nếu nội dung quá dài */
+  overflow-y: auto;
 }
 
 .doctor-section-title {
   font-size: 18px;
-  font-weight: bold;
-  color: #00D0BC;
-  margin-bottom: 15px;
+  font-weight: 600;
+  color: #4A90E2; /* Blue title */
+  margin-bottom: 16px;
 }
 
-.doctor-category-select {
+/* Select Inputs */
+.doctor-category-select,
+.doctor-urgency-select {
   padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #D9E4F5;
+  background: #F9FBFF;
   font-size: 14px;
   width: 100%;
+  transition: all 0.3s ease;
 }
 
+.doctor-category-select:hover,
+.doctor-urgency-select:hover,
+.doctor-category-select:focus,
+.doctor-urgency-select:focus {
+  border-color: #4A90E2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+/* Text Editor */
 .doctor-editor-container {
-  flex: 1;             /* để tự giãn theo chiều dọc */
-  min-height: 400px;   /* chiều cao tối thiểu, bạn có thể tăng lên 500px,... */
-  background: #f9f9f9;
-  padding: 12px;
-  border-radius: 6px;
+  flex: 1;
+  min-height: 400px;
+  background: #F9FBFF;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #D9E4F5;
   overflow-y: auto;
-  margin-top: 12px;        /* Cho phép scroll nếu nội dung vượt quá chiều cao */
 }
 
 /* Doctor Selection */
 .doctor-selection-container {
-  max-height: 300px;
+  max-height: 500px;
   overflow-y: auto;
 }
 
 .doctor-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 12px;
+  background: #F9FBFF;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 2px solid transparent;
 }
 
 .doctor-card:hover {
-  background: linear-gradient(135deg, #FFB6C1, #FFECF0);
+  background: #E6F0FA;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .doctor-card.selected {
-  border: 2px solid #00D0BC;
+  border-color: #FF6F91;
+  background: #FFF5F7;
+}
+
+.doctor-avatar img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #A29BFE; /* Purple border for avatars */
+}
+
+.doctor-info h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.doctor-status {
+  font-size: 12px;
+  color: #666;
+}
+
+.doctor-degree,
+.doctor-hospital,
+.doctor-specialization {
+  font-size: 12px;
+  color: #888;
+  margin: 2px 0;
 }
 
 /* Navigation Buttons */
 .doctor-navigation-buttons {
   display: flex;
   justify-content: space-between;
+  margin-top: 20px;
 }
 
-.doctor-back-button, .doctor-next-button, .doctor-action-button {
-  padding: 10px 20px;
-  background: linear-gradient(45deg, #FF69B4, #FFB6C1);
+.doctor-back-button,
+.doctor-next-button,
+.doctor-action-button {
+  padding: 10px 24px;
+  background: linear-gradient(45deg, #FF6F91, #FFB6C1); /* Pink gradient */
   color: #fff;
   border: none;
   border-radius: 25px;
   font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.doctor-back-button:hover, .doctor-next-button:hover, .doctor-action-button:hover {
-  background: linear-gradient(45deg, #FF1493, #FF69B4);
+.doctor-back-button:hover,
+.doctor-next-button:hover,
+.doctor-action-button:hover {
+  background: linear-gradient(45deg, #FF5A7F, #FF9BB0);
   box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
 }
 
 /* Right Column: Response Section */
 .doctor-response-column {
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   height: 100%;
   overflow-y: auto;
 }
 
-.doctor-response {
-  flex: 1;
-}
-
 .section-title {
   font-size: 18px;
-  font-weight: bold;
-  color: #00D0BC;
-  margin-bottom: 15px;
+  font-weight: 600;
+  color: #4A90E2;
+  margin-bottom: 16px;
 }
 
 .consultation-response-card {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 20px;
+  background: #F9FBFF;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.response-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
+.consultation-response-card:hover {
+  background: #E6F0FA;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.response-date {
-  font-size: 12px;
-  color: #666;
-}
-
-.response-content {
+.truncated-content {
   font-size: 14px;
-  line-height: 1.4;
   color: #333;
+  line-height: 1.5;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .doctor-grid-container {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-  }
-  .doctor-child-column, .doctor-request-column, .doctor-response-column {
-    width: 100%;
-  }
-  .doctor-steps {
-    flex-direction: column;
-    align-items: center;
-  }
-  .doctor-navigation-buttons {
-    flex-direction: column;
-    gap: 10px;
-  }
-}
-/* Style cho phần nội dung bị giới hạn hiển thị trong response card */
-.consultation-response-card .truncated-content {
-  position: relative;
-  padding: 10px;
-  background: #f8f9fa;
-  border-radius: 8px;
-}
-
-/* Overlay gradient ở cuối nội dung để gợi ý có nội dung ẩn */
-.consultation-response-card .fade-overlay {
+.fade-overlay {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   height: 30px;
-  background: linear-gradient(transparent, #f8f9fa);
-  border-radius: 0 0 8px 8px;
+  background: linear-gradient(transparent, #F9FBFF);
+  border-radius: 0 0 12px 12px;
 }
 
-/* Modal overlay toàn màn hình */
+/* Modal Overlay */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -291,24 +305,161 @@
   z-index: 1000;
 }
 
-/* Nội dung modal */
 .modal-content {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
+  background: #FFFFFF;
+  padding: 24px;
+  border-radius: 16px;
   max-height: 80%;
   overflow-y: auto;
-  width: 80%;
+  width: 90%;
+  max-width: 600px;
   position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Nút đóng modal */
 .modal-close {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 16px;
+  right: 16px;
   background: transparent;
   border: none;
   font-size: 24px;
+  color: #666;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+  color: #FF6F91;
+}
+
+.response-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.response-date,
+.response-doctor {
+  font-size: 14px;
+  color: #666;
+}
+
+.response-content p {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.response-content strong {
+  color: #4A90E2;
+}
+
+/* Review Section */
+.doctor-review-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.doctor-review-content {
+  background: #F9FBFF;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #D9E4F5;
+}
+
+.consultation-details-content {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.6;
+}
+
+.doctor-review-selection {
+  background: #F9FBFF;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #D9E4F5;
+}
+
+.doctor-profile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.doctor-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.doctor-profile-avatar img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #A29BFE;
+}
+
+.doctor-profile-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.doctor-profile-status {
+  font-size: 12px;
+  color: #666;
+}
+
+.doctor-profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.doctor-profile-degree,
+.doctor-profile-hospital,
+.doctor-profile-specialization {
+  font-size: 12px;
+  color: #888;
+}
+
+.doctor-submit-section {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.submit-error {
+  color: #FF4D4F;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .doctor-grid-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+  }
+  .doctor-child-column,
+  .doctor-request-column,
+  .doctor-response-column {
+    width: 100%;
+  }
+  .doctor-steps {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .doctor-step-item::after {
+    display: none;
+  }
+  .doctor-navigation-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
 }

@@ -1,6 +1,5 @@
 /* Bio.css */
 .bio-container {
-  background: #f5f7fb; /* Đồng bộ với nền của Home */
   padding: 24px;
   border-radius: 12px;
   min-height: 100vh; /* Đảm bảo container chiếm toàn bộ chiều cao */

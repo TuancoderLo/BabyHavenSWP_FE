@@ -34,6 +34,15 @@ function Sidebar() {
               <span>Home</span>
             </Link>
           </li>
+          <li
+            className={activePath === "/doctor/consultation" ? "active" : ""}
+            onClick={() => setActivePath("/doctor/consultation")}
+          >
+            <Link to="/doctor/consultation" className="doctor-menu-item">
+              <i className="fas fa-file-alt"></i>
+              <span>Consultation</span>
+            </Link>
+          </li>
 
           <li
             className={activePath === "/doctor/bio" ? "active" : ""}
@@ -41,40 +50,9 @@ function Sidebar() {
           >
             <Link to="/doctor/bio" className="doctor-menu-item">
               <i className="fas fa-user"></i>
-              <span>Bio</span>
+              <span>Profile</span>
             </Link>
           </li>
-
-          <li
-            className={activePath === "/doctor/request" ? "active" : ""}
-            onClick={() => setActivePath("/doctor/request")}
-          >
-            <Link to="/doctor/request" className="doctor-menu-item">
-              <i className="fas fa-file-alt"></i>
-              <span>Request</span>
-            </Link>
-          </li>
-
-          <li
-            className={activePath === "/doctor/response" ? "active" : ""}
-            onClick={() => setActivePath("/doctor/response")}
-          >
-            <Link to="/doctor/response" className="doctor-menu-item">
-              <i className="fas fa-reply"></i>
-              <span>Response</span>
-            </Link>
-          </li>
-
-          <li
-            className={activePath === "/doctor/record-request" ? "active" : ""}
-            onClick={() => setActivePath("/doctor/record-request")}
-          >
-            <Link to="/doctor/record-request" className="doctor-menu-item">
-              <i className="fas fa-notes-medical"></i>
-              <span>Record Request</span>
-            </Link>
-          </li>
-
           <li
             className={activePath === "/doctor/blog" ? "active" : ""}
             onClick={() => setActivePath("/doctor/blog")}
