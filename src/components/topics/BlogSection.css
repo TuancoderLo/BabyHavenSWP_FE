@@ -180,10 +180,11 @@
   object-fit: cover;
 }
 
-.blog-author-info {
-  display: flex;
+.blog-author-info-homepage {
   flex-direction: column;
   min-width: 0;
+  align-items: left;
+  text-align: left;
 }
 
 .blog-author {
