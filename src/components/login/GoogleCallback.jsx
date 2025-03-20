@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from "react";
-import { useNavigate } from "react-router-dom"; // Để điều hướng người dùng
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import api from "../../config/axios";
 import "./GoogleCallback.css";
@@ -7,53 +7,55 @@ import "./GoogleCallback.css";
 const GoogleCallback = () => {
     const navigate = useNavigate();
     const [error, setError] = useState("");
-    useEffect( async () => {
+
+    // Xử lý ngay khi component được render
+    const handleGoogleAuth = async () => {
         try {
             const urlParams = new URLSearchParams(window.location.search);
-            const token = urlParams.get("token"); // Lấy token từ query string
+            const token = urlParams.get("token"); // Lấy token từ URL
 
-            if (typeof token === "string" && token.trim() !== "") {
-                // Giải mã token để lấy thông tin người dùng (nếu cần)
-                const tokenPayload = jwtDecode(token);
-                const user = {
-                    email: tokenPayload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
-                    name: tokenPayload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
-                    userId: tokenPayload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"],
-                    roleId: tokenPayload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
-                    profilePicture: tokenPayload["ProfileImage"],
-                    isVerifed: tokenPayload["IsVerified"]
-                };
-
-                if (user.roleId === "1") {
-                    //Nếu là role member thì lưu memberId vào localStorage
-                    try {
-                      const member = await api.get("Members/member/" + user.userId);
-                      localStorage.setItem("memberId", member.data.data.memberId);
-                    } catch (error) {
-                      console.error("Error fetching member:", error);
-                    }
-                  }
-
-                localStorage.setItem("isAuthenticated", "true");
-                localStorage.setItem("role", user.roleId);
-
-                // Lưu thông tin từ token payload
-                localStorage.setItem("email", user.email);
-                localStorage.setItem("userId", user.userId);
-                localStorage.setItem("name", user.name);
-
-                console.log(tokenPayload);
-
-                navigate("/homepage");
-            } else {
-                setError("Invalid or missing token");
-                console.error("Invalid or missing token");
+            if (!token) {
+                throw new Error("Invalid or missing token");
             }
+
+            // Giải mã token để lấy thông tin người dùng
+            const tokenPayload = jwtDecode(token);
+            const user = {
+                email: tokenPayload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
+                name: tokenPayload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
+                userId: tokenPayload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"],
+                roleId: tokenPayload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
+                profilePicture: tokenPayload["ProfileImage"],
+                isVerified: tokenPayload["IsVerified"],
+            };
+
+            // Nếu là role member thì lưu memberId vào localStorage
+            if (user.roleId === "1") {
+                try {
+                    const member = await api.get("Members/member/" + user.userId);
+                    localStorage.setItem("memberId", member.data.data.memberId);
+                } catch (error) {
+                    console.error("Error fetching member:", error);
+                }
+            }
+
+            // Lưu thông tin vào localStorage
+            localStorage.setItem("isAuthenticated", "true");
+            localStorage.setItem("role", user.roleId);
+            localStorage.setItem("email", user.email);
+            localStorage.setItem("userId", user.userId);
+            localStorage.setItem("name", user.name);
+
+            console.log("User authenticated:", tokenPayload);
+
+            navigate("/homepage");
         } catch (error) {
-            // Xử lý lỗi nếu không có token hoặc token không hợp lệ
+            setError(error.message);
             console.error("Error during Google authentication:", error);
         }
-    }, [navigate]);
+    };
+
+    handleGoogleAuth(); // Gọi hàm xử lý ngay khi component render
 
     return (
         <div className="google-callback-container">
@@ -61,6 +63,7 @@ const GoogleCallback = () => {
                 <div className="spinner"></div>
                 <p>Processing Google Authentication...</p>
             </div>
+            {error && <p className="error-message">{error}</p>}
         </div>
     );
 };
