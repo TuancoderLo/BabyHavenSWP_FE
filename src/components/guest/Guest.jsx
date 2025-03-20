@@ -6,6 +6,7 @@ import blogCategoryApi from "../../services/blogCategoryApi";
 import blogApi from "../../services/blogApi";
 import BlogSection from "../topics/BlogSection";
 import HeaderGuest from "../commonGuest/HeaderGuest";
+import doctorApi from "../../services/DoctorApi";
 
 function Guest() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ function Guest() {
   const [parentCategories, setParentCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [latestBlogs, setLatestBlogs] = useState([]);
+  const [doctors, setDoctors] = useState([]);
 
   // Fetch tất cả category cha (parentCategoryId = null)
   useEffect(() => {
@@ -113,6 +115,22 @@ function Guest() {
     };
 
     fetchLatestBlogs();
+  }, []);
+
+  // Thêm useEffect để lấy dữ liệu bác sĩ
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const response = await doctorApi.getAllDoctors();
+        if (response?.status === 1) {
+          setDoctors(response.data);
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu bác sĩ:", error);
+      }
+    };
+
+    fetchDoctors();
   }, []);
 
   return (
@@ -352,57 +370,33 @@ function Guest() {
             </p>
 
             <div className="doctors-grid">
-              {[
-                {
-                  image:
-                    "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-                  name: "Dr. Sarah Johnson",
-                  specialty: "Pediatric Specialist",
-                },
-                {
-                  image:
-                    "https://img.freepik.com/free-photo/woman-doctor-wearing-lab-coat-with-stethoscope-isolated_1303-29791.jpg",
-                  name: "Dr. Michael Chen",
-                  specialty: "Child Development Expert",
-                },
-                {
-                  image:
-                    "https://img.freepik.com/free-photo/portrait-smiling-male-doctor_171337-1532.jpg",
-                  name: "Dr. Emily Rodriguez",
-                  specialty: "Neonatal Care Specialist",
-                },
-                {
-                  image:
-                    "https://img.freepik.com/free-photo/female-doctor-hospital-with-stethoscope_23-2148827775.jpg",
-                  name: "Dr. David Wilson",
-                  specialty: "Pediatric Nutrition Specialist",
-                },
-                {
-                  image:
-                    "https://img.freepik.com/free-photo/doctor-standing-with-folder-stethoscope_1291-16.jpg",
-                  name: "Dr. Lisa Thompson",
-                  specialty: "Child Psychology & Mental Health",
-                },
-                {
-                  image:
-                    "https://img.freepik.com/free-photo/medium-shot-doctor-with-crossed-arms_23-2148868314.jpg",
-                  name: "Dr. James Anderson",
-                  specialty: "Pediatric Immunology & Allergies",
-                },
-              ].map((doctor, index) => (
-                <div key={index} className="doctor-card">
-                  <div className="doctor-image">
-                    <img src={doctor.image} alt={doctor.name} />
+              {doctors && doctors.length > 0 ? (
+                doctors.map((doctor) => (
+                  <div key={doctor.doctorId} className="doctor-card">
+                    <div className="doctor-image">
+                      <img
+                        src={
+                          doctor.user?.profilePicture ||
+                          "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg"
+                        }
+                        alt={doctor.name}
+                      />
+                    </div>
+                    <div className="doctor-info">
+                      <h3>{doctor.name}</h3>
+                      <p>{doctor.degree}</p>
+                      <span>{doctor.hospitalName}</span>
+                    </div>
                   </div>
-                  <div className="doctor-info">
-                    <h3>{doctor.name}</h3>
-                    <p>{doctor.specialty}</p>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p>Đang tải thông tin bác sĩ...</p>
+              )}
             </div>
 
-            <button className="see-more-btn">See more</button>
+            <Link to="/doctors" className="see-more-btn">
+              Xem thêm
+            </Link>
           </div>
         </section>
 
