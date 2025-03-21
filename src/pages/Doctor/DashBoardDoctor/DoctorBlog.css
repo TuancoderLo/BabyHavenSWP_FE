@@ -1,72 +1,77 @@
-.doc-blog-container {
-  background: linear-gradient(135deg, #f5f7fa 0%, #eef2f7 100%);
+/* DoctorBlog Container */
+.DoctorRoleID2-doctor-blog-container {
   padding: 24px;
   min-height: 100vh;
+  background: #e6f0fa; /* Lấy từ Consultation - nền xanh nhạt dịu */
 }
 
-.doc-blog-card {
+.DoctorRoleID2-doctor-blog-card {
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border-radius: 16px; /* Bo góc nhẹ nhàng hơn như Consultation */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); /* Giảm shadow cho nhẹ nhàng */
   padding: 28px;
   border: none;
   overflow: hidden;
 }
 
-.doc-blog-title {
-  color: #2c3e50;
+.DoctorRoleID2-doctor-blog-title {
+  color: #4a90e2; /* Lấy màu xanh từ Consultation title */
   margin-bottom: 32px;
-  font-weight: 700;
+  font-weight: 600; /* Giảm xuống 600 cho nhẹ nhàng hơn */
   position: relative;
   padding-left: 16px;
   font-size: 28px;
   letter-spacing: -0.5px;
 }
 
-.doc-blog-title::before {
+.DoctorRoleID2-doctor-blog-title::before {
   content: "";
   position: absolute;
   left: 0;
   top: 0;
   height: 100%;
   width: 6px;
-  background: linear-gradient(to bottom, #00c6ff, #0072ff);
+  background: #4ac1e2; /* Thay gradient bằng màu teal của Consultation */
   border-radius: 8px;
 }
 
-.doc-blog-tabs .ant-tabs-nav {
+/* Tabs Styling */
+.DoctorRoleID2-doctor-blog-tabs .ant-tabs-nav {
   margin-bottom: 28px;
 }
 
-.doc-blog-tabs .ant-tabs-tab {
+.DoctorRoleID2-doctor-blog-tabs .ant-tabs-tab {
   padding: 12px 24px;
   font-size: 16px;
   transition: all 0.3s ease;
   margin-right: 8px;
   border-radius: 8px 8px 0 0;
+  color: #666; /* Màu chữ xám nhạt từ Consultation */
 }
 
-.doc-blog-tabs .ant-tabs-tab:hover {
-  color: #0072ff;
+.DoctorRoleID2-doctor-blog-tabs .ant-tabs-tab:hover {
+  color: #4ac1e2; /* Teal từ Consultation */
 }
 
-.doc-blog-tabs .ant-tabs-tab.ant-tabs-tab-active {
-  background-color: #f0f7ff;
+.DoctorRoleID2-doctor-blog-tabs .ant-tabs-tab.ant-tabs-tab-active {
+  background-color: #f0f5ff; /* Màu nền header bảng Consultation */
 }
 
-.doc-blog-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
-  color: #0072ff;
+.DoctorRoleID2-doctor-blog-tabs
+  .ant-tabs-tab.ant-tabs-tab-active
+  .ant-tabs-tab-btn {
+  color: #4ac1e2; /* Teal từ Consultation */
   font-weight: 600;
 }
 
-.doc-blog-tabs .ant-tabs-ink-bar {
-  background: linear-gradient(to right, #00c6ff, #0072ff);
+.DoctorRoleID2-doctor-blog-tabs .ant-tabs-ink-bar {
+  background: #4ac1e2; /* Teal từ Consultation */
   height: 3px;
   border-radius: 3px;
 }
 
 /* Write Blog Styling */
-.doc-blog-write-container {
+.DoctorRoleID2-doctor-blog__write-blog-container {
   max-width: 100%;
   margin: 0 auto;
   background-color: #ffffff;
@@ -74,52 +79,53 @@
   padding: 0;
 }
 
-.doc-blog-header-section {
-  background: linear-gradient(120deg, #f8f9fa 0%, #e9f2f9 100%);
+.DoctorRoleID2-doctor-blog__header-section {
+  background: #f9fbff; /* Màu nền rất nhạt từ Consultation */
   padding: 32px;
   border-radius: 12px;
   margin-bottom: 28px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-  border-left: 5px solid #0072ff;
+  border-left: 5px solid #4ac1e2; /* Teal từ Consultation */
 }
 
-.doc-blog-title-input {
+.DoctorRoleID2-doctor-blog__title-input {
   font-size: 22px;
   height: 56px;
   border-radius: 8px;
-  border: 1px solid #d9d9d9;
+  border: 1px solid #d9e4f5; /* Viền nhạt từ Consultation */
   padding-left: 16px;
   font-weight: 500;
   transition: all 0.3s ease;
+  background: #f9fbff; /* Nền nhạt từ Consultation */
 }
 
-.doc-blog-title-input:focus,
-.doc-blog-title-input:hover {
-  border-color: #0072ff;
-  box-shadow: 0 0 0 3px rgba(0, 114, 255, 0.1);
+.DoctorRoleID2-doctor-blog__title-input:focus,
+.DoctorRoleID2-doctor-blog__title-input:hover {
+  border-color: #4ac1e2; /* Teal từ Consultation */
+  box-shadow: 0 0 0 3px rgba(74, 193, 226, 0.2); /* Hiệu ứng hover từ Consultation */
 }
 
-.doc-blog-title-input::placeholder {
+.DoctorRoleID2-doctor-blog__title-input::placeholder {
   color: #a0aec0;
   font-weight: 400;
 }
 
-.doc-blog-main-container {
+.DoctorRoleID2-doctor-blog__main-container {
   display: flex;
   gap: 28px;
   margin-bottom: 28px;
 }
 
-.doc-blog-left-column {
+.DoctorRoleID2-doctor-blog__left-column {
   flex: 1;
   max-width: 350px;
 }
 
-.doc-blog-right-column {
+.DoctorRoleID2-doctor-blog__right-column {
   flex: 3;
 }
 
-.doc-blog-section {
+.DoctorRoleID2-doctor-blog__section {
   background-color: #ffffff;
   border-radius: 12px;
   margin-bottom: 28px;
@@ -130,322 +136,228 @@
   border: none;
 }
 
-.doc-blog-section::before {
+.DoctorRoleID2-doctor-blog__section::before {
   content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 4px;
-  background: linear-gradient(to right, #00c6ff, #0072ff);
+  background: #4ac1e2; /* Thay gradient bằng teal từ Consultation */
 }
 
-.doc-blog-section-title {
+.DoctorRoleID2-doctor-blog__section-title {
   font-size: 18px;
   font-weight: 600;
-  color: #0072ff;
+  color: #4a90e2; /* Xanh từ Consultation */
   margin-bottom: 20px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #e7edf3;
+  border-bottom: 1px solid #d9e4f5; /* Viền nhạt từ Consultation */
   display: flex;
   align-items: center;
 }
 
-.doc-blog-section-title i {
+.DoctorRoleID2-doctor-blog__section-title i {
   margin-right: 10px;
   font-size: 20px;
-  background: linear-gradient(to right, #00c6ff, #0072ff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #4ac1e2; /* Icon teal từ Consultation */
 }
 
-.doc-blog-content-section .doc-blog-section-title {
-  color: #00b8ff;
-  font-size: 18px;
-  font-weight: 600;
+.DoctorRoleID2-doctor-blog__content-section
+  .DoctorRoleID2-doctor-blog__section-title,
+.DoctorRoleID2-doctor-blog__category-section
+  .DoctorRoleID2-doctor-blog__section-title,
+.DoctorRoleID2-doctor-blog__image-preview
+  .DoctorRoleID2-doctor-blog__section-title {
+  color: #4a90e2; /* Đồng bộ với Consultation */
 }
 
-.doc-blog-category-section .doc-blog-section-title {
-  color: #00b8ff;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.doc-blog-image-preview .doc-blog-section-title {
-  color: #00b8ff;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.doc-blog-select {
+.DoctorRoleID2-doctor-blog__select {
   width: 100%;
   border-radius: 8px;
 }
 
-.doc-blog-select .ant-select-selector {
+.DoctorRoleID2-doctor-blog__select .ant-select-selector {
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #d9e4f5; /* Viền nhạt từ Consultation */
   padding: 10px 12px;
   transition: all 0.3s ease;
-  background-color: #f8fafc;
+  background-color: #f9fbff; /* Nền nhạt từ Consultation */
 }
 
-.doc-blog-input,
-.doc-blog-select:focus .ant-select-selector,
-.doc-blog-select:hover .ant-select-selector {
+.DoctorRoleID2-doctor-blog__input,
+.DoctorRoleID2-doctor-blog__select:focus .ant-select-selector,
+.DoctorRoleID2-doctor-blog__select:hover .ant-select-selector {
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #d9e4f5;
   padding: 10px 12px;
   transition: all 0.3s ease;
-  background-color: #f8fafc;
+  background-color: #f9fbff;
 }
 
-.doc-blog-input:focus,
-.doc-blog-input:hover {
-  border-color: #0072ff;
-  box-shadow: 0 0 0 3px rgba(0, 114, 255, 0.1);
+.DoctorRoleID2-doctor-blog__input:focus,
+.DoctorRoleID2-doctor-blog__input:hover {
+  border-color: #4ac1e2; /* Teal từ Consultation */
+  box-shadow: 0 0 0 3px rgba(74, 193, 226, 0.2); /* Hiệu ứng từ Consultation */
 }
 
-.doc-blog-image-preview-container {
-  width: 100%;
-  height: 200px;
-  border-radius: 8px;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #f5f5f5;
-  border: 1px dashed #d9d9d9;
+.DoctorRoleID2-doctor-blog__image-preview-container {
+  display: none; /* Giữ nguyên ẩn như yêu cầu */
 }
 
-.doc-blog-preview-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.doc-blog-image-placeholder {
-  text-align: center;
-  color: #a0a0a0;
-}
-
-.doc-blog-image-placeholder i {
-  font-size: 32px;
-  margin-bottom: 8px;
-}
-
-.doc-blog-editor-wrapper {
-  border: 1px solid #e2e8f0;
+.DoctorRoleID2-doctor-blog__editor-wrapper {
+  border: 1px solid #d9e4f5; /* Viền nhạt từ Consultation */
   border-radius: 12px;
   min-height: 500px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
-.doc-blog-status-option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 500;
+.DoctorRoleID2-doctor-blog__status-option-draft {
+  color: #4a90e2; /* Xanh từ Consultation thay vì xanh dương đậm */
 }
 
-.doc-blog-status-option i {
-  font-size: 16px;
+.DoctorRoleID2-doctor-blog__status-option-pending {
+  color: #dd6b20; /* Giữ màu cam nguyên bản cho Pending */
 }
 
-.doc-blog-status-option.draft {
-  color: #3182ce;
-}
-
-.doc-blog-status-option.pending {
-  color: #dd6b20;
-}
-
-.doc-blog-action-buttons {
+.DoctorRoleID2-doctor-blog__action-buttons {
   display: flex;
   justify-content: flex-end;
   gap: 16px;
   margin-top: 32px;
 }
 
-.doc-blog-cancel-button {
+.DoctorRoleID2-doctor-blog__cancel-button {
   padding: 0 28px;
   height: 44px;
   border-radius: 8px;
   font-weight: 500;
   font-size: 15px;
-  background-color: #f7fafc;
-  border: 1px solid #e2e8f0;
+  background-color: #f9fbff; /* Nền nhạt từ Consultation */
+  border: 1px solid #d9e4f5; /* Viền nhạt từ Consultation */
   color: #4a5568;
   transition: all 0.3s ease;
 }
 
-.doc-blog-cancel-button:hover {
+.DoctorRoleID2-doctor-blog__cancel-button:hover {
   background-color: #edf2f7;
   color: #2d3748;
   border-color: #cbd5e0;
 }
 
-.doc-blog-submit-button {
+.DoctorRoleID2-doctor-blog__submit-button {
   padding: 0 32px;
   height: 44px;
   border-radius: 8px;
   font-weight: 600;
   font-size: 15px;
-  background: linear-gradient(to right, #00c6ff, #0072ff);
+  background: #4ac1e2; /* Teal từ Consultation thay gradient */
   border: none;
   color: white !important;
-  box-shadow: 0 4px 12px rgba(0, 114, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(74, 193, 226, 0.3); /* Shadow nhẹ teal */
   transition: all 0.3s ease;
 }
 
-.doc-blog-submit-button:hover {
-  background: linear-gradient(to right, #00a6ff, #0062df);
+.DoctorRoleID2-doctor-blog__submit-button:hover {
+  background: #3ab0d2; /* Teal đậm hơn từ Consultation */
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 114, 255, 0.4);
+  box-shadow: 0 6px 16px rgba(74, 193, 226, 0.4);
 }
 
-.doc-blog-submit-button:active {
+.DoctorRoleID2-doctor-blog__submit-button:active {
   transform: translateY(0);
 }
 
 /* Table styling */
-.doc-blog-table {
+.DoctorRoleID2-doctor-blog__table {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
 }
 
-.doc-blog-table .ant-table-thead > tr > th {
-  background-color: #f0f7ff;
-  color: #2d3748;
+.DoctorRoleID2-doctor-blog__table .ant-table-thead > tr > th {
+  background-color: #f0f5ff; /* Màu header từ Consultation */
+  color: #4a90e2; /* Xanh từ Consultation */
   font-weight: 600;
   font-size: 14px;
   padding: 16px;
 }
 
-.doc-blog-table .ant-table-tbody > tr > td {
+.DoctorRoleID2-doctor-blog__table .ant-table-tbody > tr > td {
   padding: 16px;
 }
 
-.doc-blog-table .ant-table-tbody > tr:hover > td {
-  background-color: #f8fafc;
+.DoctorRoleID2-doctor-blog__table .ant-table-tbody > tr:hover > td {
+  background-color: #f9fbff; /* Hover nhạt từ Consultation */
 }
 
-.doc-blog-table .ant-pagination {
+.DoctorRoleID2-doctor-blog__table .ant-pagination {
   margin: 20px 0;
 }
 
-/* Responsive for smaller screens */
-@media (max-width: 1200px) {
-  .doc-blog-left-column {
-    max-width: 300px;
-  }
-}
-
-@media (max-width: 992px) {
-  .doc-blog-main-container {
-    flex-direction: column;
-  }
-
-  .doc-blog-left-column {
-    max-width: 100%;
-  }
-
-  .doc-blog-header-section {
-    padding: 24px;
-  }
-
-  .doc-blog-title {
-    font-size: 24px;
-  }
-}
-
-@media (max-width: 576px) {
-  .doc-blog-container {
-    padding: 12px;
-  }
-
-  .doc-blog-card {
-    padding: 16px;
-  }
-
-  .doc-blog-action-buttons {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .doc-blog-cancel-button,
-  .doc-blog-submit-button {
-    width: 100%;
-  }
-}
-
-/* Thêm style cho nút Edit và Delete trong trang danh sách */
-.doc-blog-edit-button {
-  background-color: #4eaef7;
-  border-color: #4eaef7;
+/* Nút Edit và Delete */
+.DoctorRoleID2-doctor-blog__btn-primary {
+  background-color: #4ac1e2; /* Teal từ Consultation */
+  border-color: #4ac1e2;
   color: white !important;
 }
 
-.doc-blog-edit-button:hover,
-.doc-blog-edit-button:focus {
-  background-color: #3a9eea;
-  border-color: #3a9eea;
+.DoctorRoleID2-doctor-blog__btn-primary:hover,
+.DoctorRoleID2-doctor-blog__btn-primary:focus {
+  background-color: #3ab0d2; /* Teal đậm hơn */
+  border-color: #3ab0d2;
   color: white !important;
 }
 
-.doc-blog-delete-button {
+.DoctorRoleID2-doctor-blog__btn-dangerous {
   background-color: #fff;
   border-color: #ff4d4f;
   color: #ff4d4f !important;
 }
 
-.doc-blog-delete-button:hover,
-.doc-blog-delete-button:focus {
+.DoctorRoleID2-doctor-blog__btn-dangerous:hover,
+.DoctorRoleID2-doctor-blog__btn-dangerous:focus {
   background-color: #fff1f0;
   border-color: #ff7875;
   color: #ff7875 !important;
 }
 
-/* Thêm hiệu ứng nổi cho các nút */
-.doc-blog-action-buttons .ant-btn {
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.02);
-  transition: all 0.3s ease;
+/* Responsive giữ nguyên như cũ nhưng với class mới */
+@media (max-width: 1200px) {
+  .DoctorRoleID2-doctor-blog__left-column {
+    max-width: 300px;
+  }
 }
 
-/* Tăng độ tương phản cho các label của form */
-.doc-blog-left-column .ant-form-item-label > label {
-  font-weight: 500;
-  color: #2c3e50;
+@media (max-width: 992px) {
+  .DoctorRoleID2-doctor-blog__main-container {
+    flex-direction: column;
+  }
+  .DoctorRoleID2-doctor-blog__left-column {
+    max-width: 100%;
+  }
+  .DoctorRoleID2-doctor-blog__header-section {
+    padding: 24px;
+  }
+  .DoctorRoleID2-doctor-blog-title {
+    font-size: 24px;
+  }
 }
 
-/* Tăng kích thước và độ rõ cho text label */
-.doc-blog-form .ant-form-item-label > label {
-  font-size: 15px;
-}
-
-/* Tạo hiệu ứng nổi cho các phần */
-.doc-blog-section:hover {
-  box-shadow: 0 5px 15px rgba(0, 184, 255, 0.1);
-  transform: translateY(-2px);
-}
-
-/* Điều chỉnh lại chiều cao của phần thông tin cơ bản */
-.doc-blog-category-section {
-  min-height: 450px; /* Tăng chiều cao để cân bằng với phần nội dung */
-}
-
-/* Nếu cần, có thể tăng padding cho các form item */
-.doc-blog-left-column .ant-form-item {
-  margin-bottom: 20px; /* Tăng khoảng cách giữa các form item */
-}
-
-/* Loại bỏ các style liên quan đến phần image preview */
-.doc-blog-image-preview,
-.doc-blog-image-preview-container,
-.doc-blog-preview-image,
-.doc-blog-image-placeholder {
-  display: none; /* Ẩn hoàn toàn các phần tử này */
+@media (max-width: 576px) {
+  .DoctorRoleID2-doctor-blog-container {
+    padding: 12px;
+  }
+  .DoctorRoleID2-doctor-blog-card {
+    padding: 16px;
+  }
+  .DoctorRoleID2-doctor-blog__action-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .DoctorRoleID2-doctor-blog__cancel-button,
+  .DoctorRoleID2-doctor-blog__submit-button {
+    width: 100%;
+  }
 }

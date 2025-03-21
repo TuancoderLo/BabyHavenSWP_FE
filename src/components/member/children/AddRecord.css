@@ -15,7 +15,7 @@ justify-content: center;
   background: #fff;
   width: 80%;
   max-width: 1000px;
-  min-height: 500px;
+  max-height: 600px;
   border-radius: 12px;
   position: relative;
   display: flex; /* Cho phép hiển thị 2 cột */
@@ -73,7 +73,7 @@ justify-content: center;
   width: 60%; /* Cột phải chiếm phần còn lại */
   padding: 2rem; /* Nếu cần padding riêng */
   overflow-y: auto;
-  max-height: 600px;
+  max-height: 650px;
 }
 
 /* Form styling */
@@ -145,33 +145,7 @@ justify-content: center;
 /* Button styling */
 .step-buttons {
   display: flex;
-  justify-content: space-between;
-  margin-top: 2rem;
-  align-items: center;
-}
-
-.button-cofirm {
-  margin-left: auto;
-}
-
-.step-buttons button {
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: none;
-}
-
-.step-buttons button[type="button"]:not(.previous-btn) {
-  background-color: #00D0BC;
-  color: white;
-}
-
-.step-buttons button[type="button"]:not(.previous-btn):hover {
-  background-color: #00b8a6;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 1rem;
 }
 
 .previous-btn {
@@ -182,6 +156,76 @@ justify-content: center;
 
 .previous-btn:hover {
   background-color: #e9e9e9;
+}
+
+.confirm-button-step1 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #ff0066;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px 20px;
+}
+
+.confirm-button-step1:hover {
+  background-color: #e6005c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.next-button-record {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #005eff;
+  color: rgb(255, 255, 255);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px 20px;
+}
+
+.next-button-record:hover {
+  background-color: #004bcd;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Nút "X" để đóng overlay */
+.close-button-record {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  width: 12px;
+  height: auto;
+  background-color: #f5f5f5;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+/* Thêm icon mũi tên bằng pseudo-element */
+.next-button-record::after {
+  content: "→";
+  font-size: 16px;
+  font-weight: bold;
+  margin-left: 5px;
+  color: white;
 }
 
 /* Notification styling */
@@ -218,25 +262,6 @@ justify-content: center;
   background-color: #00b8a6;
 }
 
-/* Confirm button at the bottom of step 1 */
-button[type="button"] {
-  background-color: #00D0BC;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 16px;
-}
-
-button[type="button"]:hover {
-  background-color: #00b8a6;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
 /* Add this if it doesn't exist */
 .babygrowth-img {
   display: flex;
@@ -245,30 +270,30 @@ button[type="button"]:hover {
 }
 
 .babygrowth-img img {
-  max-width: 100%;
+  max-width: 80%;
   height: auto;
 }
 
 /* Add these new styles for the step progress UI */
 .step-progress {
-  display: absolute;
+  display: flex; /* Sửa từ display: absolute thành flex */
   flex-direction: column;
   align-items: flex-start;
-  margin-top: 30px;
+  margin-top: 20px; /* Giảm từ 30px xuống 20px */
   position: relative;
 }
 
 .step-item {
   display: flex;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 20px; /* Giảm từ 30px xuống 20px */
   position: relative;
   z-index: 2;
 }
 
 .step-circle {
-  width: 30px;
-  height: 30px;
+  width: 24px; /* Giảm từ 30px xuống 24px */
+  height: 24px; /* Giảm từ 30px xuống 24px */
   border-radius: 50%;
   background-color: #e0e0e0;
   display: flex;
@@ -276,7 +301,8 @@ button[type="button"]:hover {
   justify-content: center;
   font-weight: 600;
   color: #666;
-  margin-right: 15px;
+  margin-right: 10px; /* Giảm từ 15px xuống 10px */
+  font-size: 14px; /* Thêm font-size để chữ trong vòng tròn nhỏ hơn */
 }
 
 .step-circle.active {
@@ -290,21 +316,21 @@ button[type="button"]:hover {
 }
 
 .checkmark {
-  font-size: 20px;
+  font-size: 16px; /* Giảm từ 20px xuống 16px */
 }
 
 .step-label {
-  font-size: 16px;
+  font-size: 14px; /* Giảm từ 16px xuống 14px */
   color: #333;
   font-weight: 500;
 }
 
 .step-connector {
   position: absolute;
-  left: 15px;
-  top: 30px;
+  left: 12px; /* Điều chỉnh từ 15px xuống 12px để khớp với vòng tròn nhỏ hơn */
+  top: 24px; /* Điều chỉnh từ 30px xuống 24px để khớp với vòng tròn nhỏ hơn */
   width: 2px;
-  height: calc(100% - 80px);
+  height: calc(100% - 60px); /* Giảm từ 80px xuống 60px để khớp với khoảng cách nhỏ hơn */
   background-color: #e0e0e0;
   z-index: 1;
 }
@@ -396,7 +422,7 @@ button[type="button"]:hover {
 }
 
 .form-section h4 {
-  color: #00D0BC;
+  color: #000000;
   margin-top: 0;
   margin-bottom: 15px;
   font-size: 16px;
@@ -418,6 +444,16 @@ button[type="button"]:hover {
   margin-top: 20px;
 }
 
+
+.warning-text-record {
+  font-size: 10px;
+}
+
+.measurements-section p {
+  font-weight: 100;
+  color:#FFC107;
+}
+
 /* Adjust input styling for the new layout */
 .form-section input, 
 .form-section select,
@@ -437,47 +473,4 @@ button[type="button"]:hover {
   border-color: #00D0BC;
   background-color: #fff;
   box-shadow: 0 0 0 3px rgba(0, 208, 188, 0.1);
-}
-
-/* Improve button styling */
-.confirm-button {
-  background-color: #00D0BC;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s;
-  font-size: 16px;
-  display: block;
-  margin-left: auto;
-  margin-top: 20px;
-}
-
-.confirm-button:hover {
-  background-color: #00b8a6;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-.replace-dialog {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-}
-
-.replace-dialog p {
-  margin-bottom: 15px;
-}
-
-.replace-dialog button {
-  margin: 5px;
-  padding: 8px 16px;
-  cursor: pointer;
 }

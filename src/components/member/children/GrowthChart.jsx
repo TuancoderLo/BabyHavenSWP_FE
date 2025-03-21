@@ -12,15 +12,90 @@ import {
 import './GrowthChart.css';
 import childApi from "../../../services/childApi";
 
-const GrowthChart = ({ childName, selectedTool, onRecordSelect, refreshTrigger = 0 }) => {
-  const [data, setData] = useState({ months: [], records: [] });
+// Dữ liệu LMS từ WHO Growth Reference 5-19 years (mẫu cho nam, 108 tháng)
+const WHO_LMS_BMI = {
+  108: { // 108 tháng = 9 tuổi, nam
+    L: -0.3529,
+    M: 16.8,
+    S: 0.1324
+  }
+  // Có thể mở rộng cho các độ tuổi và giới tính khác
+};
+
+// Hàm tính độ tuổi bằng tháng
+const calculateAgeInMonths = (dateOfBirth) => {
+  if (!dateOfBirth) {
+    console.warn('dateOfBirth is not provided, defaulting to 108 months');
+    return 108; // Mặc định 108 tháng nếu không có dữ liệu
+  }
+
+  const birthDate = new Date(dateOfBirth);
+  const today = new Date();
+
+  let years = today.getFullYear() - birthDate.getFullYear();
+  let months = today.getMonth() - birthDate.getMonth();
+
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+
+  const totalMonths = years * 12 + months;
+  console.log('Calculated ageInMonths:', totalMonths);
+  return totalMonths;
+};
+
+// Hàm tính BMI từ z-score
+const calculateBMIFromZScore = (ageInMonths, zScore) => {
+  const lms = WHO_LMS_BMI[ageInMonths] || WHO_LMS_BMI[108];
+  const { L, M, S } = lms;
+
+  if (L === 0) {
+    return M * Math.exp(S * zScore);
+  }
+  return M * Math.pow(1 + L * S * zScore, 1 / L);
+};
+
+// Hàm lấy dữ liệu WHO BMI-for-age từ LMS cục bộ
+const getWHOBMIData = (ageInMonths) => {
+  try {
+    const median = calculateBMIFromZScore(ageInMonths, 0);
+    const plus1SD = calculateBMIFromZScore(ageInMonths, 1);
+    const minus1SD = calculateBMIFromZScore(ageInMonths, -1);
+    const plus2SD = calculateBMIFromZScore(ageInMonths, 2);
+    const minus2SD = calculateBMIFromZScore(ageInMonths, -2);
+
+    const whoData = {
+      median: Number(median.toFixed(1)),
+      plus1SD: Number(plus1SD.toFixed(1)),
+      minus1SD: Number(minus1SD.toFixed(1)),
+      plus2SD: Number(plus2SD.toFixed(1)),
+      minus2SD: Number(minus2SD.toFixed(1))
+    };
+
+    console.log('WHO BMI Data:', whoData);
+    return whoData;
+  } catch (error) {
+    console.error('Error calculating WHO BMI data:', error);
+    return {
+      median: 16.8,
+      plus1SD: 18.5,
+      minus1SD: 15.2,
+      plus2SD: 20.5,
+      minus2SD: 13.8
+    };
+  }
+};
+
+const GrowthChart = ({ childName, selectedTool, onRecordSelect, refreshTrigger = 0, dateOfBirth }) => {
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [whoBMIData, setWhoBMIData] = useState(null);
 
   // Hàm tính BMI
   const calculateBMI = (weight, height) => {
     console.log('calculateBMI input:', { weight, height });
     
-    // Kiểm tra giá trị đầu vào
     const validWeight = parseFloat(weight);
     const validHeight = parseFloat(height);
     
@@ -32,7 +107,6 @@ const GrowthChart = ({ childName, selectedTool, onRecordSelect, refreshTrigger =
     const heightInMeters = validHeight / 100;
     const bmi = Number((validWeight / (heightInMeters * heightInMeters)).toFixed(1));
     
-    // Kiểm tra kết quả tính toán
     if (isNaN(bmi) || !isFinite(bmi)) {
       console.log('BMI calculation resulted in invalid value');
       return null;
@@ -44,36 +118,48 @@ const GrowthChart = ({ childName, selectedTool, onRecordSelect, refreshTrigger =
 
   useEffect(() => {
     const fetchGrowthData = async () => {
-      if (!childName) return;
-      
+      if (!childName) {
+        console.error('childName is undefined or empty');
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       try {
         const parentName = localStorage.getItem("name");
+        if (!parentName) {
+          throw new Error('parentName is undefined or empty');
+        }
+
+        // Tính độ tuổi của trẻ từ dateOfBirth (truyền qua props)
+        const ageInMonths = calculateAgeInMonths(dateOfBirth);
+
+        // Lấy dữ liệu WHO BMI-for-age từ LMS cục bộ
+        const whoData = getWHOBMIData(ageInMonths);
+        setWhoBMIData(whoData);
+
+        // Lấy dữ liệu tăng trưởng từ API
         const response = await childApi.getGrowthRecords(childName, parentName);
         console.log("Full API Response:", response);
 
         const records = Array.isArray(response.data) ? response.data : [response.data];
-        const currentYear = new Date().getFullYear();
         
-        // Xử lý và lọc dữ liệu
         const processedRecords = records
-          .filter(record => record && (record.weight || record.height)) // Lọc bỏ record không có dữ liệu
+          .filter(record => record && (record.weight || record.height))
           .map(record => {
             const recordDate = new Date(record.createdAt || record.recordDate);
-            if (recordDate.getFullYear() !== currentYear) return null;
-
+            
             const weight = parseFloat(record.weight);
             const height = parseFloat(record.height);
             
             if (isNaN(weight) || isNaN(height) || weight <= 0 || height <= 0) return null;
             
-            const bmi = Number((weight / Math.pow(height / 100, 2)).toFixed(1));
-            if (isNaN(bmi) || !isFinite(bmi)) return null;
+            const bmi = calculateBMI(weight, height);
+            if (bmi === null) return null;
 
-            // Tính vị trí x dựa trên tháng và ngày
             const month = recordDate.getMonth();
             const day = recordDate.getDate();
-            const x = month + (day - 1) / 31; // Vị trí x từ 0-11.99
+            const x = month + (day - 1) / 31;
 
             return {
               x,
@@ -89,23 +175,36 @@ const GrowthChart = ({ childName, selectedTool, onRecordSelect, refreshTrigger =
           .filter(record => record !== null)
           .sort((a, b) => a.timestamp - b.timestamp);
 
-        setData({
-          months: Array.from({ length: 12 }, (_, i) => ({
-            month: new Date(currentYear, i).toLocaleDateString('en-US', { month: 'short' }),
-            index: i
-          })),
-          records: processedRecords
+        console.log('Processed Records:', processedRecords);
+
+        // Tạo dữ liệu gộp cho biểu đồ
+        const chartData = Array.from({ length: 12 }, (_, i) => {
+          // Lấy tất cả record trong tháng i
+          const recordsInMonth = processedRecords.filter(r => Math.floor(r.x) === i);
+          return {
+            x: i,
+            month: new Date(2025, i).toLocaleDateString('en-US', { month: 'short' }),
+            records: recordsInMonth, // Lưu tất cả record trong tháng
+            median: whoData.median,
+            plus1SD: whoData.plus1SD,
+            minus1SD: whoData.minus1SD,
+            plus2SD: whoData.plus2SD,
+            minus2SD: whoData.minus2SD
+          };
         });
+
+        console.log('Chart Data:', chartData);
+        setData(chartData);
       } catch (error) {
         console.error('Error fetching growth data:', error);
-        setData({ months: [], records: [] });
+        setData([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchGrowthData();
-  }, [childName, refreshTrigger]);
+  }, [childName, refreshTrigger, dateOfBirth]);
 
   if (loading) {
     return <div className="loading">Loading chart...</div>;
@@ -114,7 +213,7 @@ const GrowthChart = ({ childName, selectedTool, onRecordSelect, refreshTrigger =
   const renderChart = () => {
     switch (selectedTool) {
       case 'BMI':
-        if (!data.records || data.records.length === 0) {
+        if (!data || data.length === 0) {
           return (
             <div style={{ 
               height: '350px', 
@@ -128,9 +227,12 @@ const GrowthChart = ({ childName, selectedTool, onRecordSelect, refreshTrigger =
           );
         }
 
+        // Tạo danh sách tất cả record để vẽ đường
+        const allRecords = data.flatMap(monthData => monthData.records);
+
         return (
           <ResponsiveContainer width="100%" height={350}>
-            <LineChart margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+            <LineChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis 
                 dataKey="x"
@@ -149,8 +251,8 @@ const GrowthChart = ({ childName, selectedTool, onRecordSelect, refreshTrigger =
                 orientation="left"
                 stroke="#FF9AA2"
                 tick={{ fill: '#666', fontSize: 11 }}
-                domain={[10, 30]}
-                ticks={[10, 15, 20, 25, 30]}
+                domain={[0, 50]}
+                ticks={[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]}
               />
               <YAxis 
                 yAxisId="right"
@@ -167,14 +269,20 @@ const GrowthChart = ({ childName, selectedTool, onRecordSelect, refreshTrigger =
                   padding: '10px'
                 }}
                 formatter={(value, name) => {
-                  if (name === 'BMI') {
+                  if (name === 'bmi') {
                     return [`${value}`, 'BMI (kg/m²)'];
+                  }
+                  if (name.includes('WHO')) {
+                    return [`${value}`, name];
                   }
                   return [value, name];
                 }}
                 labelFormatter={(label, payload) => {
                   if (payload && payload[0]) {
-                    return `Date: ${payload[0].payload.date}`;
+                    const recordsInMonth = payload[0].payload.records;
+                    if (recordsInMonth && recordsInMonth.length > 0) {
+                      return recordsInMonth.map(r => `Date: ${r.date}`).join(', ');
+                    }
                   }
                   return '';
                 }}
@@ -189,7 +297,7 @@ const GrowthChart = ({ childName, selectedTool, onRecordSelect, refreshTrigger =
               />
               <Line
                 yAxisId="bmi"
-                data={data.records}
+                data={allRecords}
                 type="monotone"
                 dataKey="bmi"
                 stroke="#FF9AA2"
@@ -203,6 +311,56 @@ const GrowthChart = ({ childName, selectedTool, onRecordSelect, refreshTrigger =
                     onRecordSelect(point);
                   }
                 }}
+              />
+              <Line
+                yAxisId="bmi"
+                type="monotone"
+                dataKey="median"
+                stroke="#8884d8"
+                strokeWidth={1}
+                dot={false}
+                name="WHO Median"
+                connectNulls={true}
+              />
+              <Line
+                yAxisId="bmi"
+                type="monotone"
+                dataKey="plus1SD"
+                stroke="#82ca9d"
+                strokeWidth={1}
+                dot={false}
+                name="WHO +1SD"
+                connectNulls={true}
+              />
+              <Line
+                yAxisId="bmi"
+                type="monotone"
+                dataKey="minus1SD"
+                stroke="#ff7300"
+                strokeWidth={1}
+                dot={false}
+                name="WHO -1SD"
+                connectNulls={true}
+              />
+              <Line
+                yAxisId="bmi"
+                type="monotone"
+                dataKey="plus2SD"
+                stroke="#ff4040"
+                strokeWidth={1}
+                dot={false}
+                name="WHO +2SD (Obesity)"
+                connectNulls={true}
+              />
+              <Line
+                yAxisId="bmi"
+                type="monotone"
+                dataKey="minus2SD"
+                stroke="#ffa500"
+                strokeWidth={1}
+                dot={false}
+                name="WHO -2SD (Thinness)"
+                connectNulls={true}
               />
             </LineChart>
           </ResponsiveContainer>

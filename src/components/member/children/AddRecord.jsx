@@ -12,9 +12,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     return (
       <div className="add-record-overlay" onClick={handleOverlayClick}>
         <div className="add-record-wizard" onClick={(e) => e.stopPropagation()}>
-          {/* <button type="button" className="close-btn" onClick={closeOverlay}>
-            ×
-          </button> */}
           <div className="notification-board">
             <h2>No Child Selected</h2>
             <p>Please select a child or add a new child to continue.</p>
@@ -26,8 +23,9 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
       </div>
     );
   }
-  // Fetch child details using GET /api/Children/{childId}
-  const setChildDetails = useState(null);
+
+  // Sửa: Thêm biến childDetails để nhận giá trị từ useState
+  const [childDetails, setChildDetails] = useState(null);
 
   useEffect(() => {
     const fetchChildDetails = async () => {
@@ -41,7 +39,52 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     fetchChildDetails();
   }, [child, memberId]);
 
-  // Growth record state (fields used across all substeps)
+  const calculateAge = (dateOfBirth) => {
+    if (!dateOfBirth) return '0 days';
+
+    const birthDate = new Date(dateOfBirth);
+    const today = new Date();
+
+    let years = today.getFullYear() - birthDate.getFullYear();
+    let months = today.getMonth() - birthDate.getMonth();
+
+    const diffTime = Math.abs(today - birthDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+
+    if (years === 0 && months === 0) {
+      return `${diffDays} days`;
+    }
+
+    if (years < 1) {
+      return `${months} months`;
+    }
+
+    return `${years} years old`;
+  };
+
+  const calculateAgeInMonths = (dateOfBirth) => {
+    if (!dateOfBirth) return 0;
+
+    const birthDate = new Date(dateOfBirth);
+    const today = new Date();
+
+    let years = today.getFullYear() - birthDate.getFullYear();
+    let months = today.getMonth() - birthDate.getMonth();
+
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+
+    const totalMonths = years * 12 + months;
+    return totalMonths;
+  };
+
   const [growthForm, setGrowthForm] = useState({
     createdAt: "",
     weight: "",
@@ -71,7 +114,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     developmentalMilestones: "",
   });
 
-  // Validation errors
   const [errors, setErrors] = useState({
     createdAt: "",
     weight: "",
@@ -86,14 +128,41 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     },
     [closeOverlay]
   );
-  // Step management: 1 = record entry (split in 3 substeps), 2 = success message
-  const [currentStep, setCurrentStep] = useState(1);
-  // subStep2: 1, 2, or 3 corresponding to the multi-page form
-  const [subStep2, setSubStep2] = useState(1);
 
-  const validateGrowthForm = useCallback(() => {
-    const newErrors = { ...errors };
-    let isValid = true;
+
+
+  const [currentStep, setCurrentStep] = useState(1);
+  // Bỏ subStep2 vì không sử dụng
+  // const [subStep2, setSubStep2] = useState(1);
+
+  const WHO_GROWTH_REFERENCE = [
+    { age: 0, weight: [3.3, 5.0], height: [49, 55] },
+    { age: 3, weight: [5.0, 7.9], height: [58, 67] },
+    { age: 6, weight: [6.4, 9.7], height: [64, 72] },
+    { age: 9, weight: [7.2, 11.0], height: [67, 76] },
+    { age: 12, weight: [8.5, 12.5], height: [72, 82] },
+    { age: 24, weight: [10.5, 15.5], height: [82, 95] },
+    { age: 36, weight: [12.0, 18.0], height: [90, 105] },
+    { age: 48, weight: [13.5, 21.0], height: [96, 112] },
+    { age: 60, weight: [15.0, 24.0], height: [102, 118] },
+    { age: 72, weight: [17.5, 28.0], height: [108, 125] },
+    { age: 84, weight: [20.0, 32.0], height: [113, 130] },
+    { age: 96, weight: [22.5, 36.0], height: [118, 136] },
+    { age: 108, weight: [25.0, 41.0], height: [123, 141] },
+    { age: 120, weight: [28.0, 45.0], height: [128, 147] },
+    { age: 132, weight: [31.0, 50.0], height: [134, 153] },
+    { age: 144, weight: [34.0, 55.0], height: [140, 160] },
+    { age: 156, weight: [38.0, 61.0], height: [145, 166] },
+    { age: 168, weight: [42.0, 67.0], height: [150, 171] },
+    { age: 180, weight: [47.0, 73.0], height: [155, 175] },
+    { age: 192, weight: [51.0, 78.0], height: [160, 178] },
+    { age: 204, weight: [55.0, 82.0], height: [162, 180] },
+    { age: 216, weight: [58.0, 85.0], height: [164, 182] },
+  ];
+
+  const validateGrowthForm = useCallback((form = growthForm) => {
+    const ageInMonths = calculateAgeInMonths(child.dateOfBirth);
+    const newErrors = {};
 
     const selectedDate = new Date(growthForm.createdAt);
     const today = new Date(); // Ngày hiện tại: 20/03/2025
@@ -102,89 +171,55 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
 
     if (!growthForm.createdAt) {
       newErrors.createdAt = "Please select date";
-      isValid = false;
     } else if (selectedDate > today) {
       newErrors.createdAt = "Cannot select a future date";
-      isValid = false;
     } else {
       newErrors.createdAt = "";
     }
 
-    if (!growthForm.weight) {
-      newErrors.weight = "Please enter weight";
-      isValid = false;
-    } else {
-      newErrors.weight = "";
-    }
+    const ageGroup =
+      WHO_GROWTH_REFERENCE.find((entry) => ageInMonths <= entry.age) ||
+      WHO_GROWTH_REFERENCE[WHO_GROWTH_REFERENCE.length - 1];
 
-    if (!growthForm.height) {
-      newErrors.height = "Please enter height";
-      isValid = false;
-    } else {
-      newErrors.height = "";
+    if (ageGroup) {
+      const [minWeight, maxWeight] = ageGroup.weight;
+      const [minHeight, maxHeight] = ageGroup.height;
+
+      if (form.weight && (form.weight < minWeight || form.weight > maxWeight)) {
+        newErrors.weight = `Warning: Weight should be between ${minWeight}kg and ${maxWeight}kg`;
+      } else {
+        newErrors.weight = "";
+      }
+
+      if (form.height && (form.height < minHeight || form.height > maxHeight)) {
+        newErrors.height = `Warning: Height should be between ${minHeight}cm and ${maxHeight}cm`;
+      } else {
+        newErrors.height = "";
+      }
     }
 
     setErrors(newErrors);
-    return isValid;
-  }, [growthForm, errors]);
+  }, [child.dateOfBirth, growthForm]);
+
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setGrowthForm((prev) => {
+      const updatedForm = { ...prev, [name]: value };
+      validateGrowthForm(updatedForm);
+      return updatedForm;
+    });
+  }, [validateGrowthForm]);
 
   const [showNotification, setShowNotification] = useState(false);
 
-  const handleConfirmGrowthRecord = useCallback(async () => {
-    if (currentStep === 1 && !validateGrowthForm()) return;
-
-    if (currentStep === 1) {
-      try {
-        console.log("Calling getGrowthRecords with:", { childName: child.name, ParentName: parent.name });
-        const existingRecords = await childApi.getGrowthRecords(child.name, parent.name);
-        console.log("Existing Records:", existingRecords.data);
-
-        if (!growthForm.createdAt) {
-          console.error("No createdAt date provided in growthForm");
-          return;
-        }
-        const selectedDate = new Date(growthForm.createdAt);
-        selectedDate.setHours(0, 0, 0, 0);
-        const selectedDateStr = selectedDate.toDateString();
-        console.log("Selected Date:", selectedDateStr);
-
-        const todayRecords = existingRecords.data.filter((record) => {
-          const recordDate = new Date(record.createdAt);
-          recordDate.setHours(0, 0, 0, 0);
-          return recordDate.toDateString() === selectedDateStr;
-        });
-
-        console.log("Today Records:", todayRecords);
-
-        if (todayRecords.length > 0) {
-          const formattedDate = selectedDate.toLocaleDateString('en-GB');
-          const confirmReplace = window.confirm(
-            `A growth record for this day (${formattedDate}) already exists. Would you like to replace the current record?`
-          );
-          if (!confirmReplace) return;
-        }
-      } catch (err) {
-        console.error("Error fetching existing records:", err);
-      }
-    }
-
-    if (currentStep < 3) {
-      setCurrentStep((prev) => prev + 1);
-      return;
-    }
-
+  // Hàm gửi dữ liệu qua API
+  const submitGrowthRecord = useCallback(async () => {
     try {
-      if (!child.name || !growthForm.weight || !growthForm.height) {
-        console.error("Missing required fields in growthPayload");
-        alert("Please fill in all required fields.");
-        return;
-      }
-
       const growthPayload = {
         name: child.name,
         dateOfBirth: child.dateOfBirth,
         recordedBy: memberId,
-        createdAt: growthForm.createdAt || new Date().toISOString(),
+        createdAt: growthForm.createdAt,
         weight: growthForm.weight,
         height: growthForm.height,
         headCircumference: growthForm.headCircumference,
@@ -215,16 +250,56 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
       console.log("Growth record created:", growthRes.data);
 
       setShowNotification(true);
-      closeOverlay();
-
       setTimeout(() => {
         setShowNotification(false);
       }, 3000);
+
+      return true; // Trả về true nếu gửi thành công
     } catch (err) {
       console.error("Error saving growth record:", err);
-      alert("Failed to save growth record. Please try again.");
+      return false; // Trả về false nếu có lỗi
     }
-  }, [child, parent, growthForm, currentStep, validateGrowthForm, closeOverlay]);
+  }, [child, memberId, growthForm]);
+
+  // Hàm xử lý khi nhấn Confirm ở Step 1
+  const handleConfirmStep1 = useCallback(async () => {
+    if (!growthForm.createdAt) {
+      setErrors((prev) => ({
+        ...prev,
+        createdAt: "Please select date",
+      }));
+      return;
+    }
+
+    const success = await submitGrowthRecord();
+    if (success) {
+      closeOverlay(); // Đóng overlay sau khi gửi thành công
+    }
+  }, [growthForm, submitGrowthRecord, closeOverlay]);
+
+  // Hàm xử lý khi nhấn Continue to Other Measurements
+  const handleContinueToNextStep = useCallback(() => {
+    if (currentStep === 1 && !growthForm.createdAt) {
+      setErrors((prev) => ({
+        ...prev,
+        createdAt: "Please select date",
+      }));
+      return;
+    }
+
+    if (currentStep < 3) {
+      setCurrentStep((prev) => prev + 1);
+    }
+  }, [currentStep, growthForm]);
+
+  // Hàm xử lý khi nhấn Submit ở Step 3
+  const handleSubmitStep3 = useCallback(async () => {
+    const success = await submitGrowthRecord();
+    if (success) {
+      closeOverlay(); // Đóng overlay sau khi gửi thành công
+    }
+  }, [submitGrowthRecord, closeOverlay]);
+
   const handlePrevious = useCallback(() => {
     if (currentStep > 1) {
       setCurrentStep((prev) => prev - 1);
@@ -236,11 +311,9 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
   }, [closeOverlay]);
 
   const renderStepContent = useMemo(() => {
-    // Step 1: Add BMI information (same as before)
     if (currentStep === 1) {
       return (
         <div className="step-form">
-          {/* Child Information Card */}
           <div className="child-info-card">
             <h3>Child Information</h3>
             <div className="child-info-details">
@@ -251,6 +324,10 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 <p>
                   <strong>Date of Birth:</strong>{" "}
                   {new Date(child.dateOfBirth).toLocaleDateString()}
+                </p>
+                <p>
+                  <strong>Age:</strong>{" "}
+                  {calculateAge(child.dateOfBirth)}
                 </p>
                 {child.gender && (
                   <p className={`gender-tag ${child.gender.toLowerCase()}`}>
@@ -295,8 +372,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
             {errors.createdAt && <p className="error-text">{errors.createdAt}</p>}
           </div>
 
-
-          {/* Measurements Section */}
           <div className="form-section">
             <h4>Basic Measurements</h4>
             <div className="measurements-section">
@@ -304,43 +379,31 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 <label>Baby's weight (kg)</label>
                 <input
                   type="number"
+                  name="weight"
                   value={growthForm.weight}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      weight: e.target.value,
-                    }))
-                  }
-                  className={errors.weight ? "error-input" : ""}
+                  onChange={handleChange}
+                  className={errors.weight ? "warning-input" : ""}
                 />
-                {errors.weight && <p className="error-text">{errors.weight}</p>}
+                {errors.weight && <p className="warning-text-record">{errors.weight}</p>}
               </div>
               <div>
                 <label>Baby's height (cm)</label>
                 <input
                   type="number"
+                  name="height"
                   value={growthForm.height}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      height: e.target.value,
-                    }))
-                  }
-                  className={errors.height ? "error-input" : ""}
+                  onChange={handleChange}
+                  className={errors.height ? "warning-input" : ""}
                 />
-                {errors.height && <p className="error-text">{errors.height}</p>}
+                {errors.height && <p className="warning-text-record">{errors.height}</p>}
               </div>
               <div>
                 <label>Head circumference (cm)</label>
                 <input
                   type="number"
+                  name="headCircumference"
                   value={growthForm.headCircumference}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      headCircumference: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
               <div>
@@ -357,54 +420,61 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               <label>Notes</label>
               <input
                 type="text"
+                name="notes"
                 value={growthForm.notes}
-                onChange={(e) =>
-                  setGrowthForm((prev) => ({
-                    ...prev,
-                    notes: e.target.value,
-                  }))
-                }
+                onChange={handleChange}
               />
             </div>
           </div>
-
-          <button
-            type="button"
-            className="confirm-button"
-            onClick={handleConfirmGrowthRecord}
-          >
-            Confirm
-          </button>
+          <div className="step-buttons">
+            <button
+              type="button"
+              className="confirm-button-step1"
+              onClick={handleConfirmStep1}
+            >
+              Submit
+            </button>
+            <button
+              type="button"
+              className="next-button-record"
+              onClick={handleContinueToNextStep}
+            >
+              Continue
+            </button>
+          </div>
         </div>
       );
     }
 
-    // Step 2: Fields from old substep 2
     if (currentStep === 2) {
       return (
         <div className="step-form">
-          {/* Child Information Card */}
           <div className="child-info-card">
             <h3>Child Information</h3>
             <div className="child-info-details">
               <p>
                 <strong>Name:</strong> {child.name}
               </p>
-              <p>
-                <strong>Date of Birth:</strong>{" "}
-                {new Date(child.dateOfBirth).toLocaleDateString()}
-              </p>
-              {child.gender && (
+              <div className="info-row">
                 <p>
-                  <strong>Gender:</strong> {child.gender}
+                  <strong>Date of Birth:</strong>{" "}
+                  {new Date(child.dateOfBirth).toLocaleDateString()}
                 </p>
-              )}
+                <p>
+                  <strong>Age:</strong>{" "}
+                  {calculateAge(child.dateOfBirth)}
+                </p>
+                {child.gender && (
+                  <p className={`gender-tag ${child.gender.toLowerCase()}`}>
+                    {child.gender}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 
           <h2>Recommendations for Your Baby</h2>
 
-          {/* Nutritional Information Section */}
           <div className="form-section">
             <h4>Nutritional Information</h4>
             <div className="measurements-section">
@@ -412,32 +482,23 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 <label>Nutritional status</label>
                 <input
                   type="text"
+                  name="nutritionalStatus"
                   value={growthForm.nutritionalStatus}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      nutritionalStatus: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
               <div>
                 <label>Physical activity level</label>
                 <input
                   type="text"
+                  name="physicalActivityLevel"
                   value={growthForm.physicalActivityLevel}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      physicalActivityLevel: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
             </div>
           </div>
 
-          {/* Blood Metrics Section */}
           <div className="form-section">
             <h4>Blood Metrics</h4>
             <div className="measurements-section">
@@ -445,52 +506,36 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 <label>Ferritin level</label>
                 <input
                   type="number"
+                  name="ferritinLevel"
                   value={growthForm.ferritinLevel}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      ferritinLevel: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
               <div>
                 <label>Triglycerides</label>
                 <input
                   type="number"
+                  name="triglycerides"
                   value={growthForm.triglycerides}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      triglycerides: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
               <div>
                 <label>Blood sugar level</label>
                 <input
                   type="number"
+                  name="bloodSugarLevel"
                   value={growthForm.bloodSugarLevel}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      bloodSugarLevel: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
               <div>
                 <label>Chest circumference (cm)</label>
                 <input
                   type="number"
+                  name="chestCircumference"
                   value={growthForm.chestCircumference}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      chestCircumference: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
             </div>
@@ -506,43 +551,45 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
             </button>
             <button
               type="button"
-              className="confirm-button"
-              onClick={handleConfirmGrowthRecord}
+              className="next-button-record"
+              onClick={handleContinueToNextStep}
             >
-              Continue to Other Measurements
+              Continue
             </button>
           </div>
         </div>
       );
     }
 
-    // Step 3: Fields from old substep 3
     if (currentStep === 3) {
       return (
         <div className="step-form">
-          {/* Child Information Card */}
           <div className="child-info-card">
             <h3>Child Information</h3>
             <div className="child-info-details">
               <p>
                 <strong>Name:</strong> {child.name}
               </p>
-              <p>
-                <strong>Date of Birth:</strong>{" "}
-                {new Date(child.dateOfBirth).toLocaleDateString()}
-              </p>
-              {child.gender && (
+              <div className="info-row">
                 <p>
-                  <strong>Gender:</strong> {child.gender}
+                  <strong>Date of Birth:</strong>{" "}
+                  {new Date(child.dateOfBirth).toLocaleDateString()}
                 </p>
-              )}
+                <p>
+                  <strong>Age:</strong>{" "}
+                  {calculateAge(child.dateOfBirth)}
+                </p>
+                {child.gender && (
+                  <p className={`gender-tag ${child.gender.toLowerCase()}`}>
+                    {child.gender}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 
           <h2>Additional Health Measurements</h2>
-          <p>Please provide any additional measurements you have:</p>
 
-          {/* Vital Signs Section */}
           <div className="form-section">
             <h4>Vital Signs</h4>
             <div className="measurements-section">
@@ -550,58 +597,41 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 <label>Heart rate</label>
                 <input
                   type="number"
+                  name="heartRate"
                   value={growthForm.heartRate}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      heartRate: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
               <div>
                 <label>Blood pressure</label>
                 <input
                   type="number"
+                  name="bloodPressure"
                   value={growthForm.bloodPressure}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      bloodPressure: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
               <div>
                 <label>Body temperature (°C)</label>
                 <input
                   type="number"
+                  name="bodyTemperature"
                   value={growthForm.bodyTemperature}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      bodyTemperature: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
               <div>
                 <label>Oxygen saturation (%)</label>
                 <input
                   type="number"
+                  name="oxygenSaturation"
                   value={growthForm.oxygenSaturation}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      oxygenSaturation: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
             </div>
           </div>
 
-          {/* Development Metrics Section */}
           <div className="form-section">
             <h4>Development Metrics</h4>
             <div className="measurements-section">
@@ -609,32 +639,23 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 <label>Sleep duration (hrs)</label>
                 <input
                   type="number"
+                  name="sleepDuration"
                   value={growthForm.sleepDuration}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      sleepDuration: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
               <div>
                 <label>Growth hormone level</label>
                 <input
                   type="number"
+                  name="growthHormoneLevel"
                   value={growthForm.growthHormoneLevel}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      growthHormoneLevel: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
             </div>
           </div>
 
-          {/* Sensory and Health Status Section */}
           <div className="form-section">
             <h4>Sensory and Health Status</h4>
             <div className="measurements-section">
@@ -642,58 +663,41 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 <label>Hearing</label>
                 <input
                   type="text"
+                  name="hearing"
                   value={growthForm.hearing}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      hearing: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
               <div>
                 <label>Vision</label>
                 <input
                   type="text"
+                  name="vision"
                   value={growthForm.vision}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      vision: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
               <div>
                 <label>Mental health status</label>
                 <input
                   type="text"
+                  name="mentalHealthStatus"
                   value={growthForm.mentalHealthStatus}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      mentalHealthStatus: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
               <div>
                 <label>Immunization status</label>
                 <input
                   type="text"
+                  name="immunizationStatus"
                   value={growthForm.immunizationStatus}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      immunizationStatus: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
             </div>
           </div>
 
-          {/* Cognitive Development Section */}
           <div className="form-section">
             <h4>Cognitive Development</h4>
             <div className="measurements-section">
@@ -701,26 +705,18 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 <label>Attention span</label>
                 <input
                   type="text"
+                  name="attentionSpan"
                   value={growthForm.attentionSpan}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      attentionSpan: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
               <div>
                 <label>Neurological reflexes</label>
                 <input
                   type="text"
+                  name="neurologicalReflexes"
                   value={growthForm.neurologicalReflexes}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      neurologicalReflexes: e.target.value,
-                    }))
-                  }
+                  onChange={handleChange}
                 />
               </div>
             </div>
@@ -729,13 +725,9 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               <label>Developmental milestones</label>
               <input
                 type="text"
+                name="developmentalMilestones"
                 value={growthForm.developmentalMilestones}
-                onChange={(e) =>
-                  setGrowthForm((prev) => ({
-                    ...prev,
-                    developmentalMilestones: e.target.value,
-                  }))
-                }
+                onChange={handleChange}
               />
             </div>
           </div>
@@ -750,8 +742,8 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
             </button>
             <button
               type="button"
-              className="confirm-button"
-              onClick={handleConfirmGrowthRecord}
+              className="confirm-button-step1"
+              onClick={handleSubmitStep3}
             >
               Submit Record
             </button>
@@ -765,7 +757,9 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     currentStep,
     growthForm,
     errors,
-    handleConfirmGrowthRecord,
+    handleConfirmStep1,
+    handleContinueToNextStep,
+    handleSubmitStep3,
     handlePrevious,
     handleClose,
     child,
@@ -774,7 +768,9 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
   return (
     <div className="add-record-overlay" onClick={handleClose}>
       <div className="add-record-wizard" onClick={(e) => e.stopPropagation()}>
-        {/* Cột trái: Hiển thị thông tin các bước */}
+        <button className="close-button-record" onClick={handleClose}>
+          ×
+        </button>
         <div className="wizard-left">
           <div className="blue-bar"></div>
           <div className="wizard-left-content">
@@ -825,7 +821,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
             </div>
           </div>
         </div>
-        {/* Cột phải: Hiển thị nội dung form */}
         <div className="wizard-content">{renderStepContent}</div>
       </div>
     </div>

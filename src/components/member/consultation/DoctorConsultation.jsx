@@ -5,19 +5,35 @@ import doctorApi from "../../../services/DoctorApi";
 import TextEditor from "../../../components/admin/Component_Sidebar/blog/textEditor";
 
 function ExpandableResponseCard({ response, request, onClick, limit = 100 }) {
-  const combinedText = `Date: ${response.responseDate} | Doctor: ${response.doctorName} | Child: ${request?.childName || "N/A"} | Category: ${request?.category || "N/A"}`;
-  const truncatedText = combinedText.length > limit ? combinedText.slice(0, limit) + "..." : combinedText;
+  const combinedText = `Date: ${response.responseDate} | Doctor: ${
+    response.doctorName
+  } | Child: ${request?.childName || "N/A"} | Category: ${
+    request?.category || "N/A"
+  }`;
+  const truncatedText =
+    combinedText.length > limit
+      ? combinedText.slice(0, limit) + "..."
+      : combinedText;
 
   return (
-    <div className="consultation-response-card" onClick={() => onClick({ response, request })}>
+    <div
+      className="consultation-response-card"
+      onClick={() => onClick({ response, request })}
+    >
       <div className="response-header">
         <span className="response-date">{response.responseDate}</span>
         <span className="response-status">{response.status}</span>
       </div>
       <div className="response-summary">
-        <p><strong>Doctor:</strong> {response.doctorName}</p>
-        <p><strong>Child:</strong> {request?.childName || "N/A"}</p>
-        <p><strong>Category:</strong> {request?.category || "N/A"}</p>
+        <p>
+          <strong>Doctor:</strong> {response.doctorName}
+        </p>
+        <p>
+          <strong>Child:</strong> {request?.childName || "N/A"}
+        </p>
+        <p>
+          <strong>Category:</strong> {request?.category || "N/A"}
+        </p>
       </div>
       <div className="truncated-content">{truncatedText}</div>
     </div>
@@ -59,7 +75,7 @@ function DoctorConsultation() {
       setError(null);
       const memberId = localStorage.getItem("memberId");
       if (!memberId) {
-        throw new Error("Vui lòng đăng nhập để xem danh sách trẻ em");
+        throw new Error("Please login to view the list of children");
       }
       const response = await childApi.getByMember(memberId);
       if (response?.data?.data && Array.isArray(response.data.data)) {
@@ -69,10 +85,10 @@ function DoctorConsultation() {
         }));
         setChildren(childrenData);
       } else {
-        throw new Error("Không tìm thấy dữ liệu trẻ em");
+        throw new Error("No child data found");
       }
     } catch (err) {
-      setError(err.message || "Không thể tải danh sách trẻ em");
+      setError(err.message || "Unable to load children list");
     } finally {
       setLoading(false);
     }
@@ -114,7 +130,9 @@ function DoctorConsultation() {
       setLoadingCategories(true);
       const response = await doctorApi.getConsultationRequests();
       if (response?.data) {
-        const uniqueCategories = [...new Set(response.data.map((req) => req.category))];
+        const uniqueCategories = [
+          ...new Set(response.data.map((req) => req.category)),
+        ];
         setCategories(uniqueCategories);
       }
     } catch (error) {
@@ -141,7 +159,12 @@ function DoctorConsultation() {
           followUp,
         };
       }
-      return { greeting: "", approvalMessage: content || "", advice: "", followUp: "" };
+      return {
+        greeting: "",
+        approvalMessage: content || "",
+        advice: "",
+        followUp: "",
+      };
     }
   };
 
@@ -154,7 +177,10 @@ function DoctorConsultation() {
       }
       const parsedResponses = responses.map((item) => ({
         ...item,
-        content: typeof item.content === "string" ? parseContentToObject(item.content) : item.content,
+        content:
+          typeof item.content === "string"
+            ? parseContentToObject(item.content)
+            : item.content,
       }));
       setConsultationResponses(parsedResponses);
 
@@ -162,12 +188,17 @@ function DoctorConsultation() {
       for (const response of parsedResponses) {
         if (response.requestId) {
           try {
-            const requestRes = await doctorApi.getConsultationRequestsById(response.requestId);
+            const requestRes = await doctorApi.getConsultationRequestsById(
+              response.requestId
+            );
             if (requestRes?.data) {
               requests[response.requestId] = requestRes.data;
             }
           } catch (error) {
-            console.error(`Error fetching request ${response.requestId}:`, error);
+            console.error(
+              `Error fetching request ${response.requestId}:`,
+              error
+            );
           }
         }
       }
@@ -205,13 +236,13 @@ function DoctorConsultation() {
       setSubmitError(null);
       const memberId = localStorage.getItem("memberId");
       if (!memberId) {
-        throw new Error("Vui lòng đăng nhập để tiếp tục");
+        throw new Error("Please login to continue");
       }
       if (!selectedChild) {
-        throw new Error("Vui lòng chọn trẻ");
+        throw new Error("Please select a child");
       }
       if (!selectedDoctor) {
-        throw new Error("Vui lòng chọn bác sĩ");
+        throw new Error("Please select a doctor");
       }
       const currentDate = new Date();
       const requestDate =
@@ -245,8 +276,8 @@ function DoctorConsultation() {
     } catch (error) {
       setSubmitError(
         error.response?.data?.title ||
-        error.message ||
-        "Không thể gửi yêu cầu tư vấn"
+          error.message ||
+          "Unable to send consultation request"
       );
     } finally {
       setSubmitLoading(false);
@@ -258,7 +289,9 @@ function DoctorConsultation() {
       case 0:
         return (
           <div className="doctor-consultation-form">
-            <h3 className="doctor-section-title">Enter Consultation Information</h3>
+            <h3 className="doctor-section-title">
+              Enter Consultation Information
+            </h3>
             <div className="form-container">
               <div className="input-group">
                 <label htmlFor="child-select">Select Child</label>
@@ -270,7 +303,9 @@ function DoctorConsultation() {
                 ) : error ? (
                   <div className="error-state">
                     <p>{error}</p>
-                    <button onClick={fetchChildren} className="retry-button">Retry</button>
+                    <button onClick={fetchChildren} className="retry-button">
+                      Retry
+                    </button>
                   </div>
                 ) : children.length === 0 ? (
                   <p>No children found</p>
@@ -279,11 +314,17 @@ function DoctorConsultation() {
                     id="child-select"
                     className="doctor-child-select"
                     value={selectedChild?.name || ""}
-                    onChange={(e) => handleChildSelect(children.find(child => child.name === e.target.value))}
+                    onChange={(e) =>
+                      handleChildSelect(
+                        children.find((child) => child.name === e.target.value)
+                      )
+                    }
                   >
                     <option value="">Select a child</option>
                     {children.map((child) => (
-                      <option key={child.name} value={child.name}>{child.name}</option>
+                      <option key={child.name} value={child.name}>
+                        {child.name}
+                      </option>
                     ))}
                   </select>
                 )}
@@ -303,7 +344,9 @@ function DoctorConsultation() {
                   <option value="Psychology">Psychology</option>
                   <option value="Other">Other</option>
                 </select>
-                {loadingCategories && <span className="loading-spinner-small"></span>}
+                {loadingCategories && (
+                  <span className="loading-spinner-small"></span>
+                )}
               </div>
               <div className="input-group">
                 <label htmlFor="urgency-select">Urgency</label>
@@ -336,7 +379,11 @@ function DoctorConsultation() {
               {doctors.map((doctor) => (
                 <div
                   key={doctor.doctorId}
-                  className={`doctor-card ${selectedDoctor?.doctorId === doctor.doctorId ? "selected" : ""}`}
+                  className={`doctor-card ${
+                    selectedDoctor?.doctorId === doctor.doctorId
+                      ? "selected"
+                      : ""
+                  }`}
                   onClick={() => setSelectedDoctor(doctor)}
                 >
                   <div className="doctor-avatar">
@@ -355,9 +402,13 @@ function DoctorConsultation() {
                     <p className="doctor-hospital">{doctor.hospitalName}</p>
                     {Array.isArray(doctorSpecializations[doctor.doctorId]) && (
                       <div className="doctor-specializations">
-                        {doctorSpecializations[doctor.doctorId].map((spec, index) => (
-                          <p key={index} className="doctor-specialization">{spec.name}</p>
-                        ))}
+                        {doctorSpecializations[doctor.doctorId].map(
+                          (spec, index) => (
+                            <p key={index} className="doctor-specialization">
+                              {spec.name}
+                            </p>
+                          )
+                        )}
                       </div>
                     )}
                   </div>
@@ -369,7 +420,9 @@ function DoctorConsultation() {
       case 2:
         return (
           <div className="doctor-review-container">
-            <h3 className="doctor-section-title">Review Consultation Information</h3>
+            <h3 className="doctor-section-title">
+              Review Consultation Information
+            </h3>
             <div className="review-section">
               <div className="review-item">
                 <strong>Child:</strong> {selectedChild?.name || "Not selected"}
@@ -402,18 +455,35 @@ function DoctorConsultation() {
                       className="doctor-profile-avatar"
                     />
                     <div className="doctor-profile-info">
-                      <h4 className="doctor-profile-name">{selectedDoctor.name}</h4>
-                      <span className="doctor-profile-status">{selectedDoctor.status}</span>
+                      <h4 className="doctor-profile-name">
+                        {selectedDoctor.name}
+                      </h4>
+                      <span className="doctor-profile-status">
+                        {selectedDoctor.status}
+                      </span>
                     </div>
                   </div>
                   <div className="doctor-profile-details">
-                    <p className="doctor-profile-degree">{selectedDoctor.degree}</p>
-                    <p className="doctor-profile-hospital">{selectedDoctor.hospitalName}</p>
-                    {Array.isArray(doctorSpecializations[selectedDoctor.doctorId]) && (
+                    <p className="doctor-profile-degree">
+                      {selectedDoctor.degree}
+                    </p>
+                    <p className="doctor-profile-hospital">
+                      {selectedDoctor.hospitalName}
+                    </p>
+                    {Array.isArray(
+                      doctorSpecializations[selectedDoctor.doctorId]
+                    ) && (
                       <div className="doctor-specializations">
-                        {doctorSpecializations[selectedDoctor.doctorId].map((spec, index) => (
-                          <p key={index} className="doctor-profile-specialization">{spec.name}</p>
-                        ))}
+                        {doctorSpecializations[selectedDoctor.doctorId].map(
+                          (spec, index) => (
+                            <p
+                              key={index}
+                              className="doctor-profile-specialization"
+                            >
+                              {spec.name}
+                            </p>
+                          )
+                        )}
                       </div>
                     )}
                   </div>
@@ -427,7 +497,7 @@ function DoctorConsultation() {
                 onClick={handleSubmit}
                 disabled={submitLoading}
               >
-                {submitLoading ? "Đang gửi..." : "Complete"}
+                {submitLoading ? "Sending..." : "Complete"}
               </button>
             </div>
           </div>
@@ -446,8 +516,9 @@ function DoctorConsultation() {
               {steps.map((step, index) => (
                 <div
                   key={index}
-                  className={`doctor-step-item ${currentStep === index ? "active" : ""} ${currentStep > index ? "completed" : ""
-                    }`}
+                  className={`doctor-step-item ${
+                    currentStep === index ? "active" : ""
+                  } ${currentStep > index ? "completed" : ""}`}
                 >
                   <div className="step-circle">{index + 1}</div>
                   <span className="step-label">{step}</span>
@@ -458,12 +529,18 @@ function DoctorConsultation() {
               {renderStepContent()}
               <div className="doctor-navigation-buttons">
                 {currentStep > 0 && (
-                  <button className="doctor-back-button" onClick={handleBackStep}>
+                  <button
+                    className="doctor-back-button"
+                    onClick={handleBackStep}
+                  >
                     Back
                   </button>
                 )}
                 {currentStep < steps.length - 1 && (
-                  <button className="doctor-next-button" onClick={handleNextStep}>
+                  <button
+                    className="doctor-next-button"
+                    onClick={handleNextStep}
+                  >
                     Next
                   </button>
                 )}
@@ -492,9 +569,15 @@ function DoctorConsultation() {
       </div>
 
       {selectedResponse && (
-        <div className="modal-overlay" onClick={() => setSelectedResponse(null)}>
+        <div
+          className="modal-overlay"
+          onClick={() => setSelectedResponse(null)}
+        >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedResponse(null)}>
+            <button
+              className="modal-close"
+              onClick={() => setSelectedResponse(null)}
+            >
               ×
             </button>
             <div className="response-details">
@@ -503,12 +586,30 @@ function DoctorConsultation() {
                 <h4>Request Information</h4>
                 {selectedResponse.request ? (
                   <>
-                    <p><strong>Member:</strong> {selectedResponse.request.memberName}</p>
-                    <p><strong>Child:</strong> {selectedResponse.request.childName}</p>
-                    <p><strong>Category:</strong> {selectedResponse.request.category}</p>
-                    <p><strong>Urgency:</strong> {selectedResponse.request.urgency}</p>
-                    <p><strong>Description:</strong> {selectedResponse.request.description}</p>
-                    <p><strong>Request Date:</strong> {selectedResponse.request.requestDate}</p>
+                    <p>
+                      <strong>Member:</strong>{" "}
+                      {selectedResponse.request.memberName}
+                    </p>
+                    <p>
+                      <strong>Child:</strong>{" "}
+                      {selectedResponse.request.childName}
+                    </p>
+                    <p>
+                      <strong>Category:</strong>{" "}
+                      {selectedResponse.request.category}
+                    </p>
+                    <p>
+                      <strong>Urgency:</strong>{" "}
+                      {selectedResponse.request.urgency}
+                    </p>
+                    <p>
+                      <strong>Description:</strong>{" "}
+                      {selectedResponse.request.description}
+                    </p>
+                    <p>
+                      <strong>Request Date:</strong>{" "}
+                      {selectedResponse.request.requestDate}
+                    </p>
                   </>
                 ) : (
                   <p>No request details available.</p>
@@ -516,14 +617,37 @@ function DoctorConsultation() {
               </div>
               <div className="response-section">
                 <h4>Response Information</h4>
-                <p><strong>Date:</strong> {selectedResponse.response.responseDate}</p>
-                <p><strong>Doctor:</strong> {selectedResponse.response.doctorName}</p>
-                <p><strong>Status:</strong> {selectedResponse.response.status}</p>
-                <p><strong>Greeting:</strong> {selectedResponse.response.content.greeting || "N/A"}</p>
-                <p><strong>Approval Message:</strong> {selectedResponse.response.content.approvalMessage || "N/A"}</p>
-                <p><strong>Advice:</strong> {selectedResponse.response.content.advice || "N/A"}</p>
-                <p><strong>Follow-Up:</strong> {selectedResponse.response.content.followUp || "N/A"}</p>
-                <p><strong>Helpful:</strong> {selectedResponse.response.isHelpful ? "Yes" : "No"}</p>
+                <p>
+                  <strong>Date:</strong>{" "}
+                  {selectedResponse.response.responseDate}
+                </p>
+                <p>
+                  <strong>Doctor:</strong>{" "}
+                  {selectedResponse.response.doctorName}
+                </p>
+                <p>
+                  <strong>Status:</strong> {selectedResponse.response.status}
+                </p>
+                <p>
+                  <strong>Greeting:</strong>{" "}
+                  {selectedResponse.response.content.greeting || "N/A"}
+                </p>
+                <p>
+                  <strong>Approval Message:</strong>{" "}
+                  {selectedResponse.response.content.approvalMessage || "N/A"}
+                </p>
+                <p>
+                  <strong>Advice:</strong>{" "}
+                  {selectedResponse.response.content.advice || "N/A"}
+                </p>
+                <p>
+                  <strong>Follow-Up:</strong>{" "}
+                  {selectedResponse.response.content.followUp || "N/A"}
+                </p>
+                <p>
+                  <strong>Helpful:</strong>{" "}
+                  {selectedResponse.response.isHelpful ? "Yes" : "No"}
+                </p>
               </div>
             </div>
           </div>
@@ -531,19 +655,31 @@ function DoctorConsultation() {
       )}
 
       {showSuccessModal && (
-        <div className="modal-overlay" onClick={() => setShowSuccessModal(false)}>
-          <div className="success-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="modal-overlay"
+          onClick={() => setShowSuccessModal(false)}
+        >
+          <div
+            className="success-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="success-modal-header">
-              <h3>Thành Công!</h3>
-              <button className="modal-close" onClick={() => setShowSuccessModal(false)}>
+              <h3>Success!</h3>
+              <button
+                className="modal-close"
+                onClick={() => setShowSuccessModal(false)}
+              >
                 ×
               </button>
             </div>
             <div className="success-modal-body">
-              <p>Gửi yêu cầu tư vấn thành công!</p>
+              <p>Consultation request sent successfully!</p>
             </div>
             <div className="success-modal-footer">
-              <button className="success-modal-button" onClick={() => setShowSuccessModal(false)}>
+              <button
+                className="success-modal-button"
+                onClick={() => setShowSuccessModal(false)}
+              >
                 OK
               </button>
             </div>

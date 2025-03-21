@@ -37,7 +37,7 @@ function ChildrenPage() {
 
   //const alert 
   const [latestAlert, setLatestAlert] = useState(null);
-  
+
   function AlertItem({ alert }) {
     const [expanded, setExpanded] = useState(false);
     const limit = 80;
@@ -45,12 +45,12 @@ function ChildrenPage() {
       if (!text) return "";
       return text.length > limit ? text.slice(0, limit) + "..." : text;
     };
-  
+
     const messageShort = truncate(alert.message);
-  
+
     const openOverlay = () => setExpanded(true);
     const closeOverlay = () => setExpanded(false);
-  
+
     // Xác định lớp CSS dựa theo severityLevel
     function getSeverityClass(level) {
       switch (level?.toLowerCase()) {
@@ -64,13 +64,13 @@ function ChildrenPage() {
           return "healthy";
       }
     }
-  
+
     // Nếu severity là medium hoặc high, áp dụng thêm lớp fadeable
     const additionalClass =
       ["medium", "high"].includes(alert.severityLevel?.toLowerCase())
         ? "fadeable"
         : "";
-  
+
     return (
       <>
         <div
@@ -82,7 +82,7 @@ function ChildrenPage() {
         >
           <p>Your child has {alert.severityLevel} alert warning</p>
         </div>
-  
+
         {expanded && (
           <div className="modal-overlay" onClick={closeOverlay}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -97,40 +97,40 @@ function ChildrenPage() {
       </>
     );
   }
-  
-  
+
+
   // Lấy memberId từ localStorage
   const memberId = localStorage.getItem("memberId");
 
- // Gọi alert khi thay đổi selectedChild
- useEffect(() => {
-  if (selectedChild && memberId) {
-    alertApi
-      .getAlert(selectedChild.name, selectedChild.dateOfBirth, memberId)
-      .then((res) => {
-        if (res.data && Array.isArray(res.data.data)) {
-          const alerts = res.data.data;
+  // Gọi alert khi thay đổi selectedChild
+  useEffect(() => {
+    if (selectedChild && memberId) {
+      alertApi
+        .getAlert(selectedChild.name, selectedChild.dateOfBirth, memberId)
+        .then((res) => {
+          if (res.data && Array.isArray(res.data.data)) {
+            const alerts = res.data.data;
 
-          // 1) Sắp xếp theo alertDate giảm dần
-          alerts.sort((a, b) => new Date(b.alertDate) - new Date(a.alertDate));
+            // 1) Sắp xếp theo alertDate giảm dần
+            alerts.sort((a, b) => new Date(b.alertDate) - new Date(a.alertDate));
 
-          // 2) Tìm alert đầu tiên có isRead = false
-          const newestUnread = alerts.find((alert) => alert.isRead === false);
+            // 2) Tìm alert đầu tiên có isRead = false
+            const newestUnread = alerts.find((alert) => alert.isRead === false);
 
-          // 3) Nếu không có, set null
-          setLatestAlert(newestUnread || null);
-        } else {
+            // 3) Nếu không có, set null
+            setLatestAlert(newestUnread || null);
+          } else {
+            setLatestAlert(null);
+          }
+        })
+        .catch((err) => {
+          console.error(err);
           setLatestAlert(null);
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        setLatestAlert(null);
-      });
-  } else {
-    setLatestAlert(null);
-  }
-}, [selectedChild, memberId]);
+        });
+    } else {
+      setLatestAlert(null);
+    }
+  }, [selectedChild, memberId]);
 
 
   // Kiểm tra memberId khi component mount
@@ -145,11 +145,11 @@ function ChildrenPage() {
   // Add isLoading state
   const [isLoading, setIsLoading] = useState(true);
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
-  
+
   // Update the useEffect that fetches children data
   useEffect(() => {
     if (!memberId) return;
-  
+
     setIsLoading(true);
     childApi.getByMember(memberId)
       .then((response) => {
@@ -173,8 +173,8 @@ function ChildrenPage() {
       .finally(() => {
         setIsLoading(false);
       });
-    }, [memberId]);
-  
+  }, [memberId]);
+
   // Update the handleSelectChild function
   const handleSelectChild = async (child) => {
     setIsLoading(true);
@@ -183,26 +183,26 @@ function ChildrenPage() {
       console.log("Child: " + response)
       console.log("Lấy thông tin chi tiết của trẻ:", response.data);
       setSelectedChild(response.data.data);
-  
+
       // Lấy dữ liệu growth record mới nhất
       try {
         const parentName = localStorage.getItem("name");
         const growthRecordsResponse = await childApi.getGrowthRecords(child.name, parentName);
         console.log("Growth Records Response:", growthRecordsResponse);
-  
+
         if (growthRecordsResponse.data) {
           let records = Array.isArray(growthRecordsResponse.data)
             ? growthRecordsResponse.data
             : [growthRecordsResponse.data];
-  
+
           // Lọc bỏ các record không có weight hoặc height
           records = records.filter(record => record && (record.weight || record.height));
-  
+
           // Sắp xếp theo thời gian gần nhất
           records.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  
+
           setGrowthRecords(records); // Cập nhật state growthRecords
-  
+
           if (records.length > 0) {
             // Lấy record mới nhất
             const latestRecord = records[0];
@@ -234,44 +234,55 @@ function ChildrenPage() {
       // 1) Gọi API lấy thông tin gói membership
       const membershipRes = await memberShipApi.getMemberMembership(memberId);
       const membershipData = membershipRes.data?.data;
-  
-      // 2) Giả sử membershipData có trường membershipPackageName = 'Free' | 'Standard' | 'Premium'
-      const membershipPackage = membershipData?.PackageName; 
-      // Hoặc tuỳ API trả về, bạn thay đổi key cho đúng
-  
-      // 3) Xác định giới hạn trẻ
+
+      // 2) Lọc ra gói đang hoạt động (status: "Active" và isActive: true)
+      const activeMembership = Array.isArray(membershipData)
+        ? membershipData.find(
+          (membership) => membership.status === "Active" && membership.isActive === true
+        )
+        : membershipData?.status === "Active" && membershipData?.isActive === true
+          ? membershipData
+          : null;
+
+      if (!activeMembership) {
+        alert("No active membership found. Please activate a membership plan.");
+        return;
+      }
+
+      // 3) Lấy packageName từ gói đang hoạt động
+      const membershipPackage = activeMembership.packageName;
+
+      // 4) Xác định giới hạn trẻ dựa trên gói
       let maxChildren = 1; // Mặc định Free = 1
       if (membershipPackage === "Standard") {
         maxChildren = 2;
       } else if (membershipPackage === "Premium") {
         maxChildren = 6;
       }
-      // (Nếu membershipPackage là "Free", maxChildren giữ nguyên = 1)
-  
-      // 4) Kiểm tra số trẻ hiện tại
-      if (childrenList.length >= maxChildren) {
-        alert(`You have reached the limit of ${maxChildren} children for the ${membershipPackage} plan. Please upgrade your plan.`);
 
+      // 5) Kiểm tra số trẻ hiện tại
+      if (childrenList.length >= maxChildren) {
+        alert(
+          `You have reached the limit of ${maxChildren} children for the ${membershipPackage} plan. Please upgrade your plan.`
+        );
         return; // Không cho thêm
       }
-  
-      // 5) Nếu còn slot, mở modal thêm trẻ
+
+      // 6) Nếu còn slot, mở modal thêm trẻ
       setShowAddChildModal(true);
-  
     } catch (error) {
       console.error("Error checking membership plan:", error);
-      // Tuỳ ý xử lý thêm, ví dụ alert
       alert("Unable to check membership package. Please try again.");
     }
   };
-  
+
 
   const closeOverlay = () => {
     setShowAddChildModal(false);
   };
 
   const [selectedTool, setSelectedTool] = useState("BMI");
- 
+
 
   // State to control the AddRecord overlay
   const [showAddRecordModal, setShowAddRecordModal] = useState(false);
@@ -465,13 +476,13 @@ function ChildrenPage() {
             </span>
           </div>
         </div>
-        <button 
-            className="connect-doctor-button" 
-            onClick={() => navigate("/member/doctor-consultation")}
-          >
-            <i className="fas fa-stethoscope"></i>
-            Connect to doctor
-          </button>
+        <button
+          className="connect-doctor-button"
+          onClick={() => navigate("/member/doctor-consultation")}
+        >
+          <i className="fas fa-stethoscope"></i>
+          Connect to doctor
+        </button>
         <button className="analyze-ai-btn" onClick={() => console.log('AI Analysis coming soon')}>
           <i className="fas fa-robot"></i>
           Analyze with AI
@@ -493,8 +504,8 @@ function ChildrenPage() {
             <h2>Welcome to <span className="highlight">BabyHaven</span>, let's start</h2>
             <h2>your journey here with your baby.</h2>
           </div>
-          <button 
-            className="add-first-child-button" 
+          <button
+            className="add-first-child-button"
             onClick={handleAddChild}
           >
             Add your first child's informations
@@ -552,12 +563,12 @@ function ChildrenPage() {
                   <div className="detail-row">
                     <span className="detail-label">Date of Birth:</span>
                     <span className="detail-value">
-                      {selectedChild.dateOfBirth 
+                      {selectedChild.dateOfBirth
                         ? new Date(selectedChild.dateOfBirth).toLocaleDateString('en-GB', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                          })
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric'
+                        })
                         : 'Not set'}
                     </span>
                   </div>
@@ -574,14 +585,14 @@ function ChildrenPage() {
 
           {/* Milestone section */}
           <div className="milestone-section">
-          <div className="milestone-content">
-            Want to track every precious milestone of your little one?
+            <div className="milestone-content">
+              Want to track every precious milestone of your little one?
+            </div>
+            <AddMilestoneButton
+              onClick={handleShowMilestoneModal}
+              disabled={!selectedChild}
+            />
           </div>
-          <AddMilestoneButton
-            onClick={handleShowMilestoneModal}
-            disabled={!selectedChild}
-          />
-        </div>
 
           {/* Latest Record Section */}
           <div className="latest-record-section">
@@ -668,6 +679,7 @@ function ChildrenPage() {
                     selectedTool={selectedTool}
                     onRecordSelect={setSelectedRecord}
                     refreshTrigger={refreshTrigger}
+                    dateOfbirth={selectedChild.dateOfBirth}
                   />
                 </>
               ) : (
@@ -724,17 +736,17 @@ function ChildrenPage() {
         />
       )}
       {showAddMilestoneModal && (
-  <AddMilestone
-    child={selectedChild}
-    memberId={memberId}
-    closeOverlay={closeMilestoneOverlay}
-    onSuccess={() => {
-      // refresh dữ liệu nếu cần
-    }}
-  />
-)}
+        <AddMilestone
+          child={selectedChild}
+          memberId={memberId}
+          closeOverlay={closeMilestoneOverlay}
+          onSuccess={() => {
+            // refresh dữ liệu nếu cần
+          }}
+        />
+      )}
     </div>
-  );  
+  );
 }
 
 export default ChildrenPage;
