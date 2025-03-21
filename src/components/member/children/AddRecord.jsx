@@ -6,7 +6,6 @@ import childApi from "../../../services/childApi";
 import "./AddRecord.css";
 import calculateBMI from "../../../services/bmiUtils";
 import BabyGrowth from "../../../assets/baby_growth.png";
-import Confirm from "./common/buttons/Confirm";
 
 const AddRecord = ({ child, memberId, closeOverlay }) => {
   if (!child) {
@@ -130,7 +129,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     [closeOverlay]
   );
 
-  
+
 
   const [currentStep, setCurrentStep] = useState(1);
   // Bỏ subStep2 vì không sử dụng
@@ -165,8 +164,15 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     const ageInMonths = calculateAgeInMonths(child.dateOfBirth);
     const newErrors = {};
 
-    if (!form.createdAt) {
+    const selectedDate = new Date(growthForm.createdAt);
+    const today = new Date(); // Ngày hiện tại: 20/03/2025
+    today.setHours(0, 0, 0, 0); // Đặt về đầu ngày
+    selectedDate.setHours(0, 0, 0, 0); // Đặt ngày được chọn về đầu ngày
+
+    if (!growthForm.createdAt) {
       newErrors.createdAt = "Please select date";
+    } else if (selectedDate > today) {
+      newErrors.createdAt = "Cannot select a future date";
     } else {
       newErrors.createdAt = "";
     }
@@ -332,13 +338,35 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
             </div>
           </div>
 
+          {/* Date Section */}
           <div className="form-section date-section">
             <h4>Record Date</h4>
             <input
               type="date"
-              name="createdAt"
               value={growthForm.createdAt || ""}
-              onChange={handleChange}
+              onChange={(e) => {
+                const selectedDate = new Date(e.target.value);
+                const today = new Date(); // Ngày hiện tại: 20/03/2025
+                today.setHours(0, 0, 0, 0); // Đặt về đầu ngày để so sánh chính xác
+                selectedDate.setHours(0, 0, 0, 0); // Đặt ngày được chọn về đầu ngày
+
+                if (selectedDate > today) {
+                  setErrors((prev) => ({
+                    ...prev,
+                    createdAt: "Cannot select a future date",
+                  }));
+                } else {
+                  setErrors((prev) => ({
+                    ...prev,
+                    createdAt: "",
+                  }));
+                  setGrowthForm((prev) => ({
+                    ...prev,
+                    createdAt: e.target.value,
+                  }));
+                }
+              }}
+              max={new Date().toISOString().split("T")[0]} // Giới hạn tối đa là ngày hiện tại (20/03/2025)
               className={errors.createdAt ? "error-input" : ""}
             />
             {errors.createdAt && <p className="error-text">{errors.createdAt}</p>}
@@ -740,7 +768,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
   return (
     <div className="add-record-overlay" onClick={handleClose}>
       <div className="add-record-wizard" onClick={(e) => e.stopPropagation()}>
-      <button className="close-button-record" onClick={handleClose}>
+        <button className="close-button-record" onClick={handleClose}>
           ×
         </button>
         <div className="wizard-left">
@@ -756,13 +784,12 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
             <div className="step-progress">
               <div className="step-item">
                 <div
-                  className={`step-circle ${
-                    currentStep > 1
-                      ? "completed"
-                      : currentStep === 1
+                  className={`step-circle ${currentStep > 1
+                    ? "completed"
+                    : currentStep === 1
                       ? "active"
                       : ""
-                  }`}
+                    }`}
                 >
                   {currentStep > 1 ? <span className="checkmark">✓</span> : "1"}
                 </div>
@@ -771,13 +798,12 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               <div className="step-connector"></div>
               <div className="step-item">
                 <div
-                  className={`step-circle ${
-                    currentStep > 2
-                      ? "completed"
-                      : currentStep === 2
+                  className={`step-circle ${currentStep > 2
+                    ? "completed"
+                    : currentStep === 2
                       ? "active"
                       : ""
-                  }`}
+                    }`}
                 >
                   {currentStep > 2 ? <span className="checkmark">✓</span> : "2"}
                 </div>
