@@ -3,6 +3,7 @@ import './Home.css';
 import Doctor from "../../../assets/doctor.jpg";
 import { FaSearch, FaBell, FaCog } from 'react-icons/fa';
 import doctorApi from '../../../services/DoctorApi';
+import DoctorCalendar from './DoctorCalendar'; // Import DoctorCalendar
 
 const Home = () => {
   const [currentDateTime, setCurrentDateTime] = useState('');
@@ -28,25 +29,22 @@ const Home = () => {
   useEffect(() => {
     const fetchDoctorInfo = async () => {
       try {
-        // Lấy userId từ localStorage
         const userId = localStorage.getItem('userId');
         if (!userId) {
           console.error('UserId not found in localStorage');
           return;
         }
 
-        // Gọi API để lấy thông tin bác sĩ theo userId
         const doctorResponse = await doctorApi.getDoctorByUserId(userId);
-        const doctor = doctorResponse.data; // Assuming the API returns { data: {...} }
+        const doctor = doctorResponse.data;
 
         if (!doctor) {
           console.error('Doctor not found for this userId:', userId);
           return;
         }
 
-        // Lưu doctorId vào localStorage
         localStorage.setItem('doctorId', doctor.doctorId);
-        setDoctorInfo(doctor); // Lưu thông tin bác sĩ để hiển thị
+        setDoctorInfo(doctor);
       } catch (error) {
         console.error('Error fetching doctor:', error);
       }
@@ -100,6 +98,7 @@ const Home = () => {
             <p className="stat-change neutral">+0% than last month</p>
           </div>
         </div>
+
         {/* Scheduled Events & Plans Done */}
         <div className="events-plans">
           <div className="scheduled-events-doctor">
@@ -160,18 +159,7 @@ const Home = () => {
         <div className="calendar-schedule">
           <div className="calendar-section-doctor">
             <h4>My Calendar</h4>
-            <div className="calendar-days-doctor">
-              <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-            </div>
-            <div className="calendar-dates-doctor">
-              <span>12</span>
-              <span className="current-day-doctor">13</span>
-              <span>14</span>
-              <span>15</span>
-              <span>16</span>
-              <span>17</span>
-              <span>18</span>
-            </div>
+            <DoctorCalendar /> {/* Thêm DoctorCalendar */}
           </div>
 
           <div className="detailed-schedule-doctor">
