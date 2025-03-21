@@ -53,16 +53,26 @@ const DoctorBlog = () => {
   const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const email = localStorage.getItem("email");
-      const response = await blogApi.getAll();
+      const userId = localStorage.getItem("userId");
+      const response = await axios.get(
+        "https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/Blog"
+      );
       if (response.data.status === 1) {
         const doctorBlogs = response.data.data.filter(
-          (blog) => blog.email === email
+          (blog) => blog.authorId === userId
         );
-        setBlogs(doctorBlogs.map((blog) => ({ ...blog, key: blog.blogId })));
+        setBlogs(
+          doctorBlogs.map((blog) => ({
+            ...blog,
+            key: blog.blogId,
+            status:
+              blog.status === "Approved" ? 1 : blog.status === "Draft" ? 0 : 2,
+          }))
+        );
       }
     } catch (error) {
       message.error("Không thể tải danh sách bài viết");
+      console.error("Lỗi khi tải blog:", error);
     } finally {
       setLoading(false);
     }
@@ -100,8 +110,8 @@ const DoctorBlog = () => {
   const handleSubmit = async (values) => {
     try {
       setLoading(true);
-      const email = localStorage.getItem("email");
-      if (!email) {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
         message.error("Vui lòng đăng nhập lại");
         return;
       }
@@ -109,22 +119,33 @@ const DoctorBlog = () => {
       const blogData = {
         title: values.title,
         content: content,
-        email: email,
+        authorId: userId,
         categoryName: values.categoryName,
         imageBlog: values.imageBlog || "",
         tags: values.tags || "",
         referenceSources: values.referenceSources || "",
-        status: 0, // Pending approval
+        status: "Draft", // Mặc định là Draft khi tạo hoặc cập nhật
       };
 
-      await blogApi.create(blogData);
-      message.success("Tạo bài viết mới thành công");
+      if (values.blogId) {
+        // Đây là cập nhật blog đã tồn tại
+        await blogApi.update(values.blogId, blogData);
+        message.success("Cập nhật bài viết thành công");
+      } else {
+        // Đây là tạo blog mới
+        await blogApi.create(blogData);
+        message.success("Tạo bài viết mới thành công");
+      }
+
       form.resetFields();
       setContent("");
       fetchBlogs();
       setActiveTab("2");
     } catch (error) {
-      message.error("Không thể lưu bài viết");
+      message.error(
+        values.blogId ? "Không thể cập nhật bài viết" : "Không thể lưu bài viết"
+      );
+      console.error("Lỗi:", error);
     } finally {
       setLoading(false);
     }
@@ -132,11 +153,19 @@ const DoctorBlog = () => {
 
   const handleDelete = async (blogId) => {
     try {
-      await blogApi.delete(blogId);
-      message.success("Xóa bài viết thành công");
-      fetchBlogs();
+      const response = await axios.delete(
+        `https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/Blog/${blogId}`
+      );
+
+      if (response.data.status === 1) {
+        message.success("Xóa bài viết thành công");
+        fetchBlogs();
+      } else {
+        message.error(response.data.message || "Xóa bài viết không thành công");
+      }
     } catch (error) {
       message.error("Không thể xóa bài viết");
+      console.error("Lỗi khi xóa blog:", error);
     }
   };
 
@@ -157,17 +186,38 @@ const DoctorBlog = () => {
       dataIndex: "status",
       key: "status",
       render: (status) => {
-        const statusColors = {
-          0: "orange",
-          1: "green",
-          2: "red",
-        };
-        const statusText = {
-          0: "Chờ duyệt",
-          1: "Đã duyệt",
-          2: "Từ chối",
-        };
-        return <Tag color={statusColors[status]}>{statusText[status]}</Tag>;
+        let color = "default";
+        let text = "Không xác định";
+
+        if (typeof status === "string") {
+          // Nếu status là chuỗi từ API
+          if (status === "Approved") {
+            color = "green";
+            text = "Đã duyệt";
+          } else if (status === "Draft") {
+            color = "orange";
+            text = "Chờ duyệt";
+          } else if (status === "Rejected") {
+            color = "red";
+            text = "Từ chối";
+          }
+        } else {
+          // Nếu status là số từ hệ thống cũ
+          const statusColors = {
+            0: "orange",
+            1: "green",
+            2: "red",
+          };
+          const statusText = {
+            0: "Chờ duyệt",
+            1: "Đã duyệt",
+            2: "Từ chối",
+          };
+          color = statusColors[status] || "default";
+          text = statusText[status] || "Không xác định";
+        }
+
+        return <Tag color={color}>{text}</Tag>;
       },
     },
     {
@@ -185,9 +235,10 @@ const DoctorBlog = () => {
                 categoryName: record.categoryName,
                 imageBlog: record.imageBlog,
                 tags: record.tags,
-                referenceSources: record.referenceSources,
+                referenceSources: record.referenceSources || "",
               });
               setContent(record.content);
+              form.setFieldsValue({ blogId: record.blogId });
             }}
           >
             Sửa
@@ -219,6 +270,9 @@ const DoctorBlog = () => {
                 onFinish={handleSubmit}
                 className="blog-form"
               >
+                <Form.Item name="blogId" hidden>
+                  <Input />
+                </Form.Item>
                 <div className="input-row">
                   <Form.Item
                     name="title"
