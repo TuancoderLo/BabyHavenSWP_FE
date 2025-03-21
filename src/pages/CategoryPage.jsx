@@ -335,7 +335,7 @@ function CategoryPage() {
                           handleReadMore(blog);
                         }}
                       >
-                        Đọc thêm
+                        Read more
                       </button>
                     </div>
                   </div>
@@ -350,7 +350,7 @@ function CategoryPage() {
                   disabled={currentPage === 1}
                   className="pagination-btn"
                 >
-                  Trước
+                  Previous
                 </button>
 
                 {[...Array(totalPages)].map((_, index) => (
