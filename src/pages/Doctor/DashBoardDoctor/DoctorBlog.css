@@ -1,10 +1,10 @@
-.doctor-blog-container {
+.doc-blog-container {
   background: linear-gradient(135deg, #f5f7fa 0%, #eef2f7 100%);
   padding: 24px;
   min-height: 100vh;
 }
 
-.doctor-blog-card {
+.doc-blog-card {
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
@@ -13,7 +13,7 @@
   overflow: hidden;
 }
 
-.doctor-blog-title {
+.doc-blog-title {
   color: #2c3e50;
   margin-bottom: 32px;
   font-weight: 700;
@@ -23,7 +23,7 @@
   letter-spacing: -0.5px;
 }
 
-.doctor-blog-title::before {
+.doc-blog-title::before {
   content: "";
   position: absolute;
   left: 0;
@@ -34,11 +34,11 @@
   border-radius: 8px;
 }
 
-.doctor-blog-tabs .ant-tabs-nav {
+.doc-blog-tabs .ant-tabs-nav {
   margin-bottom: 28px;
 }
 
-.doctor-blog-tabs .ant-tabs-tab {
+.doc-blog-tabs .ant-tabs-tab {
   padding: 12px 24px;
   font-size: 16px;
   transition: all 0.3s ease;
@@ -46,27 +46,27 @@
   border-radius: 8px 8px 0 0;
 }
 
-.doctor-blog-tabs .ant-tabs-tab:hover {
+.doc-blog-tabs .ant-tabs-tab:hover {
   color: #0072ff;
 }
 
-.doctor-blog-tabs .ant-tabs-tab.ant-tabs-tab-active {
+.doc-blog-tabs .ant-tabs-tab.ant-tabs-tab-active {
   background-color: #f0f7ff;
 }
 
-.doctor-blog-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+.doc-blog-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
   color: #0072ff;
   font-weight: 600;
 }
 
-.doctor-blog-tabs .ant-tabs-ink-bar {
+.doc-blog-tabs .ant-tabs-ink-bar {
   background: linear-gradient(to right, #00c6ff, #0072ff);
   height: 3px;
   border-radius: 3px;
 }
 
 /* Write Blog Styling */
-.write-blog-container {
+.doc-blog-write-container {
   max-width: 100%;
   margin: 0 auto;
   background-color: #ffffff;
@@ -74,7 +74,7 @@
   padding: 0;
 }
 
-.blog-header-section {
+.doc-blog-header-section {
   background: linear-gradient(120deg, #f8f9fa 0%, #e9f2f9 100%);
   padding: 32px;
   border-radius: 12px;
@@ -83,7 +83,7 @@
   border-left: 5px solid #0072ff;
 }
 
-.blog-title-input {
+.doc-blog-title-input {
   font-size: 22px;
   height: 56px;
   border-radius: 8px;
@@ -93,33 +93,33 @@
   transition: all 0.3s ease;
 }
 
-.blog-title-input:focus,
-.blog-title-input:hover {
+.doc-blog-title-input:focus,
+.doc-blog-title-input:hover {
   border-color: #0072ff;
   box-shadow: 0 0 0 3px rgba(0, 114, 255, 0.1);
 }
 
-.blog-title-input::placeholder {
+.doc-blog-title-input::placeholder {
   color: #a0aec0;
   font-weight: 400;
 }
 
-.blog-main-container {
+.doc-blog-main-container {
   display: flex;
   gap: 28px;
   margin-bottom: 28px;
 }
 
-.blog-left-column {
+.doc-blog-left-column {
   flex: 1;
   max-width: 350px;
 }
 
-.blog-right-column {
+.doc-blog-right-column {
   flex: 3;
 }
 
-.blog-section {
+.doc-blog-section {
   background-color: #ffffff;
   border-radius: 12px;
   margin-bottom: 28px;
@@ -130,7 +130,7 @@
   border: none;
 }
 
-.blog-section::before {
+.doc-blog-section::before {
   content: "";
   position: absolute;
   top: 0;
@@ -140,7 +140,7 @@
   background: linear-gradient(to right, #00c6ff, #0072ff);
 }
 
-.section-title {
+.doc-blog-section-title {
   font-size: 18px;
   font-weight: 600;
   color: #0072ff;
@@ -151,7 +151,7 @@
   align-items: center;
 }
 
-.section-title i {
+.doc-blog-section-title i {
   margin-right: 10px;
   font-size: 20px;
   background: linear-gradient(to right, #00c6ff, #0072ff);
@@ -160,30 +160,30 @@
   -webkit-text-fill-color: transparent;
 }
 
-.blog-content-section .section-title {
+.doc-blog-content-section .doc-blog-section-title {
   color: #00b8ff;
   font-size: 18px;
   font-weight: 600;
 }
 
-.blog-category-section .section-title {
+.doc-blog-category-section .doc-blog-section-title {
   color: #00b8ff;
   font-size: 18px;
   font-weight: 600;
 }
 
-.blog-image-preview .section-title {
+.doc-blog-image-preview .doc-blog-section-title {
   color: #00b8ff;
   font-size: 16px;
   font-weight: 600;
 }
 
-.blog-select {
+.doc-blog-select {
   width: 100%;
   border-radius: 8px;
 }
 
-.blog-select .ant-select-selector {
+.doc-blog-select .ant-select-selector {
   border-radius: 8px;
   border: 1px solid #e2e8f0;
   padding: 10px 12px;
@@ -191,9 +191,9 @@
   background-color: #f8fafc;
 }
 
-.blog-input,
-.blog-select:focus .ant-select-selector,
-.blog-select:hover .ant-select-selector {
+.doc-blog-input,
+.doc-blog-select:focus .ant-select-selector,
+.doc-blog-select:hover .ant-select-selector {
   border-radius: 8px;
   border: 1px solid #e2e8f0;
   padding: 10px 12px;
@@ -201,13 +201,13 @@
   background-color: #f8fafc;
 }
 
-.blog-input:focus,
-.blog-input:hover {
+.doc-blog-input:focus,
+.doc-blog-input:hover {
   border-color: #0072ff;
   box-shadow: 0 0 0 3px rgba(0, 114, 255, 0.1);
 }
 
-.image-preview-container {
+.doc-blog-image-preview-container {
   width: 100%;
   height: 200px;
   border-radius: 8px;
@@ -219,23 +219,23 @@
   border: 1px dashed #d9d9d9;
 }
 
-.preview-image {
+.doc-blog-preview-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.image-placeholder {
+.doc-blog-image-placeholder {
   text-align: center;
   color: #a0a0a0;
 }
 
-.image-placeholder i {
+.doc-blog-image-placeholder i {
   font-size: 32px;
   margin-bottom: 8px;
 }
 
-.blog-editor-wrapper {
+.doc-blog-editor-wrapper {
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   min-height: 500px;
@@ -243,33 +243,33 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
-.status-option {
+.doc-blog-status-option {
   display: flex;
   align-items: center;
   gap: 10px;
   font-weight: 500;
 }
 
-.status-option i {
+.doc-blog-status-option i {
   font-size: 16px;
 }
 
-.status-option.draft {
+.doc-blog-status-option.draft {
   color: #3182ce;
 }
 
-.status-option.pending {
+.doc-blog-status-option.pending {
   color: #dd6b20;
 }
 
-.blog-action-buttons {
+.doc-blog-action-buttons {
   display: flex;
   justify-content: flex-end;
   gap: 16px;
   margin-top: 32px;
 }
 
-.cancel-button {
+.doc-blog-cancel-button {
   padding: 0 28px;
   height: 44px;
   border-radius: 8px;
@@ -281,13 +281,13 @@
   transition: all 0.3s ease;
 }
 
-.cancel-button:hover {
+.doc-blog-cancel-button:hover {
   background-color: #edf2f7;
   color: #2d3748;
   border-color: #cbd5e0;
 }
 
-.submit-button {
+.doc-blog-submit-button {
   padding: 0 32px;
   height: 44px;
   border-radius: 8px;
@@ -300,24 +300,24 @@
   transition: all 0.3s ease;
 }
 
-.submit-button:hover {
+.doc-blog-submit-button:hover {
   background: linear-gradient(to right, #00a6ff, #0062df);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 114, 255, 0.4);
 }
 
-.submit-button:active {
+.doc-blog-submit-button:active {
   transform: translateY(0);
 }
 
 /* Table styling */
-.blog-table {
+.doc-blog-table {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
 }
 
-.blog-table .ant-table-thead > tr > th {
+.doc-blog-table .ant-table-thead > tr > th {
   background-color: #f0f7ff;
   color: #2d3748;
   font-weight: 600;
@@ -325,127 +325,127 @@
   padding: 16px;
 }
 
-.blog-table .ant-table-tbody > tr > td {
+.doc-blog-table .ant-table-tbody > tr > td {
   padding: 16px;
 }
 
-.blog-table .ant-table-tbody > tr:hover > td {
+.doc-blog-table .ant-table-tbody > tr:hover > td {
   background-color: #f8fafc;
 }
 
-.blog-table .ant-pagination {
+.doc-blog-table .ant-pagination {
   margin: 20px 0;
 }
 
 /* Responsive for smaller screens */
 @media (max-width: 1200px) {
-  .blog-left-column {
+  .doc-blog-left-column {
     max-width: 300px;
   }
 }
 
 @media (max-width: 992px) {
-  .blog-main-container {
+  .doc-blog-main-container {
     flex-direction: column;
   }
 
-  .blog-left-column {
+  .doc-blog-left-column {
     max-width: 100%;
   }
 
-  .blog-header-section {
+  .doc-blog-header-section {
     padding: 24px;
   }
 
-  .doctor-blog-title {
+  .doc-blog-title {
     font-size: 24px;
   }
 }
 
 @media (max-width: 576px) {
-  .doctor-blog-container {
+  .doc-blog-container {
     padding: 12px;
   }
 
-  .doctor-blog-card {
+  .doc-blog-card {
     padding: 16px;
   }
 
-  .blog-action-buttons {
+  .doc-blog-action-buttons {
     flex-direction: column;
     gap: 12px;
   }
 
-  .cancel-button,
-  .submit-button {
+  .doc-blog-cancel-button,
+  .doc-blog-submit-button {
     width: 100%;
   }
 }
 
 /* Thêm style cho nút Edit và Delete trong trang danh sách */
-.ant-btn-primary {
+.doc-blog-edit-button {
   background-color: #4eaef7;
   border-color: #4eaef7;
   color: white !important;
 }
 
-.ant-btn-primary:hover,
-.ant-btn-primary:focus {
+.doc-blog-edit-button:hover,
+.doc-blog-edit-button:focus {
   background-color: #3a9eea;
   border-color: #3a9eea;
   color: white !important;
 }
 
-.ant-btn-dangerous {
+.doc-blog-delete-button {
   background-color: #fff;
   border-color: #ff4d4f;
   color: #ff4d4f !important;
 }
 
-.ant-btn-dangerous:hover,
-.ant-btn-dangerous:focus {
+.doc-blog-delete-button:hover,
+.doc-blog-delete-button:focus {
   background-color: #fff1f0;
   border-color: #ff7875;
   color: #ff7875 !important;
 }
 
 /* Thêm hiệu ứng nổi cho các nút */
-.blog-action-buttons .ant-btn {
+.doc-blog-action-buttons .ant-btn {
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.02);
   transition: all 0.3s ease;
 }
 
 /* Tăng độ tương phản cho các label của form */
-.blog-left-column .ant-form-item-label > label {
+.doc-blog-left-column .ant-form-item-label > label {
   font-weight: 500;
   color: #2c3e50;
 }
 
 /* Tăng kích thước và độ rõ cho text label */
-.ant-form-item-label > label {
+.doc-blog-form .ant-form-item-label > label {
   font-size: 15px;
 }
 
 /* Tạo hiệu ứng nổi cho các phần */
-.blog-section:hover {
+.doc-blog-section:hover {
   box-shadow: 0 5px 15px rgba(0, 184, 255, 0.1);
   transform: translateY(-2px);
 }
 
 /* Điều chỉnh lại chiều cao của phần thông tin cơ bản */
-.blog-category-section {
+.doc-blog-category-section {
   min-height: 450px; /* Tăng chiều cao để cân bằng với phần nội dung */
 }
 
 /* Nếu cần, có thể tăng padding cho các form item */
-.blog-left-column .ant-form-item {
+.doc-blog-left-column .ant-form-item {
   margin-bottom: 20px; /* Tăng khoảng cách giữa các form item */
 }
 
 /* Loại bỏ các style liên quan đến phần image preview */
-.blog-image-preview,
-.image-preview-container,
-.preview-image,
-.image-placeholder {
+.doc-blog-image-preview,
+.doc-blog-image-preview-container,
+.doc-blog-preview-image,
+.doc-blog-image-placeholder {
   display: none; /* Ẩn hoàn toàn các phần tử này */
 }

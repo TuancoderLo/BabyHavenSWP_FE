@@ -5,6 +5,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Guest from "./components/guest/Guest";
 import Login from "./components/login/Login";
 import Register from "./components/register/Register";
+import ForgetPassword from "./components/login/ForgetPassword";
+import VerifyEmail from "./components/register/VerifyEmail";
 import CategoryPage from "./pages/CategoryPage";
 import FormatBlog from "./components/topics/FormatBlog";
 
@@ -87,6 +89,8 @@ function App() {
           path="/login"
           element={<Login onLoginSuccess={updateAuthState} />}
         />
+        <Route path="/forget-password" element={<ForgetPassword />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/google-callback" element={<GoogleCallback />} />
         <Route path="/register" element={<Register />} />
         <Route path="/packages" element={<MemberPackages />} />

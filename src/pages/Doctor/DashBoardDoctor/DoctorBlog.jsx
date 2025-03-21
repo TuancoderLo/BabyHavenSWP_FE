@@ -344,30 +344,30 @@ const DoctorBlog = () => {
   ];
 
   return (
-    <div className="doctor-blog-container">
-      <Card bordered={false} className="doctor-blog-card">
-        <Title level={3} className="doctor-blog-title">
+    <div className="doc-blog-container">
+      <Card bordered={false} className="doc-blog-card">
+        <Title level={3} className="doc-blog-title">
           Medical Blog Management
         </Title>
         <Tabs
           activeKey={activeTab}
           onChange={setActiveTab}
-          className="doctor-blog-tabs"
+          className="doc-blog-tabs"
         >
           <TabPane tab="Write Blog" key="1">
-            <div className="write-blog-container">
+            <div className="doc-blog-write-container">
               <Form
                 form={form}
                 layout="vertical"
                 onFinish={handleSubmit}
-                className="blog-form"
+                className="doc-blog-form"
               >
                 <Form.Item name="blogId" hidden>
                   <Input />
                 </Form.Item>
 
                 {/* Tiêu đề blog - Phần nổi bật */}
-                <div className="blog-header-section">
+                <div className="doc-blog-header-section">
                   <Form.Item
                     name="title"
                     rules={[
@@ -376,11 +376,11 @@ const DoctorBlog = () => {
                         message: "Please enter your medical article title...",
                       },
                     ]}
-                    className="blog-title-item"
+                    className="doc-blog-title-item"
                   >
                     <Input
                       placeholder="Enter your medical article title..."
-                      className="blog-title-input"
+                      className="doc-blog-title-input"
                       size="large"
                       prefix={
                         <i
@@ -392,11 +392,11 @@ const DoctorBlog = () => {
                   </Form.Item>
                 </div>
 
-                <div className="blog-main-container">
+                <div className="doc-blog-main-container">
                   {/* Phần bên trái: Category + Image */}
-                  <div className="blog-left-column">
-                    <div className="blog-section blog-category-section">
-                      <h3 className="section-title">
+                  <div className="doc-blog-left-column">
+                    <div className="doc-blog-section doc-blog-category-section">
+                      <h3 className="doc-blog-section-title">
                         <i className="fas fa-info-circle"></i>
                         Basic Information
                       </h3>
@@ -410,7 +410,7 @@ const DoctorBlog = () => {
                             message: "Please select a category",
                           },
                         ]}
-                        className="category-form-item"
+                        className="doc-blog-category-form-item"
                       >
                         <Select
                           placeholder="Select category..."
@@ -418,7 +418,7 @@ const DoctorBlog = () => {
                             const tags = getTagsFromCategory(value);
                             form.setFieldsValue({ tags });
                           }}
-                          className="blog-select"
+                          className="doc-blog-select"
                         >
                           {categories.map((category) => (
                             <Option
@@ -440,11 +440,11 @@ const DoctorBlog = () => {
                             message: "Please enter image URL",
                           },
                         ]}
-                        className="image-form-item"
+                        className="doc-blog-image-form-item"
                       >
                         <Input
                           placeholder="Enter article featured image URL (https://...)"
-                          className="blog-input"
+                          className="doc-blog-input"
                           prefix={
                             <i
                               className="fas fa-image"
@@ -460,11 +460,11 @@ const DoctorBlog = () => {
                         rules={[
                           { required: true, message: "Tags are auto-filled" },
                         ]}
-                        className="tags-form-item"
+                        className="doc-blog-tags-form-item"
                       >
                         <Input
                           placeholder="Tags"
-                          className="blog-input"
+                          className="doc-blog-input"
                           disabled
                           style={{ backgroundColor: "#f5f5f5" }}
                         />
@@ -479,11 +479,11 @@ const DoctorBlog = () => {
                             message: "Please enter reference sources",
                           },
                         ]}
-                        className="reference-form-item"
+                        className="doc-blog-reference-form-item"
                       >
                         <Input
                           placeholder="Enter reference sources..."
-                          className="blog-input"
+                          className="doc-blog-input"
                         />
                       </Form.Item>
 
@@ -491,20 +491,20 @@ const DoctorBlog = () => {
                         label="Publication Status"
                         name="status"
                         initialValue="Draft"
-                        className="status-form-item"
+                        className="doc-blog-status-form-item"
                       >
                         <Select
                           placeholder="Select status"
-                          className="blog-select"
+                          className="doc-blog-select"
                           dropdownStyle={{ borderRadius: "8px" }}
                         >
                           <Option value="Draft">
-                            <span className="status-option draft">
+                            <span className="doc-blog-status-option draft">
                               <i className="fas fa-save"></i> Save as Draft
                             </span>
                           </Option>
                           <Option value="PendingApproval">
-                            <span className="status-option pending">
+                            <span className="doc-blog-status-option pending">
                               <i className="fas fa-paper-plane"></i> Submit for
                               Approval
                             </span>
@@ -515,13 +515,13 @@ const DoctorBlog = () => {
                   </div>
 
                   {/* Phần bên phải: Content Editor */}
-                  <div className="blog-right-column">
-                    <div className="blog-section blog-content-section">
-                      <h3 className="section-title">
+                  <div className="doc-blog-right-column">
+                    <div className="doc-blog-section doc-blog-content-section">
+                      <h3 className="doc-blog-section-title">
                         <i className="fas fa-edit"></i>
                         Article Content
                       </h3>
-                      <div className="blog-editor-wrapper">
+                      <div className="doc-blog-editor-wrapper">
                         <Form.Item
                           rules={[
                             {
@@ -540,13 +540,13 @@ const DoctorBlog = () => {
                   </div>
                 </div>
 
-                <div className="blog-action-buttons">
+                <div className="doc-blog-action-buttons">
                   <Button
                     onClick={() => {
                       form.resetFields();
                       setContent("");
                     }}
-                    className="cancel-button"
+                    className="doc-blog-cancel-button"
                     icon={
                       <i
                         className="fas fa-times"
@@ -560,7 +560,7 @@ const DoctorBlog = () => {
                     type="primary"
                     htmlType="submit"
                     size="large"
-                    className="submit-button"
+                    className="doc-blog-submit-button"
                     icon={
                       <i
                         className="fas fa-check"
@@ -585,7 +585,7 @@ const DoctorBlog = () => {
                 showSizeChanger: true,
                 showTotal: (total) => `Total ${total} articles`,
               }}
-              className="blog-table"
+              className="doc-blog-table"
             />
           </TabPane>
         </Tabs>
