@@ -413,10 +413,6 @@ function HomePage() {
                 <p>Đang tải thông tin bác sĩ...</p>
               )}
             </div>
-
-            <Link to="/doctors" className="see-more-btn">
-              Xem thêm
-            </Link>
           </div>
         </section>
 
