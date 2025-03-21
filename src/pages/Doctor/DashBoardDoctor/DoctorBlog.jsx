@@ -311,6 +311,7 @@ const DoctorBlog = () => {
                 <Button
                   type="primary"
                   icon={<EditOutlined />}
+                  className="DoctorRoleID2-doctor-blog__btn-primary"
                   onClick={() => {
                     setActiveTab("1");
                     form.setFieldsValue({
@@ -329,6 +330,7 @@ const DoctorBlog = () => {
                 <Button
                   danger
                   icon={<DeleteOutlined />}
+                  className="DoctorRoleID2-doctor-blog__btn-dangerous"
                   onClick={() => handleDelete(record.blogId)}
                 >
                   Delete
@@ -344,18 +346,18 @@ const DoctorBlog = () => {
   ];
 
   return (
-    <div className="doctor-blog-container">
-      <Card bordered={false} className="doctor-blog-card">
-        <Title level={3} className="doctor-blog-title">
+    <div className="DoctorRoleID2-doctor-blog-container">
+      <Card bordered={false} className="DoctorRoleID2-doctor-blog-card">
+        <Title level={3} className="DoctorRoleID2-doctor-blog-title">
           Medical Blog Management
         </Title>
         <Tabs
           activeKey={activeTab}
           onChange={setActiveTab}
-          className="doctor-blog-tabs"
+          className="DoctorRoleID2-doctor-blog-tabs"
         >
           <TabPane tab="Write Blog" key="1">
-            <div className="write-blog-container">
+            <div className="DoctorRoleID2-doctor-blog__write-blog-container">
               <Form
                 form={form}
                 layout="vertical"
@@ -367,7 +369,7 @@ const DoctorBlog = () => {
                 </Form.Item>
 
                 {/* Tiêu đề blog - Phần nổi bật */}
-                <div className="blog-header-section">
+                <div className="DoctorRoleID2-doctor-blog__header-section">
                   <Form.Item
                     name="title"
                     rules={[
@@ -380,7 +382,7 @@ const DoctorBlog = () => {
                   >
                     <Input
                       placeholder="Enter your medical article title..."
-                      className="blog-title-input"
+                      className="DoctorRoleID2-doctor-blog__title-input"
                       size="large"
                       prefix={
                         <i
@@ -392,11 +394,11 @@ const DoctorBlog = () => {
                   </Form.Item>
                 </div>
 
-                <div className="blog-main-container">
+                <div className="DoctorRoleID2-doctor-blog__main-container">
                   {/* Phần bên trái: Category + Image */}
-                  <div className="blog-left-column">
-                    <div className="blog-section blog-category-section">
-                      <h3 className="section-title">
+                  <div className="DoctorRoleID2-doctor-blog__left-column">
+                    <div className="DoctorRoleID2-doctor-blog__section DoctorRoleID2-doctor-blog__category-section">
+                      <h3 className="DoctorRoleID2-doctor-blog__section-title">
                         <i className="fas fa-info-circle"></i>
                         Basic Information
                       </h3>
@@ -418,7 +420,7 @@ const DoctorBlog = () => {
                             const tags = getTagsFromCategory(value);
                             form.setFieldsValue({ tags });
                           }}
-                          className="blog-select"
+                          className="DoctorRoleID2-doctor-blog__select"
                         >
                           {categories.map((category) => (
                             <Option
@@ -444,7 +446,7 @@ const DoctorBlog = () => {
                       >
                         <Input
                           placeholder="Enter article featured image URL (https://...)"
-                          className="blog-input"
+                          className="DoctorRoleID2-doctor-blog__input"
                           prefix={
                             <i
                               className="fas fa-image"
@@ -464,7 +466,7 @@ const DoctorBlog = () => {
                       >
                         <Input
                           placeholder="Tags"
-                          className="blog-input"
+                          className="DoctorRoleID2-doctor-blog__input"
                           disabled
                           style={{ backgroundColor: "#f5f5f5" }}
                         />
@@ -483,7 +485,7 @@ const DoctorBlog = () => {
                       >
                         <Input
                           placeholder="Enter reference sources..."
-                          className="blog-input"
+                          className="DoctorRoleID2-doctor-blog__input"
                         />
                       </Form.Item>
 
@@ -495,16 +497,16 @@ const DoctorBlog = () => {
                       >
                         <Select
                           placeholder="Select status"
-                          className="blog-select"
+                          className="DoctorRoleID2-doctor-blog__select"
                           dropdownStyle={{ borderRadius: "8px" }}
                         >
                           <Option value="Draft">
-                            <span className="status-option draft">
+                            <span className="DoctorRoleID2-doctor-blog__status-option-draft">
                               <i className="fas fa-save"></i> Save as Draft
                             </span>
                           </Option>
                           <Option value="PendingApproval">
-                            <span className="status-option pending">
+                            <span className="DoctorRoleID2-doctor-blog__status-option-pending">
                               <i className="fas fa-paper-plane"></i> Submit for
                               Approval
                             </span>
@@ -515,13 +517,13 @@ const DoctorBlog = () => {
                   </div>
 
                   {/* Phần bên phải: Content Editor */}
-                  <div className="blog-right-column">
-                    <div className="blog-section blog-content-section">
-                      <h3 className="section-title">
+                  <div className="DoctorRoleID2-doctor-blog__right-column">
+                    <div className="DoctorRoleID2-doctor-blog__section DoctorRoleID2-doctor-blog__content-section">
+                      <h3 className="DoctorRoleID2-doctor-blog__section-title">
                         <i className="fas fa-edit"></i>
                         Article Content
                       </h3>
-                      <div className="blog-editor-wrapper">
+                      <div className="DoctorRoleID2-doctor-blog__editor-wrapper">
                         <Form.Item
                           rules={[
                             {
@@ -540,13 +542,13 @@ const DoctorBlog = () => {
                   </div>
                 </div>
 
-                <div className="blog-action-buttons">
+                <div className="DoctorRoleID2-doctor-blog__action-buttons">
                   <Button
                     onClick={() => {
                       form.resetFields();
                       setContent("");
                     }}
-                    className="cancel-button"
+                    className="DoctorRoleID2-doctor-blog__cancel-button"
                     icon={
                       <i
                         className="fas fa-times"
@@ -560,7 +562,7 @@ const DoctorBlog = () => {
                     type="primary"
                     htmlType="submit"
                     size="large"
-                    className="submit-button"
+                    className="DoctorRoleID2-doctor-blog__submit-button"
                     icon={
                       <i
                         className="fas fa-check"
@@ -585,7 +587,7 @@ const DoctorBlog = () => {
                 showSizeChanger: true,
                 showTotal: (total) => `Total ${total} articles`,
               }}
-              className="blog-table"
+              className="DoctorRoleID2-doctor-blog__table"
             />
           </TabPane>
         </Tabs>
