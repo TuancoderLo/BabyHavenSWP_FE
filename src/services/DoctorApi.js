@@ -47,9 +47,9 @@ const doctorApi = {
     return response.data;
   },
 
-  // Thêm hàm updateConsultationRequestStatus
+  // Updated updateConsultationRequestStatus
   updateConsultationRequestStatus: async (requestId, status) => {
-    const response = await api.put(`/api/ConsultationRequests/${requestId}`, { status });
+    const response = await api.put(`/api/ConsultationRequests/${requestId}/${status}`);
     return response.data;
   },
 

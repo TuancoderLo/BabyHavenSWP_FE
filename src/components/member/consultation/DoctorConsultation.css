@@ -149,13 +149,15 @@
 }
 
 .doctor-card {
-  display: flex;
-  gap: 15px;
+width: 100%;
+  max-width: 400px; /* giới hạn chiều rộng nếu cần */
+  margin: 15px auto; /* căn giữa nếu muốn */
   padding: 15px;
   background: #E1F5FE;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .doctor-card:hover {

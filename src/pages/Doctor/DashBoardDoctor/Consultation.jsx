@@ -177,24 +177,24 @@ const Consultations = () => {
         try {
             // Map the action to the status code for the API
             const statusMap = {
-                accepted: 1, // Assuming 1 means "accepted"
-                rejected: 2, // Assuming 2 means "rejected"
+                accepted: "1", // Convert to string as per Swagger
+                rejected: "2", // Convert to string as per Swagger
             };
             const status = statusMap[values.action];
 
             // Construct the payload for createConsultationResponse
-            const payload = {
+            const responsePayload = {
                 requestId: selectedConsultation.requestId,
                 content: values.response,
                 attachments: [], // Empty for now, can be updated if attachments are added
                 isHelpful: false, // Always false as per requirement
-                status: status,
+                status: parseInt(status), // Convert back to integer for createConsultationResponse if needed
             };
 
             // Call the API to create the consultation response
-            await doctorApi.createConsultationResponse(payload);
+            await doctorApi.createConsultationResponse(responsePayload);
 
-            // Update the consultation request status using the API updateConsultationRequestStatus
+            // Update the consultation request status using the API
             await doctorApi.updateConsultationRequestStatus(selectedConsultation.requestId, status);
 
             // Update the local state to reflect the new status
