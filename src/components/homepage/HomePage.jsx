@@ -336,21 +336,6 @@ function HomePage() {
                     image: Milestone,
                     title: "Milestone Records",
                   },
-                  {
-                    image:
-                      "https://img.freepik.com/free-photo/mother-doctor-examining-baby_23-2148867370.jpg",
-                    title: "Health Records",
-                  },
-                  {
-                    image:
-                      "https://img.freepik.com/free-photo/mother-consulting-doctor-about-her-baby_23-2148867368.jpg",
-                    title: "Expert Advice",
-                  },
-                  {
-                    image:
-                      "https://img.freepik.com/free-photo/mother-taking-care-her-baby_23-2148867373.jpg",
-                    title: "Health Analyze With AI",
-                  },
                 ].map((tool, index) => (
                   <a key={index} href="#" className="tool-card">
                     <div className="tool-image-homepage">
