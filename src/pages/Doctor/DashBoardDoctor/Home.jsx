@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css';
-import Logo from "../../../assets/Logo.png";
-import Name from "../../../assets/Name.png";
+import Doctor from "../../../assets/doctor.jpg";
 import { FaSearch, FaBell, FaCog } from 'react-icons/fa';
 import doctorApi from '../../../services/DoctorApi';
 
@@ -81,7 +80,6 @@ const Home = () => {
             <h1>Good Day, {doctorInfo ? doctorInfo.name : 'Dr. Nicholls'}!</h1>
             <p>Have a Nice Monday!</p>
           </div>
-          <img src={Logo} alt="Doctor" className="doctor-image" />
         </div>
 
         {/* Quick Stats */}
@@ -145,7 +143,7 @@ const Home = () => {
       <div className="right-section">
         {/* Profile Section */}
         <div className="profile-section-doctor">
-          <img src={Name} alt="Profile-doctor" className="profile-image-doctor" />
+          <img src={Doctor} alt="Profile-doctor" className="profile-image-doctor" />
           <h3>{doctorInfo ? doctorInfo.name : 'Dr. Alisha Nicholls'}</h3>
           <p className="specialty">{doctorInfo ? doctorInfo.degree : 'Dermatologist'}</p>
           <p className="location">📍 {doctorInfo ? doctorInfo.hospitalAddress : 'Bottrop, Germany'}</p>
@@ -160,7 +158,7 @@ const Home = () => {
             </div>
             <div>
               <p>Working Hours</p>
-              <p>9pm - 5am</p>
+              <p>9am - 5pm</p>
             </div>
           </div>
         </div>

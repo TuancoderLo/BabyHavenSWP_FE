@@ -139,12 +139,12 @@
 }
 
 .ant-tabs-tab-active {
-  color: #e92121 !important; /* Pink for active tab */
+  color: #67c2e2 !important; /* Pink for active tab */
   font-weight: 600 !important;
 }
 
 .ant-tabs-ink-bar {
-  background: #e92121 !important; /* Pink underline for active tab */
+  background: #67c2e2 !important; /* Pink underline for active tab */
 }
 
 /* Tag styling */
