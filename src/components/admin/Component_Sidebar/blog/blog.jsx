@@ -697,7 +697,7 @@ function Blog() {
         <>
           <div className="blog-section-header">
             <div className="blog-title-section">
-              <h2>Manage Posts</h2>
+              <h2>Manage Blogs</h2>
               <Radio.Group
                 value={blogFilter}
                 onChange={(e) => setBlogFilter(e.target.value)}
@@ -719,7 +719,7 @@ function Blog() {
                 setBlogModalVisible(true);
               }}
             >
-              Add New Post
+              Add New Blog
             </Button>
           </div>
 
