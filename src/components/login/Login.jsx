@@ -240,6 +240,10 @@ function Login({ onLoginSuccess }) {
               </span>
             </div>
 
+            <div className="forgot-password-link">
+              <Link to="/forget-password">Quên mật khẩu?</Link>
+            </div>
+
             <button type="submit" className="submit-btn" disabled={isLoading}>
               {isLoading ? "Loading..." : "Sign in"}
             </button>

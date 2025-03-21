@@ -362,7 +362,7 @@ const DoctorBlog = () => {
                 form={form}
                 layout="vertical"
                 onFinish={handleSubmit}
-                className="blog-form"
+                className="doc-blog-form"
               >
                 <Form.Item name="blogId" hidden>
                   <Input />
@@ -378,7 +378,7 @@ const DoctorBlog = () => {
                         message: "Please enter your medical article title...",
                       },
                     ]}
-                    className="blog-title-item"
+                    className="doc-blog-title-item"
                   >
                     <Input
                       placeholder="Enter your medical article title..."
@@ -412,7 +412,7 @@ const DoctorBlog = () => {
                             message: "Please select a category",
                           },
                         ]}
-                        className="category-form-item"
+                        className="doc-blog-category-form-item"
                       >
                         <Select
                           placeholder="Select category..."
@@ -442,7 +442,7 @@ const DoctorBlog = () => {
                             message: "Please enter image URL",
                           },
                         ]}
-                        className="image-form-item"
+                        className="doc-blog-image-form-item"
                       >
                         <Input
                           placeholder="Enter article featured image URL (https://...)"
@@ -462,7 +462,7 @@ const DoctorBlog = () => {
                         rules={[
                           { required: true, message: "Tags are auto-filled" },
                         ]}
-                        className="tags-form-item"
+                        className="doc-blog-tags-form-item"
                       >
                         <Input
                           placeholder="Tags"
@@ -481,7 +481,7 @@ const DoctorBlog = () => {
                             message: "Please enter reference sources",
                           },
                         ]}
-                        className="reference-form-item"
+                        className="doc-blog-reference-form-item"
                       >
                         <Input
                           placeholder="Enter reference sources..."
@@ -493,7 +493,7 @@ const DoctorBlog = () => {
                         label="Publication Status"
                         name="status"
                         initialValue="Draft"
-                        className="status-form-item"
+                        className="doc-blog-status-form-item"
                       >
                         <Select
                           placeholder="Select status"
