@@ -126,8 +126,32 @@ const DoctorBlog = () => {
         return;
       }
 
+      // Nếu đang cập nhật blog (có blogId)
+      if (values.blogId) {
+        // Tìm blog cần cập nhật trong danh sách
+        const blogToUpdate = blogs.find(
+          (blog) => blog.blogId === values.blogId
+        );
+
+        // Kiểm tra trạng thái của blog
+        if (blogToUpdate) {
+          const status = blogToUpdate.status;
+          const canUpdate =
+            (typeof status === "string" &&
+              (status === "Draft" || status === "PendingApproval")) ||
+            (typeof status === "number" && (status === 3 || status === 0));
+
+          if (!canUpdate) {
+            message.error(
+              "You cannot update blogs with Approved or Rejected status"
+            );
+            return;
+          }
+        }
+      }
+
       // Lấy trạng thái từ form hoặc sử dụng trạng thái mặc định
-      const status = values.status || "Draft"; // Mặc định là Draft
+      const status = values.status || "Draft";
 
       const blogData = {
         title: values.title,
@@ -137,7 +161,6 @@ const DoctorBlog = () => {
         imageBlog: values.imageBlog || "",
         tags: values.tags || "",
         referenceSources: values.referenceSources || "",
-        // Chỉ cho phép 2 trạng thái: Draft hoặc PendingApproval
         status: status === "PendingApproval" ? "PendingApproval" : "Draft",
       };
 
@@ -167,6 +190,30 @@ const DoctorBlog = () => {
 
   const handleDelete = async (blogId) => {
     try {
+      // Tìm blog cần xóa trong danh sách
+      const blogToDelete = blogs.find((blog) => blog.blogId === blogId);
+
+      // Kiểm tra xem blog có tồn tại không
+      if (!blogToDelete) {
+        message.error("Blog not found");
+        return;
+      }
+
+      // Kiểm tra trạng thái của blog
+      const status = blogToDelete.status;
+      const canDelete =
+        (typeof status === "string" &&
+          (status === "Draft" || status === "PendingApproval")) ||
+        (typeof status === "number" && (status === 3 || status === 0));
+
+      if (!canDelete) {
+        message.error(
+          "You cannot delete blogs with Approved or Rejected status"
+        );
+        return;
+      }
+
+      // Nếu trạng thái hợp lệ, tiến hành xóa
       const response = await axios.delete(
         `https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/Blog/${blogId}`
       );
@@ -179,7 +226,7 @@ const DoctorBlog = () => {
       }
     } catch (error) {
       message.error("Unable to delete blog");
-      console.error("Lỗi khi xóa blog:", error);
+      console.error("Error when deleting blog:", error);
     }
   };
 
@@ -242,35 +289,51 @@ const DoctorBlog = () => {
     {
       title: "Actions",
       key: "action",
-      render: (_, record) => (
-        <Space size="middle">
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            onClick={() => {
-              setActiveTab("1");
-              form.setFieldsValue({
-                title: record.title,
-                categoryName: record.categoryName,
-                imageBlog: record.imageBlog,
-                tags: record.tags,
-                referenceSources: record.referenceSources || "",
-              });
-              setContent(record.content);
-              form.setFieldsValue({ blogId: record.blogId });
-            }}
-          >
-            Edit
-          </Button>
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.blogId)}
-          >
-            Delete
-          </Button>
-        </Space>
-      ),
+      render: (_, record) => {
+        // Kiểm tra trạng thái của bài viết để quyết định hiển thị các nút action
+        const canEditOrDelete =
+          (typeof record.status === "string" &&
+            (record.status === "Draft" ||
+              record.status === "PendingApproval")) ||
+          (typeof record.status === "number" &&
+            (record.status === 3 || record.status === 0)); // 3 = Draft, 0 = PendingApproval
+
+        return (
+          <Space size="middle">
+            {canEditOrDelete ? (
+              <>
+                <Button
+                  type="primary"
+                  icon={<EditOutlined />}
+                  onClick={() => {
+                    setActiveTab("1");
+                    form.setFieldsValue({
+                      title: record.title,
+                      categoryName: record.categoryName,
+                      imageBlog: record.imageBlog,
+                      tags: record.tags,
+                      referenceSources: record.referenceSources || "",
+                      blogId: record.blogId,
+                    });
+                    setContent(record.content);
+                  }}
+                >
+                  Edit
+                </Button>
+                <Button
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={() => handleDelete(record.blogId)}
+                >
+                  Delete
+                </Button>
+              </>
+            ) : (
+              <Tag color="gray">No Actions Available</Tag>
+            )}
+          </Space>
+        );
+      },
     },
   ];
 
