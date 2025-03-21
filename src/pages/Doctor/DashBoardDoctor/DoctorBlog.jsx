@@ -61,17 +61,27 @@ const DoctorBlog = () => {
         const doctorBlogs = response.data.data.filter(
           (blog) => blog.authorId === userId
         );
+
         setBlogs(
           doctorBlogs.map((blog) => ({
             ...blog,
             key: blog.blogId,
+            // Chuyển đổi trạng thái từ chuỗi sang số cho phù hợp với hệ thống hiển thị
             status:
-              blog.status === "Approved" ? 1 : blog.status === "Draft" ? 0 : 2,
+              blog.status === "Approved"
+                ? 1
+                : blog.status === "PendingApproval"
+                ? 0
+                : blog.status === "Draft"
+                ? 3
+                : blog.status === "Rejected"
+                ? 2
+                : 0,
           }))
         );
       }
     } catch (error) {
-      message.error("Không thể tải danh sách bài viết");
+      message.error("Unable to load blog list");
       console.error("Lỗi khi tải blog:", error);
     } finally {
       setLoading(false);
@@ -85,7 +95,7 @@ const DoctorBlog = () => {
         setCategories(response.data.data);
       }
     } catch (error) {
-      message.error("Không thể tải danh sách danh mục");
+      message.error("Unable to load category list");
     }
   };
 
@@ -112,9 +122,12 @@ const DoctorBlog = () => {
       setLoading(true);
       const userId = localStorage.getItem("userId");
       if (!userId) {
-        message.error("Vui lòng đăng nhập lại");
+        message.error("Please log in again");
         return;
       }
+
+      // Lấy trạng thái từ form hoặc sử dụng trạng thái mặc định
+      const status = values.status || "Draft"; // Mặc định là Draft
 
       const blogData = {
         title: values.title,
@@ -124,17 +137,18 @@ const DoctorBlog = () => {
         imageBlog: values.imageBlog || "",
         tags: values.tags || "",
         referenceSources: values.referenceSources || "",
-        status: "Draft", // Mặc định là Draft khi tạo hoặc cập nhật
+        // Chỉ cho phép 2 trạng thái: Draft hoặc PendingApproval
+        status: status === "PendingApproval" ? "PendingApproval" : "Draft",
       };
 
       if (values.blogId) {
         // Đây là cập nhật blog đã tồn tại
         await blogApi.update(values.blogId, blogData);
-        message.success("Cập nhật bài viết thành công");
+        message.success("Blog updated successfully");
       } else {
         // Đây là tạo blog mới
         await blogApi.create(blogData);
-        message.success("Tạo bài viết mới thành công");
+        message.success("New blog created successfully");
       }
 
       form.resetFields();
@@ -143,9 +157,9 @@ const DoctorBlog = () => {
       setActiveTab("2");
     } catch (error) {
       message.error(
-        values.blogId ? "Không thể cập nhật bài viết" : "Không thể lưu bài viết"
+        values.blogId ? "Unable to update blog" : "Unable to save blog"
       );
-      console.error("Lỗi:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -158,48 +172,51 @@ const DoctorBlog = () => {
       );
 
       if (response.data.status === 1) {
-        message.success("Xóa bài viết thành công");
+        message.success("Blog deleted successfully");
         fetchBlogs();
       } else {
-        message.error(response.data.message || "Xóa bài viết không thành công");
+        message.error(response.data.message || "Failed to delete blog");
       }
     } catch (error) {
-      message.error("Không thể xóa bài viết");
+      message.error("Unable to delete blog");
       console.error("Lỗi khi xóa blog:", error);
     }
   };
 
   const columns = [
     {
-      title: "Tiêu đề",
+      title: "Title",
       dataIndex: "title",
       key: "title",
       ellipsis: true,
     },
     {
-      title: "Danh mục",
+      title: "Category",
       dataIndex: "categoryName",
       key: "categoryName",
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: (status) => {
         let color = "default";
-        let text = "Không xác định";
+        let text = "Undefined";
 
         if (typeof status === "string") {
           // Nếu status là chuỗi từ API
           if (status === "Approved") {
             color = "green";
-            text = "Đã duyệt";
+            text = "Approved";
           } else if (status === "Draft") {
+            color = "blue";
+            text = "Draft";
+          } else if (status === "PendingApproval") {
             color = "orange";
-            text = "Chờ duyệt";
+            text = "Pending Approval";
           } else if (status === "Rejected") {
             color = "red";
-            text = "Từ chối";
+            text = "Rejected";
           }
         } else {
           // Nếu status là số từ hệ thống cũ
@@ -207,21 +224,23 @@ const DoctorBlog = () => {
             0: "orange",
             1: "green",
             2: "red",
+            3: "blue",
           };
           const statusText = {
-            0: "Chờ duyệt",
-            1: "Đã duyệt",
-            2: "Từ chối",
+            0: "Pending Approval",
+            1: "Approved",
+            2: "Rejected",
+            3: "Draft",
           };
           color = statusColors[status] || "default";
-          text = statusText[status] || "Không xác định";
+          text = statusText[status] || "Undefined";
         }
 
         return <Tag color={color}>{text}</Tag>;
       },
     },
     {
-      title: "Thao tác",
+      title: "Actions",
       key: "action",
       render: (_, record) => (
         <Space size="middle">
@@ -241,14 +260,14 @@ const DoctorBlog = () => {
               form.setFieldsValue({ blogId: record.blogId });
             }}
           >
-            Sửa
+            Edit
           </Button>
           <Button
             danger
             icon={<DeleteOutlined />}
             onClick={() => handleDelete(record.blogId)}
           >
-            Xóa
+            Delete
           </Button>
         </Space>
       ),
@@ -259,10 +278,14 @@ const DoctorBlog = () => {
     <div className="doctor-blog-container">
       <Card bordered={false} className="doctor-blog-card">
         <Title level={3} className="doctor-blog-title">
-          Quản lý Blog
+          Medical Blog Management
         </Title>
-        <Tabs activeKey={activeTab} onChange={setActiveTab}>
-          <TabPane tab="Viết Blog" key="1">
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          className="doctor-blog-tabs"
+        >
+          <TabPane tab="Write Blog" key="1">
             <div className="write-blog-container">
               <Form
                 form={form}
@@ -273,126 +296,217 @@ const DoctorBlog = () => {
                 <Form.Item name="blogId" hidden>
                   <Input />
                 </Form.Item>
-                <div className="input-row">
+
+                {/* Tiêu đề blog - Phần nổi bật */}
+                <div className="blog-header-section">
                   <Form.Item
                     name="title"
                     rules={[
-                      { required: true, message: "Vui lòng nhập tiêu đề" },
-                    ]}
-                    className="input-item"
-                  >
-                    <Input placeholder="Title" className="blog-input" />
-                  </Form.Item>
-
-                  <Form.Item
-                    name="tags"
-                    rules={[{ required: true, message: "Tags tự động điền" }]}
-                    className="input-item"
-                  >
-                    <Input
-                      placeholder="Tags"
-                      className="blog-input"
-                      disabled
-                      style={{ backgroundColor: "#f5f5f5" }}
-                    />
-                  </Form.Item>
-
-                  <Form.Item
-                    name="referenceSources"
-                    rules={[
                       {
                         required: true,
-                        message: "Vui lòng nhập nguồn tham khảo",
+                        message: "Please enter your medical article title...",
                       },
                     ]}
-                    className="input-item"
+                    className="blog-title-item"
                   >
                     <Input
-                      placeholder="Reference source"
-                      className="blog-input"
-                    />
-                  </Form.Item>
-
-                  <Form.Item name="status" className="input-item">
-                    <Input
-                      placeholder="Status"
-                      className="blog-input"
-                      disabled
-                      value="Chờ duyệt"
-                      style={{ backgroundColor: "#f5f5f5" }}
+                      placeholder="Enter your medical article title..."
+                      className="blog-title-input"
+                      size="large"
+                      prefix={
+                        <i
+                          className="fas fa-heading"
+                          style={{ color: "#0072ff", marginRight: "8px" }}
+                        ></i>
+                      }
                     />
                   </Form.Item>
                 </div>
 
-                <div className="category-section">
-                  <Form.Item
-                    name="categoryName"
-                    rules={[
-                      { required: true, message: "Vui lòng chọn danh mục" },
-                    ]}
-                    className="category-item"
-                  >
-                    <Select
-                      placeholder="Chọn danh mục"
-                      onChange={(value) => {
-                        const tags = getTagsFromCategory(value);
-                        form.setFieldsValue({ tags });
-                      }}
-                      className="category-select"
-                    >
-                      {categories.map((category) => (
-                        <Option
-                          key={category.categoryId}
-                          value={category.categoryName}
+                <div className="blog-main-container">
+                  {/* Phần bên trái: Category + Image */}
+                  <div className="blog-left-column">
+                    <div className="blog-section blog-category-section">
+                      <h3 className="section-title">
+                        <i className="fas fa-info-circle"></i>
+                        Basic Information
+                      </h3>
+
+                      <Form.Item
+                        label="Category"
+                        name="categoryName"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please select a category",
+                          },
+                        ]}
+                        className="category-form-item"
+                      >
+                        <Select
+                          placeholder="Select category..."
+                          onChange={(value) => {
+                            const tags = getTagsFromCategory(value);
+                            form.setFieldsValue({ tags });
+                          }}
+                          className="blog-select"
                         >
-                          {category.categoryName}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
+                          {categories.map((category) => (
+                            <Option
+                              key={category.categoryId}
+                              value={category.categoryName}
+                            >
+                              {category.categoryName}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
 
-                  <Form.Item
-                    name="imageBlog"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Vui lòng nhập đường dẫn ảnh",
-                      },
-                    ]}
-                    className="image-item"
+                      <Form.Item
+                        label="Featured Image"
+                        name="imageBlog"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please enter image URL",
+                          },
+                        ]}
+                        className="image-form-item"
+                      >
+                        <Input
+                          placeholder="Enter article featured image URL (https://...)"
+                          className="blog-input"
+                          prefix={
+                            <i
+                              className="fas fa-image"
+                              style={{ color: "#00b8ff" }}
+                            ></i>
+                          }
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Tags"
+                        name="tags"
+                        rules={[
+                          { required: true, message: "Tags are auto-filled" },
+                        ]}
+                        className="tags-form-item"
+                      >
+                        <Input
+                          placeholder="Tags"
+                          className="blog-input"
+                          disabled
+                          style={{ backgroundColor: "#f5f5f5" }}
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Reference Sources"
+                        name="referenceSources"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please enter reference sources",
+                          },
+                        ]}
+                        className="reference-form-item"
+                      >
+                        <Input
+                          placeholder="Enter reference sources..."
+                          className="blog-input"
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Publication Status"
+                        name="status"
+                        initialValue="Draft"
+                        className="status-form-item"
+                      >
+                        <Select
+                          placeholder="Select status"
+                          className="blog-select"
+                          dropdownStyle={{ borderRadius: "8px" }}
+                        >
+                          <Option value="Draft">
+                            <span className="status-option draft">
+                              <i className="fas fa-save"></i> Save as Draft
+                            </span>
+                          </Option>
+                          <Option value="PendingApproval">
+                            <span className="status-option pending">
+                              <i className="fas fa-paper-plane"></i> Submit for
+                              Approval
+                            </span>
+                          </Option>
+                        </Select>
+                      </Form.Item>
+                    </div>
+                  </div>
+
+                  {/* Phần bên phải: Content Editor */}
+                  <div className="blog-right-column">
+                    <div className="blog-section blog-content-section">
+                      <h3 className="section-title">
+                        <i className="fas fa-edit"></i>
+                        Article Content
+                      </h3>
+                      <div className="blog-editor-wrapper">
+                        <Form.Item
+                          rules={[
+                            {
+                              required: true,
+                              message: "Please enter content",
+                            },
+                          ]}
+                        >
+                          <CustomEditor
+                            value={content}
+                            onChange={(newContent) => setContent(newContent)}
+                          />
+                        </Form.Item>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="blog-action-buttons">
+                  <Button
+                    onClick={() => {
+                      form.resetFields();
+                      setContent("");
+                    }}
+                    className="cancel-button"
+                    icon={
+                      <i
+                        className="fas fa-times"
+                        style={{ marginRight: "8px" }}
+                      ></i>
+                    }
                   >
-                    <Input placeholder="Image URL" className="blog-input" />
-                  </Form.Item>
-                </div>
-
-                <div className="content-section">
-                  <div className="content-header">
-                    <h3>Nội dung bài viết</h3>
-                  </div>
-                  <div className="content-body">
-                    <Form.Item
-                      rules={[
-                        { required: true, message: "Vui lòng nhập nội dung" },
-                      ]}
-                    >
-                      <CustomEditor
-                        value={content}
-                        onChange={(newContent) => setContent(newContent)}
-                      />
-                    </Form.Item>
-                  </div>
-                </div>
-
-                <div className="submit-button">
-                  <Button type="primary" htmlType="submit" size="large">
-                    Confirm
+                    Cancel
+                  </Button>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    size="large"
+                    className="submit-button"
+                    icon={
+                      <i
+                        className="fas fa-check"
+                        style={{ marginRight: "8px" }}
+                      ></i>
+                    }
+                  >
+                    Save Article
                   </Button>
                 </div>
               </Form>
             </div>
           </TabPane>
 
-          <TabPane tab="Danh sách Blog" key="2">
+          <TabPane tab="Blog List" key="2">
             <Table
               columns={columns}
               dataSource={blogs}
@@ -400,8 +514,9 @@ const DoctorBlog = () => {
               pagination={{
                 defaultPageSize: 10,
                 showSizeChanger: true,
-                showTotal: (total) => `Tổng ${total} bài viết`,
+                showTotal: (total) => `Total ${total} articles`,
               }}
+              className="blog-table"
             />
           </TabPane>
         </Tabs>

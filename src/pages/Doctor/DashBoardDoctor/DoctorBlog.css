@@ -1,35 +1,451 @@
 .doctor-blog-container {
-  background: #f7f9fc;
-  padding: 16px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #eef2f7 100%);
+  padding: 24px;
+  min-height: 100vh;
 }
 
 .doctor-blog-card {
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  padding: 28px;
+  border: none;
+  overflow: hidden;
 }
 
 .doctor-blog-title {
-  color: #4eaef7;
-  margin-bottom: 24px;
+  color: #2c3e50;
+  margin-bottom: 32px;
+  font-weight: 700;
+  position: relative;
+  padding-left: 16px;
+  font-size: 28px;
+  letter-spacing: -0.5px;
 }
 
-/* Giữ lại các phần còn lại, chỉ đổi nền .blog-container => .doctor-blog-container */
+.doctor-blog-title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 6px;
+  background: linear-gradient(to bottom, #00c6ff, #0072ff);
+  border-radius: 8px;
+}
+
+.doctor-blog-tabs .ant-tabs-nav {
+  margin-bottom: 28px;
+}
+
+.doctor-blog-tabs .ant-tabs-tab {
+  padding: 12px 24px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  margin-right: 8px;
+  border-radius: 8px 8px 0 0;
+}
+
+.doctor-blog-tabs .ant-tabs-tab:hover {
+  color: #0072ff;
+}
+
+.doctor-blog-tabs .ant-tabs-tab.ant-tabs-tab-active {
+  background-color: #f0f7ff;
+}
+
+.doctor-blog-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #0072ff;
+  font-weight: 600;
+}
+
+.doctor-blog-tabs .ant-tabs-ink-bar {
+  background: linear-gradient(to right, #00c6ff, #0072ff);
+  height: 3px;
+  border-radius: 3px;
+}
+
+/* Write Blog Styling */
 .write-blog-container {
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
   background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: none; /* card cha đã có shadow */
+  border-radius: 12px;
   padding: 0;
 }
 
-/* Tùy chỉnh input, button, vv. */
-.blog-input {
-  border-radius: 6px;
+.blog-header-section {
+  background: linear-gradient(120deg, #f8f9fa 0%, #e9f2f9 100%);
+  padding: 32px;
+  border-radius: 12px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  border-left: 5px solid #0072ff;
+}
+
+.blog-title-input {
+  font-size: 22px;
+  height: 56px;
+  border-radius: 8px;
   border: 1px solid #d9d9d9;
+  padding-left: 16px;
+  font-weight: 500;
   transition: all 0.3s ease;
 }
 
-/* Giữ các style CKEditor, v.v. nếu cần */
+.blog-title-input:focus,
+.blog-title-input:hover {
+  border-color: #0072ff;
+  box-shadow: 0 0 0 3px rgba(0, 114, 255, 0.1);
+}
+
+.blog-title-input::placeholder {
+  color: #a0aec0;
+  font-weight: 400;
+}
+
+.blog-main-container {
+  display: flex;
+  gap: 28px;
+  margin-bottom: 28px;
+}
+
+.blog-left-column {
+  flex: 1;
+  max-width: 350px;
+}
+
+.blog-right-column {
+  flex: 3;
+}
+
+.blog-section {
+  background-color: #ffffff;
+  border-radius: 12px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  border: none;
+}
+
+.blog-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(to right, #00c6ff, #0072ff);
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0072ff;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e7edf3;
+  display: flex;
+  align-items: center;
+}
+
+.section-title i {
+  margin-right: 10px;
+  font-size: 20px;
+  background: linear-gradient(to right, #00c6ff, #0072ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.blog-content-section .section-title {
+  color: #00b8ff;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.blog-category-section .section-title {
+  color: #00b8ff;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.blog-image-preview .section-title {
+  color: #00b8ff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.blog-select {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.blog-select .ant-select-selector {
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  padding: 10px 12px;
+  transition: all 0.3s ease;
+  background-color: #f8fafc;
+}
+
+.blog-input,
+.blog-select:focus .ant-select-selector,
+.blog-select:hover .ant-select-selector {
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  padding: 10px 12px;
+  transition: all 0.3s ease;
+  background-color: #f8fafc;
+}
+
+.blog-input:focus,
+.blog-input:hover {
+  border-color: #0072ff;
+  box-shadow: 0 0 0 3px rgba(0, 114, 255, 0.1);
+}
+
+.image-preview-container {
+  width: 100%;
+  height: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5;
+  border: 1px dashed #d9d9d9;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-placeholder {
+  text-align: center;
+  color: #a0a0a0;
+}
+
+.image-placeholder i {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.blog-editor-wrapper {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  min-height: 500px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.status-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.status-option i {
+  font-size: 16px;
+}
+
+.status-option.draft {
+  color: #3182ce;
+}
+
+.status-option.pending {
+  color: #dd6b20;
+}
+
+.blog-action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.cancel-button {
+  padding: 0 28px;
+  height: 44px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 15px;
+  background-color: #f7fafc;
+  border: 1px solid #e2e8f0;
+  color: #4a5568;
+  transition: all 0.3s ease;
+}
+
+.cancel-button:hover {
+  background-color: #edf2f7;
+  color: #2d3748;
+  border-color: #cbd5e0;
+}
+
+.submit-button {
+  padding: 0 32px;
+  height: 44px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  background: linear-gradient(to right, #00c6ff, #0072ff);
+  border: none;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(0, 114, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.submit-button:hover {
+  background: linear-gradient(to right, #00a6ff, #0062df);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 114, 255, 0.4);
+}
+
+.submit-button:active {
+  transform: translateY(0);
+}
+
+/* Table styling */
+.blog-table {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+.blog-table .ant-table-thead > tr > th {
+  background-color: #f0f7ff;
+  color: #2d3748;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 16px;
+}
+
+.blog-table .ant-table-tbody > tr > td {
+  padding: 16px;
+}
+
+.blog-table .ant-table-tbody > tr:hover > td {
+  background-color: #f8fafc;
+}
+
+.blog-table .ant-pagination {
+  margin: 20px 0;
+}
+
+/* Responsive for smaller screens */
+@media (max-width: 1200px) {
+  .blog-left-column {
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 992px) {
+  .blog-main-container {
+    flex-direction: column;
+  }
+
+  .blog-left-column {
+    max-width: 100%;
+  }
+
+  .blog-header-section {
+    padding: 24px;
+  }
+
+  .doctor-blog-title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 576px) {
+  .doctor-blog-container {
+    padding: 12px;
+  }
+
+  .doctor-blog-card {
+    padding: 16px;
+  }
+
+  .blog-action-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cancel-button,
+  .submit-button {
+    width: 100%;
+  }
+}
+
+/* Thêm style cho nút Edit và Delete trong trang danh sách */
+.ant-btn-primary {
+  background-color: #4eaef7;
+  border-color: #4eaef7;
+  color: white !important;
+}
+
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  background-color: #3a9eea;
+  border-color: #3a9eea;
+  color: white !important;
+}
+
+.ant-btn-dangerous {
+  background-color: #fff;
+  border-color: #ff4d4f;
+  color: #ff4d4f !important;
+}
+
+.ant-btn-dangerous:hover,
+.ant-btn-dangerous:focus {
+  background-color: #fff1f0;
+  border-color: #ff7875;
+  color: #ff7875 !important;
+}
+
+/* Thêm hiệu ứng nổi cho các nút */
+.blog-action-buttons .ant-btn {
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.02);
+  transition: all 0.3s ease;
+}
+
+/* Tăng độ tương phản cho các label của form */
+.blog-left-column .ant-form-item-label > label {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+/* Tăng kích thước và độ rõ cho text label */
+.ant-form-item-label > label {
+  font-size: 15px;
+}
+
+/* Tạo hiệu ứng nổi cho các phần */
+.blog-section:hover {
+  box-shadow: 0 5px 15px rgba(0, 184, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Điều chỉnh lại chiều cao của phần thông tin cơ bản */
+.blog-category-section {
+  min-height: 450px; /* Tăng chiều cao để cân bằng với phần nội dung */
+}
+
+/* Nếu cần, có thể tăng padding cho các form item */
+.blog-left-column .ant-form-item {
+  margin-bottom: 20px; /* Tăng khoảng cách giữa các form item */
+}
+
+/* Loại bỏ các style liên quan đến phần image preview */
+.blog-image-preview,
+.image-preview-container,
+.preview-image,
+.image-placeholder {
+  display: none; /* Ẩn hoàn toàn các phần tử này */
+}
