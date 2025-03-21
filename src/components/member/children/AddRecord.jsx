@@ -130,6 +130,8 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     [closeOverlay]
   );
 
+  
+
   const [currentStep, setCurrentStep] = useState(1);
   // Bỏ subStep2 vì không sử dụng
   // const [subStep2, setSubStep2] = useState(1);
@@ -738,6 +740,9 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
   return (
     <div className="add-record-overlay" onClick={handleClose}>
       <div className="add-record-wizard" onClick={(e) => e.stopPropagation()}>
+      <button className="close-button-record" onClick={handleClose}>
+          ×
+        </button>
         <div className="wizard-left">
           <div className="blue-bar"></div>
           <div className="wizard-left-content">

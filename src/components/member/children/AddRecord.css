@@ -199,6 +199,26 @@ justify-content: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Nút "X" để đóng overlay */
+.close-button-record {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  width: 12px;
+  height: auto;
+  background-color: #f5f5f5;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
 /* Thêm icon mũi tên bằng pseudo-element */
 .next-button-record::after {
   content: "→";
