@@ -83,7 +83,6 @@
     text-align: center;
     margin-right: 12px;
 }
-
 /* Text menu (ẩn khi đóng) */
 .doctor-sidebar-nav li span {
     color: #2C3E50;
@@ -100,7 +99,7 @@
 
 /* Hover item đổi màu */
 .doctor-sidebar-nav li:hover {
-  background-color: #357ABD;
+  background-color: #dddede;
 }
 
 .doctor-sidebar-nav li:hover i {
@@ -118,6 +117,8 @@
 
 .doctor-sidebar-nav li.active i {
   transform: scale(1.1);
+    color: #f5f6f8;
+
 }
 .doctor-sidebar-nav li.active span {
   color: #ffffff;
