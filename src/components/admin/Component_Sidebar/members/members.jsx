@@ -109,7 +109,7 @@ const Members = () => {
     // Set default values for required fields
     userAccountForm.setFieldsValue({
       status: "Active",
-      roleId: 2, // Default role ID for Member
+      roleId: 1, // Thay đổi thành 1 vì roleId = 1 là Member
       gender: "Male", // Default gender
     });
     setUserAccountModalVisible(true);
@@ -122,8 +122,9 @@ const Members = () => {
       dateOfBirth: record.dateOfBirth ? moment(record.dateOfBirth) : null,
       // Convert status string to number if needed
       status: record.status,
-      // Set roleId based on roleName if needed
-      roleId: record.roleName === "Admin" ? 1 : 2,
+      // Cập nhật roleId dựa trên roleName
+      roleId:
+        record.roleName === "Admin" ? 3 : record.roleName === "Doctor" ? 2 : 1,
     });
     setUserAccountModalVisible(true);
   };
@@ -1025,8 +1026,9 @@ const Members = () => {
 
             <Form.Item name="roleId" label="Role" className="form-col">
               <Select>
-                <Option value={1}>Admin</Option>
-                <Option value={2}>Member</Option>
+                <Option value={1}>Member</Option>
+                <Option value={2}>Doctor</Option>
+                <Option value={3}>Admin</Option>
               </Select>
             </Form.Item>
           </div>
