@@ -194,6 +194,9 @@ const Consultations = () => {
             // Call the API to create the consultation response
             await doctorApi.createConsultationResponse(payload);
 
+            // Update the consultation request status using the API updateConsultationRequestStatus
+            await doctorApi.updateConsultationRequestStatus(selectedConsultation.requestId, status);
+
             // Update the local state to reflect the new status
             const updated = consultations.map((req) =>
                 req.id === selectedConsultation.id
