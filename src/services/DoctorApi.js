@@ -40,6 +40,13 @@ const doctorApi = {
     return response.data;
   },
 
+  getConsultationResponsesByDoctor: async (doctorName) => {
+    const response = await api.get(`/api/ConsultationResponses/odata`, {
+      params: { doctorName },
+    });
+    return response.data;
+  },
+
   getDoctorsFromEndpoint: async () => {
     const response = await api.get("/Doctors");
     return response.data;

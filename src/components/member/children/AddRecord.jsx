@@ -94,24 +94,36 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
   const validateGrowthForm = useCallback(() => {
     const newErrors = { ...errors };
     let isValid = true;
+
+    const selectedDate = new Date(growthForm.createdAt);
+    const today = new Date(); // Ngày hiện tại: 20/03/2025
+    today.setHours(0, 0, 0, 0); // Đặt về đầu ngày
+    selectedDate.setHours(0, 0, 0, 0); // Đặt ngày được chọn về đầu ngày
+
     if (!growthForm.createdAt) {
       newErrors.createdAt = "Please select date";
+      isValid = false;
+    } else if (selectedDate > today) {
+      newErrors.createdAt = "Cannot select a future date";
       isValid = false;
     } else {
       newErrors.createdAt = "";
     }
+
     if (!growthForm.weight) {
       newErrors.weight = "Please enter weight";
       isValid = false;
     } else {
       newErrors.weight = "";
     }
+
     if (!growthForm.height) {
       newErrors.height = "Please enter height";
       isValid = false;
     } else {
       newErrors.height = "";
     }
+
     setErrors(newErrors);
     return isValid;
   }, [growthForm, errors]);
@@ -119,17 +131,55 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
   const [showNotification, setShowNotification] = useState(false);
 
   const handleConfirmGrowthRecord = useCallback(async () => {
-    // Only validate on step 1
     if (currentStep === 1 && !validateGrowthForm()) return;
 
-    // If we're on steps 1 or 2, just advance to the next step
+    if (currentStep === 1) {
+      try {
+        console.log("Calling getGrowthRecords with:", { childName: child.name, ParentName: parent.name });
+        const existingRecords = await childApi.getGrowthRecords(child.name, parent.name);
+        console.log("Existing Records:", existingRecords.data);
+
+        if (!growthForm.createdAt) {
+          console.error("No createdAt date provided in growthForm");
+          return;
+        }
+        const selectedDate = new Date(growthForm.createdAt);
+        selectedDate.setHours(0, 0, 0, 0);
+        const selectedDateStr = selectedDate.toDateString();
+        console.log("Selected Date:", selectedDateStr);
+
+        const todayRecords = existingRecords.data.filter((record) => {
+          const recordDate = new Date(record.createdAt);
+          recordDate.setHours(0, 0, 0, 0);
+          return recordDate.toDateString() === selectedDateStr;
+        });
+
+        console.log("Today Records:", todayRecords);
+
+        if (todayRecords.length > 0) {
+          const formattedDate = selectedDate.toLocaleDateString('en-GB');
+          const confirmReplace = window.confirm(
+            `A growth record for this day (${formattedDate}) already exists. Would you like to replace the current record?`
+          );
+          if (!confirmReplace) return;
+        }
+      } catch (err) {
+        console.error("Error fetching existing records:", err);
+      }
+    }
+
     if (currentStep < 3) {
       setCurrentStep((prev) => prev + 1);
       return;
     }
 
-    // If we're on step 3, submit the data
     try {
+      if (!child.name || !growthForm.weight || !growthForm.height) {
+        console.error("Missing required fields in growthPayload");
+        alert("Please fill in all required fields.");
+        return;
+      }
+
       const growthPayload = {
         name: child.name,
         dateOfBirth: child.dateOfBirth,
@@ -164,26 +214,17 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
       const growthRes = await childApi.createGrowthRecord(growthPayload);
       console.log("Growth record created:", growthRes.data);
 
-      // Show notification and close overlay
       setShowNotification(true);
       closeOverlay();
 
-      // Hide notification after 3 seconds
       setTimeout(() => {
         setShowNotification(false);
       }, 3000);
     } catch (err) {
       console.error("Error saving growth record:", err);
+      alert("Failed to save growth record. Please try again.");
     }
-  }, [
-    child,
-    memberId,
-    growthForm,
-    currentStep,
-    validateGrowthForm,
-    closeOverlay,
-  ]);
-
+  }, [child, parent, growthForm, currentStep, validateGrowthForm, closeOverlay]);
   const handlePrevious = useCallback(() => {
     if (currentStep > 1) {
       setCurrentStep((prev) => prev - 1);
@@ -227,15 +268,33 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               type="date"
               value={growthForm.createdAt || ""}
               onChange={(e) => {
-                setGrowthForm((prev) => ({
-                  ...prev,
-                  createdAt: e.target.value, // Lưu đúng định dạng yyyy-MM-dd
-                }));
+                const selectedDate = new Date(e.target.value);
+                const today = new Date(); // Ngày hiện tại: 20/03/2025
+                today.setHours(0, 0, 0, 0); // Đặt về đầu ngày để so sánh chính xác
+                selectedDate.setHours(0, 0, 0, 0); // Đặt ngày được chọn về đầu ngày
+
+                if (selectedDate > today) {
+                  setErrors((prev) => ({
+                    ...prev,
+                    createdAt: "Cannot select a future date",
+                  }));
+                } else {
+                  setErrors((prev) => ({
+                    ...prev,
+                    createdAt: "",
+                  }));
+                  setGrowthForm((prev) => ({
+                    ...prev,
+                    createdAt: e.target.value,
+                  }));
+                }
               }}
+              max={new Date().toISOString().split("T")[0]} // Giới hạn tối đa là ngày hiện tại (20/03/2025)
               className={errors.createdAt ? "error-input" : ""}
             />
             {errors.createdAt && <p className="error-text">{errors.createdAt}</p>}
           </div>
+
 
           {/* Measurements Section */}
           <div className="form-section">
@@ -729,13 +788,12 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
             <div className="step-progress">
               <div className="step-item">
                 <div
-                  className={`step-circle ${
-                    currentStep > 1
-                      ? "completed"
-                      : currentStep === 1
+                  className={`step-circle ${currentStep > 1
+                    ? "completed"
+                    : currentStep === 1
                       ? "active"
                       : ""
-                  }`}
+                    }`}
                 >
                   {currentStep > 1 ? <span className="checkmark">✓</span> : "1"}
                 </div>
@@ -744,13 +802,12 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               <div className="step-connector"></div>
               <div className="step-item">
                 <div
-                  className={`step-circle ${
-                    currentStep > 2
-                      ? "completed"
-                      : currentStep === 2
+                  className={`step-circle ${currentStep > 2
+                    ? "completed"
+                    : currentStep === 2
                       ? "active"
                       : ""
-                  }`}
+                    }`}
                 >
                   {currentStep > 2 ? <span className="checkmark">✓</span> : "2"}
                 </div>
