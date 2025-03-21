@@ -54,12 +54,15 @@ const DoctorBlog = () => {
     try {
       setLoading(true);
       const userId = localStorage.getItem("userId");
+      const email = localStorage.getItem("email");
+
       const response = await axios.get(
         "https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/Blog"
       );
+
       if (response.data.status === 1) {
         const doctorBlogs = response.data.data.filter(
-          (blog) => blog.authorId === userId
+          (blog) => blog.authorId === userId || blog.email === email
         );
 
         setBlogs(
@@ -82,7 +85,7 @@ const DoctorBlog = () => {
       }
     } catch (error) {
       message.error("Unable to load blog list");
-      console.error("Lỗi khi tải blog:", error);
+      console.error("Error loading blogs:", error);
     } finally {
       setLoading(false);
     }
@@ -121,7 +124,9 @@ const DoctorBlog = () => {
     try {
       setLoading(true);
       const userId = localStorage.getItem("userId");
-      if (!userId) {
+      const email = localStorage.getItem("email");
+
+      if (!userId || !email) {
         message.error("Please log in again");
         return;
       }
@@ -157,6 +162,7 @@ const DoctorBlog = () => {
         title: values.title,
         content: content,
         authorId: userId,
+        email: email,
         categoryName: values.categoryName,
         imageBlog: values.imageBlog || "",
         tags: values.tags || "",
