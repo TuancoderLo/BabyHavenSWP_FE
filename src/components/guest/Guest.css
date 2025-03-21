@@ -1265,3 +1265,23 @@ nav {
   padding: 0.2rem 0.8rem;
   border-radius: 12px;
 }
+
+/* Thêm lớp tool-image-homepage cho Guest.css */
+.tool-image-homepage {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #eee;
+}
+
+.tool-image-homepage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.tool-card:hover .tool-image-homepage img {
+  transform: scale(1.05);
+}
