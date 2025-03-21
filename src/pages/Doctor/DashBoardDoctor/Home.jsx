@@ -3,13 +3,13 @@ import './Home.css';
 import Doctor from "../../../assets/doctor.jpg";
 import { FaSearch, FaBell, FaCog } from 'react-icons/fa';
 import doctorApi from '../../../services/DoctorApi';
-import DoctorCalendar from './DoctorCalendar'; // Import DoctorCalendar
+import DoctorCalendar from './DoctorCalendar';
 
 const Home = () => {
   const [currentDateTime, setCurrentDateTime] = useState('');
   const [doctorInfo, setDoctorInfo] = useState(null);
 
-  // Logic để lấy ngày giờ hiện tại
+  // Logic to update current date and time
   useEffect(() => {
     const updateDateTime = () => {
       const now = new Date();
@@ -25,25 +25,25 @@ const Home = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Logic để lấy thông tin bác sĩ và lưu doctorId
+  // Logic to fetch doctor info using doctorId from localStorage
   useEffect(() => {
     const fetchDoctorInfo = async () => {
       try {
-        const userId = localStorage.getItem('userId');
-        if (!userId) {
-          console.error('UserId not found in localStorage');
+        const doctorId = localStorage.getItem('doctorId');
+        if (!doctorId) {
+          console.error('DoctorId not found in localStorage');
           return;
         }
 
-        const doctorResponse = await doctorApi.getDoctorByUserId(userId);
+        // Call getDoctorById API
+        const doctorResponse = await doctorApi.getDoctorById(doctorId);
         const doctor = doctorResponse.data;
 
         if (!doctor) {
-          console.error('Doctor not found for this userId:', userId);
+          console.error('Doctor not found for this doctorId:', doctorId);
           return;
         }
 
-        localStorage.setItem('doctorId', doctor.doctorId);
         setDoctorInfo(doctor);
       } catch (error) {
         console.error('Error fetching doctor:', error);
@@ -55,9 +55,8 @@ const Home = () => {
 
   return (
     <div className="home-container-doctor">
-      {/* Phần bên trái */}
+      {/* Left Section (unchanged) */}
       <div className="left-section">
-        {/* Header */}
         <div className="header-doctor">
           <div className="search-bar-doctor">
             <input type="text" placeholder="Search for events, patients etc." />
@@ -69,7 +68,6 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Welcome Section */}
         <div className="welcome-section">
           <div className="date-time-box">
             <span>{currentDateTime}</span>
@@ -80,7 +78,6 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Quick Stats */}
         <div className="quick-stats-doctor">
           <div className="stat-card-doctor">
             <h4>Total Requests</h4>
@@ -99,7 +96,6 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Scheduled Events & Plans Done */}
         <div className="events-plans">
           <div className="scheduled-events-doctor">
             <h4>My Scheduled Online Events</h4>
@@ -131,45 +127,32 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Phần bên phải */}
+      {/* Right Section */}
       <div className="right-section">
-        {/* Profile Section */}
+        {/* Profile Section with API Data */}
         <div className="profile-section-doctor">
           <img src={Doctor} alt="Profile-doctor" className="profile-image-doctor" />
           <h3>{doctorInfo ? doctorInfo.name : 'Dr. Alisha Nicholls'}</h3>
           <p className="specialty">{doctorInfo ? doctorInfo.degree : 'Online Consultant'}</p>
           <p className="location">📍 {doctorInfo ? doctorInfo.hospitalAddress : 'Remote'}</p>
+          <p className="biography">{doctorInfo ? doctorInfo.biography : 'N/A'}</p>
           <div className="profile-details-doctor">
             <div>
-              <p>Date Birth</p>
-              <p>{doctorInfo && doctorInfo.user ? doctorInfo.user.dateOfBirth : '17.07.86'}</p>
+              <p>Phone</p>
+              <p>{doctorInfo ? doctorInfo.phoneNumber : 'N/A'}</p>
             </div>
             <div>
-              <p>Blood</p>
-              <p>A(II) Rh+</p>
-            </div>
-            <div>
-              <p>Working Hours</p>
-              <p>9am - 5pm (Online)</p>
+              <p>Hospital</p>
+              <p>{doctorInfo ? doctorInfo.hospitalName : 'N/A'}</p>
             </div>
           </div>
         </div>
 
-        {/* Calendar & Detailed Schedule */}
+        {/* Calendar */}
         <div className="calendar-schedule">
           <div className="calendar-section-doctor">
             <h4>My Calendar</h4>
-            <DoctorCalendar /> {/* Thêm DoctorCalendar */}
-          </div>
-
-          <div className="detailed-schedule-doctor">
-            <h4>April 13</h4>
-            <ul>
-              <li><span className="dot blue"></span> 2:00 pm - Online Consultation with Mr. White</li>
-              <li><span className="dot green"></span> 2:30 pm - Response to Mrs. Maisy’s Request</li>
-              <li><span className="dot blue"></span> 3:00 pm - Online Consultation with Mrs. Lee</li>
-              <li><span className="dot green"></span> 3:30 pm - Response to Mr. Smith’s Request</li>
-            </ul>
+            <DoctorCalendar />
           </div>
         </div>
       </div>
