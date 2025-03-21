@@ -373,3 +373,96 @@
   font-size: 14px;
   margin-bottom: 10px;
 }
+/* Calendar & Detailed Schedule */
+.calendar-schedule {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.calendar-section-doctor,
+.detailed-schedule-doctor {
+  background-color: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-section-doctor h4,
+.detailed-schedule-doctor h4 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  color: #4a90e2; /* Đồng bộ màu với giao diện */
+}
+
+/* Tùy chỉnh DoctorCalendar trong calendar-section-doctor */
+.calendar-section-doctor .small-calendar {
+  width: 100%;
+  max-width: 300px; /* Giới hạn chiều rộng để vừa với right-section */
+  margin: 0 auto;
+}
+
+.calendar-section-doctor .ant-picker-calendar-full {
+  border: none;
+}
+
+.calendar-section-doctor .ant-picker-panel {
+  border: none;
+}
+
+/* Định dạng header của calendar */
+.calendar-section-doctor .ant-picker-calendar-header {
+  padding: 8px 12px;
+  background-color: #f0f7ff; /* Nền xanh nhạt nhẹ */
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.calendar-section-doctor .ant-picker-header-view {
+  color: #4a90e2; /* Màu chữ xanh */
+  font-weight: 600;
+}
+
+/* Định dạng ngày trong calendar */
+.calendar-section-doctor .ant-picker-calendar-date {
+  height: 40px; /* Giữ chiều cao từ DoctorCalendar.css */
+  border: none;
+}
+
+.calendar-section-doctor .ant-picker-calendar-date-today {
+  background-color: #4a90e2; /* Ngày hiện tại nổi bật */
+  color: white;
+  border-radius: 50%;
+}
+
+.calendar-section-doctor .ant-picker-calendar-date-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 14px;
+}
+
+/* Định dạng ngày có sự kiện */
+.calendar-section-doctor .ant-picker-calendar-date-content div {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #ff6f61; /* Màu đỏ nhạt cho sự kiện */
+}
+
+/* Hover effect */
+.calendar-section-doctor .ant-picker-calendar-date:hover {
+  background-color: #e6f0fa; /* Nền xanh nhạt khi hover */
+  border-radius: 50%;
+}
+
+.detailed-schedule-doctor ul {
+  list-style: none;
+  padding: 0;
+}
+
+.detailed-schedule-doctor li {
+  font-size: 14px;
+  margin-bottom: 10px;
+}

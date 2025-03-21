@@ -6,10 +6,29 @@
 
 .small-calendar .ant-picker-calendar-full .ant-picker-panel .ant-picker-calendar-date {
   height: 40px;
+  transition: background-color 0.3s ease; /* Thêm hiệu ứng hover */
 }
 
 .small-calendar .ant-picker-calendar-date-content {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Đảm bảo các ngày được căn giữa và đẹp hơn */
+.small-calendar .ant-picker-calendar-date-value {
+  font-size: 14px;
+  color: #333;
+}
+
+/* Ngày được chọn */
+.small-calendar .ant-picker-cell-selected .ant-picker-calendar-date {
+  background-color: #4a90e2;
+  color: white;
+  border-radius: 50%;
+}
+
+/* Tắt viền mặc định của Antd */
+.small-calendar .ant-picker-cell-inner {
+  border: none;
 }
