@@ -381,7 +381,7 @@ function FormatBlog() {
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN", {
+    return date.toLocaleDateString("en-US", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -421,7 +421,7 @@ function FormatBlog() {
         authorImageUrl.startsWith("https://"));
 
     const authorImage = isValidUrl ? authorImageUrl : DEFAULT_AVATAR;
-    const authorName = blog.name || blog.authorName || "Unknow Author";
+    const authorName = blog.name || blog.authorName || "Unknown Author";
 
     // Kiểm tra xem có phải là Doctor không (dựa vào doctorInfo)
     const isDoctorAuthor = doctorInfo !== null;
@@ -446,7 +446,7 @@ function FormatBlog() {
             src={authorImage}
             alt={authorName}
             onError={(e) => {
-              console.log("Sử dụng ảnh mặc định cho tác giả");
+              console.log("Using default image for author");
               e.target.onerror = null;
               e.target.src = DEFAULT_AVATAR;
             }}
@@ -470,10 +470,10 @@ function FormatBlog() {
       <div className="blog-navigation">
         <div className="blog-navigation-container">
           <button onClick={handleGoBack} className="back-button">
-            &larr; Quay lại
+            &larr; Back
           </button>
           <div className="breadcrumbs">
-            <span>Trang chủ</span> &gt;
+            <span>Home</span> &gt;
             <span>{blog?.categoryName || "Category"}</span> &gt;
             <span className="current-page">{blog?.title || "Blog"}</span>
           </div>
@@ -516,7 +516,7 @@ function FormatBlog() {
                     src={blog.imageBlog}
                     alt={blog.title}
                     onError={(e) => {
-                      console.log("Sử dụng ảnh mặc định cho bài viết");
+                      console.log("Using default image for blog post");
                       e.target.onerror = null;
                       e.target.src = DEFAULT_IMAGE;
                     }}
@@ -535,7 +535,7 @@ function FormatBlog() {
             {/* Các bài viết liên quan */}
             {relatedBlogs.length > 0 ? (
               <div className="related-blogs-section">
-                <h2 className="related-blogs-title">Bài viết liên quan</h2>
+                <h2 className="related-blogs-title">Related Articles</h2>
                 <div className="related-blogs-grid">
                   {relatedBlogs.map((relatedBlog, index) => (
                     <div
@@ -548,9 +548,7 @@ function FormatBlog() {
                           src={relatedBlog.imageBlog || DEFAULT_IMAGE}
                           alt={relatedBlog.title}
                           onError={(e) => {
-                            console.log(
-                              "Sử dụng ảnh mặc định cho bài viết liên quan"
-                            );
+                            console.log("Using default image for related blog");
                             e.target.onerror = null;
                             e.target.src = DEFAULT_IMAGE;
                           }}
@@ -583,7 +581,7 @@ function FormatBlog() {
                               ))}
                           </div>
                         )}
-                        <button className="read-more-btn">Đọc thêm</button>
+                        <button className="read-more-btn">Read More</button>
                       </div>
                     </div>
                   ))}
@@ -591,7 +589,7 @@ function FormatBlog() {
               </div>
             ) : (
               <div className="no-related-blogs">
-                <p>Không có bài viết liên quan</p>
+                <p>No related articles</p>
               </div>
             )}
           </div>
