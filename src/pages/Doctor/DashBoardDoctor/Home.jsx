@@ -85,54 +85,47 @@ const Home = () => {
         {/* Quick Stats */}
         <div className="quick-stats-doctor">
           <div className="stat-card-doctor">
-            <h4>Offline Work</h4>
-            <p>27 hospital patients</p>
-            <p className="stat-change negative-doctor">-6% than average</p>
+            <h4>Total Requests</h4>
+            <p>41 requests received</p>
+            <p className="stat-change positive-doctor">+8% than last month</p>
           </div>
           <div className="stat-card-doctor">
-            <h4>Online Work</h4>
-            <p>9 online consultations</p>
-            <p className="stat-change positive-doctor">+12% than average</p>
+            <h4>Total Responses</h4>
+            <p>36 responses sent</p>
+            <p className="stat-change positive-doctor">+10% than last month</p>
           </div>
           <div className="stat-card-doctor">
-            <h4>Laboratory Work</h4>
-            <p>19 laboratory analyses</p>
-            <p className="stat-change neutral">+0% than average</p>
+            <h4>Pending Requests</h4>
+            <p>5 requests pending</p>
+            <p className="stat-change neutral">+0% than last month</p>
           </div>
         </div>
-
         {/* Scheduled Events & Plans Done */}
         <div className="events-plans">
           <div className="scheduled-events-doctor">
-            <h4>My Scheduled Events</h4>
+            <h4>My Scheduled Online Events</h4>
             <div className="progress-circle-doctor">
-              <span>95%</span>
+              <span>85%</span>
               <p>Busyness</p>
             </div>
             <div className="event-stats-doctor">
-              <p><span className="dot blue"></span> 25 Consultations</p>
-              <p><span className="dot pink"></span> 10 Laboratory analyses</p>
-              <p><span className="dot light-blue"></span> 3 Meetings</p>
+              <p><span className="dot blue"></span> 25 Online Consultations</p>
+              <p><span className="dot green"></span> 10 Request Responses</p>
             </div>
           </div>
 
           <div className="plans-done-doctor">
-            <h4>My Plans Done</h4>
+            <h4>My Online Plans Done</h4>
             <p>Today</p>
             <div className="progress-bar-doctor">
               <p>Consultations</p>
-              <div className="bar"><div className="fill blue" style={{ width: '64%' }}></div></div>
-              <p>64%</p>
+              <div className="bar"><div className="fill blue" style={{ width: '70%' }}></div></div>
+              <p>70%</p>
             </div>
             <div className="progress-bar-doctor">
-              <p>Analyses</p>
-              <div className="bar"><div className="fill pink" style={{ width: '50%' }}></div></div>
-              <p>50%</p>
-            </div>
-            <div className="progress-bar-doctor">
-              <p>Meetings</p>
-              <div className="bar"><div className="fill light-blue" style={{ width: '33%' }}></div></div>
-              <p>33%</p>
+              <p>Responses</p>
+              <div className="bar"><div className="fill green" style={{ width: '60%' }}></div></div>
+              <p>60%</p>
             </div>
             <button className="add-plan">Add plan +</button>
           </div>
@@ -145,8 +138,8 @@ const Home = () => {
         <div className="profile-section-doctor">
           <img src={Doctor} alt="Profile-doctor" className="profile-image-doctor" />
           <h3>{doctorInfo ? doctorInfo.name : 'Dr. Alisha Nicholls'}</h3>
-          <p className="specialty">{doctorInfo ? doctorInfo.degree : 'Dermatologist'}</p>
-          <p className="location">📍 {doctorInfo ? doctorInfo.hospitalAddress : 'Bottrop, Germany'}</p>
+          <p className="specialty">{doctorInfo ? doctorInfo.degree : 'Online Consultant'}</p>
+          <p className="location">📍 {doctorInfo ? doctorInfo.hospitalAddress : 'Remote'}</p>
           <div className="profile-details-doctor">
             <div>
               <p>Date Birth</p>
@@ -158,7 +151,7 @@ const Home = () => {
             </div>
             <div>
               <p>Working Hours</p>
-              <p>9am - 5pm</p>
+              <p>9am - 5pm (Online)</p>
             </div>
           </div>
         </div>
@@ -184,11 +177,10 @@ const Home = () => {
           <div className="detailed-schedule-doctor">
             <h4>April 13</h4>
             <ul>
-              <li><span className="dot pink"></span> 2:00 pm - Meeting with chief physician Dr. Williams</li>
-              <li><span className="dot blue"></span> 2:30 pm - Consultation with Mr. White</li>
-              <li><span className="dot green"></span> 3:00 pm - Consultation with Mrs. Maisy</li>
-              <li><span className="dot purple"></span> 3:30 pm - Examination of Mrs. Lee's freckle</li>
-              <li><span className="dot pink"></span> 4:00 pm - Meeting with gastroenterologist Dr. Alice</li>
+              <li><span className="dot blue"></span> 2:00 pm - Online Consultation with Mr. White</li>
+              <li><span className="dot green"></span> 2:30 pm - Response to Mrs. Maisy’s Request</li>
+              <li><span className="dot blue"></span> 3:00 pm - Online Consultation with Mrs. Lee</li>
+              <li><span className="dot green"></span> 3:30 pm - Response to Mr. Smith’s Request</li>
             </ul>
           </div>
         </div>
