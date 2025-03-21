@@ -1,22 +1,23 @@
+/* DoctorBlog Container */
 .doctor-blog-container {
-  background: linear-gradient(135deg, #f5f7fa 0%, #eef2f7 100%);
   padding: 24px;
   min-height: 100vh;
+  background: #E6F0FA; /* Lấy từ Consultation - nền xanh nhạt dịu */
 }
 
 .doctor-blog-card {
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border-radius: 16px; /* Bo góc nhẹ nhàng hơn như Consultation */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); /* Giảm shadow cho nhẹ nhàng */
   padding: 28px;
   border: none;
   overflow: hidden;
 }
 
 .doctor-blog-title {
-  color: #2c3e50;
+  color: #4A90E2; /* Lấy màu xanh từ Consultation title */
   margin-bottom: 32px;
-  font-weight: 700;
+  font-weight: 600; /* Giảm xuống 600 cho nhẹ nhàng hơn */
   position: relative;
   padding-left: 16px;
   font-size: 28px;
@@ -30,10 +31,11 @@
   top: 0;
   height: 100%;
   width: 6px;
-  background: linear-gradient(to bottom, #00c6ff, #0072ff);
+  background: #4AC1E2; /* Thay gradient bằng màu teal của Consultation */
   border-radius: 8px;
 }
 
+/* Tabs Styling */
 .doctor-blog-tabs .ant-tabs-nav {
   margin-bottom: 28px;
 }
@@ -44,23 +46,24 @@
   transition: all 0.3s ease;
   margin-right: 8px;
   border-radius: 8px 8px 0 0;
+  color: #666; /* Màu chữ xám nhạt từ Consultation */
 }
 
 .doctor-blog-tabs .ant-tabs-tab:hover {
-  color: #0072ff;
+  color: #4AC1E2; /* Teal từ Consultation */
 }
 
 .doctor-blog-tabs .ant-tabs-tab.ant-tabs-tab-active {
-  background-color: #f0f7ff;
+  background-color: #F0F5FF; /* Màu nền header bảng Consultation */
 }
 
 .doctor-blog-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
-  color: #0072ff;
+  color: #4AC1E2; /* Teal từ Consultation */
   font-weight: 600;
 }
 
 .doctor-blog-tabs .ant-tabs-ink-bar {
-  background: linear-gradient(to right, #00c6ff, #0072ff);
+  background: #4AC1E2; /* Teal từ Consultation */
   height: 3px;
   border-radius: 3px;
 }
@@ -75,32 +78,33 @@
 }
 
 .blog-header-section {
-  background: linear-gradient(120deg, #f8f9fa 0%, #e9f2f9 100%);
+  background: #F9FBFF; /* Màu nền rất nhạt từ Consultation */
   padding: 32px;
   border-radius: 12px;
   margin-bottom: 28px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-  border-left: 5px solid #0072ff;
+  border-left: 5px solid #4AC1E2; /* Teal từ Consultation */
 }
 
 .blog-title-input {
   font-size: 22px;
   height: 56px;
   border-radius: 8px;
-  border: 1px solid #d9d9d9;
+  border: 1px solid #D9E4F5; /* Viền nhạt từ Consultation */
   padding-left: 16px;
   font-weight: 500;
   transition: all 0.3s ease;
+  background: #F9FBFF; /* Nền nhạt từ Consultation */
 }
 
 .blog-title-input:focus,
 .blog-title-input:hover {
-  border-color: #0072ff;
-  box-shadow: 0 0 0 3px rgba(0, 114, 255, 0.1);
+  border-color: #4AC1E2; /* Teal từ Consultation */
+  box-shadow: 0 0 0 3px rgba(74, 193, 226, 0.2); /* Hiệu ứng hover từ Consultation */
 }
 
 .blog-title-input::placeholder {
-  color: #a0aec0;
+  color: #A0AEC0;
   font-weight: 400;
 }
 
@@ -137,16 +141,16 @@
   left: 0;
   width: 100%;
   height: 4px;
-  background: linear-gradient(to right, #00c6ff, #0072ff);
+  background: #4AC1E2; /* Thay gradient bằng teal từ Consultation */
 }
 
 .section-title {
   font-size: 18px;
   font-weight: 600;
-  color: #0072ff;
+  color: #4A90E2; /* Xanh từ Consultation */
   margin-bottom: 20px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #e7edf3;
+  border-bottom: 1px solid #D9E4F5; /* Viền nhạt từ Consultation */
   display: flex;
   align-items: center;
 }
@@ -154,28 +158,13 @@
 .section-title i {
   margin-right: 10px;
   font-size: 20px;
-  background: linear-gradient(to right, #00c6ff, #0072ff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #4AC1E2; /* Icon teal từ Consultation */
 }
 
-.blog-content-section .section-title {
-  color: #00b8ff;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.blog-category-section .section-title {
-  color: #00b8ff;
-  font-size: 18px;
-  font-weight: 600;
-}
-
+.blog-content-section .section-title,
+.blog-category-section .section-title,
 .blog-image-preview .section-title {
-  color: #00b8ff;
-  font-size: 16px;
-  font-weight: 600;
+  color: #4A90E2; /* Đồng bộ với Consultation */
 }
 
 .blog-select {
@@ -185,81 +174,46 @@
 
 .blog-select .ant-select-selector {
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #D9E4F5; /* Viền nhạt từ Consultation */
   padding: 10px 12px;
   transition: all 0.3s ease;
-  background-color: #f8fafc;
+  background-color: #F9FBFF; /* Nền nhạt từ Consultation */
 }
 
 .blog-input,
 .blog-select:focus .ant-select-selector,
 .blog-select:hover .ant-select-selector {
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #D9E4F5;
   padding: 10px 12px;
   transition: all 0.3s ease;
-  background-color: #f8fafc;
+  background-color: #F9FBFF;
 }
 
 .blog-input:focus,
 .blog-input:hover {
-  border-color: #0072ff;
-  box-shadow: 0 0 0 3px rgba(0, 114, 255, 0.1);
+  border-color: #4AC1E2; /* Teal từ Consultation */
+  box-shadow: 0 0 0 3px rgba(74, 193, 226, 0.2); /* Hiệu ứng từ Consultation */
 }
 
 .image-preview-container {
-  width: 100%;
-  height: 200px;
-  border-radius: 8px;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #f5f5f5;
-  border: 1px dashed #d9d9d9;
-}
-
-.preview-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.image-placeholder {
-  text-align: center;
-  color: #a0a0a0;
-}
-
-.image-placeholder i {
-  font-size: 32px;
-  margin-bottom: 8px;
+  display: none; /* Giữ nguyên ẩn như yêu cầu */
 }
 
 .blog-editor-wrapper {
-  border: 1px solid #e2e8f0;
+  border: 1px solid #D9E4F5; /* Viền nhạt từ Consultation */
   border-radius: 12px;
   min-height: 500px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
-.status-option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 500;
-}
-
-.status-option i {
-  font-size: 16px;
-}
-
 .status-option.draft {
-  color: #3182ce;
+  color: #4A90E2; /* Xanh từ Consultation thay vì xanh dương đậm */
 }
 
 .status-option.pending {
-  color: #dd6b20;
+  color: #dd6b20; /* Giữ màu cam nguyên bản cho Pending */
 }
 
 .blog-action-buttons {
@@ -275,16 +229,16 @@
   border-radius: 8px;
   font-weight: 500;
   font-size: 15px;
-  background-color: #f7fafc;
-  border: 1px solid #e2e8f0;
-  color: #4a5568;
+  background-color: #F9FBFF; /* Nền nhạt từ Consultation */
+  border: 1px solid #D9E4F5; /* Viền nhạt từ Consultation */
+  color: #4A5568;
   transition: all 0.3s ease;
 }
 
 .cancel-button:hover {
-  background-color: #edf2f7;
-  color: #2d3748;
-  border-color: #cbd5e0;
+  background-color: #EDF2F7;
+  color: #2D3748;
+  border-color: #CBD5E0;
 }
 
 .submit-button {
@@ -293,17 +247,17 @@
   border-radius: 8px;
   font-weight: 600;
   font-size: 15px;
-  background: linear-gradient(to right, #00c6ff, #0072ff);
+  background: #4AC1E2; /* Teal từ Consultation thay gradient */
   border: none;
   color: white !important;
-  box-shadow: 0 4px 12px rgba(0, 114, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(74, 193, 226, 0.3); /* Shadow nhẹ teal */
   transition: all 0.3s ease;
 }
 
 .submit-button:hover {
-  background: linear-gradient(to right, #00a6ff, #0062df);
+  background: #3AB0D2; /* Teal đậm hơn từ Consultation */
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 114, 255, 0.4);
+  box-shadow: 0 6px 16px rgba(74, 193, 226, 0.4);
 }
 
 .submit-button:active {
@@ -318,8 +272,8 @@
 }
 
 .blog-table .ant-table-thead > tr > th {
-  background-color: #f0f7ff;
-  color: #2d3748;
+  background-color: #F0F5FF; /* Màu header từ Consultation */
+  color: #4A90E2; /* Xanh từ Consultation */
   font-weight: 600;
   font-size: 14px;
   padding: 16px;
@@ -330,69 +284,24 @@
 }
 
 .blog-table .ant-table-tbody > tr:hover > td {
-  background-color: #f8fafc;
+  background-color: #F9FBFF; /* Hover nhạt từ Consultation */
 }
 
 .blog-table .ant-pagination {
   margin: 20px 0;
 }
 
-/* Responsive for smaller screens */
-@media (max-width: 1200px) {
-  .blog-left-column {
-    max-width: 300px;
-  }
-}
-
-@media (max-width: 992px) {
-  .blog-main-container {
-    flex-direction: column;
-  }
-
-  .blog-left-column {
-    max-width: 100%;
-  }
-
-  .blog-header-section {
-    padding: 24px;
-  }
-
-  .doctor-blog-title {
-    font-size: 24px;
-  }
-}
-
-@media (max-width: 576px) {
-  .doctor-blog-container {
-    padding: 12px;
-  }
-
-  .doctor-blog-card {
-    padding: 16px;
-  }
-
-  .blog-action-buttons {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .cancel-button,
-  .submit-button {
-    width: 100%;
-  }
-}
-
-/* Thêm style cho nút Edit và Delete trong trang danh sách */
+/* Nút Edit và Delete */
 .ant-btn-primary {
-  background-color: #4eaef7;
-  border-color: #4eaef7;
+  background-color: #4AC1E2; /* Teal từ Consultation */
+  border-color: #4AC1E2;
   color: white !important;
 }
 
 .ant-btn-primary:hover,
 .ant-btn-primary:focus {
-  background-color: #3a9eea;
-  border-color: #3a9eea;
+  background-color: #3AB0D2; /* Teal đậm hơn */
+  border-color: #3AB0D2;
   color: white !important;
 }
 
@@ -409,43 +318,41 @@
   color: #ff7875 !important;
 }
 
-/* Thêm hiệu ứng nổi cho các nút */
-.blog-action-buttons .ant-btn {
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.02);
-  transition: all 0.3s ease;
+/* Responsive giữ nguyên như cũ */
+@media (max-width: 1200px) {
+  .blog-left-column {
+    max-width: 300px;
+  }
 }
 
-/* Tăng độ tương phản cho các label của form */
-.blog-left-column .ant-form-item-label > label {
-  font-weight: 500;
-  color: #2c3e50;
+@media (max-width: 992px) {
+  .blog-main-container {
+    flex-direction: column;
+  }
+  .blog-left-column {
+    max-width: 100%;
+  }
+  .blog-header-section {
+    padding: 24px;
+  }
+  .doctor-blog-title {
+    font-size: 24px;
+  }
 }
 
-/* Tăng kích thước và độ rõ cho text label */
-.ant-form-item-label > label {
-  font-size: 15px;
-}
-
-/* Tạo hiệu ứng nổi cho các phần */
-.blog-section:hover {
-  box-shadow: 0 5px 15px rgba(0, 184, 255, 0.1);
-  transform: translateY(-2px);
-}
-
-/* Điều chỉnh lại chiều cao của phần thông tin cơ bản */
-.blog-category-section {
-  min-height: 450px; /* Tăng chiều cao để cân bằng với phần nội dung */
-}
-
-/* Nếu cần, có thể tăng padding cho các form item */
-.blog-left-column .ant-form-item {
-  margin-bottom: 20px; /* Tăng khoảng cách giữa các form item */
-}
-
-/* Loại bỏ các style liên quan đến phần image preview */
-.blog-image-preview,
-.image-preview-container,
-.preview-image,
-.image-placeholder {
-  display: none; /* Ẩn hoàn toàn các phần tử này */
+@media (max-width: 576px) {
+  .doctor-blog-container {
+    padding: 12px;
+  }
+  .doctor-blog-card {
+    padding: 16px;
+  }
+  .blog-action-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .cancel-button,
+  .submit-button {
+    width: 100%;
+  }
 }
