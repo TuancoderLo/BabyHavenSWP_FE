@@ -288,12 +288,36 @@ function Packages() {
                 <TableCell>{pkg.maxChildrenAllowed}</TableCell>
                 <TableCell>{pkg.status}</TableCell>
                 <TableCell>
-                  <IconButton onClick={() => handleOpen(pkg)}>
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton onClick={() => handleDelete(pkg)}>
-                    <DeleteIcon />
-                  </IconButton>
+                  <Box sx={{ display: "flex", gap: 1 }}>
+                    <IconButton
+                      onClick={() => handleOpen(pkg)}
+                      sx={{
+                        backgroundColor: "#00E5BE",
+                        color: "white",
+                        borderRadius: "8px",
+                        padding: "8px",
+                        "&:hover": {
+                          backgroundColor: "#00D1AD",
+                        },
+                      }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => handleDelete(pkg)}
+                      sx={{
+                        backgroundColor: "#FF5252",
+                        color: "white",
+                        borderRadius: "8px",
+                        padding: "8px",
+                        "&:hover": {
+                          backgroundColor: "#FF1744",
+                        },
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
                 </TableCell>
               </TableRow>
             ))}

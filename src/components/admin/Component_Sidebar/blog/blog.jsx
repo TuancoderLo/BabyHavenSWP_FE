@@ -632,7 +632,7 @@ function Blog() {
           />
 
           <Modal
-            title={editingId ? "Sửa danh mục" : "Thêm danh mục mới"}
+            title={editingId ? "Edit Category" : "Add New Category"}
             open={isModalVisible}
             onCancel={() => {
               setIsModalVisible(false);
@@ -649,20 +649,20 @@ function Blog() {
             >
               <Form.Item
                 name="categoryName"
-                label="Tên danh mục"
+                label="Category Name"
                 rules={[
-                  { required: true, message: "Vui lòng nhập tên danh mục" },
+                  { required: true, message: "Please enter category name" },
                 ]}
               >
                 <Input />
               </Form.Item>
 
-              <Form.Item name="description" label="Mô tả">
+              <Form.Item name="description" label="Description">
                 <Input.TextArea rows={4} />
               </Form.Item>
 
-              <Form.Item name="parentCategoryId" label="Danh mục cha">
-                <Select allowClear placeholder="Chọn danh mục cha">
+              <Form.Item name="parentCategoryId" label="Parent Category">
+                <Select allowClear placeholder="Select parent category">
                   {categories
                     .filter((cat) => cat.parentCategoryId === null)
                     .map((cat) => (
@@ -676,18 +676,14 @@ function Blog() {
                 </Select>
               </Form.Item>
 
-              <Form.Item
-                name="isActive"
-                label="Trạng thái"
-                valuePropName="checked"
-              >
+              <Form.Item name="isActive" label="Status" valuePropName="checked">
                 <Switch checkedChildren="Active" unCheckedChildren="Inactive" />
               </Form.Item>
 
               <div className="blog-form-footer">
-                <Button onClick={() => setIsModalVisible(false)}>Hủy</Button>
+                <Button onClick={() => setIsModalVisible(false)}>Cancel</Button>
                 <Button type="primary" htmlType="submit" loading={loading}>
-                  {editingId ? "Cập nhật" : "Thêm mới"}
+                  {editingId ? "Update" : "Add"}
                 </Button>
               </div>
             </Form>

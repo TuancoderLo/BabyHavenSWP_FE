@@ -53,16 +53,39 @@ const DoctorBlog = () => {
   const fetchBlogs = async () => {
     try {
       setLoading(true);
+      const userId = localStorage.getItem("userId");
       const email = localStorage.getItem("email");
-      const response = await blogApi.getAll();
+
+      const response = await axios.get(
+        "https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/Blog"
+      );
+
       if (response.data.status === 1) {
         const doctorBlogs = response.data.data.filter(
-          (blog) => blog.email === email
+          (blog) => blog.authorId === userId || blog.email === email
         );
-        setBlogs(doctorBlogs.map((blog) => ({ ...blog, key: blog.blogId })));
+
+        setBlogs(
+          doctorBlogs.map((blog) => ({
+            ...blog,
+            key: blog.blogId,
+            // Chuyển đổi trạng thái từ chuỗi sang số cho phù hợp với hệ thống hiển thị
+            status:
+              blog.status === "Approved"
+                ? 1
+                : blog.status === "PendingApproval"
+                ? 0
+                : blog.status === "Draft"
+                ? 3
+                : blog.status === "Rejected"
+                ? 2
+                : 0,
+          }))
+        );
       }
     } catch (error) {
-      message.error("Không thể tải danh sách bài viết");
+      message.error("Unable to load blog list");
+      console.error("Error loading blogs:", error);
     } finally {
       setLoading(false);
     }
@@ -75,7 +98,7 @@ const DoctorBlog = () => {
         setCategories(response.data.data);
       }
     } catch (error) {
-      message.error("Không thể tải danh sách danh mục");
+      message.error("Unable to load category list");
     }
   };
 
@@ -100,31 +123,72 @@ const DoctorBlog = () => {
   const handleSubmit = async (values) => {
     try {
       setLoading(true);
+      const userId = localStorage.getItem("userId");
       const email = localStorage.getItem("email");
-      if (!email) {
-        message.error("Vui lòng đăng nhập lại");
+
+      if (!userId || !email) {
+        message.error("Please log in again");
         return;
       }
+
+      // Nếu đang cập nhật blog (có blogId)
+      if (values.blogId) {
+        // Tìm blog cần cập nhật trong danh sách
+        const blogToUpdate = blogs.find(
+          (blog) => blog.blogId === values.blogId
+        );
+
+        // Kiểm tra trạng thái của blog
+        if (blogToUpdate) {
+          const status = blogToUpdate.status;
+          const canUpdate =
+            (typeof status === "string" &&
+              (status === "Draft" || status === "PendingApproval")) ||
+            (typeof status === "number" && (status === 3 || status === 0));
+
+          if (!canUpdate) {
+            message.error(
+              "You cannot update blogs with Approved or Rejected status"
+            );
+            return;
+          }
+        }
+      }
+
+      // Lấy trạng thái từ form hoặc sử dụng trạng thái mặc định
+      const status = values.status || "Draft";
 
       const blogData = {
         title: values.title,
         content: content,
+        authorId: userId,
         email: email,
         categoryName: values.categoryName,
         imageBlog: values.imageBlog || "",
         tags: values.tags || "",
         referenceSources: values.referenceSources || "",
-        status: 0, // Pending approval
+        status: status === "PendingApproval" ? "PendingApproval" : "Draft",
       };
 
-      await blogApi.create(blogData);
-      message.success("Tạo bài viết mới thành công");
+      if (values.blogId) {
+        // Đây là cập nhật blog đã tồn tại
+        await blogApi.update(values.blogId, blogData);
+        message.success("Blog updated successfully");
+      } else {
+        // Đây là tạo blog mới
+        await blogApi.create(blogData);
+        message.success("New blog created successfully");
+      }
+
       form.resetFields();
       setContent("");
       fetchBlogs();
       setActiveTab("2");
     } catch (error) {
-      message.error("Không thể lưu bài viết");
+      message.error(
+        values.blogId ? "Unable to update blog" : "Unable to save blog"
+      );
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -132,213 +196,388 @@ const DoctorBlog = () => {
 
   const handleDelete = async (blogId) => {
     try {
-      await blogApi.delete(blogId);
-      message.success("Xóa bài viết thành công");
-      fetchBlogs();
+      // Tìm blog cần xóa trong danh sách
+      const blogToDelete = blogs.find((blog) => blog.blogId === blogId);
+
+      // Kiểm tra xem blog có tồn tại không
+      if (!blogToDelete) {
+        message.error("Blog not found");
+        return;
+      }
+
+      // Kiểm tra trạng thái của blog
+      const status = blogToDelete.status;
+      const canDelete =
+        (typeof status === "string" &&
+          (status === "Draft" || status === "PendingApproval")) ||
+        (typeof status === "number" && (status === 3 || status === 0));
+
+      if (!canDelete) {
+        message.error(
+          "You cannot delete blogs with Approved or Rejected status"
+        );
+        return;
+      }
+
+      // Nếu trạng thái hợp lệ, tiến hành xóa
+      const response = await axios.delete(
+        `https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/Blog/${blogId}`
+      );
+
+      if (response.data.status === 1) {
+        message.success("Blog deleted successfully");
+        fetchBlogs();
+      } else {
+        message.error(response.data.message || "Failed to delete blog");
+      }
     } catch (error) {
-      message.error("Không thể xóa bài viết");
+      message.error("Unable to delete blog");
+      console.error("Error when deleting blog:", error);
     }
   };
 
   const columns = [
     {
-      title: "Tiêu đề",
+      title: "Title",
       dataIndex: "title",
       key: "title",
       ellipsis: true,
     },
     {
-      title: "Danh mục",
+      title: "Category",
       dataIndex: "categoryName",
       key: "categoryName",
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: (status) => {
-        const statusColors = {
-          0: "orange",
-          1: "green",
-          2: "red",
-        };
-        const statusText = {
-          0: "Chờ duyệt",
-          1: "Đã duyệt",
-          2: "Từ chối",
-        };
-        return <Tag color={statusColors[status]}>{statusText[status]}</Tag>;
+        let color = "default";
+        let text = "Undefined";
+
+        if (typeof status === "string") {
+          // Nếu status là chuỗi từ API
+          if (status === "Approved") {
+            color = "green";
+            text = "Approved";
+          } else if (status === "Draft") {
+            color = "blue";
+            text = "Draft";
+          } else if (status === "PendingApproval") {
+            color = "orange";
+            text = "Pending Approval";
+          } else if (status === "Rejected") {
+            color = "red";
+            text = "Rejected";
+          }
+        } else {
+          // Nếu status là số từ hệ thống cũ
+          const statusColors = {
+            0: "orange",
+            1: "green",
+            2: "red",
+            3: "blue",
+          };
+          const statusText = {
+            0: "Pending Approval",
+            1: "Approved",
+            2: "Rejected",
+            3: "Draft",
+          };
+          color = statusColors[status] || "default";
+          text = statusText[status] || "Undefined";
+        }
+
+        return <Tag color={color}>{text}</Tag>;
       },
     },
     {
-      title: "Thao tác",
+      title: "Actions",
       key: "action",
-      render: (_, record) => (
-        <Space size="middle">
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            onClick={() => {
-              setActiveTab("1");
-              form.setFieldsValue({
-                title: record.title,
-                categoryName: record.categoryName,
-                imageBlog: record.imageBlog,
-                tags: record.tags,
-                referenceSources: record.referenceSources,
-              });
-              setContent(record.content);
-            }}
-          >
-            Sửa
-          </Button>
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.blogId)}
-          >
-            Xóa
-          </Button>
-        </Space>
-      ),
+      render: (_, record) => {
+        // Kiểm tra trạng thái của bài viết để quyết định hiển thị các nút action
+        const canEditOrDelete =
+          (typeof record.status === "string" &&
+            (record.status === "Draft" ||
+              record.status === "PendingApproval")) ||
+          (typeof record.status === "number" &&
+            (record.status === 3 || record.status === 0)); // 3 = Draft, 0 = PendingApproval
+
+        return (
+          <Space size="middle">
+            {canEditOrDelete ? (
+              <>
+                <Button
+                  type="primary"
+                  icon={<EditOutlined />}
+                  className="DoctorRoleID2-doctor-blog__btn-primary"
+                  onClick={() => {
+                    setActiveTab("1");
+                    form.setFieldsValue({
+                      title: record.title,
+                      categoryName: record.categoryName,
+                      imageBlog: record.imageBlog,
+                      tags: record.tags,
+                      referenceSources: record.referenceSources || "",
+                      blogId: record.blogId,
+                    });
+                    setContent(record.content);
+                  }}
+                >
+                  Edit
+                </Button>
+                <Button
+                  danger
+                  icon={<DeleteOutlined />}
+                  className="DoctorRoleID2-doctor-blog__btn-dangerous"
+                  onClick={() => handleDelete(record.blogId)}
+                >
+                  Delete
+                </Button>
+              </>
+            ) : (
+              <Tag color="gray">No Actions Available</Tag>
+            )}
+          </Space>
+        );
+      },
     },
   ];
 
   return (
-    <div className="doctor-blog-container">
-      <Card bordered={false} className="doctor-blog-card">
-        <Title level={3} className="doctor-blog-title">
-          Quản lý Blog
+    <div className="DoctorRoleID2-doctor-blog-container">
+      <Card bordered={false} className="DoctorRoleID2-doctor-blog-card">
+        <Title level={3} className="DoctorRoleID2-doctor-blog-title">
+          Medical Blog Management
         </Title>
-        <Tabs activeKey={activeTab} onChange={setActiveTab}>
-          <TabPane tab="Viết Blog" key="1">
-            <div className="write-blog-container">
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          className="DoctorRoleID2-doctor-blog-tabs"
+        >
+          <TabPane tab="Write Blog" key="1">
+            <div className="DoctorRoleID2-doctor-blog__write-blog-container">
               <Form
                 form={form}
                 layout="vertical"
                 onFinish={handleSubmit}
                 className="blog-form"
               >
-                <div className="input-row">
+                <Form.Item name="blogId" hidden>
+                  <Input />
+                </Form.Item>
+
+                {/* Tiêu đề blog - Phần nổi bật */}
+                <div className="DoctorRoleID2-doctor-blog__header-section">
                   <Form.Item
                     name="title"
                     rules={[
-                      { required: true, message: "Vui lòng nhập tiêu đề" },
-                    ]}
-                    className="input-item"
-                  >
-                    <Input placeholder="Title" className="blog-input" />
-                  </Form.Item>
-
-                  <Form.Item
-                    name="tags"
-                    rules={[{ required: true, message: "Tags tự động điền" }]}
-                    className="input-item"
-                  >
-                    <Input
-                      placeholder="Tags"
-                      className="blog-input"
-                      disabled
-                      style={{ backgroundColor: "#f5f5f5" }}
-                    />
-                  </Form.Item>
-
-                  <Form.Item
-                    name="referenceSources"
-                    rules={[
                       {
                         required: true,
-                        message: "Vui lòng nhập nguồn tham khảo",
+                        message: "Please enter your medical article title...",
                       },
                     ]}
-                    className="input-item"
+                    className="blog-title-item"
                   >
                     <Input
-                      placeholder="Reference source"
-                      className="blog-input"
-                    />
-                  </Form.Item>
-
-                  <Form.Item name="status" className="input-item">
-                    <Input
-                      placeholder="Status"
-                      className="blog-input"
-                      disabled
-                      value="Chờ duyệt"
-                      style={{ backgroundColor: "#f5f5f5" }}
+                      placeholder="Enter your medical article title..."
+                      className="DoctorRoleID2-doctor-blog__title-input"
+                      size="large"
+                      prefix={
+                        <i
+                          className="fas fa-heading"
+                          style={{ color: "#0072ff", marginRight: "8px" }}
+                        ></i>
+                      }
                     />
                   </Form.Item>
                 </div>
 
-                <div className="category-section">
-                  <Form.Item
-                    name="categoryName"
-                    rules={[
-                      { required: true, message: "Vui lòng chọn danh mục" },
-                    ]}
-                    className="category-item"
-                  >
-                    <Select
-                      placeholder="Chọn danh mục"
-                      onChange={(value) => {
-                        const tags = getTagsFromCategory(value);
-                        form.setFieldsValue({ tags });
-                      }}
-                      className="category-select"
-                    >
-                      {categories.map((category) => (
-                        <Option
-                          key={category.categoryId}
-                          value={category.categoryName}
+                <div className="DoctorRoleID2-doctor-blog__main-container">
+                  {/* Phần bên trái: Category + Image */}
+                  <div className="DoctorRoleID2-doctor-blog__left-column">
+                    <div className="DoctorRoleID2-doctor-blog__section DoctorRoleID2-doctor-blog__category-section">
+                      <h3 className="DoctorRoleID2-doctor-blog__section-title">
+                        <i className="fas fa-info-circle"></i>
+                        Basic Information
+                      </h3>
+
+                      <Form.Item
+                        label="Category"
+                        name="categoryName"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please select a category",
+                          },
+                        ]}
+                        className="category-form-item"
+                      >
+                        <Select
+                          placeholder="Select category..."
+                          onChange={(value) => {
+                            const tags = getTagsFromCategory(value);
+                            form.setFieldsValue({ tags });
+                          }}
+                          className="DoctorRoleID2-doctor-blog__select"
                         >
-                          {category.categoryName}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
+                          {categories.map((category) => (
+                            <Option
+                              key={category.categoryId}
+                              value={category.categoryName}
+                            >
+                              {category.categoryName}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
 
-                  <Form.Item
-                    name="imageBlog"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Vui lòng nhập đường dẫn ảnh",
-                      },
-                    ]}
-                    className="image-item"
+                      <Form.Item
+                        label="Featured Image"
+                        name="imageBlog"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please enter image URL",
+                          },
+                        ]}
+                        className="image-form-item"
+                      >
+                        <Input
+                          placeholder="Enter article featured image URL (https://...)"
+                          className="DoctorRoleID2-doctor-blog__input"
+                          prefix={
+                            <i
+                              className="fas fa-image"
+                              style={{ color: "#00b8ff" }}
+                            ></i>
+                          }
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Tags"
+                        name="tags"
+                        rules={[
+                          { required: true, message: "Tags are auto-filled" },
+                        ]}
+                        className="tags-form-item"
+                      >
+                        <Input
+                          placeholder="Tags"
+                          className="DoctorRoleID2-doctor-blog__input"
+                          disabled
+                          style={{ backgroundColor: "#f5f5f5" }}
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Reference Sources"
+                        name="referenceSources"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please enter reference sources",
+                          },
+                        ]}
+                        className="reference-form-item"
+                      >
+                        <Input
+                          placeholder="Enter reference sources..."
+                          className="DoctorRoleID2-doctor-blog__input"
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Publication Status"
+                        name="status"
+                        initialValue="Draft"
+                        className="status-form-item"
+                      >
+                        <Select
+                          placeholder="Select status"
+                          className="DoctorRoleID2-doctor-blog__select"
+                          dropdownStyle={{ borderRadius: "8px" }}
+                        >
+                          <Option value="Draft">
+                            <span className="DoctorRoleID2-doctor-blog__status-option-draft">
+                              <i className="fas fa-save"></i> Save as Draft
+                            </span>
+                          </Option>
+                          <Option value="PendingApproval">
+                            <span className="DoctorRoleID2-doctor-blog__status-option-pending">
+                              <i className="fas fa-paper-plane"></i> Submit for
+                              Approval
+                            </span>
+                          </Option>
+                        </Select>
+                      </Form.Item>
+                    </div>
+                  </div>
+
+                  {/* Phần bên phải: Content Editor */}
+                  <div className="DoctorRoleID2-doctor-blog__right-column">
+                    <div className="DoctorRoleID2-doctor-blog__section DoctorRoleID2-doctor-blog__content-section">
+                      <h3 className="DoctorRoleID2-doctor-blog__section-title">
+                        <i className="fas fa-edit"></i>
+                        Article Content
+                      </h3>
+                      <div className="DoctorRoleID2-doctor-blog__editor-wrapper">
+                        <Form.Item
+                          rules={[
+                            {
+                              required: true,
+                              message: "Please enter content",
+                            },
+                          ]}
+                        >
+                          <CustomEditor
+                            value={content}
+                            onChange={(newContent) => setContent(newContent)}
+                          />
+                        </Form.Item>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="DoctorRoleID2-doctor-blog__action-buttons">
+                  <Button
+                    onClick={() => {
+                      form.resetFields();
+                      setContent("");
+                    }}
+                    className="DoctorRoleID2-doctor-blog__cancel-button"
+                    icon={
+                      <i
+                        className="fas fa-times"
+                        style={{ marginRight: "8px" }}
+                      ></i>
+                    }
                   >
-                    <Input placeholder="Image URL" className="blog-input" />
-                  </Form.Item>
-                </div>
-
-                <div className="content-section">
-                  <div className="content-header">
-                    <h3>Nội dung bài viết</h3>
-                  </div>
-                  <div className="content-body">
-                    <Form.Item
-                      rules={[
-                        { required: true, message: "Vui lòng nhập nội dung" },
-                      ]}
-                    >
-                      <CustomEditor
-                        value={content}
-                        onChange={(newContent) => setContent(newContent)}
-                      />
-                    </Form.Item>
-                  </div>
-                </div>
-
-                <div className="submit-button">
-                  <Button type="primary" htmlType="submit" size="large">
-                    Confirm
+                    Cancel
+                  </Button>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    size="large"
+                    className="DoctorRoleID2-doctor-blog__submit-button"
+                    icon={
+                      <i
+                        className="fas fa-check"
+                        style={{ marginRight: "8px" }}
+                      ></i>
+                    }
+                  >
+                    Save Article
                   </Button>
                 </div>
               </Form>
             </div>
           </TabPane>
 
-          <TabPane tab="Danh sách Blog" key="2">
+          <TabPane tab="Blog List" key="2">
             <Table
               columns={columns}
               dataSource={blogs}
@@ -346,8 +585,9 @@ const DoctorBlog = () => {
               pagination={{
                 defaultPageSize: 10,
                 showSizeChanger: true,
-                showTotal: (total) => `Tổng ${total} bài viết`,
+                showTotal: (total) => `Total ${total} articles`,
               }}
+              className="DoctorRoleID2-doctor-blog__table"
             />
           </TabPane>
         </Tabs>

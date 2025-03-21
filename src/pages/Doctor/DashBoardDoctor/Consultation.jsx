@@ -31,6 +31,7 @@ import {
     UserOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
+import doctorApi from "../../../services/DoctorApi";
 import "./Consultation.css";
 
 const { Title } = Typography;
@@ -52,64 +53,92 @@ const Consultations = () => {
         fetchConsultations();
     }, [activeTab]);
 
-    const fetchConsultations = () => {
+    const fetchConsultations = async () => {
         setLoading(true);
-        const mockData = [
-            {
-                id: 1,
-                parentName: "Nguyễn Thị Lam",
-                parentAvatar: "https://randomuser.me/api/portraits/women/32.jpg",
-                childName: "Nga",
-                childAge: "2 tuổi",
-                requestDate: "2023-11-15T08:30:00",
-                topic: "Tiêm chủng",
-                description: "Con tôi sắp đến lịch tiêm phòng...",
-                urgency: "normal",
-                status: "pending",
-                contactMethod: "video",
-                preferredTime: "2023-11-20T15:00:00",
-            },
-            {
-                id: 2,
-                parentName: "Nguyễn Văn Hiếu",
-                parentAvatar: "https://randomuser.me/api/portraits/men/32.jpg",
-                childName: "Hoàng",
-                childAge: "2 tuổi",
-                requestDate: "2023-11-10T08:30:00",
-                responseDate: "2023-11-10T10:15:00",
-                topic: "Tiêm chủng",
-                description: "Con tôi sắp đến lịch tiêm phòng...",
-                response: "Đối với bé 2 tuổi, vaccine...",
-                status: "completed",
-                appointmentDate: "2023-11-15T14:00:00",
-                completedDate: "2023-11-15T15:00:00",
-                rating: 5,
-                feedback: "Bác sĩ tư vấn rất chi tiết...",
-                notes: "Đã tư vấn về lịch tiêm chủng...",
-            },
-        ];
+        try {
+            const doctorId = localStorage.getItem("doctorId");
+            if (!doctorId) {
+                message.error("Doctor ID not found in localStorage!");
+                setLoading(false);
+                return;
+            }
 
-        let filteredData = [];
-        switch (activeTab) {
-            case "new":
-                filteredData = mockData.filter((item) => item.status === "pending");
-                break;
-            case "ongoing":
-                filteredData = mockData.filter((item) => item.status === "accepted");
-                break;
-            case "completed":
-                filteredData = mockData.filter((item) => item.status === "completed");
-                break;
-            case "history":
-                filteredData = mockData;
-                break;
-            default:
-                filteredData = mockData;
+            const response = await doctorApi.getConsultationRequests();
+            let requests = response.data;
+
+            if (!Array.isArray(requests)) {
+                if (response && response.data) {
+                    requests = response.data;
+                } else {
+                    throw new Error("API response is not an array");
+                }
+            }
+
+            const filteredByDoctor = requests.filter(
+                (request) => request.doctorId === parseInt(doctorId)
+            );
+
+            const detailedRequests = await Promise.all(
+                filteredByDoctor.map(async (request) => {
+                    try {
+                        const detailedResponse = await doctorApi.getConsultationRequestsById(request.requestId);
+                        const detailedData = detailedResponse.data;
+
+                        return {
+                            id: request.requestId,
+                            requestId: request.requestId,
+                            parentName: detailedData.memberName,
+                            parentAvatar: "https://randomuser.me/api/portraits/women/32.jpg",
+                            childName: detailedData.childName,
+                            childAge: detailedData.child.age ? `${detailedData.child.age} tuổi` : "N/A",
+                            childGender: detailedData.child.gender || "N/A",
+                            childAllergies: detailedData.child.allergies || "None",
+                            childNotes: detailedData.child.notes || "None",
+                            childDateOfBirth: detailedData.child.dateOfBirth || "N/A",
+                            requestDate: detailedData.requestDate,
+                            topic: detailedData.category,
+                            description: detailedData.description || "N/A",
+                            urgency: detailedData.urgency.toLowerCase(),
+                            status: detailedData.status.toLowerCase(),
+                            attachments: detailedData.attachments || [],
+                            createdAt: detailedData.createdAt,
+                            updatedAt: detailedData.updatedAt,
+                        };
+                    } catch (error) {
+                        console.error(`Error fetching details for request ${request.requestId}:`, error);
+                        return null;
+                    }
+                })
+            );
+
+            const mappedData = detailedRequests.filter((request) => request !== null);
+
+            let filteredData = [];
+            switch (activeTab) {
+                case "new":
+                    filteredData = mappedData.filter((item) => item.status === "pending");
+                    break;
+                case "ongoing":
+                    filteredData = mappedData.filter((item) => item.status === "accepted");
+                    break;
+                case "completed":
+                    filteredData = mappedData.filter((item) => item.status === "completed");
+                    break;
+                case "history":
+                    filteredData = mappedData;
+                    break;
+                default:
+                    filteredData = mappedData;
+            }
+
+            setConsultations(mappedData);
+            setFilteredConsultations(filteredData);
+        } catch (error) {
+            message.error("Failed to fetch consultation requests!");
+            console.error("Error fetching consultations:", error);
+        } finally {
+            setLoading(false);
         }
-
-        setConsultations(mockData);
-        setFilteredConsultations(filteredData);
-        setLoading(false);
     };
 
     const handleSearch = (value) => {
@@ -143,9 +172,32 @@ const Consultations = () => {
         setResponseVisible(true);
     };
 
-    const handleResponseSubmit = (values) => {
+    const handleResponseSubmit = async (values) => {
         setLoading(true);
-        setTimeout(() => {
+        try {
+            // Map the action to the status code for the API
+            const statusMap = {
+                accepted: 1, // Assuming 1 means "accepted"
+                rejected: 2, // Assuming 2 means "rejected"
+            };
+            const status = statusMap[values.action];
+
+            // Construct the payload for createConsultationResponse
+            const payload = {
+                requestId: selectedConsultation.requestId,
+                content: values.response,
+                attachments: [], // Empty for now, can be updated if attachments are added
+                isHelpful: false, // Always false as per requirement
+                status: status,
+            };
+
+            // Call the API to create the consultation response
+            await doctorApi.createConsultationResponse(payload);
+
+            // Update the consultation request status using the API updateConsultationRequestStatus
+            await doctorApi.updateConsultationRequestStatus(selectedConsultation.requestId, status);
+
+            // Update the local state to reflect the new status
             const updated = consultations.map((req) =>
                 req.id === selectedConsultation.id
                     ? {
@@ -161,15 +213,23 @@ const Consultations = () => {
                     : req
             );
             setConsultations(updated);
-            fetchConsultations();
+
+            // Refresh the consultations list
+            await fetchConsultations();
+
+            // Close the modal and show success message
             setResponseVisible(false);
-            setLoading(false);
             message.success(
                 values.action === "accepted"
                     ? "Consultation request accepted"
                     : "Consultation request rejected"
             );
-        }, 800);
+        } catch (error) {
+            message.error("Failed to submit response!");
+            console.error("Error submitting consultation response:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleComplete = (record) => {
@@ -204,11 +264,79 @@ const Consultations = () => {
     const getUrgencyTag = (urgency) => {
         const tags = {
             high: <Tag color="red">Urgent</Tag>,
+            medium: <Tag color="orange">Medium</Tag>,
             normal: <Tag color="blue">Normal</Tag>,
             low: <Tag color="green">Low Priority</Tag>,
         };
         return tags[urgency] || <Tag>Undefined</Tag>;
     };
+
+    const newRequestColumns = [
+        {
+            title: "Parent",
+            dataIndex: "parentName",
+            key: "parentName",
+            render: (text, record) => (
+                <div className="consult-parent-info">
+                    <Avatar src={record.parentAvatar} icon={<UserOutlined />} />
+                    <span>{text}</span>
+                </div>
+            ),
+        },
+        {
+            title: "Child",
+            dataIndex: "childName",
+            key: "childName",
+            render: (text, record) => (
+                <div>
+                    {text} <br />
+                    <span className="consult-child-age">{record.childAge}</span>
+                </div>
+            ),
+        },
+        {
+            title: "Topic",
+            dataIndex: "topic",
+            key: "topic",
+        },
+        {
+            title: "Priority",
+            dataIndex: "urgency",
+            key: "urgency",
+            render: getUrgencyTag,
+        },
+        {
+            title: "Request Date",
+            dataIndex: "requestDate",
+            key: "requestDate",
+            render: (date) => moment(date).format("DD/MM/YYYY HH:mm"),
+        },
+        {
+            title: "Actions",
+            key: "action",
+            render: (_, record) => (
+                <Space>
+                    <Button
+                        icon={<EyeOutlined />}
+                        onClick={() => handleViewDetail(record)}
+                        className="consult-action-btn"
+                    >
+                        Details
+                    </Button>
+                    {record.status === "pending" && (
+                        <Button
+                            type="primary"
+                            icon={<MessageOutlined />}
+                            onClick={() => handleRespond(record)}
+                            className="consult-action-btn"
+                        >
+                            Respond
+                        </Button>
+                    )}
+                </Space>
+            ),
+        },
+    ];
 
     const columns = [
         {
@@ -341,14 +469,14 @@ const Consultations = () => {
                                     {newRequestsCount > 0 && (
                                         <Badge
                                             count={newRequestsCount}
-                                            style={{ backgroundColor: "#FF6F91" }}
+                                            style={{ backgroundColor: "#e92121" }}
                                         />
                                     )}
                                 </span>
                             ),
                             children: (
                                 <Table
-                                    columns={columns}
+                                    columns={newRequestColumns}
                                     dataSource={filteredConsultations}
                                     rowKey="id"
                                     loading={loading}
@@ -414,6 +542,7 @@ const Consultations = () => {
                         onFinish={handleResponseSubmit}
                         initialValues={{ action: "accepted" }}
                     >
+                        <Divider orientation="left">Consultation Information</Divider>
                         <Descriptions bordered size="small" column={1}>
                             <Descriptions.Item label="Parent">
                                 {selectedConsultation.parentName}
@@ -424,11 +553,34 @@ const Consultations = () => {
                             <Descriptions.Item label="Topic">
                                 {selectedConsultation.topic}
                             </Descriptions.Item>
+                            <Descriptions.Item label="Priority">
+                                {getUrgencyTag(selectedConsultation.urgency)}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Request Date">
+                                {moment(selectedConsultation.requestDate).format("DD/MM/YYYY HH:mm")}
+                            </Descriptions.Item>
                             <Descriptions.Item label="Description">
                                 {selectedConsultation.description}
                             </Descriptions.Item>
                         </Descriptions>
 
+                        <Divider orientation="left">Child Information</Divider>
+                        <Descriptions bordered size="small" column={1}>
+                            <Descriptions.Item label="Date of Birth">
+                                {moment(selectedConsultation.childDateOfBirth).format("DD/MM/YYYY")}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Gender">
+                                {selectedConsultation.childGender}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Allergies">
+                                {selectedConsultation.childAllergies}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Notes">
+                                {selectedConsultation.childNotes}
+                            </Descriptions.Item>
+                        </Descriptions>
+
+                        <Divider orientation="left">Response</Divider>
                         <Form.Item
                             name="action"
                             label="Action"
@@ -492,6 +644,7 @@ const Consultations = () => {
             >
                 {selectedConsultation && (
                     <>
+                        <Divider orientation="left">Consultation Information</Divider>
                         <Descriptions bordered column={1}>
                             <Descriptions.Item label="Status">
                                 {getStatusTag(selectedConsultation.status)}
@@ -510,6 +663,38 @@ const Consultations = () => {
                             </Descriptions.Item>
                             <Descriptions.Item label="Priority">
                                 {getUrgencyTag(selectedConsultation.urgency)}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Request Date">
+                                {moment(selectedConsultation.requestDate).format("DD/MM/YYYY HH:mm")}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Description">
+                                {selectedConsultation.description}
+                            </Descriptions.Item>
+                        </Descriptions>
+
+                        <Divider orientation="left">Child Information</Divider>
+                        <Descriptions bordered column={1}>
+                            <Descriptions.Item label="Date of Birth">
+                                {moment(selectedConsultation.childDateOfBirth).format("DD/MM/YYYY")}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Gender">
+                                {selectedConsultation.childGender}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Allergies">
+                                {selectedConsultation.childAllergies}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Notes">
+                                {selectedConsultation.childNotes}
+                            </Descriptions.Item>
+                        </Descriptions>
+
+                        <Divider orientation="left">System Information</Divider>
+                        <Descriptions bordered column={1}>
+                            <Descriptions.Item label="Created At">
+                                {moment(selectedConsultation.createdAt).format("DD/MM/YYYY HH:mm")}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Updated At">
+                                {moment(selectedConsultation.updatedAt).format("DD/MM/YYYY HH:mm")}
                             </Descriptions.Item>
                         </Descriptions>
 

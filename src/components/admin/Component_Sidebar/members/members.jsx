@@ -14,7 +14,9 @@ import {
   Space,
   Menu,
   Dropdown,
+  Upload,
 } from "antd";
+import axios from "axios";
 import membershipApi from "../../../../services/memberShipApi";
 import userAccountsApi from "../../../../services/userAccountsApi";
 import {
@@ -30,6 +32,7 @@ import {
   EditOutlined,
   DeleteOutlined,
   MoreOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 
 const { Title } = Typography;
@@ -61,6 +64,10 @@ const Members = () => {
   const [membershipForm] = Form.useForm();
   const [editingMembership, setEditingMembership] = useState(null);
   const [membershipPackages, setMembershipPackages] = useState([]);
+
+  // Thêm state cho xử lý upload image
+  const [imageUrl, setImageUrl] = useState("");
+  const [imageLoading, setImageLoading] = useState(false);
 
   // Fetch data when component mounts and when tab changes
   useEffect(() => {
@@ -102,7 +109,7 @@ const Members = () => {
     // Set default values for required fields
     userAccountForm.setFieldsValue({
       status: "Active",
-      roleId: 2, // Default role ID for Member
+      roleId: 1, // Thay đổi thành 1 vì roleId = 1 là Member
       gender: "Male", // Default gender
     });
     setUserAccountModalVisible(true);
@@ -115,8 +122,9 @@ const Members = () => {
       dateOfBirth: record.dateOfBirth ? moment(record.dateOfBirth) : null,
       // Convert status string to number if needed
       status: record.status,
-      // Set roleId based on roleName if needed
-      roleId: record.roleName === "Admin" ? 1 : 2,
+      // Cập nhật roleId dựa trên roleName
+      roleId:
+        record.roleName === "Admin" ? 3 : record.roleName === "Doctor" ? 2 : 1,
     });
     setUserAccountModalVisible(true);
   };
@@ -132,6 +140,64 @@ const Members = () => {
       message.error("Could not delete user account");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const uploadImageToCloudinary = async (file) => {
+    setImageLoading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "ml_default");
+    formData.append("cloud_name", "dk1fulaii");
+
+    try {
+      // Ghi log để debug
+      console.log("File being uploaded:", file.name, file.type, file.size);
+
+      // KHÔNG thiết lập header Content-Type để axios tự xử lý
+      const response = await axios.post(
+        "https://api.cloudinary.com/v1_1/dk1fulaii/image/upload",
+        formData
+      );
+
+      console.log("Cloudinary response:", response.data);
+      const url = response.data.secure_url;
+      setImageUrl(url);
+
+      return {
+        url: url,
+        // Không cần thiết chuyển đổi thành byte array ở client
+        // Backend có thể tải ảnh từ URL
+      };
+    } catch (error) {
+      console.error("Error uploading image to Cloudinary:", error);
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+      }
+      message.error(
+        "Không thể tải ảnh lên: " +
+          (error.response?.data?.error?.message || error.message)
+      );
+      return null;
+    } finally {
+      setImageLoading(false);
+    }
+  };
+
+  const fetchImageAsByteArray = async (imageUrl) => {
+    try {
+      const response = await fetch(imageUrl);
+      const imageBlob = await response.blob();
+      const reader = new FileReader();
+
+      return new Promise((resolve, reject) => {
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(imageBlob);
+      });
+    } catch (error) {
+      console.error("Error converting image to byte array:", error);
+      return null;
     }
   };
 
@@ -162,6 +228,11 @@ const Members = () => {
         roleId: values.roleId || 2, // Default to Member role (2)
       };
 
+      // Nếu có URL ảnh, thêm vào dữ liệu
+      if (imageUrl) {
+        formattedData.profilePicture = imageUrl; // Chỉ gửi URL
+      }
+
       if (editingUserAccount) {
         // Cập nhật tài khoản hiện có
         await userAccountsApi.update(editingUserAccount.userId, formattedData);
@@ -179,6 +250,8 @@ const Members = () => {
 
       setUserAccountModalVisible(false);
       fetchUserAccounts();
+      // Reset image state sau khi submit thành công
+      setImageUrl("");
     } catch (error) {
       console.error("Error saving user account:", error);
       message.error(error.message || "Could not save user account");
@@ -847,8 +920,76 @@ const Members = () => {
             <Input />
           </Form.Item>
 
-          <Form.Item name="profilePicture" label="Profile Picture URL">
-            <Input placeholder="Enter image URL (optional)" />
+          <Form.Item name="profilePicture" label="Profile Picture">
+            <div className="profile-upload-container">
+              <Upload
+                name="profilePicture"
+                listType="picture-card"
+                className="avatar-uploader"
+                showUploadList={false}
+                beforeUpload={async (file) => {
+                  const isImage = /image\/(jpeg|png|jpg|gif)/.test(file.type);
+                  if (!isImage) {
+                    message.error("You can only upload image files!");
+                    return Upload.LIST_IGNORE;
+                  }
+
+                  const isLt2M = file.size / 1024 / 1024 < 2;
+                  if (!isLt2M) {
+                    message.error("Image must be smaller than 2MB!");
+                    return Upload.LIST_IGNORE;
+                  }
+
+                  // Upload lên Cloudinary
+                  const result = await uploadImageToCloudinary(file);
+                  if (result) {
+                    setImageUrl(result.url);
+                    // Form.setFieldsValue là để cập nhật giá trị của form
+                    userAccountForm.setFieldsValue({
+                      profilePicture: result.url,
+                    });
+                  }
+                  return false; // Chặn upload mặc định của antd
+                }}
+              >
+                {imageUrl ? (
+                  <div className="uploaded-image-preview">
+                    <img
+                      src={imageUrl}
+                      alt="Avatar"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    {imageLoading ? (
+                      <div>Uploading...</div>
+                    ) : (
+                      <div>
+                        <UploadOutlined />
+                        <div style={{ marginTop: 8 }}>Upload</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Upload>
+              {imageUrl && (
+                <Button
+                  onClick={() => {
+                    setImageUrl("");
+                    userAccountForm.setFieldsValue({ profilePicture: "" });
+                  }}
+                  size="small"
+                  style={{ marginTop: 8 }}
+                >
+                  Remove
+                </Button>
+              )}
+            </div>
           </Form.Item>
 
           <Form.Item
@@ -885,8 +1026,9 @@ const Members = () => {
 
             <Form.Item name="roleId" label="Role" className="form-col">
               <Select>
-                <Option value={1}>Admin</Option>
-                <Option value={2}>Member</Option>
+                <Option value={1}>Member</Option>
+                <Option value={2}>Doctor</Option>
+                <Option value={3}>Admin</Option>
               </Select>
             </Form.Item>
           </div>

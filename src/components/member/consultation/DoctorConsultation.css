@@ -1,205 +1,181 @@
 /* Main Container */
 .doctor-consultation {
   min-height: calc(100vh - 64px);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
+  padding: 20px;
 }
 
 /* Grid Container */
 .doctor-grid-container {
-  flex: 1;
   display: grid;
-  grid-template-columns: 220px 1.5fr 300px;
-  gap: 24px;
-  height: 100%;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-/* Left Column: Child List */
-.doctor-child-column {
-  border-radius: 16px;
-  padding: 16px;
-  overflow-y: auto;
-}
-
-.doctor-child-item {
-  background: #F9FBFF;
-  border-radius: 12px;
-  padding: 12px;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
-}
-
-.doctor-child-item:hover {
-  background: #E6F0FA;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.doctor-child-item.selected {
-  border-color: #FF6F91; /* Pink border for selected item */
-  background: #FFF5F7;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.doctor-child-content i {
-  font-size: 20px;
-  color: #4A90E2; /* Blue icon */
-}
-
-.doctor-child-label {
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
-}
-
-/* Center Column: Request Section */
+/* Request Column */
 .doctor-request-column {
-  display: flex;
-  flex-direction: column;
-  background: #FFFFFF;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  height: 100%;
-  overflow: hidden;
-}
-
-.doctor-request {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .doctor-steps {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 24px;
-  background: #F9FBFF;
-  padding: 12px;
-  border-radius: 12px;
+  align-items: center;
+  position: relative;
+  margin-bottom: 30px;
 }
 
 .doctor-step-item {
-  font-size: 16px;
-  color: #666;
-  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  flex: 1;
   position: relative;
+  z-index: 1;
+  width: 33.33%; /* Chia đều cho 3 bước */
+}
+
+.doctor-step-item::before {
+  content: "";
+  position: absolute;
+  top: 12px; /* Đặt đường nối ở giữa vòng tròn */
+  left: -50%;
+  width: 100%;
+  height: 4px;
+  background: #D1D5DB; /* Đường nối màu xám nhạt */
+  z-index: -1;
+}
+
+.doctor-step-item:first-child::before {
+  display: none; /* Ẩn đường nối ở bước đầu tiên */
+}
+
+.doctor-step-item.completed::before,
+.doctor-step-item.active::before {
+  background: #3B82F6; /* Đường nối màu xanh dương khi hoàn thành hoặc đang active */
+}
+
+.step-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #D1D5DB; /* Vòng tròn màu xám nhạt */
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 8px;
   transition: all 0.3s ease;
 }
 
-.doctor-step-item.active {
-  color: #FF6F91; /* Pink for active step */
-  font-weight: 600;
+.doctor-step-item.active .step-circle,
+.doctor-step-item.completed .step-circle {
+  background: #3B82F6; /* Vòng tròn màu xanh dương khi active hoặc hoàn thành */
 }
 
-.doctor-step-item::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: #E6E6E6;
+.step-label {
+  font-size: 14px;
+  color: #666;
+  transition: all 0.3s ease;
 }
 
-.doctor-step-item.active::after {
-  background: #FF6F91;
+.doctor-step-item.active .step-label,
+.doctor-step-item.completed .step-label {
+  color: #3B82F6; /* Chữ màu xanh dương khi active hoặc hoàn thành */
 }
 
 .doctor-form-content {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  overflow-y: auto;
 }
 
-.doctor-section-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #4A90E2; /* Blue title */
-  margin-bottom: 16px;
+/* Step 1: Enter Information */
+.doctor-consultation-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
-/* Select Inputs */
+.form-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.doctor-child-select,
 .doctor-category-select,
 .doctor-urgency-select {
   padding: 10px;
+  border: 1px solid #E1F5FE; /* Viền xanh nhạt */
   border-radius: 8px;
-  border: 1px solid #D9E4F5;
-  background: #F9FBFF;
   font-size: 14px;
-  width: 100%;
-  transition: all 0.3s ease;
 }
 
-.doctor-category-select:hover,
-.doctor-urgency-select:hover,
-.doctor-category-select:focus,
-.doctor-urgency-select:focus {
-  border-color: #4A90E2;
-  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
-}
-
-/* Text Editor */
-.doctor-editor-container {
-  flex: 1;
-  min-height: 400px;
-  background: #F9FBFF;
-  padding: 16px;
+.editor-wrapper {
+  border: 1px solid #E1F5FE;
   border-radius: 8px;
-  border: 1px solid #D9E4F5;
+  padding: 10px;
+  background: #E1F5FE; /* Nền xanh nhạt */
+}
+
+/* Step 2: Select Doctor */
+.doctor-selection-container {
+  max-height: 450px;
   overflow-y: auto;
 }
 
-/* Doctor Selection */
-.doctor-selection-container {
-  max-height: 500px;
-  overflow-y: auto;
+.doctor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .doctor-card {
-  background: #F9FBFF;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
   display: flex;
-  align-items: center;
-  gap: 16px;
-  border: 2px solid transparent;
+  gap: 15px;
+  padding: 15px;
+  background: #E1F5FE;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .doctor-card:hover {
-  background: #E6F0FA;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: #B3E5FC; /* Xanh nhạt hơn khi hover */
 }
 
 .doctor-card.selected {
-  border-color: #FF6F91;
-  background: #FFF5F7;
+  border: 2px solid #5BC0EB; /* Viền xanh dương nhạt */
 }
 
 .doctor-avatar img {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  border: 2px solid #A29BFE; /* Purple border for avatars */
 }
 
 .doctor-info h4 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
   margin: 0;
+  font-size: 16px;
+  color: #333;
 }
 
 .doctor-status {
@@ -212,86 +188,132 @@
 .doctor-specialization {
   font-size: 12px;
   color: #888;
-  margin: 2px 0;
+  margin: 3px 0;
 }
 
-/* Navigation Buttons */
-.doctor-navigation-buttons {
+/* Step 3: Review */
+.doctor-review-container {
   display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
+  flex-direction: column;
+  gap: 15px;
 }
 
-.doctor-back-button,
-.doctor-next-button,
-.doctor-action-button {
-  padding: 10px 24px;
-  background: linear-gradient(45deg, #FF6F91, #FFB6C1); /* Pink gradient */
-  color: #fff;
-  border: none;
-  border-radius: 25px;
+.review-section,
+.doctor-review-section {
+  background: #E1F5FE;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.review-item {
+  margin-bottom: 10px;
   font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
 }
 
-.doctor-back-button:hover,
-.doctor-next-button:hover,
-.doctor-action-button:hover {
-  background: linear-gradient(45deg, #FF5A7F, #FF9BB0);
-  box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+.consultation-details-content {
+  margin-top: 5px;
+  font-size: 14px;
+  color: #333;
 }
 
-/* Right Column: Response Section */
+.doctor-profile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.doctor-profile-header {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.doctor-profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.doctor-profile-name {
+  font-size: 16px;
+  color: #333;
+}
+
+.doctor-profile-status {
+  font-size: 12px;
+  color: #666;
+}
+
+.submit-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+/* Response Column */
 .doctor-response-column {
-  background: #FFFFFF;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  height: 100%;
+  background: #fff;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.doctor-response {
+  max-height: 500px;
   overflow-y: auto;
 }
 
-.section-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #4A90E2;
-  margin-bottom: 16px;
-}
-
 .consultation-response-card {
-  background: #F9FBFF;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  padding: 15px;
+  background: #E1F5FE;
+  border-radius: 10px;
+  margin-bottom: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  border: 1px solid #B3E5FC;
 }
 
 .consultation-response-card:hover {
-  background: #E6F0FA;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: #B3E5FC;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.response-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.response-status {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #fff;
+  background: #5BC0EB; /* Xanh dương nhạt */
+}
+
+.response-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.response-summary p {
+  font-size: 14px;
+  color: #333;
+  margin: 0;
 }
 
 .truncated-content {
   font-size: 14px;
-  color: #333;
-  line-height: 1.5;
+  color: #666;
 }
 
-.fade-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 30px;
-  background: linear-gradient(transparent, #F9FBFF);
-  border-radius: 0 0 12px 12px;
-}
-
-/* Modal Overlay */
+/* Modal for Response */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -302,164 +324,180 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
 }
 
 .modal-content {
-  background: #FFFFFF;
-  padding: 24px;
-  border-radius: 16px;
-  max-height: 80%;
-  overflow-y: auto;
-  width: 90%;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
   max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
   position: relative;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .modal-close {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  background: transparent;
+  top: 10px;
+  right: 10px;
   border: none;
-  font-size: 24px;
-  color: #666;
+  background: none;
+  font-size: 20px;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
-.modal-close:hover {
-  color: #FF6F91;
+.modal-title {
+  font-size: 18px;
+  color: #5BC0EB; /* Xanh dương nhạt */
+  margin-bottom: 15px;
 }
 
-.response-header {
+.response-details {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.response-section,
+.request-section {
+  background: #E1F5FE;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.response-section h4,
+.request-section h4 {
+  font-size: 16px;
+  color: #F472B6; /* Thay màu vàng bằng hồng phấn */
+  margin-bottom: 10px;
+}
+
+.request-section h5 {
+  font-size: 14px;
+  color: #F472B6;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+.response-section p,
+.request-section p {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+/* Success Modal */
+.success-modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 12px rgba(91, 192, 235, 0.3); /* Box-shadow xanh nhạt */
+  text-align: center;
+}
+
+.success-modal-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.response-date,
-.response-doctor {
-  font-size: 14px;
-  color: #666;
-}
-
-.response-content p {
-  font-size: 14px;
-  color: #333;
-  line-height: 1.6;
-  margin-bottom: 12px;
-}
-
-.response-content strong {
-  color: #4A90E2;
-}
-
-/* Review Section */
-.doctor-review-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.doctor-review-content {
-  background: #F9FBFF;
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid #D9E4F5;
-}
-
-.consultation-details-content {
-  margin-top: 8px;
-  font-size: 14px;
-  color: #333;
-  line-height: 1.6;
-}
-
-.doctor-review-selection {
-  background: #F9FBFF;
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid #D9E4F5;
-}
-
-.doctor-profile-card {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.doctor-profile-header {
-  display: flex;
   align-items: center;
-  gap: 16px;
+  margin-bottom: 15px;
 }
 
-.doctor-profile-avatar img {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  border: 2px solid #A29BFE;
+.success-modal-header h3 {
+  font-size: 18px;
+  color: #5BC0EB;
+  margin: 0;
 }
 
-.doctor-profile-name {
+.success-modal-body p {
   font-size: 16px;
-  font-weight: 600;
   color: #333;
+  margin-bottom: 20px;
 }
 
-.doctor-profile-status {
-  font-size: 12px;
-  color: #666;
-}
-
-.doctor-profile-details {
+.success-modal-footer {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  justify-content: center;
 }
 
-.doctor-profile-degree,
-.doctor-profile-hospital,
-.doctor-profile-specialization {
-  font-size: 12px;
-  color: #888;
+/* Buttons */
+.doctor-back-button,
+.doctor-next-button,
+.doctor-action-button,
+.success-modal-button {
+  padding: 10px 30px;
+  background: #F472B6; /* Thay màu vàng bằng hồng phấn */
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  font-size: 16px;
+  font-weight: 500;
 }
 
-.doctor-submit-section {
+.doctor-back-button:hover,
+.doctor-next-button:hover,
+.doctor-action-button:hover,
+.success-modal-button:hover {
+  background: #EC4899; /* Hồng đậm hơn khi hover */
+}
+
+.doctor-navigation-buttons {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   margin-top: 20px;
 }
 
-.submit-error {
-  color: #FF4D4F;
-  font-size: 14px;
-  margin-bottom: 12px;
+/* Misc */
+.section-title {
+  font-size: 18px;
+  color: #5BC0EB; /* Xanh dương nhạt */
+  margin-bottom: 15px;
 }
 
-/* Responsive Design */
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #5BC0EB;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.submit-error {
+  color: #FF8A80; /* Đỏ san hô, dịu hơn */
+  font-size: 14px;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .doctor-grid-container {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
   }
-  .doctor-child-column,
-  .doctor-request-column,
-  .doctor-response-column {
-    width: 100%;
+
+  .form-container {
+    grid-template-columns: 1fr;
   }
+
   .doctor-steps {
     flex-direction: column;
-    align-items: center;
-    gap: 12px;
+    gap: 20px;
   }
-  .doctor-step-item::after {
-    display: none;
+
+  .doctor-step-item {
+    width: 100%;
   }
-  .doctor-navigation-buttons {
-    flex-direction: column;
-    gap: 12px;
+
+  .doctor-step-item::before {
+    display: none; /* Ẩn đường nối khi ở chế độ mobile */
   }
 }

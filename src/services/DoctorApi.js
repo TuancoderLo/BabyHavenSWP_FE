@@ -5,6 +5,16 @@ const doctorApi = {
     const response = await api.get("/Doctors");
     return response.data;
   },
+
+  getDoctorByUserId: async (userId) => {
+    const response = await api.get(`/Doctors/doctor/${userId}`);
+    return response.data;
+  },
+  getConsultationRequestsById: async (id) => {
+    const response = await api.get(`/ConsultationRequests/${id}`);
+    return response.data;
+  },
+
   getDoctorSpecializations: async (doctorId) => {
     const response = await api.get(`/Specializations/${doctorId}`);
     return response.data;
@@ -20,8 +30,26 @@ const doctorApi = {
     return response.data;
   },
 
+  createConsultationResponse: async (data) => {
+    const response = await api.post("/ConsultationResponses", data);
+    return response.data;
+  },
+
   getConsultationResponse: async () => {
     const response = await api.get("/ConsultationResponses");
+    return response.data;
+  },
+
+  getConsultationResponsesByDoctor: async (doctorName) => {
+    const response = await api.get(`/api/ConsultationResponses/odata`, {
+      params: { doctorName },
+    });
+    return response.data;
+  },
+
+  // Thêm hàm updateConsultationRequestStatus
+  updateConsultationRequestStatus: async (requestId, status) => {
+    const response = await api.put(`/api/ConsultationRequests/${requestId}`, { status });
     return response.data;
   },
 

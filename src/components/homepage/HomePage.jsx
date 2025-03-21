@@ -9,10 +9,11 @@ import blogCategoryApi from "../../services/blogCategoryApi";
 import blogApi from "../../services/blogApi"; // Add this import
 import BlogSection from "../topics/BlogSection";
 import TrackConfident from "../../assets/Monthly_users_resized.svg";
-import Medical from "../../assets/ic_med-advisers_dm_rejv.svg"
-import Alert from "../../assets/Expert_articles_resized.svg"
-import GrowthTrack from "../../assets/GrowthTracker-nov-2023.svg"
-import Milestone from "../../assets/ChildHeightPredictor.svg"
+import Medical from "../../assets/ic_med-advisers_dm_rejv.svg";
+import Alert from "../../assets/Expert_articles_resized.svg";
+import GrowthTrack from "../../assets/GrowthTracker-nov-2023.svg";
+import Milestone from "../../assets/ChildHeightPredictor.svg";
+import doctorApi from "../../services/DoctorApi"; // Thêm import này
 
 function HomePage() {
   const navigate = useNavigate();
@@ -38,7 +39,6 @@ function HomePage() {
       setUserData({ name: nameFromLocal });
     }
   }, []);
-  
 
   // Định nghĩa dữ liệu carousel
   const carouselImages = [
@@ -133,16 +133,33 @@ function HomePage() {
         console.log("Fetching blogs..."); // Kiểm tra hàm có chạy không
         const response = await blogApi.getOrderBy("CreatedAt", "desc");
         console.log("API response:", response.data); // Kiểm tra dữ liệu trả về
-  
+
         setLatestBlogs(response.data.slice(0, 6));
       } catch (error) {
         console.error("Error fetching latest blogs:", error);
       }
     };
-  
+
     fetchLatestBlogs();
   }, []);
-  
+
+  const [doctors, setDoctors] = useState([]); // Thêm state lưu trữ danh sách bác sĩ
+
+  // Thêm useEffect để lấy dữ liệu bác sĩ
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const response = await doctorApi.getAllDoctors();
+        if (response?.status === 1) {
+          setDoctors(response.data);
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu bác sĩ:", error);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
 
   return (
     <div className="homepage">
@@ -218,7 +235,11 @@ function HomePage() {
                     <div className="blog-tags-homepage">
                       {renderTags(blog.tags)?.map((tag, index) => (
                         <span key={index} className="tag">
-                          #{tag ? tag.replace(/<[^>]*>/g, "").substring(0, 8) + "..." : "..."}
+                          #
+                          {tag
+                            ? tag.replace(/<[^>]*>/g, "").substring(0, 8) +
+                              "..."
+                            : "..."}
                         </span>
                       ))}
                     </div>
@@ -238,7 +259,7 @@ function HomePage() {
 
             <div className="feature-cards">
               <div className="feature-highlight-card">
-                <img src={TrackConfident} alt="track your child"/>
+                <img src={TrackConfident} alt="track your child" />
                 <div>
                   <h3>Track Your Child's Growth with Confidence</h3>
                   <p>
@@ -249,7 +270,7 @@ function HomePage() {
               </div>
 
               <div className="feature-highlight-card">
-                <img src={Medical} alt="medical from expert"/>
+                <img src={Medical} alt="medical from expert" />
                 <div>
                   <h3>Access Trusted Advice from Pediatric Experts</h3>
                   <p>
@@ -260,13 +281,13 @@ function HomePage() {
               </div>
 
               <div className="feature-highlight-card">
-                <img src={Alert} alt="smart alerts"/>
+                <img src={Alert} alt="smart alerts" />
                 <div>
                   <h3>Personalized Insights & Smart Alerts</h3>
                   <p>
                     Stay informed with customized recommendations and real-time
-                    alerts to address your child's unique health and developmental
-                    needs.
+                    alerts to address your child's unique health and
+                    developmental needs.
                   </p>
                 </div>
               </div>
@@ -304,18 +325,15 @@ function HomePage() {
               <div className="tools-grid">
                 {[
                   {
-                    image:
-                    GrowthTrack,
+                    image: GrowthTrack,
                     title: "Growth Tracker",
                   },
                   {
-                    image:
-                    Medical,
+                    image: Medical,
                     title: "Consultation with Experts",
                   },
                   {
-                    image:
-                    Milestone,
+                    image: Milestone,
                     title: "Milestone Records",
                   },
                   {
@@ -372,57 +390,29 @@ function HomePage() {
             </p>
 
             <div className="doctors-grid">
-              {[
-                {
-                  image:
-                    "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-                  name: "Dr. Sarah Johnson",
-                  specialty: "Pediatric Specialist",
-                },
-                {
-                  image:
-                    "https://img.freepik.com/free-photo/woman-doctor-wearing-lab-coat-with-stethoscope-isolated_1303-29791.jpg",
-                  name: "Dr. Michael Chen",
-                  specialty: "Child Development Expert",
-                },
-                {
-                  image:
-                    "https://img.freepik.com/free-photo/portrait-smiling-male-doctor_171337-1532.jpg",
-                  name: "Dr. Emily Rodriguez",
-                  specialty: "Neonatal Care Specialist",
-                },
-                {
-                  image:
-                    "https://img.freepik.com/free-photo/female-doctor-hospital-with-stethoscope_23-2148827775.jpg",
-                  name: "Dr. David Wilson",
-                  specialty: "Pediatric Nutrition Specialist",
-                },
-                {
-                  image:
-                    "https://img.freepik.com/free-photo/doctor-standing-with-folder-stethoscope_1291-16.jpg",
-                  name: "Dr. Lisa Thompson",
-                  specialty: "Child Psychology & Mental Health",
-                },
-                {
-                  image:
-                    "https://img.freepik.com/free-photo/medium-shot-doctor-with-crossed-arms_23-2148868314.jpg",
-                  name: "Dr. James Anderson",
-                  specialty: "Pediatric Immunology & Allergies",
-                },
-              ].map((doctor, index) => (
-                <div key={index} className="doctor-card">
-                  <div className="doctor-image">
-                    <img src={doctor.image} alt={doctor.name} />
+              {doctors && doctors.length > 0 ? (
+                doctors.map((doctor) => (
+                  <div key={doctor.doctorId} className="doctor-card">
+                    <div className="doctor-image">
+                      <img
+                        src={
+                          doctor.user?.profilePicture ||
+                          "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg"
+                        }
+                        alt={doctor.name}
+                      />
+                    </div>
+                    <div className="doctor-info">
+                      <h3>{doctor.name}</h3>
+                      <p>{doctor.degree}</p>
+                      <span>{doctor.hospitalName}</span>
+                    </div>
                   </div>
-                  <div className="doctor-info">
-                    <h3>{doctor.name}</h3>
-                    <p>{doctor.specialty}</p>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p>Đang tải thông tin bác sĩ...</p>
+              )}
             </div>
-
-            <button className="see-more-btn">See more</button>
           </div>
         </section>
 
@@ -456,7 +446,7 @@ function HomePage() {
             <div className="trust-footer">
               <p>
                 Learn more about our commitment to quality and accuracy.{" "}
-                <a href="#">Read more</a>
+                <a href="">Read more</a>
               </p>
             </div>
           </div>

@@ -6,6 +6,12 @@ import blogCategoryApi from "../../services/blogCategoryApi";
 import blogApi from "../../services/blogApi";
 import BlogSection from "../topics/BlogSection";
 import HeaderGuest from "../commonGuest/HeaderGuest";
+import doctorApi from "../../services/DoctorApi";
+import TrackConfident from "../../assets/Monthly_users_resized.svg";
+import Medical from "../../assets/ic_med-advisers_dm_rejv.svg";
+import Alert from "../../assets/Expert_articles_resized.svg";
+import GrowthTrack from "../../assets/GrowthTracker-nov-2023.svg";
+import Milestone from "../../assets/ChildHeightPredictor.svg";
 
 function Guest() {
   const navigate = useNavigate();
@@ -13,6 +19,7 @@ function Guest() {
   const [parentCategories, setParentCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [latestBlogs, setLatestBlogs] = useState([]);
+  const [doctors, setDoctors] = useState([]);
 
   // Fetch tất cả category cha (parentCategoryId = null)
   useEffect(() => {
@@ -113,6 +120,22 @@ function Guest() {
     };
 
     fetchLatestBlogs();
+  }, []);
+
+  // Thêm useEffect để lấy dữ liệu bác sĩ
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const response = await doctorApi.getAllDoctors();
+        if (response?.status === 1) {
+          setDoctors(response.data);
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu bác sĩ:", error);
+      }
+    };
+
+    fetchDoctors();
   }, []);
 
   return (
@@ -216,29 +239,37 @@ function Guest() {
 
             <div className="feature-cards">
               <div className="feature-highlight-card">
-                <h3>Track Your Child's Growth with Confidence</h3>
-                <p>
-                  Monitor and analyze your child's development using
-                  internationally recognized standards, ensuring they are on the
-                  right path.
-                </p>
+                <img src={TrackConfident} alt="track your child" />
+                <div>
+                  <h3>Track Your Child's Growth with Confidence</h3>
+                  <p>
+                    Monitor and analyze your child's development using
+                    internationally recognized standards
+                  </p>
+                </div>
               </div>
 
               <div className="feature-highlight-card">
-                <h3>Access Trusted Advice from Pediatric Experts</h3>
-                <p>
-                  Instantly connect with experienced doctors and child care
-                  specialists for expert guidance whenever you need it.
-                </p>
+                <img src={Medical} alt="medical from expert" />
+                <div>
+                  <h3>Access Trusted Advice from Pediatric Experts</h3>
+                  <p>
+                    Instantly connect with experienced doctors and child care
+                    specialists for expert guidance whenever you need it.
+                  </p>
+                </div>
               </div>
 
               <div className="feature-highlight-card">
-                <h3>Personalized Insights & Smart Alerts</h3>
-                <p>
-                  Stay informed with customized recommendations and real-time
-                  alerts to address your child's unique health and developmental
-                  needs.
-                </p>
+                <img src={Alert} alt="smart alerts" />
+                <div>
+                  <h3>Personalized Insights & Smart Alerts</h3>
+                  <p>
+                    Stay informed with customized recommendations and real-time
+                    alerts to address your child's unique health and
+                    developmental needs.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -274,34 +305,16 @@ function Guest() {
               <div className="tools-grid">
                 {[
                   {
-                    image:
-                      "https://img.freepik.com/free-photo/mother-measuring-temperature-sick-daughter_23-2148867372.jpg",
-                    title: "Health Tracker",
-                  },
-                  {
-                    image:
-                      "https://img.freepik.com/free-photo/mother-feeding-her-baby_23-2148867369.jpg",
-                    title: "Feeding Guide",
-                  },
-                  {
-                    image:
-                      "https://img.freepik.com/free-photo/baby-sleeping-his-crib_23-2148867367.jpg",
-                    title: "Sleep Tracker",
-                  },
-                  {
-                    image:
-                      "https://img.freepik.com/free-photo/mother-playing-with-her-baby_23-2148867374.jpg",
-                    title: "Development",
-                  },
-                  {
-                    image:
-                      "https://img.freepik.com/free-photo/mother-taking-care-her-baby_23-2148867373.jpg",
-                    title: "Care Guide",
-                  },
-                  {
-                    image:
-                      "https://img.freepik.com/free-photo/mother-measuring-baby-growth_23-2148867371.jpg",
+                    image: GrowthTrack,
                     title: "Growth Tracker",
+                  },
+                  {
+                    image: Medical,
+                    title: "Consultation with Experts",
+                  },
+                  {
+                    image: Milestone,
+                    title: "Milestone Records",
                   },
                   {
                     image:
@@ -313,9 +326,14 @@ function Guest() {
                       "https://img.freepik.com/free-photo/mother-consulting-doctor-about-her-baby_23-2148867368.jpg",
                     title: "Expert Advice",
                   },
+                  {
+                    image:
+                      "https://img.freepik.com/free-photo/mother-taking-care-her-baby_23-2148867373.jpg",
+                    title: "Health Analyze With AI",
+                  },
                 ].map((tool, index) => (
                   <a key={index} href="#" className="tool-card">
-                    <div className="tool-image">
+                    <div className="tool-image-homepage">
                       <img src={tool.image} alt={tool.title} />
                     </div>
                     <span className="tool-title">{tool.title}</span>
@@ -352,57 +370,29 @@ function Guest() {
             </p>
 
             <div className="doctors-grid">
-              {[
-                {
-                  image:
-                    "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-                  name: "Dr. Sarah Johnson",
-                  specialty: "Pediatric Specialist",
-                },
-                {
-                  image:
-                    "https://img.freepik.com/free-photo/woman-doctor-wearing-lab-coat-with-stethoscope-isolated_1303-29791.jpg",
-                  name: "Dr. Michael Chen",
-                  specialty: "Child Development Expert",
-                },
-                {
-                  image:
-                    "https://img.freepik.com/free-photo/portrait-smiling-male-doctor_171337-1532.jpg",
-                  name: "Dr. Emily Rodriguez",
-                  specialty: "Neonatal Care Specialist",
-                },
-                {
-                  image:
-                    "https://img.freepik.com/free-photo/female-doctor-hospital-with-stethoscope_23-2148827775.jpg",
-                  name: "Dr. David Wilson",
-                  specialty: "Pediatric Nutrition Specialist",
-                },
-                {
-                  image:
-                    "https://img.freepik.com/free-photo/doctor-standing-with-folder-stethoscope_1291-16.jpg",
-                  name: "Dr. Lisa Thompson",
-                  specialty: "Child Psychology & Mental Health",
-                },
-                {
-                  image:
-                    "https://img.freepik.com/free-photo/medium-shot-doctor-with-crossed-arms_23-2148868314.jpg",
-                  name: "Dr. James Anderson",
-                  specialty: "Pediatric Immunology & Allergies",
-                },
-              ].map((doctor, index) => (
-                <div key={index} className="doctor-card">
-                  <div className="doctor-image">
-                    <img src={doctor.image} alt={doctor.name} />
+              {doctors && doctors.length > 0 ? (
+                doctors.map((doctor) => (
+                  <div key={doctor.doctorId} className="doctor-card">
+                    <div className="doctor-image">
+                      <img
+                        src={
+                          doctor.user?.profilePicture ||
+                          "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg"
+                        }
+                        alt={doctor.name}
+                      />
+                    </div>
+                    <div className="doctor-info">
+                      <h3>{doctor.name}</h3>
+                      <p>{doctor.degree}</p>
+                      <span>{doctor.hospitalName}</span>
+                    </div>
                   </div>
-                  <div className="doctor-info">
-                    <h3>{doctor.name}</h3>
-                    <p>{doctor.specialty}</p>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p>Đang tải thông tin bác sĩ...</p>
+              )}
             </div>
-
-            <button className="see-more-btn">See more</button>
           </div>
         </section>
 

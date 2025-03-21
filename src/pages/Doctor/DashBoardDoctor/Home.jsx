@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css';
-import Logo from "../../../assets/Logo.png";
-import Name from "../../../assets/Name.png";
+import Doctor from "../../../assets/doctor.jpg";
 import { FaSearch, FaBell, FaCog } from 'react-icons/fa';
 import doctorApi from '../../../services/DoctorApi';
 
@@ -36,37 +35,20 @@ const Home = () => {
           return;
         }
 
-        // Gọi API để lấy danh sách tất cả bác sĩ
-        const doctorsResponse = await doctorApi.getAllDoctors();
-        console.log('Doctors response:', doctorsResponse);
+        // Gọi API để lấy thông tin bác sĩ theo userId
+        const doctorResponse = await doctorApi.getDoctorByUserId(userId);
+        const doctor = doctorResponse.data; // Assuming the API returns { data: {...} }
 
-        // Kiểm tra xem dữ liệu trả về có phải là mảng không
-        let doctors = doctorsResponse;
-        if (!Array.isArray(doctorsResponse)) {
-          // Nếu API trả về một object có chứa mảng, ví dụ: { data: [...] }
-          if (doctorsResponse && doctorsResponse.data) {
-            doctors = doctorsResponse.data;
-          } else {
-            throw new Error('API response is not an array');
-          }
-        }
-
-        // Kiểm tra lại lần nữa sau khi xử lý
-        if (!Array.isArray(doctors)) {
-          throw new Error('Doctors data is not an array after processing');
-        }
-
-        // Tìm bác sĩ có userId khớp
-        const matchedDoctor = doctors.find(doctor => doctor.userId === userId);
-        if (matchedDoctor) {
-          // Lưu doctorId vào localStorage
-          localStorage.setItem('doctorId', matchedDoctor.doctorId);
-          setDoctorInfo(matchedDoctor); // Lưu thông tin bác sĩ để hiển thị nếu cần
-        } else {
+        if (!doctor) {
           console.error('Doctor not found for this userId:', userId);
+          return;
         }
+
+        // Lưu doctorId vào localStorage
+        localStorage.setItem('doctorId', doctor.doctorId);
+        setDoctorInfo(doctor); // Lưu thông tin bác sĩ để hiển thị
       } catch (error) {
-        console.error('Error fetching doctors:', error);
+        console.error('Error fetching doctor:', error);
       }
     };
 
@@ -98,7 +80,6 @@ const Home = () => {
             <h1>Good Day, {doctorInfo ? doctorInfo.name : 'Dr. Nicholls'}!</h1>
             <p>Have a Nice Monday!</p>
           </div>
-          <img src={Logo} alt="Doctor" className="doctor-image" />
         </div>
 
         {/* Quick Stats */}
@@ -162,7 +143,7 @@ const Home = () => {
       <div className="right-section">
         {/* Profile Section */}
         <div className="profile-section-doctor">
-          <img src={Name} alt="Profile-doctor" className="profile-image-doctor" />
+          <img src={Doctor} alt="Profile-doctor" className="profile-image-doctor" />
           <h3>{doctorInfo ? doctorInfo.name : 'Dr. Alisha Nicholls'}</h3>
           <p className="specialty">{doctorInfo ? doctorInfo.degree : 'Dermatologist'}</p>
           <p className="location">📍 {doctorInfo ? doctorInfo.hospitalAddress : 'Bottrop, Germany'}</p>
@@ -177,7 +158,7 @@ const Home = () => {
             </div>
             <div>
               <p>Working Hours</p>
-              <p>9pm - 5am</p>
+              <p>9am - 5pm</p>
             </div>
           </div>
         </div>

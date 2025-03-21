@@ -20,7 +20,8 @@ const userAccountsApi = {
       address: data.address?.trim(),
       password: data.password,
       status: 0, // Mặc định status = 0
-      roleId: 2, // Mặc định roleId = 2 (Member)
+      roleId: data.roleId || 1, // Sử dụng roleId từ form, mặc định là 1 (Member) nếu không có
+      profilePicture: data.profilePicture, // Đảm bảo thêm trường này nếu có
     };
 
     return api.post("UserAccounts", formattedData);
@@ -37,6 +38,8 @@ const userAccountsApi = {
       dateOfBirth: data.dateOfBirth,
       address: data.address?.trim(),
       status: data.status || 0,
+      roleId: data.roleId,
+      profilePicture: data.profilePicture,
       ...(data.password ? { password: data.password } : {}),
     };
 
