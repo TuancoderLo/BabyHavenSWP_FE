@@ -143,14 +143,12 @@ const GrowthChart = ({ childName, selectedTool, onRecordSelect, refreshTrigger =
         console.log("Full API Response:", response);
 
         const records = Array.isArray(response.data) ? response.data : [response.data];
-        const currentYear = new Date().getFullYear();
         
         const processedRecords = records
           .filter(record => record && (record.weight || record.height))
           .map(record => {
             const recordDate = new Date(record.createdAt || record.recordDate);
-            if (recordDate.getFullYear() !== currentYear) return null;
-
+            
             const weight = parseFloat(record.weight);
             const height = parseFloat(record.height);
             
@@ -177,14 +175,16 @@ const GrowthChart = ({ childName, selectedTool, onRecordSelect, refreshTrigger =
           .filter(record => record !== null)
           .sort((a, b) => a.timestamp - b.timestamp);
 
+        console.log('Processed Records:', processedRecords);
+
         // Tạo dữ liệu gộp cho biểu đồ
         const chartData = Array.from({ length: 12 }, (_, i) => {
-          const record = processedRecords.find(r => Math.floor(r.x) === i);
+          // Lấy tất cả record trong tháng i
+          const recordsInMonth = processedRecords.filter(r => Math.floor(r.x) === i);
           return {
             x: i,
-            month: new Date(currentYear, i).toLocaleDateString('en-US', { month: 'short' }),
-            bmi: record ? record.bmi : null,
-            date: record ? record.date : null,
+            month: new Date(2025, i).toLocaleDateString('en-US', { month: 'short' }),
+            records: recordsInMonth, // Lưu tất cả record trong tháng
             median: whoData.median,
             plus1SD: whoData.plus1SD,
             minus1SD: whoData.minus1SD,
@@ -226,6 +226,9 @@ const GrowthChart = ({ childName, selectedTool, onRecordSelect, refreshTrigger =
             </div>
           );
         }
+
+        // Tạo danh sách tất cả record để vẽ đường
+        const allRecords = data.flatMap(monthData => monthData.records);
 
         return (
           <ResponsiveContainer width="100%" height={350}>
@@ -276,7 +279,10 @@ const GrowthChart = ({ childName, selectedTool, onRecordSelect, refreshTrigger =
                 }}
                 labelFormatter={(label, payload) => {
                   if (payload && payload[0]) {
-                    return `Date: ${payload[0].payload.date || ''}`;
+                    const recordsInMonth = payload[0].payload.records;
+                    if (recordsInMonth && recordsInMonth.length > 0) {
+                      return recordsInMonth.map(r => `Date: ${r.date}`).join(', ');
+                    }
                   }
                   return '';
                 }}
@@ -291,6 +297,7 @@ const GrowthChart = ({ childName, selectedTool, onRecordSelect, refreshTrigger =
               />
               <Line
                 yAxisId="bmi"
+                data={allRecords}
                 type="monotone"
                 dataKey="bmi"
                 stroke="#FF9AA2"

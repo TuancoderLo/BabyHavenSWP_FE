@@ -668,6 +668,7 @@ function ChildrenPage() {
                     selectedTool={selectedTool}
                     onRecordSelect={setSelectedRecord}
                     refreshTrigger={refreshTrigger}
+                    dateOfbirth={selectedChild.dateOfBirth}
                   />
                 </>
               ) : (

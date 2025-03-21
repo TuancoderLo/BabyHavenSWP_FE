@@ -213,7 +213,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
         name: child.name,
         dateOfBirth: child.dateOfBirth,
         recordedBy: memberId,
-        createdAt: growthForm.createdAt || new Date().toISOString(),
+        createdAt: growthForm.createdAt,
         weight: growthForm.weight,
         height: growthForm.height,
         headCircumference: growthForm.headCircumference,
