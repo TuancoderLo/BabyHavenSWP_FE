@@ -4,6 +4,7 @@ import "./Register.css";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../config/firebase";
 import api from "../../config/axios";
+import { sendRegistrationOTP } from "../../services/VerifyOPT";
 // import { toast } from "react-toastify";
 // import "react-toastify/dist/ReactToastify.css";
 
@@ -123,34 +124,79 @@ function Register() {
     setIsLoading(true);
 
     try {
-      const response = await api.post("Authentication/Register", {
+      // Tạo dữ liệu đăng ký để lưu trữ
+      const registrationData = {
         username: formData.username,
         email: formData.email,
         phoneNumber: formData.phoneNumber,
         name: formData.name,
         gender: formData.gender,
         dateOfBirth: formData.dateOfBirth,
+        address: "", // Thêm trường address (có thể trống)
         password: formData.password,
+      };
+
+      // Gửi email đến API Register để nhận OTP
+      const response = await api.post("Authentication/Register", {
+        email: formData.email,
       });
 
-      if (response.data.status === 200 || response.status === 200) {
-        navigate("/login");
+      console.log("API Response:", response.data);
+
+      // Lưu thông tin đăng ký vào localStorage (bất kể kết quả API)
+      localStorage.setItem("pending_email", formData.email);
+      localStorage.setItem(
+        "registration_data",
+        JSON.stringify(registrationData)
+      );
+
+      // Kiểm tra phản hồi từ API
+      if (
+        response.data.status === 1 ||
+        response.data.status === 200 ||
+        response.status === 200
+      ) {
+        // Chuyển đến trang xác thực email
+        navigate("/verify-email");
       } else {
         setError(
-          response.data.message ||
-            "Registration failed. Please try again later."
+          response.data.message || "Không thể gửi OTP. Vui lòng thử lại sau."
         );
       }
     } catch (error) {
+      console.error("Lỗi khi gửi yêu cầu đăng ký:", error);
+
+      // Kiểm tra nếu phản hồi có status 200 hoặc thông báo OTP
+      if (
+        error.response &&
+        (error.response.status === 200 ||
+          (error.response.data &&
+            error.response.data.message &&
+            error.response.data.message.includes("OTP")))
+      ) {
+        // Lưu email và chuyển trang
+        localStorage.setItem("pending_email", formData.email);
+
+        // Hiển thị thông báo OTP đã được gửi
+        setError("OTP sent. Please verify your email.");
+
+        // Thêm nút để chuyển trang
+        setTimeout(() => {
+          navigate("/verify-email");
+        }, 1000);
+
+        return;
+      }
+
       if (error.response) {
         setError(
           error.response.data.message ||
-            "Registration failed. Please try again later."
+            "Đăng ký thất bại. Vui lòng thử lại sau."
         );
       } else if (error.request) {
-        setError("Registration failed. Please try again later.");
+        setError("Đăng ký thất bại. Vui lòng thử lại sau.");
       } else {
-        setError("Registration error");
+        setError("Lỗi đăng ký");
       }
     } finally {
       setIsLoading(false);
@@ -183,6 +229,19 @@ function Register() {
           </div>
 
           {error && <div className="error-message">{error}</div>}
+
+          {/* Hiển thị nút khi đã nhận được OTP */}
+          {error && error.includes("OTP sent") && (
+            <div style={{ marginBottom: "15px", textAlign: "center" }}>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => navigate("/verify-email")}
+              >
+                Tiếp tục xác thực email
+              </button>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
