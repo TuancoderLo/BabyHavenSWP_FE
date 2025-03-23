@@ -13,7 +13,7 @@ import {
   Select,
 } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import TextEditor from "../../../components/admin/Component_Sidebar/blog/textEditor";
+import TextEditor from "../../../pages/Admin/DashboardAdmin/blog/textEditor";
 import axios from "axios";
 import "./DoctorBlog.css";
 import blogApi from "../../../services/blogApi";

@@ -1,5 +1,5 @@
 import React from "react";
-import Sidebar from "../Doctor/Sidebar/Sidebar";
+import Sidebar from "../../layouts/Doctor/Sidebar/Sidebar";
 import Home from "./DashBoardDoctor/Home";
 import Bio from "./DashBoardDoctor/Bio";
 import Consultation from "./DashBoardDoctor/Consultation";
