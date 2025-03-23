@@ -159,47 +159,6 @@ function Packages() {
         alert("Failed to create memberMembership!");
         return;
       }
-<<<<<<< HEAD:src/components/packages/Packages.jsx
-
-      // 2) Lấy thông tin chi tiết của memberMembership qua API GET /api/MemberMemberships/odata
-      // Hàm getMemberMembershipId nhận vào membershipId vừa tạo và trả về memberMembershipId từ chi tiết
-      const newMemberMembershipId = await transactionsApi.getMemberMembershipId(membershipId);
-      if (!newMemberMembershipId) {
-        alert("Cannot retrieve membership details!");
-        return;
-      }
-
-      // Lấy thông tin transaction vừa tạo
-      const transactionResponse = await transactionsApi.getTransaction(userId, newMemberMembershipId);
-      const transactionData = transactionResponse.data.data;
-
-      if (!transactionData || transactionData.paymentStatus !== "Pending") {
-        alert("Transaction is not pending or failed!");
-        return;
-      }
-      const gatewayTransactionId = transactionData.gatewayTransactionId;
-
-      // 4) Gọi API VNPay để tạo URL thanh toán với gatewayTransactionId
-      const paymentRes = await transactionsApi.createPayment(gatewayTransactionId);
-      const paymentUrl = paymentRes.data.data;
-      if (!paymentUrl) {
-        alert("Cannot get payment URL from server!");
-        return;
-      }
-      console.log(paymentUrl);
-      // 5) Redirect sang cổng VNPay
-      window.location.href = paymentUrl;
-    } catch (err) {
-      console.error("Payment error:", err);
-      alert("Payment initiation failed, please try again.");
-    }
-  };
-
-  const handleFinish = () => {
-    handleCloseOverlay();
-  };
-
-=======
 
       // 2) Lấy thông tin chi tiết của memberMembership qua API GET /api/MemberMemberships/odata
       // Hàm getMemberMembershipId nhận vào membershipId vừa tạo và trả về memberMembershipId từ chi tiết
@@ -251,8 +210,6 @@ function Packages() {
   const handleFinish = () => {
     handleCloseOverlay();
   };
->>>>>>> ManhTero:src/components/packages/PackageHome.jsx
-
   // Add new useEffect to get current plan
   useEffect(() => {
     const memberId = localStorage.getItem("memberId");
@@ -295,14 +252,9 @@ function Packages() {
                   {/* Free Package */}
                   <div className="package-card-homepage free">
                     <h3>Free</h3>
-<<<<<<< HEAD:src/components/packages/Packages.jsx
-                    <p className="package-description">Free membership with basic features</p>
-=======
                     <p className="package-description">
                       Free membership with basic features
                     </p>
->>>>>>> ManhTero:src/components/packages/PackageHome.jsx
-
                     <div className="feature-list">
                       <div className="feature-item">
                         <span className="feature-label">Support services</span>
@@ -344,31 +296,20 @@ function Packages() {
                         đ
                       </span>
                       <span className="price-duration Free">
-<<<<<<< HEAD:src/components/packages/Packages.jsx
-                        /{packagesData.find(p => p.packageName === 'Free')?.durationMonths}
-=======
-                        /
                         {
                           packagesData.find((p) => p.packageName === "Free")
                             ?.durationMonths
-                        }
->>>>>>> ManhTero:src/components/packages/PackageHome.jsx
-                      </span>
+                        }                      </span>
                       <span className="price-duration Free"> Months</span>
                     </div>
 
                     <button
-<<<<<<< HEAD:src/components/packages/Packages.jsx
-                      className={`package-btn-homepage ${currentPlan?.packageName === 'Free' ? 'current-plan' : 'Free'}`}
-                      disabled={currentPlan?.packageName === 'Free'}
-=======
                       className={`package-btn-homepage ${
                         currentPlan?.packageName === "Free"
                           ? "current-plan"
                           : "Free"
                       }`}
                       disabled={currentPlan?.packageName === "Free"}
->>>>>>> ManhTero:src/components/packages/PackageHome.jsx
                     >
                       {currentPlan?.packageName === "Free"
                         ? "YOUR CURRENT PLAN"
@@ -380,14 +321,9 @@ function Packages() {
                   <div className="package-card-homepage standard">
                     <div className="best-service-badge">POPULAR</div>
                     <h3>STANDARD</h3>
-<<<<<<< HEAD:src/components/packages/Packages.jsx
-                    <p className="package-description">Standard membership with advance features</p>
-=======
                     <p className="package-description">
                       Standard membership with advance features
                     </p>
->>>>>>> ManhTero:src/components/packages/PackageHome.jsx
-
                     <div className="feature-list">
                       <div className="feature-item">
                         <span className="feature-label">Support services</span>
@@ -429,25 +365,15 @@ function Packages() {
                         đ
                       </span>
                       <span className="price-duration">
-<<<<<<< HEAD:src/components/packages/Packages.jsx
-                        /{packagesData.find(p => p.packageName === 'Standard')?.durationMonths}
-=======
-                        /
                         {
                           packagesData.find((p) => p.packageName === "Standard")
                             ?.durationMonths
                         }
->>>>>>> ManhTero:src/components/packages/PackageHome.jsx
                       </span>
                       <span className="price-duration"> Months</span>
                     </div>
 
                     <button
-<<<<<<< HEAD:src/components/packages/Packages.jsx
-                      className={`package-btn-homepage ${currentPlan?.packageName === 'Standard' ? 'current-plan' : 'standard'}`}
-                      onClick={() => currentPlan?.packageName !== 'Standard' && handleBuyPackage(packagesData.find(p => p.packageName === 'Standard'))}
-                      disabled={currentPlan?.packageName === 'Standard'}
-=======
                       className={`package-btn-homepage ${
                         currentPlan?.packageName === "Standard"
                           ? "current-plan"
@@ -460,19 +386,12 @@ function Packages() {
                         )
                       }
                       disabled={currentPlan?.packageName === "Standard"}
->>>>>>> ManhTero:src/components/packages/PackageHome.jsx
                     >
                       {currentPlan?.packageName === "Standard"
                         ? "YOUR CURRENT PLAN"
                         : "GO STANDARD"}
                     </button>
                   </div>
-
-<<<<<<< HEAD:src/components/packages/Packages.jsx
-
-
-=======
->>>>>>> ManhTero:src/components/packages/PackageHome.jsx
                   {/* Premium Package */}
                   <div className="package-card-homepage premium">
                     <div className="premium-icon">
@@ -480,14 +399,9 @@ function Packages() {
                     </div>
                     <div className="best-service-badge">BEST SERVICE</div>
                     <h3>PREMIUM</h3>
-<<<<<<< HEAD:src/components/packages/Packages.jsx
-                    <p className="package-description">Premium membership with full features</p>
-=======
                     <p className="package-description">
                       Premium membership with full features
                     </p>
->>>>>>> ManhTero:src/components/packages/PackageHome.jsx
-
                     <div className="feature-list">
                       <div className="feature-item">
                         <span className="feature-label">Support services</span>
@@ -529,25 +443,15 @@ function Packages() {
                         đ
                       </span>
                       <span className="price-duration">
-<<<<<<< HEAD:src/components/packages/Packages.jsx
-                        /{packagesData.find(p => p.packageName === 'Premium')?.durationMonths}
-=======
-                        /
                         {
                           packagesData.find((p) => p.packageName === "Premium")
                             ?.durationMonths
                         }
->>>>>>> ManhTero:src/components/packages/PackageHome.jsx
                       </span>
                       <span className="price-duration"> Months</span>
                     </div>
 
                     <button
-<<<<<<< HEAD:src/components/packages/Packages.jsx
-                      className={`package-btn-homepage ${currentPlan?.packageName === 'Premium' ? 'current-plan' : 'premium-btn'}`}
-                      onClick={() => currentPlan?.packageName !== 'Premium' && handleBuyPackage(packagesData.find(p => p.packageName === 'Premium'))}
-                      disabled={currentPlan?.packageName === 'Premium'}
-=======
                       className={`package-btn-homepage ${
                         currentPlan?.packageName === "Premium"
                           ? "current-plan"
@@ -560,7 +464,6 @@ function Packages() {
                         )
                       }
                       disabled={currentPlan?.packageName === "Premium"}
->>>>>>> ManhTero:src/components/packages/PackageHome.jsx
                     >
                       {currentPlan?.packageName === "Premium"
                         ? "YOUR CURRENT PLAN"
@@ -634,16 +537,6 @@ function Packages() {
                         <img src={packagesIcon} alt="Premium" />
                       </div>
                       <div className="package-info">
-<<<<<<< HEAD:src/components/packages/Packages.jsx
-                        <div className="package-name">{selectedPackage?.packageName}</div>
-                        <div className="package-price">
-                          {selectedPackage
-                            ? `${selectedPackage.price.toLocaleString()} ${selectedPackage.currency} / ${selectedPackage.durationMonths} months`
-                            : ""}
-                        </div>
-                      </div>
-                      <button className="change-button" onClick={() => handleCloseOverlay()}>
-=======
                         <div className="package-name">
                           {selectedPackage?.packageName}
                         </div>
@@ -659,7 +552,6 @@ function Packages() {
                         className="change-button"
                         onClick={() => handleCloseOverlay()}
                       >
->>>>>>> ManhTero:src/components/packages/PackageHome.jsx
                         Change
                       </button>
                     </div>
@@ -704,13 +596,9 @@ function Packages() {
                     <h3>Your subscription</h3>
                     <div className="subscription-items">
                       <div>1. {selectedPackage?.packageName}</div>
-<<<<<<< HEAD:src/components/packages/Packages.jsx
-                      {promoCode && <div>2. Promo code applied: {promoCode}</div>}
-=======
                       {promoCode && (
                         <div>2. Promo code applied: {promoCode}</div>
                       )}
->>>>>>> ManhTero:src/components/packages/PackageHome.jsx
                     </div>
 
                     <div className="subscription-dates">
@@ -718,40 +606,6 @@ function Packages() {
                       <div>
                         End date:{" "}
                         {new Date(
-<<<<<<< HEAD:src/components/packages/Packages.jsx
-                          new Date().setMonth(new Date().getMonth() + selectedPackage?.durationMonths)
-                        ).toLocaleDateString()}
-                      </div>
-                    </div>
-
-                    <div className="cost-breakdown">
-                      <div className="cost-row">
-                        <span>Amount</span>
-                        <span className="amount">
-                          {selectedPackage
-                            ? `${selectedPackage.price.toLocaleString()} ${selectedPackage.currency}`
-                            : ""}
-                        </span>
-                      </div>
-                      <div className="cost-row">
-                        <span>Promotion</span>
-                        <span className="promotion">
-                          {selectedPackage
-                            ? `${discount.toLocaleString()} ${selectedPackage.currency}`
-                            : ""}
-                        </span>
-                      </div>
-                      <div className="total-row">
-                        <span>Total</span>
-                        <span className="total">
-                          {selectedPackage
-                            ? `${(selectedPackage.price - discount).toLocaleString()} ${selectedPackage.currency}`
-                            : ""}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-=======
                           new Date().setMonth(
                             new Date().getMonth() +
                               selectedPackage?.durationMonths
@@ -759,8 +613,6 @@ function Packages() {
                         ).toLocaleDateString()}
                       </div>
                     </div>
->>>>>>> ManhTero:src/components/packages/PackageHome.jsx
-
                     <div className="cost-breakdown">
                       <div className="cost-row">
                         <span>Amount</span>
