@@ -248,3 +248,20 @@ input::placeholder {
   border-radius: 6px;
   border: 1px solid #fee2e2;
 }
+
+.forgot-password-link {
+  text-align: right;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+
+.forgot-password-link a {
+  color: #00bfa6;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.forgot-password-link a:hover {
+  text-decoration: underline;
+  color: #00a892;
+}
