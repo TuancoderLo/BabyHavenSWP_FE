@@ -2,36 +2,36 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // Guest & Auth
-import Guest from "./components/guest/Guest";
-import Login from "./components/login/Login";
-import Register from "./components/register/Register";
-import ForgetPassword from "./components/login/ForgetPassword";
-import VerifyEmail from "./components/register/VerifyEmail";
-import CategoryPage from "./pages/CategoryPage";
-import FormatBlog from "./components/topics/FormatBlog";
+import Guest from "./pages/Home/HomePage/Guest";
+import Login from "./pages/Authentication/Login/Login";
+import Register from "./pages/Authentication/Register/Register";
+import ForgetPassword from "./pages/Authentication/Login/ForgetPassword";
+import VerifyEmail from "./pages/Authentication/Register/VerifyEmail";
+import CategoryPage from "./pages/Home/ApiForHomePage/Navbar/CategoryPage";
+import FormatBlog from "./pages/Home/ApiForHomePage/Navbar/FormatBlog";
 
 // HomePage (user)
-import Homepage from "./components/homepage/HomePage";
-import Member from "./components/member/member";
+import Homepage from "./pages/Home/HomePage/HomePage";
+import Member from "./pages/Member/member";
 // Admin
-import Admin from "./components/admin/Admin";
+import Admin from "./pages/Admin/Admin";
 // import ChartCard from "./components/admin/ChartCard/ChartCard";
 // import Home from "./components/admin/Component_Sidebar/home/home";
-import Blog from "./components/admin/Component_Sidebar/blog/blog";
-import Members from "./components/admin/Component_Sidebar/members/members";
-import AdminPackages from "./components/admin/Component_Sidebar/packages/packages";
-import Inbox from "./components/admin/Component_Sidebar/inbox/inbox";
-import Notifications from "./components/admin/Component_Sidebar/Notifications/notifications.jsx";
-import Settings from "./components/admin/Component_Sidebar/settings/settings";
+import Blog from "./pages/Admin/DashboardAdmin/blog/blog";
+import Members from "./pages/Admin/DashboardAdmin/members/members";
+import AdminPackages from "./pages/Admin/DashboardAdmin/packages/packages";
+import Inbox from "./pages/Admin/DashboardAdmin/inbox/inbox";
+import Notifications from "./pages/Admin/DashboardAdmin/Notifications/notifications.jsx";
+import Settings from "./pages/Admin/DashboardAdmin/settings/settings";
 
 //doctor
 import Doctor from "./pages/Doctor/Doctor";
 
 //Member
-import MemberPackages from "./components/packages/Packages";
+import MemberPackages from "./components/packages/PackageHome.jsx";
 // ↑ đổi tên import (MamberPackages) để khác với AdminPackages
 
-import GoogleCallback from "./components/login/GoogleCallback.jsx";
+import GoogleCallback from "./pages/Authentication/GoogleCallback.jsx";
 
 function App() {
   const [userRole, setUserRole] = useState(() => {
