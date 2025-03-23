@@ -41,15 +41,16 @@ const doctorApi = {
   },
 
   getConsultationResponsesByDoctor: async (doctorName) => {
-    const response = await api.get(`/api/ConsultationResponses/odata`, {
+    const response = await api.get(`/ConsultationResponses/odata`, {
       params: { doctorName },
     });
     return response.data;
   },
 
   // Updated updateConsultationRequestStatus
-  updateConsultationRequestStatus: async (requestId, status) => {
-    const response = await api.put(`/api/ConsultationRequests/${requestId}/${status}`);
+  updateConsultationRequestStatus: async (requestId, statusString) => {
+    // statusString = 'pending' hoặc 'accepted' hoặc 'rejected', ...
+    const response = await api.put(`/ConsultationRequests/${requestId}/${statusString}`);
     return response.data;
   },
 
