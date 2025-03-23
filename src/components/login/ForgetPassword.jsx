@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./ForgetPassword.css";
 import { useNavigate } from "react-router-dom";
+import api from "../../config/axios";
 
 const ForgetPassword = () => {
   // States để quản lý các bước trong quá trình đặt lại mật khẩu
@@ -10,10 +11,11 @@ const ForgetPassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   // Xử lý khi submit form nhập email
-  const handleEmailSubmit = (e) => {
+  const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -23,13 +25,34 @@ const ForgetPassword = () => {
       return;
     }
 
-    // Trong tương lai, ở đây sẽ gọi API để kiểm tra email
-    // Giả sử email hợp lệ và chuyển sang bước tiếp theo
-    setStep(2);
+    try {
+      setIsLoading(true);
+      // Gọi API để yêu cầu OTP đặt lại mật khẩu
+      const response = await api.post("Authentication/ForgetPassword", {
+        email,
+      });
+
+      if (response.data.status === 1) {
+        // Lưu email để sử dụng ở các bước sau
+        localStorage.setItem("reset_password_email", email);
+        setStep(2); // Chuyển sang bước nhập OTP
+      } else {
+        setError(
+          response.data.message || "Không thể gửi OTP. Vui lòng thử lại sau."
+        );
+      }
+    } catch (error) {
+      console.error("Lỗi khi gửi yêu cầu OTP:", error);
+      setError(
+        error.response?.data?.message || "Đã xảy ra lỗi. Vui lòng thử lại."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Xử lý khi submit form nhập OTP
-  const handleOtpSubmit = (e) => {
+  const handleOtpSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -39,13 +62,36 @@ const ForgetPassword = () => {
       return;
     }
 
-    // Trong tương lai, ở đây sẽ gọi API để xác thực OTP
-    // Giả sử OTP hợp lệ
-    setStep(3); // Người dùng quên mật khẩu cần đặt mật khẩu mới
+    try {
+      setIsLoading(true);
+      // Lấy email đã lưu từ bước trước
+      const storedEmail = localStorage.getItem("reset_password_email");
+
+      // Gọi API để xác thực OTP
+      const response = await api.post("Authentication/VerifyResetPasswordOtp", {
+        email: storedEmail,
+        otp: otp,
+      });
+
+      if (response.data.status === 1) {
+        setStep(3); // Chuyển sang bước đặt mật khẩu mới
+      } else {
+        setError(
+          response.data.message || "Mã OTP không hợp lệ. Vui lòng thử lại."
+        );
+      }
+    } catch (error) {
+      console.error("Lỗi khi xác thực OTP:", error);
+      setError(
+        error.response?.data?.message || "Đã xảy ra lỗi. Vui lòng thử lại."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Xử lý khi submit form đặt mật khẩu mới
-  const handlePasswordSubmit = (e) => {
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -60,9 +106,35 @@ const ForgetPassword = () => {
       return;
     }
 
-    // Trong tương lai, ở đây sẽ gọi API để đặt mật khẩu mới
-    // Giả sử đặt mật khẩu thành công
-    setStep(4);
+    try {
+      setIsLoading(true);
+      // Lấy email đã lưu từ bước trước
+      const storedEmail = localStorage.getItem("reset_password_email");
+
+      // Gọi API để đặt lại mật khẩu
+      const response = await api.post("Authentication/ResetPassword", {
+        email: storedEmail,
+        newPassword: newPassword,
+      });
+
+      if (response.data.status === 1) {
+        // Xóa email đã lưu vì không cần nữa
+        localStorage.removeItem("reset_password_email");
+        setStep(4); // Chuyển sang bước hoàn thành
+      } else {
+        setError(
+          response.data.message ||
+            "Không thể đặt lại mật khẩu. Vui lòng thử lại."
+        );
+      }
+    } catch (error) {
+      console.error("Lỗi khi đặt lại mật khẩu:", error);
+      setError(
+        error.response?.data?.message || "Đã xảy ra lỗi. Vui lòng thử lại."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Quay lại bước trước đó
@@ -109,11 +181,16 @@ const ForgetPassword = () => {
                 type="button"
                 className="secondary-button"
                 onClick={handleReturnToLogin}
+                disabled={isLoading}
               >
                 Hủy
               </button>
-              <button type="submit" className="primary-button">
-                Tiếp tục
+              <button
+                type="submit"
+                className="primary-button"
+                disabled={isLoading}
+              >
+                {isLoading ? "Đang xử lý..." : "Tiếp tục"}
               </button>
             </div>
           </form>
@@ -142,11 +219,16 @@ const ForgetPassword = () => {
                 type="button"
                 className="secondary-button"
                 onClick={handleBack}
+                disabled={isLoading}
               >
                 Quay lại
               </button>
-              <button type="submit" className="primary-button">
-                Xác nhận
+              <button
+                type="submit"
+                className="primary-button"
+                disabled={isLoading}
+              >
+                {isLoading ? "Đang xử lý..." : "Xác nhận"}
               </button>
             </div>
           </form>
@@ -182,11 +264,16 @@ const ForgetPassword = () => {
                 type="button"
                 className="secondary-button"
                 onClick={handleBack}
+                disabled={isLoading}
               >
                 Quay lại
               </button>
-              <button type="submit" className="primary-button">
-                Xác nhận
+              <button
+                type="submit"
+                className="primary-button"
+                disabled={isLoading}
+              >
+                {isLoading ? "Đang xử lý..." : "Xác nhận"}
               </button>
             </div>
           </form>

@@ -1,18 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "../login/ForgetPassword.css"; // Có thể sử dụng chung CSS
+import "../login/ForgetPassword.css"; // Sử dụng chung CSS
+import api from "../../config/axios";
 
 const VerifyEmail = () => {
   const [step, setStep] = useState(1); // 1: Nhập OTP, 2: Hoàn thành
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [registrationData, setRegistrationData] = useState(null);
   const navigate = useNavigate();
 
-  // Email từ quá trình đăng ký (có thể nhận qua props hoặc localStorage)
+  // Email từ quá trình đăng ký
   const email = localStorage.getItem("pending_email") || "";
 
+  useEffect(() => {
+    // Lấy dữ liệu đăng ký từ localStorage
+    const storedData = localStorage.getItem("registration_data");
+    if (storedData) {
+      setRegistrationData(JSON.parse(storedData));
+    } else {
+      // Nếu không có dữ liệu, chuyển hướng về trang đăng ký
+      navigate("/register");
+    }
+  }, [navigate]);
+
   // Xử lý khi submit form nhập OTP
-  const handleOtpSubmit = (e) => {
+  const handleOtpSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -22,9 +36,57 @@ const VerifyEmail = () => {
       return;
     }
 
-    // Trong tương lai, ở đây sẽ gọi API để xác thực OTP
-    // Giả sử OTP hợp lệ
-    setStep(2); // Chuyển tới bước hoàn thành
+    try {
+      setIsLoading(true);
+
+      // Lấy email và dữ liệu đăng ký từ localStorage
+      const email = localStorage.getItem("pending_email");
+      const userData = JSON.parse(localStorage.getItem("registration_data"));
+
+      if (!userData || !email) {
+        setError("Không tìm thấy thông tin đăng ký!");
+        setIsLoading(false);
+        return;
+      }
+
+      // Gọi API để xác thực OTP và hoàn tất đăng ký
+      const verifyData = {
+        email: email,
+        otp: otp,
+        username: userData.username,
+        phoneNumber: userData.phoneNumber,
+        name: userData.name,
+        gender: userData.gender,
+        dateOfBirth: userData.dateOfBirth,
+        address: userData.address || "",
+        password: userData.password,
+      };
+
+      const response = await api.post(
+        "Authentication/VerifyRegistrationOtp",
+        verifyData
+      );
+
+      if (response.data.status === 1) {
+        // Xác thực thành công, tài khoản đã được tạo
+        // Xóa dữ liệu đăng ký tạm thời
+        localStorage.removeItem("registration_data");
+        localStorage.removeItem("pending_email");
+
+        setStep(2); // Chuyển tới bước hoàn thành
+      } else {
+        setError(
+          response.data.message || "Mã OTP không hợp lệ. Vui lòng thử lại."
+        );
+      }
+    } catch (error) {
+      console.error("Lỗi khi xác thực OTP:", error);
+      setError(
+        error.response?.data?.message || "Đã xảy ra lỗi. Vui lòng thử lại."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Quay về trang đăng nhập
@@ -66,11 +128,16 @@ const VerifyEmail = () => {
                 type="button"
                 className="secondary-button"
                 onClick={handleReturnToLogin}
+                disabled={isLoading}
               >
                 Hủy
               </button>
-              <button type="submit" className="primary-button">
-                Xác nhận
+              <button
+                type="submit"
+                className="primary-button"
+                disabled={isLoading}
+              >
+                {isLoading ? "Đang xử lý..." : "Xác nhận"}
               </button>
             </div>
           </form>
