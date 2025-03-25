@@ -91,6 +91,35 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
   const [errors, setErrors] = useState({});
   const [currentStep, setCurrentStep] = useState(1);
 
+  // Thêm hàm validateForm để kiểm tra ngay khi người dùng nhập weight và height
+  const validateForm = useCallback(
+    (form = growthForm) => {
+      let formErrors = {};
+      if (currentStep === 1) {
+        formErrors = validateStep2Page1Rules(form, child.dateOfBirth);
+      } else if (currentStep === 2) {
+        formErrors = validateStep2Page2Rules(form);
+      } else if (currentStep === 3) {
+        formErrors = validateStep2Page3Rules(form);
+      }
+      setErrors(formErrors);
+    },
+    [currentStep, growthForm, child.dateOfBirth]
+  );
+
+  // Thêm hàm handleChange để áp dụng cho weight và height
+  const handleChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
+      setGrowthForm((prev) => {
+        const updatedForm = { ...prev, [name]: value };
+        validateForm(updatedForm); // Gọi validation ngay khi nhập
+        return updatedForm;
+      });
+    },
+    [validateForm]
+  );
+
   const validateStep = useCallback(() => {
     let stepErr = {};
     if (currentStep === 1) {
@@ -231,16 +260,14 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                   type="number"
                   name="weight"
                   value={growthForm.weight}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({ ...prev, weight: e.target.value }))
-                  }
-                  className={errors.weight ? "error-input" : ""}
+                  onChange={handleChange} // Sử dụng handleChange để hiển thị cảnh báo ngay
+                  className={errors.weight ? "warning-input" : ""} // Sử dụng warning-input
                   min="0"
                   onKeyDown={(e) => {
                     if (e.key === "-" || e.key === "e") e.preventDefault();
                   }}
                 />
-                {errors.weight && <p className="error-text">{errors.weight}</p>}
+                {errors.weight && <p className="warning-text-record">{errors.weight}</p>} // Sử dụng warning-text-record
               </div>
               <div>
                 <label>Baby's height (cm)</label>
@@ -248,16 +275,14 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                   type="number"
                   name="height"
                   value={growthForm.height}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({ ...prev, height: e.target.value }))
-                  }
-                  className={errors.height ? "error-input" : ""}
+                  onChange={handleChange} // Sử dụng handleChange để hiển thị cảnh báo ngay
+                  className={errors.height ? "warning-input" : ""} // Sử dụng warning-input
                   min="0"
                   onKeyDown={(e) => {
                     if (e.key === "-" || e.key === "e") e.preventDefault();
                   }}
                 />
-                {errors.height && <p className="error-text">{errors.height}</p>}
+                {errors.height && <p className="warning-text-record">{errors.height}</p>} // Sử dụng warning-text-record
               </div>
               <div>
                 <label>Head circumference (cm)</label>
