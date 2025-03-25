@@ -14,6 +14,7 @@ import AddMilestoneButton from "../../../../components/common/buttons/AddMilesto
 import AddChildButton from "../../../../components/common/buttons/AddChild";
 import memberShipApi from "../../../../services/memberShipApi";
 import alertApi from "../../../../services/alertApi";
+import AIChat from "./AIChat.jsx"
 
 function ChildrenPage() {
   const navigate = useNavigate();
@@ -29,6 +30,23 @@ function ChildrenPage() {
   const [showAddMilestoneModal, setShowAddMilestoneModal] = useState(false);
   const handleShowMilestoneModal = () => {
     setShowAddMilestoneModal(true);
+  };
+
+  // State for chat modal
+  const [showChatModal, setShowChatModal] = useState(false);
+
+  // Open chat modal
+  const handleOpenChat = () => {
+    if (!selectedChild) {
+      alert("Please select a child to chat with AI.");
+      return;
+    }
+    setShowChatModal(true);
+  };
+
+  // Close chat modal
+  const handleCloseChat = () => {
+    setShowChatModal(false);
   };
 
   const closeMilestoneOverlay = () => {
@@ -530,19 +548,25 @@ function ChildrenPage() {
   };
 
   const renderAnalyzeWithAI = () => {
+    console.log("renderAnalyzeWithAI called, showChatModal:", showChatModal); // Debug log
     return (
       <div className="analyze-ai-section">
         <div className="analyze-ai-title">
           Discover <span className="highlight">BabyHaven AI</span>: Your Partner in Parenting!
         </div>
         <button
-        className="analyze-ai-btn"
-        onClick={() => console.log("AI Analysis coming soon")}
-        disabled={!selectedChild}
+          className="analyze-ai-btn"
+          onClick={handleOpenChat} // Fix: Call handleOpenChat instead of console.log
+          disabled={!selectedChild}
         >
           <i className="fas fa-robot"></i>
-          Analyze with AI 
+          Analyze with AI
         </button>
+        <AIChat
+          isOpen={showChatModal}
+          onClose={handleCloseChat}
+          selectedChild={selectedChild}
+        />
       </div>
     );
   };
