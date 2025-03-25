@@ -267,7 +267,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                     if (e.key === "-" || e.key === "e") e.preventDefault();
                   }}
                 />
-                {errors.weight && <p className="warning-text-record">{errors.weight}</p>} // Sử dụng warning-text-record
+                {errors.weight && <p className="warning-text-record">{errors.weight}</p>}
               </div>
               <div>
                 <label>Baby's height (cm)</label>
