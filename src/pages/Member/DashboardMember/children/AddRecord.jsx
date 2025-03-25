@@ -282,7 +282,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                     if (e.key === "-" || e.key === "e") e.preventDefault();
                   }}
                 />
-                {errors.height && <p className="warning-text-record">{errors.height}</p>} // Sử dụng warning-text-record
+                {errors.height && <p className="warning-text-record">{errors.height}</p>}
               </div>
               <div>
                 <label>Head circumference (cm)</label>
