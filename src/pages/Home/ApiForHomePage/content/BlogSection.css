@@ -65,7 +65,6 @@
   max-width: 100%;
 }
 
-
 .blog-card {
   width: 100%;
   padding: 16px;
@@ -210,7 +209,6 @@
   }
 }
 
-
 @media (min-width: 768px) and (max-width: 991px) {
   .blog-cards {
     grid-template-columns: repeat(2, 1fr);
@@ -253,4 +251,44 @@
   100% {
     transform: rotate(360deg);
   }
+}
+
+/* Thêm styles mới cho danh mục cha */
+.blog-section-parent-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.blog-section-parent-category-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 25px;
+  background: #f8f8f8;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  font-weight: 500;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.blog-section-parent-category-btn:hover {
+  background: #f0f0f0;
+  transform: translateY(-2px);
+}
+
+.blog-section-parent-category-btn.active {
+  background: #00bfa6;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 191, 166, 0.3);
+}
+
+.no-blogs-message {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 1.1rem;
 }
