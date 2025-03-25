@@ -49,23 +49,28 @@ const VerifyEmail = () => {
         return;
       }
 
-      // Gọi API để xác thực OTP và hoàn tất đăng ký
+      // Cấu trúc lại dữ liệu theo đúng định dạng mà API yêu cầu
       const verifyData = {
-        email: email,
-        otp: otp,
+        email: userData.email,
         username: userData.username,
         phoneNumber: userData.phoneNumber,
         name: userData.name,
         gender: userData.gender,
         dateOfBirth: userData.dateOfBirth,
-        address: userData.address || "",
+        address: userData.address,
         password: userData.password,
+        otp: otp,
       };
 
+      console.log("Sending verification data:", verifyData);
+
+      // Gọi API để xác thực OTP và hoàn tất đăng ký
       const response = await api.post(
         "Authentication/VerifyRegistrationOtp",
         verifyData
       );
+
+      console.log("Verification response:", response.data);
 
       if (response.data.status === 1) {
         // Xác thực thành công, tài khoản đã được tạo
