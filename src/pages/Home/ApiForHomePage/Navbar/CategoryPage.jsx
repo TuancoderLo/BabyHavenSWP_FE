@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../../../layouts/Home/Navbar/Header";
 import HeaderGuest from "../../../../layouts/Home/Navbar/HeaderGuest";
 import Footer from "../../../../layouts/Home/Footer";
-import api from "../../../../config/axios";
+import blogCategoryApi from "../../../../services/blogCategoryApi";
 import "./CategoryPage.css";
 import parse from "html-react-parser";
 
@@ -35,8 +35,8 @@ function CategoryPage() {
     try {
       setLoading(true);
 
-      // 1. Gọi API để lấy danh sách tất cả categories
-      const response = await api.get("BlogCategories");
+      // Sử dụng service API thay vì gọi trực tiếp
+      const response = await blogCategoryApi.getAll();
       console.log("All categories:", response.data);
 
       // 2. Lấy dữ liệu categories (xử lý cả trường hợp data nằm trong response.data.data)
@@ -88,53 +88,70 @@ function CategoryPage() {
       setLoading(true);
       setError(null);
 
-      const response = await api.get(
-        `BlogCategories/parent-categories/${parentCategoryId}`
+      const response = await blogCategoryApi.getParentCategories(
+        parentCategoryId
       );
-      console.log("Response from parent API:", response.data);
+      console.log("Complete API response:", response);
+      console.log("Response data:", response.data);
 
       let blogsData = [];
+      let processedData = null;
 
-      // Xử lý dữ liệu từ API danh mục cha
-      // API này trả về mảng các danh mục con, mỗi danh mục có mảng blogs
+      // Xử lý nhiều cấu trúc dữ liệu có thể có
       if (response.data) {
-        const categories = Array.isArray(response.data)
-          ? response.data
-          : response.data.data && Array.isArray(response.data.data)
-          ? response.data.data
-          : [];
+        if (response.data.data) {
+          // Trường hợp: { data: { data: [...] } }
+          processedData = response.data.data;
+        } else if (Array.isArray(response.data)) {
+          // Trường hợp: { data: [...] }
+          processedData = response.data;
+        } else {
+          // Trường hợp khác
+          processedData = [response.data];
+        }
 
-        // Lặp qua từng danh mục con
-        categories.forEach((category) => {
-          if (category.blogs && Array.isArray(category.blogs)) {
-            // Lọc blog có status là "Approved"
-            const approvedBlogs = category.blogs.filter(
-              (blog) => blog.status === "Approved"
-            );
+        console.log("Processed data structure:", processedData);
 
-            // Chuẩn hóa dữ liệu blog từ mỗi danh mục con
-            const formattedBlogs = approvedBlogs.map((blog) => ({
-              blogId: blog.blogId,
-              title: blog.title,
-              content: blog.content,
-              authorId: blog.authorId,
-              // Nếu không có authorName, sử dụng "Unknown"
-              authorName:
-                blog.authorName || (blog.author ? blog.author.name : "Unknown"),
-              categoryName: category.categoryName,
-              categoryId: category.categoryId,
-              imageBlog: blog.imageBlog,
-              status: blog.status,
-              tags: blog.tags,
-              createdAt: blog.createdAt,
-              updatedAt: blog.updatedAt,
-            }));
-            blogsData = [...blogsData, ...formattedBlogs];
-          }
-        });
+        // Xử lý dữ liệu đã chuẩn hóa
+        if (Array.isArray(processedData)) {
+          processedData.forEach((category) => {
+            const blogArray = category.blog || category.blogs || [];
+
+            if (Array.isArray(blogArray)) {
+              // Lọc blog có status là "Approved" (không phân biệt hoa thường)
+              const approvedBlogs = blogArray.filter(
+                (blog) =>
+                  blog.status && blog.status.toLowerCase() === "approved"
+              );
+
+              console.log(
+                `Category ${category.categoryName}: Found ${approvedBlogs.length} approved blogs`
+              );
+
+              if (approvedBlogs.length > 0) {
+                const formattedBlogs = approvedBlogs.map((blog) => ({
+                  blogId: blog.blogId,
+                  title: blog.title,
+                  content: blog.content,
+                  authorId: blog.authorId,
+                  authorName: blog.authorName || "Unknown",
+                  categoryName: category.categoryName || "Unknown Category",
+                  categoryId: parentCategoryId,
+                  imageBlog: blog.imageBlog,
+                  status: blog.status,
+                  tags: blog.tags,
+                  createdAt: blog.createdAt,
+                  updatedAt: blog.updatedAt,
+                }));
+
+                blogsData = [...blogsData, ...formattedBlogs];
+              }
+            }
+          });
+        }
       }
 
-      console.log("Processed blogs data (Parent):", blogsData);
+      console.log("Final processed blogs:", blogsData);
 
       if (blogsData.length === 0) {
         setError("No approved blogs found in this category");
@@ -156,29 +173,29 @@ function CategoryPage() {
       setLoading(true);
       setError(null);
 
-      const response = await api.get(`BlogCategories/${childCategoryId}`);
+      // Sử dụng service API
+      const response = await blogCategoryApi.getById(childCategoryId);
       console.log("Response from child API:", response.data);
 
       let blogsData = [];
 
-      // Xử lý dữ liệu từ API danh mục con
+      // Cải thiện xử lý dữ liệu
       if (response.data) {
         const categoryData = response.data.data || response.data;
         const blogs = categoryData.blogs;
 
         if (blogs && Array.isArray(blogs)) {
-          // Lọc blog có status là "Approved"
-          const approvedBlogs = blogs.filter(
-            (blog) => blog.status === "Approved"
-          );
+          // Cũng cải thiện điều kiện lọc status
+          const allBlogs = blogs;
 
           // Chuẩn hóa dữ liệu blog từ danh mục con
-          blogsData = approvedBlogs.map((blog) => ({
+          blogsData = allBlogs.map((blog) => ({
             blogId: blog.blogId,
             title: blog.title,
             content: blog.content,
             authorId: blog.authorId,
-            authorName: blog.authorName || "Unknown",
+            authorName:
+              blog.authorName || (blog.author ? blog.author.name : "Unknown"),
             categoryName: categoryData.categoryName || blog.categoryName,
             categoryId: childCategoryId,
             imageBlog: blog.imageBlog,
