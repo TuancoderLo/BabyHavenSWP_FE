@@ -16,6 +16,7 @@ function Register() {
     name: "",
     gender: "Male",
     dateOfBirth: "",
+    address: "",
     password: "",
     confirmPassword: "",
   });
@@ -78,6 +79,7 @@ function Register() {
       !formData.phoneNumber.trim() ||
       !formData.name.trim() ||
       !formData.dateOfBirth.trim() ||
+      !formData.address.trim() ||
       !formData.password.trim() ||
       !formData.confirmPassword.trim()
     ) {
@@ -124,6 +126,13 @@ function Register() {
     setIsLoading(true);
 
     try {
+      // Định dạng lại ngày tháng năm thành yyyy/MM/dd
+      const date = new Date(formData.dateOfBirth);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const formattedDate = `${year}/${month}/${day}`;
+
       // Tạo dữ liệu đăng ký để lưu trữ
       const registrationData = {
         username: formData.username,
@@ -131,8 +140,8 @@ function Register() {
         phoneNumber: formData.phoneNumber,
         name: formData.name,
         gender: formData.gender,
-        dateOfBirth: formData.dateOfBirth,
-        address: "", // Thêm trường address (có thể trống)
+        dateOfBirth: formattedDate, // Sử dụng định dạng năm/tháng/ngày
+        address: formData.address,
         password: formData.password,
       };
 
@@ -307,6 +316,17 @@ function Register() {
                 type="date"
                 name="dateOfBirth"
                 value={formData.dateOfBirth}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <input
+                type="text"
+                name="address"
+                placeholder="Address"
+                value={formData.address}
                 onChange={handleChange}
                 required
               />
