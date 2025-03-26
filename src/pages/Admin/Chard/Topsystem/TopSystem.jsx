@@ -10,13 +10,17 @@ import {
   FaUserMd,
   FaCalendarCheck,
   FaChild,
+  FaChartLine,
+  FaListOl,
 } from "react-icons/fa";
 
 function TopSystem() {
   const [topDoctors, setTopDoctors] = useState([]);
+  const [allTopDoctors, setAllTopDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showDetailIndex, setShowDetailIndex] = useState(null);
+  const [showFullRanking, setShowFullRanking] = useState(false);
 
   useEffect(() => {
     const fetchTopDoctors = async () => {
@@ -58,16 +62,16 @@ function TopSystem() {
 
         console.log("Số lượng yêu cầu theo bác sĩ:", doctorCounts);
 
-        // 3. Sắp xếp và lấy top 3
-        const topDoctorIds = Object.entries(doctorCounts)
+        // 3. Sắp xếp và lấy top 10
+        const top10DoctorIds = Object.entries(doctorCounts)
           .sort((a, b) => b[1] - a[1])
-          .slice(0, 3)
+          .slice(0, 10)
           .map(([id]) => parseInt(id));
 
-        console.log("Top 3 doctorId:", topDoctorIds);
+        console.log("Top 10 doctorId:", top10DoctorIds);
 
         // 4. Tạo mảng promises để lấy thông tin bác sĩ từ API
-        const doctorPromises = topDoctorIds.map(async (id) => {
+        const doctorPromises = top10DoctorIds.map(async (id) => {
           try {
             console.log(`Đang lấy thông tin bác sĩ ID ${id}...`);
             const doctorResponse = await axios.get(
@@ -113,7 +117,9 @@ function TopSystem() {
 
         const doctorsInfo = await Promise.all(doctorPromises);
         console.log("Danh sách bác sĩ đã lấy thông tin:", doctorsInfo);
-        setTopDoctors(doctorsInfo);
+
+        setTopDoctors(doctorsInfo.slice(0, 3)); // Lấy 3 bác sĩ đầu tiên cho top 3
+        setAllTopDoctors(doctorsInfo); // Lưu toàn bộ danh sách top 10
         setLoading(false);
       } catch (err) {
         console.error("Lỗi khi lấy dữ liệu top bác sĩ:", err);
@@ -142,6 +148,10 @@ function TopSystem() {
 
   const toggleDoctorDetail = (index) => {
     setShowDetailIndex(showDetailIndex === index ? null : index);
+  };
+
+  const toggleFullRanking = () => {
+    setShowFullRanking(!showFullRanking);
   };
 
   if (loading)
@@ -175,6 +185,8 @@ function TopSystem() {
         <FaMedal className="TopSystem-title-icon" /> Top Bác Sĩ Được Yêu Cầu
         Nhiều Nhất
       </h2>
+
+      {/* Top 3 bác sĩ với card nổi bật */}
       <div className="TopSystem-grid">
         {topDoctors.map((doctor, index) => (
           <div
@@ -307,6 +319,89 @@ function TopSystem() {
           </div>
         ))}
       </div>
+
+      {/* Nút chuyển đổi hiển thị bảng xếp hạng đầy đủ */}
+      <div className="TopSystem-toggle-container">
+        <button className="TopSystem-toggle-button" onClick={toggleFullRanking}>
+          {showFullRanking ? (
+            <>
+              <FaChartLine className="TopSystem-toggle-icon" /> Ẩn bảng xếp hạng
+              chi tiết
+            </>
+          ) : (
+            <>
+              <FaListOl className="TopSystem-toggle-icon" /> Xem bảng xếp hạng
+              đầy đủ (Top 10)
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Bảng xếp hạng đầy đủ top 10 */}
+      {showFullRanking && allTopDoctors.length > 0 && (
+        <div className="TopSystem-full-ranking">
+          <h3 className="TopSystem-ranking-title">
+            <FaListOl className="TopSystem-ranking-icon" /> Bảng Xếp Hạng Top 10
+            Bác Sĩ
+          </h3>
+          <div className="TopSystem-ranking-table-container">
+            <table className="TopSystem-ranking-table">
+              <thead>
+                <tr>
+                  <th className="TopSystem-ranking-col-rank">Xếp hạng</th>
+                  <th className="TopSystem-ranking-col-doctor">Bác sĩ</th>
+                  <th className="TopSystem-ranking-col-degree">Chuyên môn</th>
+                  <th className="TopSystem-ranking-col-hospital">Bệnh viện</th>
+                  <th className="TopSystem-ranking-col-count">Số yêu cầu</th>
+                </tr>
+              </thead>
+              <tbody>
+                {allTopDoctors.map((doctor, index) => (
+                  <tr
+                    key={doctor.doctorId}
+                    className={`TopSystem-ranking-row ${
+                      index < 3 ? "TopSystem-ranking-top3" : ""
+                    }`}
+                  >
+                    <td className="TopSystem-ranking-col-rank">
+                      <div
+                        className={`TopSystem-ranking-badge rank-${index + 1}`}
+                      >
+                        {index + 1}
+                      </div>
+                    </td>
+                    <td className="TopSystem-ranking-col-doctor">
+                      <div className="TopSystem-ranking-doctor-info">
+                        <div className="TopSystem-ranking-avatar">
+                          <img
+                            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                              doctor.name || "Doctor"
+                            )}&background=random&color=fff&size=32`}
+                            alt={doctor.name}
+                          />
+                        </div>
+                        <span>{doctor.name || "Không có tên"}</span>
+                      </div>
+                    </td>
+                    <td className="TopSystem-ranking-col-degree">
+                      {doctor.degree || "Không có thông tin"}
+                    </td>
+                    <td className="TopSystem-ranking-col-hospital">
+                      {doctor.hospitalName || "Không có thông tin"}
+                    </td>
+                    <td className="TopSystem-ranking-col-count">
+                      <span className="TopSystem-ranking-count">
+                        {doctor.requestCount}
+                      </span>
+                      <span className="TopSystem-ranking-label">yêu cầu</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
