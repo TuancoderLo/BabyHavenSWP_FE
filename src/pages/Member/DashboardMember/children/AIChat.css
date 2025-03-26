@@ -35,8 +35,8 @@
     border-radius: 16px;
     width: 100%;
     max-width: 1000px;
-    height: 80vh;
-    max-height: 600px;
+    height: 90vh;
+    max-height: 800px;
     animation: slideUp-ai 0.3s ease-in-out;
     display: flex;
     flex-direction: column;
@@ -227,7 +227,7 @@
 
 .chat-messages-ai {
     flex: 1;
-    padding: 40px;
+    padding: 30px;
     width: 710px;
     overflow-y: auto;
     display: flex;
@@ -313,16 +313,18 @@
 }
 
 .chat-message-ai.ai-ai .chat-text-ai {
-    background: #e38eff;
-    color:#ffffff;
+    background: #ffffff;
+    color:#000000;
     font-weight: 500;
     border-bottom-left-radius: 0;
+    border: 1px solid #000000;
 }
 
 .chat-message-ai.ai-ai .typing-ai {
     display: flex;
     gap: 5px;
     background: none;
+    border: none;
 }
 
 .dot-ai {
@@ -491,7 +493,7 @@
 @media (max-width: 768px) {
     .chat-modal-content-ai {
         width: 95%;
-        height: 80vh;
+        height: 90vh;
         max-height: 500px;
     }
 

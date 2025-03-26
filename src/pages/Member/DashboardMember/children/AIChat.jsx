@@ -19,7 +19,7 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
     console.log("newMessage:", newMessage);
   }, [newMessage]);
 
-  // Fetch danh sách trẻ khi modal mở và tự động chọn trẻ đầu tiên
+  // Fetch children list when modal opens and auto-select the first child
   useEffect(() => {
     if (isOpen) {
       const memberId = localStorage.getItem("memberId");
@@ -64,12 +64,49 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
     }
   }, [isOpen, initialSelectedChild]);
 
-  // Lưu messages vào localStorage mỗi khi messages thay đổi
+  // Save messages to localStorage when they change
   useEffect(() => {
     if (messages.length > 0 && selectedChild) {
       localStorage.setItem(`chatMessages_${selectedChild.name}`, JSON.stringify(messages));
     }
   }, [messages, selectedChild]);
+
+  // Clear chat history for all children on logout
+  useEffect(() => {
+    const handleStorageChange = (event) => {
+      if (event.key === "memberId" && event.newValue === null) {
+        childrenList.forEach((child) => {
+          aiChatApi
+            .clearChat(child.name)
+            .then((response) => {
+              if (response.data.statusCode !== "00") {
+                console.error(`Error clearing chat for ${child.name}:`, response.data.message);
+              } else {
+                localStorage.removeItem(`chatMessages_${child.name}`);
+              }
+            })
+            .catch((error) => {
+              console.error(`Error clearing chat for ${child.name}:`, error);
+            });
+        });
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, [childrenList]);
+
+  // Format AI response into JSX elements (used only during rendering)
+  const formatResponse = (text) => {
+    if (typeof text !== "string") return <p>[Invalid Response]</p>;
+    const formattedText = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    const paragraphs = formattedText.split("\n").filter((para) => para.trim() !== "");
+    return paragraphs.map((para, index) => (
+      <p key={index} dangerouslySetInnerHTML={{ __html: para }} />
+    ));
+  };
 
   // Handle sending a message
   const handleSendMessage = async (text, customPrompt = null) => {
@@ -86,13 +123,12 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
     setIsTyping(true);
 
     try {
-      // Nếu có customPrompt (từ suggestion button), sử dụng nó; nếu không, sử dụng trimmedText
       const messageToSend = customPrompt || trimmedText;
       const response = await sendMessageToAI(messageToSend, selectedChild);
       const aiResponseText = typeof response === "string" ? response : "[Error: Invalid Response]";
       const aiMessage = {
         sender: "AI",
-        text: aiResponseText,
+        text: aiResponseText, // Store raw text, not JSX
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages((prev) => [...prev, aiMessage]);
@@ -108,13 +144,10 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
     }
   };
 
-  // Gửi tin nhắn đến backend bằng aiChatApi
+  // Send message to AI backend
   const sendMessageToAI = async (message, child) => {
     try {
-      // Tính tuổi trước khi gọi API
       const age = parseInt(calculateAge(child.dateOfBirth)) || 0;
-
-      // Kiểm tra xem có dữ liệu tăng trưởng không
       const hasGrowthData =
         child.weight ||
         child.height ||
@@ -124,7 +157,6 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
         child.triglycerides ||
         child.nutritionalStatus;
 
-      // Nếu có dữ liệu tăng trưởng, tạo growthData; nếu không, để growthData là null
       const growthData = hasGrowthData
         ? {
             weight: child.weight || 0,
@@ -137,12 +169,7 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
           }
         : null;
 
-      const response = await aiChatApi.postMessage(
-        child.name, // sessionId
-        age, // age đã tính
-        message, // userMessage
-        growthData // growthData (có thể là null)
-      );
+      const response = await aiChatApi.postMessage(child.name, age, message, growthData);
 
       if (response.data.data && response.data.data.aiResponse) {
         return response.data.data.aiResponse;
@@ -164,19 +191,17 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
 
   // Reset state when modal closes
   useEffect(() => {
-    if (!isOpen) {
-      if (selectedChild) {
-        aiChatApi
-          .clearChat(selectedChild.name)
-          .then((response) => {
-            if (response.data.statusCode !== "00") {
-              console.error("Error clearing chat:", response.data.message);
-            }
-          })
-          .catch((error) => {
-            console.error("Error clearing chat:", error);
-          });
-      }
+    if (!isOpen && selectedChild) {
+      aiChatApi
+        .clearChat(selectedChild.name)
+        .then((response) => {
+          if (response.data.statusCode !== "00") {
+            console.error("Error clearing chat:", response.data.message);
+          }
+        })
+        .catch((error) => {
+          console.error("Error clearing chat:", error);
+        });
       setMessages([]);
       setNewMessage("");
       setIsTyping(false);
@@ -186,11 +211,6 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
       setError(null);
     }
   }, [isOpen, selectedChild]);
-
-  // Debug messages
-  useEffect(() => {
-    console.log("Messages:", messages);
-  }, [messages]);
 
   // Handle child selection
   const handleSelectChild = (child) => {
@@ -218,7 +238,6 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
         customPrompt = suggestion;
     }
 
-    // Gửi suggestion (hiển thị trên giao diện) và customPrompt (gửi đến AI)
     handleSendMessage(suggestion, customPrompt);
   };
 
@@ -273,10 +292,11 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
 
           {/* Main Chat Area */}
           <div className="chat-main-ai">
-            <img src={Logo} alt="logo" className="logo-ai" />
-            <button className="chat-modal-close-ai" onClick={onClose}>
-              ×
-            </button>
+            <div className="chat-main-header-ai">
+              <img src={Logo} alt="logo" className="logo-ai" />
+              <button className="chat-modal-close-ai" onClick={onClose}>×</button>
+            </div>
+
             {/* Messages Area */}
             <div className="chat-messages-ai" ref={chatContainerRef}>
               {hasStartedChat ? (
@@ -290,7 +310,11 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
                     >
                       <div className="chat-text-wrapper-ai">
                         <div className="chat-text-ai">
-                          {typeof msg.text === "string" ? msg.text : "[Invalid Message]"}
+                          {msg.sender === "User" ? (
+                            msg.text
+                          ) : (
+                            formatResponse(msg.text) // Format only when rendering
+                          )}
                         </div>
                         <div className="chat-timestamp-ai">{msg.timestamp}</div>
                       </div>
@@ -298,7 +322,7 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
                   ))}
                   {isTyping && (
                     <div className="chat-message-container-ai chat-message-ai ai-ai">
-                      <div className="chat-avatar-ai"></div>
+                    <div className="chat-avatar-ai"></div>
                       <div className="chat-text-wrapper-ai">
                         <div className="chat-text-ai typing-ai">
                           <span className="dot-ai"></span>
@@ -314,11 +338,10 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
                   {selectedChild && (
                     <div className="welcome-title-wrapper-ai">
                       <h2 className="welcome-title-ai">
-                        Hello! I am <span className="highlight">BabyHaven AI</span>, ready to assist you with {selectedChild.name}.
+                        Hello! I am <span className="highlight">BabyHaven AI</span>, ready to assist
+                        you with {selectedChild.name}.
                       </h2>
-                      <h2 className="welcome-title-ai below">
-                        How can I help you today?
-                      </h2>
+                      <h2 className="welcome-title-ai below">How can I help you today?</h2>
                     </div>
                   )}
                   <div className="chat-input-and-suggestions-ai">
