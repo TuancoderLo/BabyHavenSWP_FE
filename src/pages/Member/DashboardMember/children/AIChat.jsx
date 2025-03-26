@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import childApi from "../../../../services/childApi";
+import aiChatApi from "../../../../services/aiChatApi";
 import Logo from "../../../../assets/full_logo.png";
 import "./AIChat.css";
 
@@ -107,26 +108,46 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
     }
   };
 
-  // Simulate sending message to backend with specific responses for suggestions
+  // Gửi tin nhắn đến backend bằng aiChatApi
   const sendMessageToAI = async (message, child) => {
     try {
-      const response = await fetch("http://your-backend-url/api/GrowthRecordAnalysis/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          sessionId: child.name,
-          userMessage: message,
-          initialRecord: null, // Truyền initialRecord nếu có dữ liệu tăng trưởng ban đầu
-        }),
-      });
+      // Tính tuổi trước khi gọi API
+      const age = parseInt(calculateAge(child.dateOfBirth)) || 0;
 
-      const result = await response.json();
-      if (result.statusCode === "00") {
-        return result.data.aiResponse;
+      // Kiểm tra xem có dữ liệu tăng trưởng không
+      const hasGrowthData =
+        child.weight ||
+        child.height ||
+        child.chestCircumference ||
+        child.muscleMass ||
+        child.bloodSugarLevel ||
+        child.triglycerides ||
+        child.nutritionalStatus;
+
+      // Nếu có dữ liệu tăng trưởng, tạo growthData; nếu không, để growthData là null
+      const growthData = hasGrowthData
+        ? {
+            weight: child.weight || 0,
+            height: child.height || 0,
+            chestCircumference: child.chestCircumference || 0,
+            muscleMass: child.muscleMass || 0,
+            bloodSugarLevel: child.bloodSugarLevel || 0,
+            triglycerides: child.triglycerides || 0,
+            nutritionalStatus: child.nutritionalStatus || "Unknown",
+          }
+        : null;
+
+      const response = await aiChatApi.postMessage(
+        child.name, // sessionId
+        age, // age đã tính
+        message, // userMessage
+        growthData // growthData (có thể là null)
+      );
+
+      if (response.data.data && response.data.data.aiResponse) {
+        return response.data.data.aiResponse;
       } else {
-        throw new Error(result.message);
+        throw new Error(response.data.message || "Failed to get AI response.");
       }
     } catch (error) {
       console.error("Error sending message to AI:", error);
@@ -145,15 +166,16 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
   useEffect(() => {
     if (!isOpen) {
       if (selectedChild) {
-        fetch("http://your-backend-url/api/GrowthRecordAnalysis/clear-chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            sessionId: selectedChild.name,
-          }),
-        });
+        aiChatApi
+          .clearChat(selectedChild.name)
+          .then((response) => {
+            if (response.data.statusCode !== "00") {
+              console.error("Error clearing chat:", response.data.message);
+            }
+          })
+          .catch((error) => {
+            console.error("Error clearing chat:", error);
+          });
       }
       setMessages([]);
       setNewMessage("");
@@ -276,7 +298,7 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
                   ))}
                   {isTyping && (
                     <div className="chat-message-container-ai chat-message-ai ai-ai">
-                    <div className="chat-avatar-ai"></div>
+                      <div className="chat-avatar-ai"></div>
                       <div className="chat-text-wrapper-ai">
                         <div className="chat-text-ai typing-ai">
                           <span className="dot-ai"></span>
