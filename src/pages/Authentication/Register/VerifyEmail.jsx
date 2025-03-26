@@ -153,15 +153,25 @@ const VerifyEmail = () => {
   const handleResendOtp = async () => {
     try {
       setIsLoading(true);
-      const userData = JSON.parse(localStorage.getItem("registration_data"));
+      // Reset thời gian ngay khi bấm vào nút gửi lại
+      setRemainingTime(60);
 
-      // Gọi API để gửi lại OTP
-      const response = await api.post("Authentication/ResendOtp", {
-        email: userData.email,
+      // Lấy email từ localStorage
+      const email = localStorage.getItem("pending_email");
+
+      if (!email) {
+        setError("Không tìm thấy thông tin email!");
+        setIsLoading(false);
+        return;
+      }
+
+      // Gọi API để gửi lại OTP - sử dụng endpoint Register
+      const response = await api.post("Authentication/Register", {
+        email: email,
       });
 
       if (response.data.status === 1) {
-        setRemainingTime(60); // Reset thời gian thành 1 phút
+        // Đã reset thời gian ở trên rồi
         setError(""); // Xóa thông báo lỗi (nếu có)
       } else {
         setError(
