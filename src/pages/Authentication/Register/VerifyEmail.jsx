@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./VerifyEmail.css"; // Using separate CSS file
 import api from "../../../config/axios";
@@ -10,6 +10,8 @@ const VerifyEmail = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [registrationData, setRegistrationData] = useState(null);
   const [remainingTime, setRemainingTime] = useState(60); // Reduced to 1 minute (60 seconds)
+  const [icons, setIcons] = useState([]);
+  const containerRef = useRef(null);
   const navigate = useNavigate();
 
   // Email from registration process
@@ -204,8 +206,66 @@ const VerifyEmail = () => {
     setOtp(e.target.value);
   };
 
+  // Generate floating icons when component mounts
+  useEffect(() => {
+    if (containerRef.current) {
+      generateFloatingIcons();
+    }
+    // Cleanup on unmount
+    return () => {
+      setIcons([]);
+    };
+  }, []);
+
+  // Function to generate snow flakes
+  const generateFloatingIcons = () => {
+    const numberOfSnowflakes = 50; // Nhiều bông tuyết hơn
+    const newIcons = [];
+
+    for (let i = 0; i < numberOfSnowflakes; i++) {
+      newIcons.push({
+        id: `snowflake-${i}`,
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        size: `${5 + Math.random() * 15}px`, // Kích thước đa dạng
+        fallDuration: `${7 + Math.random() * 15}s`, // Thời gian rơi
+        shakeDuration: `${2 + Math.random() * 4}s`, // Thời gian lắc lư
+        windShift: `${-50 + Math.random() * 100}px`, // Dịch chuyển ngang do gió
+        shakeDistance: `${2 + Math.random() * 6}px`, // Khoảng cách lắc
+        delay: `${Math.random() * 10}s`, // Thời gian delay
+        opacity: 0.2 + Math.random() * 0.8, // Độ trong suốt
+      });
+    }
+
+    setIcons(newIcons);
+  };
+
   return (
-    <div className="verify-email-container">
+    <div className="verify-email-container" ref={containerRef}>
+      {/* Add floating icons */}
+      <div className="floating-icons">
+        {icons.map((icon) => (
+          <div
+            key={icon.id}
+            className="floating-email-icon"
+            style={{
+              left: icon.left,
+              top: icon.top,
+              width: icon.size,
+              height: icon.size,
+              "--fall-duration": icon.fallDuration,
+              "--shake-duration": icon.shakeDuration,
+              "--wind-shift": icon.windShift,
+              "--shake-distance": icon.shakeDistance,
+              "--delay": icon.delay,
+              "--opacity": icon.opacity,
+              "--size": icon.size,
+              animationDelay: icon.delay,
+            }}
+          />
+        ))}
+      </div>
+
       <div className="verify-email-card">
         <h2 className="verify-email-title">
           {step === 1 && "Email Verification"}

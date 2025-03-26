@@ -7,19 +7,147 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f9f9f9;
   padding: 20px;
-  background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background-image: url("https://i.pinimg.com/736x/69/30/ee/6930eed5ffee46e96d38c223b84400a2.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  overflow: hidden; /* Đảm bảo các icon không tràn ra ngoài container */
 }
 
+/* Thêm overlay để làm tối ảnh một chút và làm nổi bật nội dung */
+.verify-email-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.25); /* Giảm độ tối từ 0.4 xuống 0.25 */
+  z-index: 1;
+}
+
+/* Thay đổi hiệu ứng từ icon email thành tuyết rơi */
+.floating-icons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Đảm bảo người dùng có thể click qua các icon */
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* Style cho từng bông tuyết */
+.floating-email-icon {
+  position: absolute;
+  width: 10px; /* Kích thước nhỏ hơn cho bông tuyết */
+  height: 10px;
+  background-image: none; /* Xóa hình ảnh email */
+  background-color: white; /* Màu trắng cho tuyết */
+  border-radius: 50%; /* Hình tròn */
+  opacity: 0.8;
+  z-index: 0;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.8); /* Hiệu ứng sáng cho tuyết */
+
+  /* Tạo hiệu ứng tuyết rơi */
+  animation: snow-falling var(--fall-duration, 10s) linear infinite,
+    snow-shake var(--shake-duration, 3s) ease-in-out infinite alternate;
+}
+
+/* Tạo hình dạng tuyết đa dạng */
+.floating-email-icon:nth-child(3n + 1) {
+  clip-path: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
+}
+
+.floating-email-icon:nth-child(3n + 2) {
+  opacity: 0.6;
+  transform: rotate(45deg);
+}
+
+/* Hiệu ứng tuyết rơi chính */
+@keyframes snow-falling {
+  0% {
+    transform: translateY(-50px) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--opacity, 0.8);
+  }
+  90% {
+    opacity: var(--opacity, 0.8);
+  }
+  100% {
+    transform: translateY(calc(100vh + 50px))
+      translateX(var(--wind-shift, 20px));
+    opacity: 0;
+  }
+}
+
+/* Hiệu ứng lắc lư nhẹ */
+@keyframes snow-shake {
+  0% {
+    transform: translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: translateX(var(--shake-distance, 5px)) rotate(5deg);
+  }
+  50% {
+    transform: translateX(calc(var(--shake-distance, 5px) * -0.5)) rotate(-5deg);
+  }
+  75% {
+    transform: translateX(calc(var(--shake-distance, 5px) * 0.5)) rotate(3deg);
+  }
+  100% {
+    transform: translateX(calc(var(--shake-distance, 5px) * -1)) rotate(-3deg);
+  }
+}
+
+/* Tạo đa dạng tốc độ và kích thước cho các bông tuyết */
+.floating-email-icon:nth-child(2n) {
+  width: calc(var(--size, 10px) * 0.8);
+  height: calc(var(--size, 10px) * 0.8);
+  animation-delay: calc(var(--delay) * 1.5);
+}
+
+.floating-email-icon:nth-child(3n) {
+  width: calc(var(--size, 10px) * 1.2);
+  height: calc(var(--size, 10px) * 1.2);
+  animation-duration: calc(var(--fall-duration) * 0.8);
+}
+
+.floating-email-icon:nth-child(5n) {
+  opacity: 0.5;
+  animation-duration: calc(var(--fall-duration) * 1.2);
+  animation-delay: calc(var(--delay) * 0.7);
+}
+
+/* Đảm bảo card nổi trên overlay */
 .verify-email-card {
   width: 100%;
   max-width: 450px;
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 30px;
   transition: all 0.3s ease;
+  position: relative;
+  z-index: 3; /* Cao hơn z-index của floating-icons */
 }
 
 .verify-email-card:hover {
@@ -385,4 +513,24 @@
     width: 100px;
     height: 100px;
   }
+}
+
+/* Thêm class để phân biệt các loại icon với animation khác nhau */
+.floating-email-icon:nth-child(2n) {
+  animation-direction: alternate-reverse; /* Đảo ngược animation cho một số icon */
+}
+
+.floating-email-icon:nth-child(3n) {
+  animation-duration: calc(
+    var(--float-duration) * 1.2
+  ); /* Thay đổi thời gian cho một số icon */
+}
+
+.floating-email-icon:nth-child(5n) {
+  filter: hue-rotate(30deg) drop-shadow(0 0 3px rgba(255, 130, 180, 0.6)); /* Thay đổi màu sắc nhẹ */
+}
+
+/* Thêm hiệu ứng khi hover vào container */
+.verify-email-container:hover .floating-email-icon {
+  animation-play-state: paused; /* Tạm dừng animation khi hover vào container */
 }
