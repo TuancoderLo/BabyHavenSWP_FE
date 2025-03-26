@@ -171,10 +171,11 @@ function Blog() {
 
     // Lọc theo status
     switch (blogFilter) {
-      case "approved-rejected":
-        filteredData = blogs.filter(
-          (blog) => blog.status === "Approved" || blog.status === "Rejected"
-        );
+      case "approved":
+        filteredData = blogs.filter((blog) => blog.status === "Approved");
+        break;
+      case "rejected":
+        filteredData = blogs.filter((blog) => blog.status === "Rejected");
         break;
       case "pending":
         filteredData = blogs.filter(
@@ -233,12 +234,14 @@ function Blog() {
       ];
     }
 
-    // Nếu đang ở filter Approved/Rejected
-    if (blogFilter === "approved-rejected") {
-      return [
-        { value: "Approved", label: "Approved" },
-        { value: "Rejected", label: "Rejected" },
-      ];
+    // Nếu đang ở filter Approved
+    if (blogFilter === "approved") {
+      return [{ value: "Approved", label: "Approved" }];
+    }
+
+    // Nếu đang ở filter Rejected
+    if (blogFilter === "rejected") {
+      return [{ value: "Rejected", label: "Rejected" }];
     }
 
     // Nếu đang tạo mới (không có currentStatus)
@@ -263,11 +266,9 @@ function Blog() {
           { value: "Rejected", label: "Reject" },
         ];
       case "Approved":
+        return [{ value: "Approved", label: "Approved" }];
       case "Rejected":
-        return [
-          { value: "Approved", label: "Approved" },
-          { value: "Rejected", label: "Rejected" },
-        ];
+        return [{ value: "Rejected", label: "Rejected" }];
       default:
         return [
           { value: "Draft", label: "Draft" },
@@ -802,9 +803,8 @@ function Blog() {
                 className="blog-filters"
               >
                 <Radio.Button value="all">All</Radio.Button>
-                <Radio.Button value="approved-rejected">
-                  Approved/Rejected
-                </Radio.Button>
+                <Radio.Button value="approved">Approved</Radio.Button>
+                <Radio.Button value="rejected">Rejected</Radio.Button>
                 <Radio.Button value="pending">Pending Approval</Radio.Button>
                 <Radio.Button value="draft">Draft</Radio.Button>
               </Radio.Group>
@@ -861,8 +861,10 @@ function Blog() {
                   ? "danh mục"
                   : "tác giả"}{" "}
                 trong
-                {blogFilter === "approved-rejected"
-                  ? " Approved/Rejected"
+                {blogFilter === "approved"
+                  ? " Approved"
+                  : blogFilter === "rejected"
+                  ? " Rejected"
                   : blogFilter === "pending"
                   ? " Pending Approval"
                   : blogFilter === "draft"
