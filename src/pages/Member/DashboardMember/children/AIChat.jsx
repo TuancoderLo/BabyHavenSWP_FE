@@ -35,7 +35,6 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
             const list = response.data.data;
             setChildrenList(list);
             if (list.length > 0) {
-              // Tự động chọn trẻ đầu tiên và load đoạn chat
               const firstChild = list[0];
               setSelectedChild(firstChild);
               const storedMessages = localStorage.getItem(`chatMessages_${firstChild.name}`);
@@ -72,7 +71,7 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
   }, [messages, selectedChild]);
 
   // Handle sending a message
-  const handleSendMessage = async (text) => {
+  const handleSendMessage = async (text, customPrompt = null) => {
     const trimmedText = typeof text === "string" ? text.trim() : "";
     if (!trimmedText) return;
 
@@ -86,8 +85,9 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
     setIsTyping(true);
 
     try {
-      const response = await sendMessageToAI(trimmedText, selectedChild);
-      console.log("Response from sendMessageToAI:", response); // Debug response
+      // Nếu có customPrompt (từ suggestion button), sử dụng nó; nếu không, sử dụng trimmedText
+      const messageToSend = customPrompt || trimmedText;
+      const response = await sendMessageToAI(messageToSend, selectedChild);
       const aiResponseText = typeof response === "string" ? response : "[Error: Invalid Response]";
       const aiMessage = {
         sender: "AI",
@@ -109,27 +109,29 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
 
   // Simulate sending message to backend with specific responses for suggestions
   const sendMessageToAI = async (message, child) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (message === "Analyze growth record") {
-          resolve(
-            `Here is the growth analysis for ${child?.name || "your child"}: Based on the latest data, their height and weight are within the 75th percentile for their age. Would you like a detailed chart?`
-          );
-        } else if (message === "Health Consultation") {
-          resolve(
-            `For ${child?.name || "your child"}, I recommend scheduling a health checkup if they haven't had one recently. Common concerns at this age include nutrition and sleep patterns. Would you like tips on these topics?`
-          );
-        } else if (message === "Growth Advice") {
-          resolve(
-            `To support ${child?.name || "your child"}'s growth, ensure they have a balanced diet rich in protein, calcium, and vitamins. Regular physical activity is also key. Would you like a sample meal plan?`
-          );
-        } else {
-          resolve(
-            `I have analyzed the data for ${child?.name || "your child"}. Would you like to know more about nutrition or development?`
-          );
-        }
-      }, 1500);
-    });
+    try {
+      const response = await fetch("http://your-backend-url/api/GrowthRecordAnalysis/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sessionId: child.name,
+          userMessage: message,
+          initialRecord: null, // Truyền initialRecord nếu có dữ liệu tăng trưởng ban đầu
+        }),
+      });
+
+      const result = await response.json();
+      if (result.statusCode === "00") {
+        return result.data.aiResponse;
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      console.error("Error sending message to AI:", error);
+      throw error;
+    }
   };
 
   // Auto-scroll to the latest message
@@ -142,6 +144,17 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
   // Reset state when modal closes
   useEffect(() => {
     if (!isOpen) {
+      if (selectedChild) {
+        fetch("http://your-backend-url/api/GrowthRecordAnalysis/clear-chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            sessionId: selectedChild.name,
+          }),
+        });
+      }
       setMessages([]);
       setNewMessage("");
       setIsTyping(false);
@@ -149,9 +162,8 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
       setSelectedChild(null);
       setLoading(false);
       setError(null);
-      // Không xóa localStorage ở đây vì đã có logic xóa khi sign out
     }
-  }, [isOpen]);
+  }, [isOpen, selectedChild]);
 
   // Debug messages
   useEffect(() => {
@@ -160,20 +172,36 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
 
   // Handle child selection
   const handleSelectChild = (child) => {
-    // Reset messages và khôi phục từ localStorage ngay lập tức (đồng bộ)
     const storedMessages = localStorage.getItem(`chatMessages_${child.name}`);
     setMessages(storedMessages ? JSON.parse(storedMessages) : []);
     setSelectedChild(child);
   };
 
-  // Handle suggestion button clicks
+  // Handle suggestion button clicks with custom prompts
   const handleSuggestionClick = (suggestion) => {
-    handleSendMessage(suggestion);
+    let customPrompt = "";
+    const childAge = calculateAge(selectedChild?.dateOfBirth);
+
+    switch (suggestion) {
+      case "Analyze growth record":
+        customPrompt = `Please analyze the growth record for ${selectedChild?.name}, who is ${childAge} old. Provide a detailed analysis of their growth metrics and compare them to standard growth charts (e.g., WHO or CDC). Suggest any areas of concern and recommendations for improvement.`;
+        break;
+      case "Health Consultation":
+        customPrompt = `I need a health consultation for ${selectedChild?.name}, who is ${childAge} old. Provide general health advice for a child of this age, including common health concerns, recommended checkups, vaccinations, and tips for maintaining overall well-being.`;
+        break;
+      case "Growth Advice":
+        customPrompt = `Please provide growth advice for ${selectedChild?.name}, who is ${childAge} old. Focus on age-specific nutritional needs, physical activity recommendations, and any other factors that can support healthy growth and development at this stage.`;
+        break;
+      default:
+        customPrompt = suggestion;
+    }
+
+    // Gửi suggestion (hiển thị trên giao diện) và customPrompt (gửi đến AI)
+    handleSendMessage(suggestion, customPrompt);
   };
 
   if (!isOpen) return null;
 
-  // Check if the chat has started (any messages exist)
   const hasStartedChat = messages.length > 0;
 
   return (
@@ -234,7 +262,9 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
                   {messages.map((msg, index) => (
                     <div
                       key={index}
-                      className={`chat-message-ai ${msg.sender === "User" ? "user-ai" : "ai-ai"}`}
+                      className={`chat-message-container-ai chat-message-ai ${
+                        msg.sender === "User" ? "user-ai" : "ai-ai"
+                      }`}
                     >
                       <div className="chat-text-wrapper-ai">
                         <div className="chat-text-ai">
@@ -245,8 +275,8 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
                     </div>
                   ))}
                   {isTyping && (
-                    <div className="chat-message-ai ai-ai">
-                      <div className="chat-avatar-ai"></div>
+                    <div className="chat-message-container-ai chat-message-ai ai-ai">
+                    <div className="chat-avatar-ai"></div>
                       <div className="chat-text-wrapper-ai">
                         <div className="chat-text-ai typing-ai">
                           <span className="dot-ai"></span>
@@ -259,7 +289,6 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
                 </>
               ) : (
                 <div className="welcome-container-ai">
-                  {/* Welcome Title */}
                   {selectedChild && (
                     <div className="welcome-title-wrapper-ai">
                       <h2 className="welcome-title-ai">
