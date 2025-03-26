@@ -1,0 +1,759 @@
+.TopSystem-container {
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06);
+  padding: 28px;
+  margin-bottom: 30px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.TopSystem-container:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.TopSystem-title {
+  font-size: 22px;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #eaedf3;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.TopSystem-title-icon {
+  color: #ffd700;
+  font-size: 24px;
+}
+
+.TopSystem-grid {
+  display: flex;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.TopSystem-doctor-card {
+  background: #ffffff;
+  border-radius: 20px;
+  flex: 1;
+  min-width: 280px;
+  position: relative;
+  transition: all 0.4s ease;
+  box-shadow: 0 5px 20px rgba(67, 97, 238, 0.08);
+  cursor: pointer;
+  overflow: hidden;
+  height: auto;
+  border: 1px solid rgba(67, 97, 238, 0.1);
+}
+
+.TopSystem-doctor-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(67, 97, 238, 0.15);
+}
+
+.TopSystem-doctor-card.expanded {
+  flex: 1.2;
+}
+
+.TopSystem-doctor-card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.TopSystem-doctor-card-front {
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.TopSystem-doctor-card-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(145deg, #ffffff, #f7faff);
+  padding: 25px;
+  border-radius: 20px;
+  animation: TopSystem-fadeIn 0.3s ease;
+  overflow: auto;
+}
+
+.TopSystem-doctor-rank {
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 22px;
+  z-index: 2;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  color: white;
+}
+
+.TopSystem-doctor-card:nth-child(1) .TopSystem-doctor-rank {
+  background: linear-gradient(135deg, #ffd700, #ffaa00); /* Vàng cho hạng 1 */
+}
+
+.TopSystem-doctor-card:nth-child(2) .TopSystem-doctor-rank {
+  background: linear-gradient(135deg, #c0c0c0, #a0a0a0); /* Bạc cho hạng 2 */
+}
+
+.TopSystem-doctor-card:nth-child(3) .TopSystem-doctor-rank {
+  background: linear-gradient(135deg, #cd7f32, #a05a2c); /* Đồng cho hạng 3 */
+}
+
+.TopSystem-doctor-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 20px;
+  border: 5px solid white;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.TopSystem-doctor-avatar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.TopSystem-doctor-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.TopSystem-doctor-card:hover .TopSystem-doctor-avatar img {
+  transform: scale(1.1);
+}
+
+.TopSystem-doctor-info {
+  text-align: center;
+  width: 100%;
+}
+
+.TopSystem-doctor-info h3 {
+  font-size: 20px;
+  color: #2c3e50;
+  margin: 5px 0;
+  font-weight: 600;
+}
+
+.TopSystem-doctor-degree {
+  color: #4361ee;
+  font-weight: 500;
+  margin: 8px 0;
+  font-size: 15px;
+}
+
+.TopSystem-doctor-hospital {
+  color: #5a6474;
+  font-size: 14px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.TopSystem-info-icon {
+  color: #4361ee;
+}
+
+.TopSystem-request-count {
+  background: linear-gradient(135deg, #f0f4ff, #e6eeff);
+  border-radius: 30px;
+  padding: 10px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 15px;
+  box-shadow: 0 4px 10px rgba(67, 97, 238, 0.1);
+}
+
+.TopSystem-count-number {
+  font-size: 26px;
+  font-weight: bold;
+  color: #4361ee;
+  line-height: 1.1;
+}
+
+.TopSystem-count-label {
+  font-size: 13px;
+  color: #5a6474;
+  margin-top: 3px;
+}
+
+.TopSystem-view-details {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #4361ee;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.TopSystem-doctor-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.TopSystem-doctor-detail h4 {
+  font-size: 16px;
+  color: #2c3e50;
+  margin: 18px 0 5px 0;
+  font-weight: 600;
+  border-bottom: 1px solid #eaedf3;
+  padding-bottom: 8px;
+}
+
+.TopSystem-doctor-detail p {
+  font-size: 14px;
+  color: #5a6474;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 5px 0;
+}
+
+.TopSystem-doctor-detail a {
+  color: #4361ee;
+  text-decoration: none;
+}
+
+.TopSystem-doctor-detail a:hover {
+  text-decoration: underline;
+}
+
+.TopSystem-detail-icon {
+  color: #4361ee;
+  font-size: 16px;
+  min-width: 16px;
+}
+
+.TopSystem-doctor-biography {
+  line-height: 1.6;
+  font-style: italic;
+  border-left: 3px solid #4361ee;
+  padding-left: 10px;
+  margin: 10px 0;
+}
+
+.TopSystem-doctor-status {
+  margin-top: 15px;
+}
+
+.TopSystem-status-badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.TopSystem-status-badge.active {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.TopSystem-status-badge.inactive {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.TopSystem-back-button {
+  margin-top: 20px;
+  padding: 8px 15px;
+  background-color: #4361ee;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.TopSystem-back-button:hover {
+  background-color: #2741b3;
+  transform: translateY(-2px);
+}
+
+.TopSystem-loading,
+.TopSystem-error,
+.TopSystem-empty {
+  padding: 25px;
+  text-align: center;
+  color: #5a6474;
+  background-color: #f9fafc;
+  border-radius: 15px;
+  margin: 15px 0;
+}
+
+.TopSystem-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.TopSystem-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(67, 97, 238, 0.2);
+  border-radius: 50%;
+  border-top-color: #4361ee;
+  animation: TopSystem-spin 1s ease-in-out infinite;
+}
+
+.TopSystem-error {
+  color: #e74c3c;
+  border-left: 4px solid #e74c3c;
+}
+
+.TopSystem-empty {
+  border-left: 4px solid #f39c12;
+  color: #f39c12;
+  font-style: italic;
+}
+
+@keyframes TopSystem-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes TopSystem-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .TopSystem-grid {
+    gap: 20px;
+  }
+
+  .TopSystem-doctor-card {
+    min-width: 230px;
+  }
+}
+
+@media (max-width: 992px) {
+  .TopSystem-grid {
+    gap: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .TopSystem-grid {
+    flex-direction: column;
+  }
+
+  .TopSystem-doctor-card {
+    width: 100%;
+  }
+
+  .TopSystem-doctor-avatar {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .TopSystem-container {
+    padding: 20px 15px;
+  }
+
+  .TopSystem-doctor-card-front {
+    padding: 20px 15px;
+  }
+
+  .TopSystem-doctor-rank {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    top: -10px;
+    left: -10px;
+  }
+}
+
+.TopSystem-request-stats {
+  background: linear-gradient(145deg, #f8faff, #f0f4ff);
+  border-radius: 10px;
+  padding: 15px;
+  margin: 10px 0;
+  box-shadow: 0 2px 8px rgba(67, 97, 238, 0.08);
+}
+
+.TopSystem-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-weight: 500;
+  color: #4361ee;
+}
+
+.TopSystem-stat-icon {
+  color: #4361ee;
+  font-size: 16px;
+}
+
+.TopSystem-category-stats {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #d1d9e6;
+}
+
+.TopSystem-category-stats h5 {
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #5a6474;
+}
+
+.TopSystem-category-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 5px 0;
+  padding-left: 10px;
+  font-size: 13px;
+  color: #5a6474;
+}
+
+.TopSystem-category-icon {
+  color: #4361ee;
+  font-size: 14px;
+}
+
+.TopSystem-category-count {
+  font-weight: 500;
+  color: #3a4257;
+}
+
+.TopSystem-details-icon {
+  margin-right: 5px;
+}
+
+.TopSystem-status-badge.unknown {
+  background-color: #95a5a6;
+  color: white;
+}
+
+.TopSystem-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+}
+
+/* Toggle Button */
+.TopSystem-toggle-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.TopSystem-toggle-button {
+  background: linear-gradient(135deg, #4361ee, #3a0ca3);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+}
+
+.TopSystem-toggle-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(67, 97, 238, 0.3);
+}
+
+.TopSystem-toggle-icon {
+  font-size: 16px;
+}
+
+/* Full Ranking */
+.TopSystem-full-ranking {
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  margin-top: 20px;
+  animation: TopSystem-fadeIn 0.4s ease;
+}
+
+.TopSystem-ranking-title {
+  font-size: 18px;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.TopSystem-ranking-icon {
+  color: #4361ee;
+}
+
+.TopSystem-ranking-table-container {
+  overflow-x: auto;
+}
+
+.TopSystem-ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.TopSystem-ranking-table th,
+.TopSystem-ranking-table td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #eaedf3;
+}
+
+.TopSystem-ranking-table th {
+  background-color: #f8faff;
+  color: #5a6474;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.TopSystem-ranking-row {
+  transition: all 0.2s ease;
+}
+
+.TopSystem-ranking-row:hover {
+  background-color: #f8faff;
+}
+
+.TopSystem-ranking-top3 {
+  background-color: #f0f4ff;
+}
+
+.TopSystem-ranking-col-rank {
+  width: 80px;
+  text-align: center;
+}
+
+.TopSystem-ranking-col-doctor {
+  min-width: 180px;
+}
+
+.TopSystem-ranking-col-degree {
+  min-width: 150px;
+}
+
+.TopSystem-ranking-col-hospital {
+  min-width: 180px;
+}
+
+.TopSystem-ranking-col-count {
+  width: 120px;
+  text-align: center;
+}
+
+.TopSystem-ranking-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  margin: 0 auto;
+  background-color: #95a5a6;
+}
+
+.TopSystem-ranking-badge.rank-1 {
+  background: linear-gradient(135deg, #ffd700, #ffaa00);
+  box-shadow: 0 3px 8px rgba(255, 215, 0, 0.3);
+}
+
+.TopSystem-ranking-badge.rank-2 {
+  background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
+  box-shadow: 0 3px 8px rgba(192, 192, 192, 0.3);
+}
+
+.TopSystem-ranking-badge.rank-3 {
+  background: linear-gradient(135deg, #cd7f32, #a05a2c);
+  box-shadow: 0 3px 8px rgba(205, 127, 50, 0.3);
+}
+
+.TopSystem-ranking-doctor-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.TopSystem-ranking-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.TopSystem-ranking-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.TopSystem-ranking-count {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  color: #4361ee;
+}
+
+.TopSystem-ranking-label {
+  display: block;
+  font-size: 12px;
+  color: #5a6474;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .TopSystem-ranking-table th,
+  .TopSystem-ranking-table td {
+    padding: 10px;
+  }
+
+  .TopSystem-ranking-col-degree,
+  .TopSystem-ranking-col-hospital {
+    display: none;
+  }
+}
+
+/* Month Selector */
+.TopSystem-month-selector {
+  position: relative;
+  margin-left: auto;
+}
+
+.TopSystem-month-button {
+  background: linear-gradient(135deg, #4361ee, #3a0ca3);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+}
+
+.TopSystem-month-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(67, 97, 238, 0.3);
+}
+
+.TopSystem-month-icon,
+.TopSystem-filter-icon {
+  font-size: 14px;
+}
+
+.TopSystem-month-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 240px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  padding: 10px 0;
+  margin-top: 8px;
+  animation: TopSystem-fadeIn 0.3s ease;
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.TopSystem-month-item {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #5a6474;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.TopSystem-month-item:hover {
+  background-color: #f8faff;
+}
+
+.TopSystem-month-item.active {
+  background-color: #f0f4ff;
+  color: #4361ee;
+  font-weight: 500;
+}
+
+.TopSystem-month-item-icon {
+  color: #4361ee;
+  font-size: 14px;
+}
+
+/* Đảm bảo responsive */
+@media (max-width: 768px) {
+  .TopSystem-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .TopSystem-month-selector {
+    margin-left: 0;
+    align-self: flex-start;
+  }
+
+  .TopSystem-month-dropdown {
+    width: 220px;
+    right: auto;
+    left: 0;
+  }
+}

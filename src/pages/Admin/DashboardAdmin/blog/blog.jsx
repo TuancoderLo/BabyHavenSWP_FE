@@ -42,11 +42,16 @@ function Blog() {
   const [parentNames, setParentNames] = useState({}); // Lưu tên của category cha
   const [categoryFilter, setCategoryFilter] = useState("all"); // Filter cho categories
   const [editingId, setEditingId] = useState(null); // ID của category đang edit
+  // Thêm state cho search query
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Blog States
   const [blogs, setBlogs] = useState([]); // Lưu danh sách blogs
   const [blogFilter, setBlogFilter] = useState("all"); // Filter cho blogs
   const [editingBlogId, setEditingBlogId] = useState(null); // ID của blog đang edit
+  // Thêm state cho tìm kiếm blog
+  const [blogSearchQuery, setBlogSearchQuery] = useState("");
+  const [blogSearchType, setBlogSearchType] = useState("title"); // 'title' hoặc 'category'
 
   // UI States
   const [activeTab, setActiveTab] = useState("categories"); // Tab hiện tại
@@ -129,32 +134,85 @@ function Blog() {
   /* ==========================================================================
      FILTER FUNCTIONS
      ========================================================================== */
-  // Lọc categories theo parent/child
+  // Lọc categories theo parent/child và search query
   const getFilteredCategories = () => {
+    let filteredData = categories;
+
+    // Lọc theo parent/child
     switch (categoryFilter) {
       case "parent":
-        return categories.filter((cat) => cat.parentCategoryId === null);
+        filteredData = categories.filter(
+          (cat) => cat.parentCategoryId === null
+        );
+        break;
       case "child":
-        return categories.filter((cat) => cat.parentCategoryId !== null);
+        filteredData = categories.filter(
+          (cat) => cat.parentCategoryId !== null
+        );
+        break;
       default:
-        return categories;
+        filteredData = categories;
     }
+
+    // Lọc theo search query nếu có
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filteredData = filteredData.filter((cat) =>
+        cat.categoryName.toLowerCase().includes(query)
+      );
+    }
+
+    return filteredData;
   };
 
-  // Lọc blogs theo status
+  // Cập nhật hàm lọc blogs để hỗ trợ tìm kiếm
   const getFilteredBlogs = () => {
+    let filteredData = blogs;
+
+    // Lọc theo status
     switch (blogFilter) {
-      case "approved-rejected":
-        return blogs.filter(
-          (blog) => blog.status === "Approved" || blog.status === "Rejected"
-        );
+      case "approved":
+        filteredData = blogs.filter((blog) => blog.status === "Approved");
+        break;
+      case "rejected":
+        filteredData = blogs.filter((blog) => blog.status === "Rejected");
+        break;
       case "pending":
-        return blogs.filter((blog) => blog.status === "PendingApproval");
+        filteredData = blogs.filter(
+          (blog) => blog.status === "PendingApproval"
+        );
+        break;
       case "draft":
-        return blogs.filter((blog) => blog.status === "Draft");
+        filteredData = blogs.filter((blog) => blog.status === "Draft");
+        break;
       default:
-        return blogs;
+        filteredData = blogs;
     }
+
+    // Lọc theo từ khóa tìm kiếm nếu có
+    if (blogSearchQuery.trim()) {
+      const query = blogSearchQuery.toLowerCase().trim();
+
+      if (blogSearchType === "title") {
+        // Tìm kiếm theo tiêu đề
+        filteredData = filteredData.filter((blog) =>
+          blog.title.toLowerCase().includes(query)
+        );
+      } else if (blogSearchType === "category") {
+        // Tìm kiếm theo danh mục
+        filteredData = filteredData.filter((blog) =>
+          blog.categoryName.toLowerCase().includes(query)
+        );
+      } else if (blogSearchType === "author") {
+        // Tìm kiếm theo tác giả
+        filteredData = filteredData.filter((blog) => {
+          const authorText = blog.authorName || blog.email || "";
+          return authorText.toLowerCase().includes(query);
+        });
+      }
+    }
+
+    return filteredData;
   };
 
   // Render status options based on current blog status and filter
@@ -176,12 +234,14 @@ function Blog() {
       ];
     }
 
-    // Nếu đang ở filter Approved/Rejected
-    if (blogFilter === "approved-rejected") {
-      return [
-        { value: "Approved", label: "Approved" },
-        { value: "Rejected", label: "Rejected" },
-      ];
+    // Nếu đang ở filter Approved
+    if (blogFilter === "approved") {
+      return [{ value: "Approved", label: "Approved" }];
+    }
+
+    // Nếu đang ở filter Rejected
+    if (blogFilter === "rejected") {
+      return [{ value: "Rejected", label: "Rejected" }];
     }
 
     // Nếu đang tạo mới (không có currentStatus)
@@ -206,11 +266,9 @@ function Blog() {
           { value: "Rejected", label: "Reject" },
         ];
       case "Approved":
+        return [{ value: "Approved", label: "Approved" }];
       case "Rejected":
-        return [
-          { value: "Approved", label: "Approved" },
-          { value: "Rejected", label: "Rejected" },
-        ];
+        return [{ value: "Rejected", label: "Rejected" }];
       default:
         return [
           { value: "Draft", label: "Draft" },
@@ -262,6 +320,7 @@ function Blog() {
     try {
       setLoading(true);
       const email = localStorage.getItem("email"); // Lấy email người dùng từ localStorage
+      const fullName = localStorage.getItem("fullName") || ""; // Lấy tên người dùng từ localStorage
 
       // Xử lý nội dung từ CKEditor theo yêu cầu của back-end
       const content =
@@ -278,6 +337,7 @@ function Blog() {
           categories.find((cat) => cat.categoryId === values.categoryId)
             ?.categoryName || "",
         email: email || "",
+        authorName: fullName, // Thêm trường authorName
         imageBlog: values.imageBlog || "",
         tags: values.tags || "",
         referenceSources: values.referenceSources || "",
@@ -422,6 +482,12 @@ function Blog() {
       key: "categoryName",
     },
     {
+      title: "Author",
+      dataIndex: "authorName",
+      key: "authorName",
+      render: (authorName, record) => authorName || record.email || "Anonymous",
+    },
+    {
       title: "Status",
       dataIndex: "status",
       key: "status",
@@ -540,7 +606,8 @@ function Blog() {
         blogForm.setFieldsValue({
           title: blogData.title,
           content: blogData.content,
-          categoryId: blogData.categoryId, // Lấy từ response hoặc lưu từ record
+          categoryId: blogData.categoryId,
+          authorName: blogData.authorName || "",
           imageBlog: blogData.imageBlog,
           tags: blogData.tags,
           referenceSources: blogData.referenceSources,
@@ -607,17 +674,49 @@ function Blog() {
                 <Radio.Button value="child">Child Categories</Radio.Button>
               </Radio.Group>
             </div>
-            <Button
-              type="primary"
-              onClick={() => {
-                setEditingId(null);
-                form.resetFields();
-                setIsModalVisible(true);
-              }}
-            >
-              Add New Category
-            </Button>
+            <div className="blog-actions">
+              {/* Thêm ô tìm kiếm */}
+              <Input.Search
+                placeholder="Tìm kiếm theo tên danh mục..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onSearch={(value) => setSearchQuery(value)}
+                style={{ width: 300, marginRight: 16 }}
+                allowClear
+              />
+              <Button
+                type="primary"
+                onClick={() => {
+                  setEditingId(null);
+                  form.resetFields();
+                  setIsModalVisible(true);
+                }}
+              >
+                Add New Category
+              </Button>
+            </div>
           </div>
+
+          {/* Hiển thị một thông báo về kết quả tìm kiếm */}
+          {searchQuery.trim() && (
+            <div style={{ marginBottom: 16 }}>
+              <span>
+                Kết quả tìm kiếm cho "{searchQuery}" trong
+                {categoryFilter === "parent"
+                  ? " Parent Categories"
+                  : categoryFilter === "child"
+                  ? " Child Categories"
+                  : " All Categories"}
+              </span>
+              <Button
+                type="link"
+                onClick={() => setSearchQuery("")}
+                style={{ marginLeft: 8 }}
+              >
+                Xóa tìm kiếm
+              </Button>
+            </div>
+          )}
 
           <Table
             className="blog-table"
@@ -704,24 +803,83 @@ function Blog() {
                 className="blog-filters"
               >
                 <Radio.Button value="all">All</Radio.Button>
-                <Radio.Button value="approved-rejected">
-                  Approved/Rejected
-                </Radio.Button>
+                <Radio.Button value="approved">Approved</Radio.Button>
+                <Radio.Button value="rejected">Rejected</Radio.Button>
                 <Radio.Button value="pending">Pending Approval</Radio.Button>
                 <Radio.Button value="draft">Draft</Radio.Button>
               </Radio.Group>
             </div>
-            <Button
-              type="primary"
-              onClick={() => {
-                setEditingBlogId(null);
-                blogForm.resetFields();
-                setBlogModalVisible(true);
-              }}
-            >
-              Add New Blog
-            </Button>
+            <div className="blog-actions">
+              {/* Thêm tìm kiếm cho blogs */}
+              <Input.Group compact style={{ display: "flex", width: 400 }}>
+                <Select
+                  defaultValue="title"
+                  value={blogSearchType}
+                  onChange={setBlogSearchType}
+                  style={{ width: "30%" }}
+                >
+                  <Select.Option value="title">Tiêu đề</Select.Option>
+                  <Select.Option value="category">Danh mục</Select.Option>
+                  <Select.Option value="author">Tác giả</Select.Option>
+                </Select>
+                <Input.Search
+                  placeholder={`Tìm kiếm theo ${
+                    blogSearchType === "title"
+                      ? "tiêu đề"
+                      : blogSearchType === "category"
+                      ? "danh mục"
+                      : "tác giả"
+                  }...`}
+                  value={blogSearchQuery}
+                  onChange={(e) => setBlogSearchQuery(e.target.value)}
+                  onSearch={(value) => setBlogSearchQuery(value)}
+                  style={{ width: "70%" }}
+                  allowClear
+                />
+              </Input.Group>
+              <Button
+                type="primary"
+                onClick={() => {
+                  setEditingBlogId(null);
+                  blogForm.resetFields();
+                  setBlogModalVisible(true);
+                }}
+              >
+                Add New Blog
+              </Button>
+            </div>
           </div>
+
+          {/* Hiển thị thông báo về kết quả tìm kiếm */}
+          {blogSearchQuery.trim() && (
+            <div style={{ marginBottom: 16 }}>
+              <span>
+                Kết quả tìm kiếm cho "{blogSearchQuery}" theo{" "}
+                {blogSearchType === "title"
+                  ? "tiêu đề"
+                  : blogSearchType === "category"
+                  ? "danh mục"
+                  : "tác giả"}{" "}
+                trong
+                {blogFilter === "approved"
+                  ? " Approved"
+                  : blogFilter === "rejected"
+                  ? " Rejected"
+                  : blogFilter === "pending"
+                  ? " Pending Approval"
+                  : blogFilter === "draft"
+                  ? " Draft"
+                  : " All Blogs"}
+              </span>
+              <Button
+                type="link"
+                onClick={() => setBlogSearchQuery("")}
+                style={{ marginLeft: 8 }}
+              >
+                Xóa tìm kiếm
+              </Button>
+            </div>
+          )}
 
           <Table
             className="blog-table"
@@ -829,6 +987,13 @@ function Blog() {
                     </Select.Option>
                   ))}
                 </Select>
+              </Form.Item>
+
+              <Form.Item name="authorName" label="Author Name">
+                <Input
+                  placeholder="Author name will be automatically filled"
+                  disabled
+                />
               </Form.Item>
 
               {/* Luôn hiển thị trường rejectionReason */}

@@ -1,0 +1,89 @@
+.ManagePackage-edit-button {
+  background-color: #74b9ff !important;
+  color: white !important;
+  border: none !important;
+  height: 30px !important;
+  width: 30px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 4px !important;
+  padding: 0 !important;
+}
+
+.ManagePackage-edit-button:hover {
+  background-color: #0984e3 !important;
+}
+
+.ManagePackage-delete-button {
+  background-color: #ff7675 !important;
+  color: white !important;
+  border: none !important;
+  height: 30px !important;
+  width: 30px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 4px !important;
+  padding: 0 !important;
+}
+
+.ManagePackage-delete-button:hover {
+  background-color: #d63031 !important;
+}
+
+.ManagePackage-action-button-container {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.ManagePackage-page-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.ManagePackage-page-container {
+  padding: 24px;
+}
+
+.ManagePackage-action-cell {
+  width: 120px;
+}
+
+.ManagePackage-action-title {
+  color: #4b7bec;
+  font-weight: 500;
+}
+
+.ManagePackage-add-button {
+  background-color: #0984e3 !important;
+  border-radius: 4px !important;
+  text-transform: uppercase !important;
+}
+
+.ManagePackage-table {
+  border-collapse: collapse;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ManagePackage-table-header {
+  background-color: #f8f9fa;
+}
+
+.ManagePackage-pencil-icon {
+  color: #74b9ff;
+  cursor: pointer;
+}
+
+.ManagePackage-trash-icon {
+  color: #ff7675;
+  cursor: pointer;
+}
+
+.ManagePackage-actions-container {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}

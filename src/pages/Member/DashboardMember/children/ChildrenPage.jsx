@@ -14,6 +14,7 @@ import AddMilestoneButton from "../../../../components/common/buttons/AddMilesto
 import AddChildButton from "../../../../components/common/buttons/AddChild";
 import memberShipApi from "../../../../services/memberShipApi";
 import alertApi from "../../../../services/alertApi";
+import AIChat from "./AIChat.jsx"
 
 function ChildrenPage() {
   const navigate = useNavigate();
@@ -31,6 +32,23 @@ function ChildrenPage() {
     setShowAddMilestoneModal(true);
   };
 
+  // State for chat modal
+  const [showChatModal, setShowChatModal] = useState(false);
+
+  // Open chat modal
+  const handleOpenChat = () => {
+    if (!selectedChild) {
+      alert("Please select a child to chat with AI.");
+      return;
+    }
+    setShowChatModal(true);
+  };
+
+  // Close chat modal
+  const handleCloseChat = () => {
+    setShowChatModal(false);
+  };
+
   const closeMilestoneOverlay = () => {
     setShowAddMilestoneModal(false);
   };
@@ -40,18 +58,15 @@ function ChildrenPage() {
 
   function AlertItem({ alert }) {
     const [expanded, setExpanded] = useState(false);
-    const limit = 80;
-    const truncate = (text) => {
-      if (!text) return "";
-      return text.length > limit ? text.slice(0, limit) + "..." : text;
-    };
-
-    const messageShort = truncate(alert.message);
-
+    const [visible, setVisible] = useState(true);
+  
     const openOverlay = () => setExpanded(true);
     const closeOverlay = () => setExpanded(false);
-
-    // Xác định lớp CSS dựa theo severityLevel
+    const closeAlert = () => setVisible(false);
+  
+    if (!visible) return null;
+  
+    // Determine CSS class based on severityLevel
     function getSeverityClass(level) {
       switch (level?.toLowerCase()) {
         case "low":
@@ -59,38 +74,54 @@ function ChildrenPage() {
         case "medium":
           return "warning";
         case "high":
-          return "warning";
+          return "danger";
         default:
           return "healthy";
       }
     }
-
-    // Nếu severity là medium hoặc high, áp dụng thêm lớp fadeable
-    const additionalClass = ["medium", "high"].includes(
-      alert.severityLevel?.toLowerCase()
-    )
+  
+    // Apply fadeable class for medium or high severity
+    const additionalClass = ["medium", "high"].includes(alert.severityLevel?.toLowerCase())
       ? "fadeable"
       : "";
-
+  
     return (
       <>
         <div
-          className={`health-alert-content ${getSeverityClass(
-            alert.severityLevel
-          )} ${additionalClass}`}
-          onClick={openOverlay}
-          style={{ cursor: "pointer" }}
+          className={`alert-item ${getSeverityClass(alert.severityLevel)} ${additionalClass}`}
         >
-          <p>Your child has {alert.severityLevel} alert warning</p>
+          <span className="alert-icon">
+            {alert.severityLevel?.toLowerCase() === "high" ? "🚨" : "🔔"}
+          </span>
+          <div className="alert-message">
+            <p>Your child's health has a {alert.severityLevel} level alert</p>
+          </div>
+          {/* Nút "See More" để mở overlay */}
+          <button
+            className="alert-see-more"
+            onClick={openOverlay}
+          >
+            See More
+          </button>
+          {/* Nút "X" để đóng AlertItem */}
+          <button
+            className="alert-close-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              closeAlert();
+            }}
+          >
+            ×
+          </button>
         </div>
-
+  
         {expanded && (
           <div className="modal-overlay" onClick={closeOverlay}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <button className="modal-close" onClick={closeOverlay}>
                 ×
               </button>
-              <h2>Full Alert Message</h2>
+              <h2>Alert Details</h2>
               <p>{alert.message}</p>
             </div>
           </div>
@@ -512,13 +543,30 @@ function ChildrenPage() {
           <i className="fas fa-stethoscope"></i>
           Connect to doctor
         </button>
+      </div>
+    );
+  };
+
+  const renderAnalyzeWithAI = () => {
+    console.log("renderAnalyzeWithAI called, showChatModal:", showChatModal); // Debug log
+    return (
+      <div className="analyze-ai-section">
+        <div className="analyze-ai-title">
+          Discover <span className="highlight">BabyHaven AI</span>: Your Partner in Parenting!
+        </div>
         <button
           className="analyze-ai-btn"
-          onClick={() => console.log("AI Analysis coming soon")}
+          onClick={handleOpenChat} // Fix: Call handleOpenChat instead of console.log
+          disabled={!selectedChild}
         >
           <i className="fas fa-robot"></i>
           Analyze with AI
         </button>
+        <AIChat
+          isOpen={showChatModal}
+          onClose={handleCloseChat}
+          selectedChild={selectedChild}
+        />
       </div>
     );
   };
@@ -699,17 +747,12 @@ function ChildrenPage() {
           </div>
 
           {/* Health Alert Section */}
-          <div className="health-alert-section">
-            <div className="health-alert-title">Health Alert</div>
 
             {latestAlert ? (
               <AlertItem alert={latestAlert} />
             ) : (
-              <div className="health-alert-content healthy">
-                Your child's health is in good condition
-              </div>
+              null
             )}
-          </div>
 
           {/* Growth chart section */}
           <div className="growth-chart-section">
@@ -768,6 +811,9 @@ function ChildrenPage() {
               )}
             </div>
           </div>
+
+          {/* AI Analysis Section */}
+          {renderAnalyzeWithAI()}
 
           {/* Growth Analysis Section */}
           {renderGrowthAnalysis()}
