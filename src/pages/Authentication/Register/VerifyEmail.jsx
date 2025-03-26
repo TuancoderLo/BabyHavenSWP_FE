@@ -66,7 +66,7 @@ const VerifyEmail = () => {
 
       // Gọi API để xác thực OTP và hoàn tất đăng ký
       const response = await api.post(
-        "Authentication/VerifyRegistrationOtp",
+        `Authentication/VerifyRegistrationOtp?otp=${otp}`,
         verifyData
       );
 
