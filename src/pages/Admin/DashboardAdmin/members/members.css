@@ -1,4 +1,4 @@
-.members-container {
+.MemberAdmin-container {
   padding: 24px;
   background-color: #fff;
   border-radius: 8px;
@@ -6,7 +6,7 @@
   overflow-x: hidden;
 }
 
-.members-header {
+.MemberAdmin-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -15,27 +15,27 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
-.members-title {
+.MemberAdmin-title {
   font-size: 22px;
   font-weight: 600;
   color: #1a1a1a;
   margin: 0;
 }
 
-.tab-header {
+.MemberAdmin-tab-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
 }
 
-.tab-header-title {
+.MemberAdmin-tab-header-title {
   font-size: 18px;
   font-weight: 500;
   color: #333;
 }
 
-.tab-header-actions {
+.MemberAdmin-tab-header-actions {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -67,7 +67,7 @@
 }
 
 /* Status badges */
-.status-active {
+.MemberAdmin-status-active {
   color: #52c41a;
   font-weight: 500;
   padding: 4px 10px;
@@ -77,7 +77,7 @@
   display: inline-block;
 }
 
-.status-inactive {
+.MemberAdmin-status-inactive {
   color: #ff4d4f;
   font-weight: 500;
   padding: 4px 10px;
@@ -87,7 +87,7 @@
   display: inline-block;
 }
 
-.status-pending {
+.MemberAdmin-status-pending {
   color: #faad14;
   font-weight: 500;
   padding: 4px 10px;
@@ -197,12 +197,12 @@
 }
 
 /* Form layout */
-.form-row {
+.MemberAdmin-form-row {
   display: flex;
   gap: 16px;
 }
 
-.form-col {
+.MemberAdmin-form-col {
   flex: 1;
 }
 
@@ -219,7 +219,7 @@
 }
 
 @media (max-width: 992px) {
-  .form-row {
+  .MemberAdmin-form-row {
     flex-direction: column;
     gap: 0;
   }
@@ -234,11 +234,11 @@
 }
 
 @media (max-width: 768px) {
-  .members-container {
+  .MemberAdmin-container {
     padding: 16px;
   }
 
-  .members-title {
+  .MemberAdmin-title {
     font-size: 20px;
   }
 
@@ -247,13 +247,13 @@
     font-size: 14px;
   }
 
-  .tab-header {
+  .MemberAdmin-tab-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
 
-  .tab-header-actions {
+  .MemberAdmin-tab-header-actions {
     flex-direction: column;
     align-items: flex-start;
     width: 100%;
@@ -276,10 +276,25 @@
     font-size: 14px;
     height: 32px;
   }
+
+  .filter-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .search-input {
+    width: 100% !important;
+  }
+
+  .MemberAdmin-tab-header-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 
 @media (max-width: 576px) {
-  .members-container {
+  .MemberAdmin-container {
     padding: 12px;
     border-radius: 4px;
   }
@@ -289,9 +304,9 @@
     padding: 8px;
   }
 
-  .status-active,
-  .status-inactive,
-  .status-pending {
+  .MemberAdmin-status-active,
+  .MemberAdmin-status-inactive,
+  .MemberAdmin-status-pending {
     padding: 2px 6px;
     font-size: 12px;
   }
@@ -316,7 +331,7 @@
 }
 
 /* Styling cho action buttons */
-.action-button {
+.MemberAdmin-action-button {
   height: 28px !important;
   width: 28px !important;
   padding: 0 !important;
@@ -326,7 +341,7 @@
   border-radius: 4px !important;
 }
 
-.action-button .anticon {
+.MemberAdmin-action-button .anticon {
   font-size: 14px;
 }
 
@@ -355,7 +370,7 @@
 }
 
 /* Styling cho các role */
-.role-admin {
+.MemberAdmin-role-admin {
   color: #722ed1;
   font-weight: 500;
   padding: 4px 10px;
@@ -365,7 +380,7 @@
   display: inline-block;
 }
 
-.role-doctor {
+.MemberAdmin-role-doctor {
   color: #1890ff;
   font-weight: 500;
   padding: 4px 10px;
@@ -375,7 +390,7 @@
   display: inline-block;
 }
 
-.role-member {
+.MemberAdmin-role-member {
   color: #52c41a;
   font-weight: 500;
   padding: 4px 10px;
@@ -386,7 +401,7 @@
 }
 
 /* CSS cho phần upload ảnh */
-.profile-upload-container {
+.MemberAdmin-profile-upload-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -403,9 +418,103 @@
   background-color: #f5f5f5;
 }
 
-.uploaded-image-preview {
+.MemberAdmin-uploaded-image-preview {
   width: 100%;
   height: 100%;
   border-radius: 50%;
   overflow: hidden;
+}
+
+.filter-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-input {
+  margin-right: 8px;
+  border-radius: 4px;
+}
+
+/* Cập nhật lại cấu trúc phần User Accounts List */
+.MemberAdmin-user-accounts-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.MemberAdmin-search-input-container {
+  width: 100%;
+}
+
+.MemberAdmin-search-input {
+  width: 100%;
+  border-radius: 4px;
+}
+
+.MemberAdmin-filter-action-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.MemberAdmin-role-filter {
+  display: flex;
+  gap: 8px;
+}
+
+.MemberAdmin-filter-button {
+  min-width: 80px;
+  height: 36px;
+  border-radius: 4px;
+}
+
+.MemberAdmin-add-account-button {
+  height: 36px;
+  border-radius: 4px;
+}
+
+/* Responsive styles */
+@media (min-width: 768px) {
+  .MemberAdmin-user-accounts-actions {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .MemberAdmin-search-input-container {
+    width: 300px;
+    margin-right: 16px;
+  }
+
+  .MemberAdmin-filter-action-container {
+    flex: 1;
+  }
+}
+
+@media (max-width: 767px) {
+  .MemberAdmin-filter-action-container {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .MemberAdmin-role-filter {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .MemberAdmin-add-account-button {
+    width: 100%;
+  }
+}
+
+/* Khi màn hình nhỏ hơn, các nút filter co lại */
+@media (max-width: 480px) {
+  .MemberAdmin-filter-button {
+    min-width: unset;
+    padding: 0 10px;
+    font-size: 12px;
+  }
 }

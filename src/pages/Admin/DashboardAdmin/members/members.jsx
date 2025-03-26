@@ -33,6 +33,7 @@ import {
   DeleteOutlined,
   MoreOutlined,
   UploadOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 
 const { Title } = Typography;
@@ -51,6 +52,7 @@ const Members = () => {
   const [userAccountForm] = Form.useForm();
   const [editingUserAccount, setEditingUserAccount] = useState(null);
   const [selectedRole, setSelectedRole] = useState("All");
+  const [searchText, setSearchText] = useState("");
 
   // State for Members
   const [members, setMembers] = useState([]);
@@ -429,11 +431,11 @@ const Members = () => {
     let className = "";
 
     if (status === "Active") {
-      className = "status-active";
+      className = "MemberAdmin-status-active";
     } else if (status === "Inactive") {
-      className = "status-inactive";
+      className = "MemberAdmin-status-inactive";
     } else {
-      className = "status-pending";
+      className = "MemberAdmin-status-pending";
     }
 
     return <span className={className}>{status}</span>;
@@ -444,11 +446,11 @@ const Members = () => {
     let className = "";
 
     if (role === "Admin") {
-      className = "role-admin";
+      className = "MemberAdmin-role-admin";
     } else if (role === "Doctor") {
-      className = "role-doctor";
+      className = "MemberAdmin-role-doctor";
     } else {
-      className = "role-member";
+      className = "MemberAdmin-role-member";
     }
 
     return <span className={className}>{role}</span>;
@@ -556,7 +558,7 @@ const Members = () => {
             size="small"
             icon={<EditOutlined />}
             onClick={() => handleEditUserAccount(record)}
-            className="action-button"
+            className="MemberAdmin-action-button"
           />
           <Popconfirm
             title="Are you sure you want to delete this account?"
@@ -569,7 +571,7 @@ const Members = () => {
               danger
               size="small"
               icon={<DeleteOutlined />}
-              className="action-button"
+              className="MemberAdmin-action-button"
             />
           </Popconfirm>
         </Space>
@@ -617,7 +619,7 @@ const Members = () => {
             size="small"
             icon={<EditOutlined />}
             onClick={() => handleEditMember(record)}
-            className="action-button"
+            className="MemberAdmin-action-button"
           />
           <Popconfirm
             title="Are you sure you want to delete this member?"
@@ -630,7 +632,7 @@ const Members = () => {
               danger
               size="small"
               icon={<DeleteOutlined />}
-              className="action-button"
+              className="MemberAdmin-action-button"
             />
           </Popconfirm>
         </Space>
@@ -684,7 +686,7 @@ const Members = () => {
             size="small"
             icon={<EditOutlined />}
             onClick={() => handleEditMembership(record)}
-            className="action-button"
+            className="MemberAdmin-action-button"
           />
           <Popconfirm
             title="Are you sure you want to delete this membership?"
@@ -697,7 +699,7 @@ const Members = () => {
               danger
               size="small"
               icon={<DeleteOutlined />}
-              className="action-button"
+              className="MemberAdmin-action-button"
             />
           </Popconfirm>
         </Space>
@@ -705,10 +707,29 @@ const Members = () => {
     },
   ];
 
-  // Thêm hàm để lọc dữ liệu theo role
+  // Thêm hàm xử lý thay đổi tìm kiếm
+  const handleSearchChange = (e) => {
+    setSearchText(e.target.value);
+  };
+
+  // Cập nhật hàm lọc dữ liệu user accounts để bao gồm cả tìm kiếm
   const filteredUserAccounts = userAccounts.filter((account) => {
-    if (selectedRole === "All") return true;
-    return account.roleName === selectedRole;
+    // Lọc theo vai trò
+    const matchesRole =
+      selectedRole === "All" || account.roleName === selectedRole;
+
+    // Lọc theo chuỗi tìm kiếm (nếu có)
+    const searchLower = searchText.toLowerCase();
+    const matchesSearch =
+      !searchText ||
+      (account.name && account.name.toLowerCase().includes(searchLower)) ||
+      (account.username &&
+        account.username.toLowerCase().includes(searchLower)) ||
+      (account.email && account.email.toLowerCase().includes(searchLower)) ||
+      (account.phoneNumber &&
+        account.phoneNumber.toLowerCase().includes(searchLower));
+
+    return matchesRole && matchesSearch;
   });
 
   // Thêm hàm xử lý khi thay đổi role
@@ -717,55 +738,70 @@ const Members = () => {
   };
 
   return (
-    <div className="members-container">
-      <div className="members-header">
-        <Title level={4} className="members-title">
+    <div className="MemberAdmin-container">
+      <div className="MemberAdmin-header">
+        <Title level={4} className="MemberAdmin-title">
           Member Management
         </Title>
       </div>
 
       <Tabs activeKey={activeTab} onChange={setActiveTab}>
         <TabPane tab="User Accounts" key="1">
-          <div className="tab-header">
-            <div className="tab-header-title">User Accounts List</div>
-            <div className="tab-header-actions">
-              <div className="role-filter">
+          <div className="MemberAdmin-tab-header">
+            <div className="MemberAdmin-tab-header-title">
+              User Accounts List
+            </div>
+            <div className="MemberAdmin-user-accounts-actions">
+              <div className="MemberAdmin-search-input-container">
+                <Input
+                  placeholder="Tìm theo tên, username, email, SĐT"
+                  value={searchText}
+                  onChange={handleSearchChange}
+                  allowClear
+                  className="MemberAdmin-search-input"
+                  prefix={<SearchOutlined />}
+                />
+              </div>
+              <div className="MemberAdmin-filter-action-container">
+                <div className="MemberAdmin-role-filter">
+                  <Button
+                    type={selectedRole === "All" ? "primary" : "default"}
+                    onClick={() => handleRoleChange("All")}
+                    className="MemberAdmin-filter-button"
+                  >
+                    All
+                  </Button>
+                  <Button
+                    type={selectedRole === "Member" ? "primary" : "default"}
+                    onClick={() => handleRoleChange("Member")}
+                    className="MemberAdmin-filter-button"
+                  >
+                    Member
+                  </Button>
+                  <Button
+                    type={selectedRole === "Doctor" ? "primary" : "default"}
+                    onClick={() => handleRoleChange("Doctor")}
+                    className="MemberAdmin-filter-button"
+                  >
+                    Doctor
+                  </Button>
+                  <Button
+                    type={selectedRole === "Admin" ? "primary" : "default"}
+                    onClick={() => handleRoleChange("Admin")}
+                    className="MemberAdmin-filter-button"
+                  >
+                    Admin
+                  </Button>
+                </div>
                 <Button
-                  type={selectedRole === "All" ? "primary" : "default"}
-                  onClick={() => handleRoleChange("All")}
-                  className="filter-button"
+                  type="primary"
+                  onClick={handleAddUserAccount}
+                  icon={<PlusOutlined />}
+                  className="MemberAdmin-add-account-button"
                 >
-                  All
-                </Button>
-                <Button
-                  type={selectedRole === "Member" ? "primary" : "default"}
-                  onClick={() => handleRoleChange("Member")}
-                  className="filter-button"
-                >
-                  Member
-                </Button>
-                <Button
-                  type={selectedRole === "Doctor" ? "primary" : "default"}
-                  onClick={() => handleRoleChange("Doctor")}
-                  className="filter-button"
-                >
-                  Doctor
-                </Button>
-                <Button
-                  type={selectedRole === "Admin" ? "primary" : "default"}
-                  onClick={() => handleRoleChange("Admin")}
-                  className="filter-button"
-                >
-                  Admin
+                  Add New Account
                 </Button>
               </div>
-              <Button
-                type="primary"
-                onClick={handleAddUserAccount}
-                icon={<PlusOutlined />}
-              >
-                Add New Account
-              </Button>
             </div>
           </div>
           <Table
@@ -786,9 +822,9 @@ const Members = () => {
         </TabPane>
 
         <TabPane tab="Members" key="2">
-          <div className="tab-header">
-            <div className="tab-header-title">Members List</div>
-            <div className="tab-header-actions">
+          <div className="MemberAdmin-tab-header">
+            <div className="MemberAdmin-tab-header-title">Members List</div>
+            <div className="MemberAdmin-tab-header-actions">
               <Button
                 type="primary"
                 onClick={handleAddMember}
@@ -815,9 +851,9 @@ const Members = () => {
         </TabPane>
 
         <TabPane tab="Memberships" key="3">
-          <div className="tab-header">
-            <div className="tab-header-title">Memberships List</div>
-            <div className="tab-header-actions">
+          <div className="MemberAdmin-tab-header">
+            <div className="MemberAdmin-tab-header-title">Memberships List</div>
+            <div className="MemberAdmin-tab-header-actions">
               <Button
                 type="primary"
                 onClick={handleAddMembership}
@@ -858,11 +894,11 @@ const Members = () => {
           layout="vertical"
           onFinish={handleUserAccountSubmit}
         >
-          <div className="form-row">
+          <div className="MemberAdmin-form-row">
             <Form.Item
               name="username"
               label="Username"
-              className="form-col"
+              className="MemberAdmin-form-col"
               rules={[{ required: true, message: "Please enter username" }]}
             >
               <Input />
@@ -870,7 +906,7 @@ const Members = () => {
             <Form.Item
               name="email"
               label="Email"
-              className="form-col"
+              className="MemberAdmin-form-col"
               rules={[
                 { required: true, message: "Please enter email" },
                 { type: "email", message: "Invalid email format" },
@@ -880,11 +916,11 @@ const Members = () => {
             </Form.Item>
           </div>
 
-          <div className="form-row">
+          <div className="MemberAdmin-form-row">
             <Form.Item
               name="phoneNumber"
               label="Phone Number"
-              className="form-col"
+              className="MemberAdmin-form-col"
               rules={[{ required: true, message: "Please enter phone number" }]}
             >
               <Input />
@@ -892,15 +928,19 @@ const Members = () => {
             <Form.Item
               name="name"
               label="Full Name"
-              className="form-col"
+              className="MemberAdmin-form-col"
               rules={[{ required: true, message: "Please enter full name" }]}
             >
               <Input />
             </Form.Item>
           </div>
 
-          <div className="form-row">
-            <Form.Item name="gender" label="Gender" className="form-col">
+          <div className="MemberAdmin-form-row">
+            <Form.Item
+              name="gender"
+              label="Gender"
+              className="MemberAdmin-form-col"
+            >
               <Select>
                 <Option value="Male">Male</Option>
                 <Option value="Female">Female</Option>
@@ -910,7 +950,7 @@ const Members = () => {
             <Form.Item
               name="dateOfBirth"
               label="Date of Birth"
-              className="form-col"
+              className="MemberAdmin-form-col"
             >
               <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
             </Form.Item>
@@ -921,7 +961,7 @@ const Members = () => {
           </Form.Item>
 
           <Form.Item name="profilePicture" label="Profile Picture">
-            <div className="profile-upload-container">
+            <div className="MemberAdmin-profile-upload-container">
               <Upload
                 name="profilePicture"
                 listType="picture-card"
@@ -953,7 +993,7 @@ const Members = () => {
                 }}
               >
                 {imageUrl ? (
-                  <div className="uploaded-image-preview">
+                  <div className="MemberAdmin-uploaded-image-preview">
                     <img
                       src={imageUrl}
                       alt="Avatar"
@@ -1015,8 +1055,12 @@ const Members = () => {
             />
           </Form.Item>
 
-          <div className="form-row">
-            <Form.Item name="status" label="Status" className="form-col">
+          <div className="MemberAdmin-form-row">
+            <Form.Item
+              name="status"
+              label="Status"
+              className="MemberAdmin-form-col"
+            >
               <Select>
                 <Option value="Active">Active</Option>
                 <Option value="Inactive">Inactive</Option>
@@ -1024,7 +1068,11 @@ const Members = () => {
               </Select>
             </Form.Item>
 
-            <Form.Item name="roleId" label="Role" className="form-col">
+            <Form.Item
+              name="roleId"
+              label="Role"
+              className="MemberAdmin-form-col"
+            >
               <Select>
                 <Option value={1}>Member</Option>
                 <Option value={2}>Doctor</Option>
@@ -1135,11 +1183,11 @@ const Members = () => {
               ))}
             </Select>
           </Form.Item>
-          <div className="form-row">
+          <div className="MemberAdmin-form-row">
             <Form.Item
               name="startDate"
               label="Start Date"
-              className="form-col"
+              className="MemberAdmin-form-col"
               rules={[{ required: true, message: "Please select start date" }]}
             >
               <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
@@ -1147,7 +1195,7 @@ const Members = () => {
             <Form.Item
               name="endDate"
               label="End Date"
-              className="form-col"
+              className="MemberAdmin-form-col"
               rules={[{ required: true, message: "Please select end date" }]}
             >
               <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
