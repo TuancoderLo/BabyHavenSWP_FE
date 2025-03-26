@@ -1,4 +1,4 @@
-.top-doctors-container {
+.TopSystem-container {
   background-color: #fff;
   border-radius: 15px;
   box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06);
@@ -8,11 +8,11 @@
   position: relative;
 }
 
-.top-doctors-container:hover {
+.TopSystem-container:hover {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-.top-doctors-title {
+.TopSystem-title {
   font-size: 22px;
   color: #2c3e50;
   margin-bottom: 25px;
@@ -24,18 +24,18 @@
   gap: 10px;
 }
 
-.title-icon {
+.TopSystem-title-icon {
   color: #ffd700;
   font-size: 24px;
 }
 
-.top-doctors-grid {
+.TopSystem-grid {
   display: flex;
   gap: 25px;
   flex-wrap: wrap;
 }
 
-.doctor-card {
+.TopSystem-doctor-card {
   background: #ffffff;
   border-radius: 20px;
   flex: 1;
@@ -49,22 +49,22 @@
   border: 1px solid rgba(67, 97, 238, 0.1);
 }
 
-.doctor-card:hover {
+.TopSystem-doctor-card:hover {
   transform: translateY(-8px);
   box-shadow: 0 12px 30px rgba(67, 97, 238, 0.15);
 }
 
-.doctor-card.expanded {
+.TopSystem-doctor-card.expanded {
   flex: 1.2;
 }
 
-.doctor-card-inner {
+.TopSystem-doctor-card-inner {
   width: 100%;
   height: 100%;
   position: relative;
 }
 
-.doctor-card-front {
+.TopSystem-doctor-card-front {
   padding: 25px;
   display: flex;
   flex-direction: column;
@@ -72,7 +72,7 @@
   width: 100%;
 }
 
-.doctor-card-back {
+.TopSystem-doctor-card-back {
   position: absolute;
   top: 0;
   left: 0;
@@ -81,11 +81,11 @@
   background: linear-gradient(145deg, #ffffff, #f7faff);
   padding: 25px;
   border-radius: 20px;
-  animation: fadeIn 0.3s ease;
+  animation: TopSystem-fadeIn 0.3s ease;
   overflow: auto;
 }
 
-.doctor-rank {
+.TopSystem-doctor-rank {
   position: absolute;
   top: -15px;
   left: -15px;
@@ -102,19 +102,19 @@
   color: white;
 }
 
-.doctor-card:nth-child(1) .doctor-rank {
+.TopSystem-doctor-card:nth-child(1) .TopSystem-doctor-rank {
   background: linear-gradient(135deg, #ffd700, #ffaa00); /* Vàng cho hạng 1 */
 }
 
-.doctor-card:nth-child(2) .doctor-rank {
+.TopSystem-doctor-card:nth-child(2) .TopSystem-doctor-rank {
   background: linear-gradient(135deg, #c0c0c0, #a0a0a0); /* Bạc cho hạng 2 */
 }
 
-.doctor-card:nth-child(3) .doctor-rank {
+.TopSystem-doctor-card:nth-child(3) .TopSystem-doctor-rank {
   background: linear-gradient(135deg, #cd7f32, #a05a2c); /* Đồng cho hạng 3 */
 }
 
-.doctor-avatar {
+.TopSystem-doctor-avatar {
   width: 120px;
   height: 120px;
   border-radius: 50%;
@@ -125,7 +125,7 @@
   position: relative;
 }
 
-.doctor-avatar::after {
+.TopSystem-doctor-avatar::after {
   content: "";
   position: absolute;
   top: 0;
@@ -136,37 +136,37 @@
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
-.doctor-avatar img {
+.TopSystem-doctor-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.5s ease;
 }
 
-.doctor-card:hover .doctor-avatar img {
+.TopSystem-doctor-card:hover .TopSystem-doctor-avatar img {
   transform: scale(1.1);
 }
 
-.doctor-info {
+.TopSystem-doctor-info {
   text-align: center;
   width: 100%;
 }
 
-.doctor-info h3 {
+.TopSystem-doctor-info h3 {
   font-size: 20px;
   color: #2c3e50;
   margin: 5px 0;
   font-weight: 600;
 }
 
-.doctor-degree {
+.TopSystem-doctor-degree {
   color: #4361ee;
   font-weight: 500;
   margin: 8px 0;
   font-size: 15px;
 }
 
-.doctor-hospital {
+.TopSystem-doctor-hospital {
   color: #5a6474;
   font-size: 14px;
   margin-bottom: 15px;
@@ -176,11 +176,11 @@
   gap: 6px;
 }
 
-.info-icon {
+.TopSystem-info-icon {
   color: #4361ee;
 }
 
-.request-count {
+.TopSystem-request-count {
   background: linear-gradient(135deg, #f0f4ff, #e6eeff);
   border-radius: 30px;
   padding: 10px 20px;
@@ -191,20 +191,20 @@
   box-shadow: 0 4px 10px rgba(67, 97, 238, 0.1);
 }
 
-.count-number {
+.TopSystem-count-number {
   font-size: 26px;
   font-weight: bold;
   color: #4361ee;
   line-height: 1.1;
 }
 
-.count-label {
+.TopSystem-count-label {
   font-size: 13px;
   color: #5a6474;
   margin-top: 3px;
 }
 
-.view-details {
+.TopSystem-view-details {
   margin-top: 15px;
   font-size: 14px;
   color: #4361ee;
@@ -212,13 +212,13 @@
   cursor: pointer;
 }
 
-.doctor-detail {
+.TopSystem-doctor-detail {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.doctor-detail h4 {
+.TopSystem-doctor-detail h4 {
   font-size: 16px;
   color: #2c3e50;
   margin: 18px 0 5px 0;
@@ -227,7 +227,7 @@
   padding-bottom: 8px;
 }
 
-.doctor-detail p {
+.TopSystem-doctor-detail p {
   font-size: 14px;
   color: #5a6474;
   display: flex;
@@ -236,22 +236,22 @@
   margin: 5px 0;
 }
 
-.doctor-detail a {
+.TopSystem-doctor-detail a {
   color: #4361ee;
   text-decoration: none;
 }
 
-.doctor-detail a:hover {
+.TopSystem-doctor-detail a:hover {
   text-decoration: underline;
 }
 
-.detail-icon {
+.TopSystem-detail-icon {
   color: #4361ee;
   font-size: 16px;
   min-width: 16px;
 }
 
-.doctor-biography {
+.TopSystem-doctor-biography {
   line-height: 1.6;
   font-style: italic;
   border-left: 3px solid #4361ee;
@@ -259,11 +259,11 @@
   margin: 10px 0;
 }
 
-.doctor-status {
+.TopSystem-doctor-status {
   margin-top: 15px;
 }
 
-.status-badge {
+.TopSystem-status-badge {
   padding: 5px 12px;
   border-radius: 20px;
   font-size: 12px;
@@ -271,17 +271,17 @@
   text-transform: uppercase;
 }
 
-.status-badge.active {
+.TopSystem-status-badge.active {
   background-color: #2ecc71;
   color: white;
 }
 
-.status-badge.inactive {
+.TopSystem-status-badge.inactive {
   background-color: #e74c3c;
   color: white;
 }
 
-.back-button {
+.TopSystem-back-button {
   margin-top: 20px;
   padding: 8px 15px;
   background-color: #4361ee;
@@ -294,14 +294,14 @@
   width: 100%;
 }
 
-.back-button:hover {
+.TopSystem-back-button:hover {
   background-color: #2741b3;
   transform: translateY(-2px);
 }
 
-.top-doctors-loading,
-.top-doctors-error,
-.top-doctors-empty {
+.TopSystem-loading,
+.TopSystem-error,
+.TopSystem-empty {
   padding: 25px;
   text-align: center;
   color: #5a6474;
@@ -310,40 +310,40 @@
   margin: 15px 0;
 }
 
-.top-doctors-loading {
+.TopSystem-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 15px;
 }
 
-.loading-spinner {
+.TopSystem-loading-spinner {
   width: 40px;
   height: 40px;
   border: 3px solid rgba(67, 97, 238, 0.2);
   border-radius: 50%;
   border-top-color: #4361ee;
-  animation: spin 1s ease-in-out infinite;
+  animation: TopSystem-spin 1s ease-in-out infinite;
 }
 
-.top-doctors-error {
+.TopSystem-error {
   color: #e74c3c;
   border-left: 4px solid #e74c3c;
 }
 
-.top-doctors-empty {
+.TopSystem-empty {
   border-left: 4px solid #f39c12;
   color: #f39c12;
   font-style: italic;
 }
 
-@keyframes spin {
+@keyframes TopSystem-spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-@keyframes fadeIn {
+@keyframes TopSystem-fadeIn {
   from {
     opacity: 0;
     transform: translateY(10px);
@@ -356,46 +356,46 @@
 
 /* Responsive */
 @media (max-width: 1200px) {
-  .top-doctors-grid {
+  .TopSystem-grid {
     gap: 20px;
   }
 
-  .doctor-card {
+  .TopSystem-doctor-card {
     min-width: 230px;
   }
 }
 
 @media (max-width: 992px) {
-  .top-doctors-grid {
+  .TopSystem-grid {
     gap: 15px;
   }
 }
 
 @media (max-width: 768px) {
-  .top-doctors-grid {
+  .TopSystem-grid {
     flex-direction: column;
   }
 
-  .doctor-card {
+  .TopSystem-doctor-card {
     width: 100%;
   }
 
-  .doctor-avatar {
+  .TopSystem-doctor-avatar {
     width: 100px;
     height: 100px;
   }
 }
 
 @media (max-width: 480px) {
-  .top-doctors-container {
+  .TopSystem-container {
     padding: 20px 15px;
   }
 
-  .doctor-card-front {
+  .TopSystem-doctor-card-front {
     padding: 20px 15px;
   }
 
-  .doctor-rank {
+  .TopSystem-doctor-rank {
     width: 40px;
     height: 40px;
     font-size: 18px;
@@ -404,7 +404,7 @@
   }
 }
 
-.request-stats {
+.TopSystem-request-stats {
   background: linear-gradient(145deg, #f8faff, #f0f4ff);
   border-radius: 10px;
   padding: 15px;
@@ -412,7 +412,7 @@
   box-shadow: 0 2px 8px rgba(67, 97, 238, 0.08);
 }
 
-.stat-item {
+.TopSystem-stat-item {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -421,24 +421,24 @@
   color: #4361ee;
 }
 
-.stat-icon {
+.TopSystem-stat-icon {
   color: #4361ee;
   font-size: 16px;
 }
 
-.category-stats {
+.TopSystem-category-stats {
   margin-top: 10px;
   padding-top: 10px;
   border-top: 1px dashed #d1d9e6;
 }
 
-.category-stats h5 {
+.TopSystem-category-stats h5 {
   font-size: 14px;
   margin-bottom: 8px;
   color: #5a6474;
 }
 
-.category-item {
+.TopSystem-category-item {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -448,26 +448,26 @@
   color: #5a6474;
 }
 
-.category-icon {
+.TopSystem-category-icon {
   color: #4361ee;
   font-size: 14px;
 }
 
-.category-count {
+.TopSystem-category-count {
   font-weight: 500;
   color: #3a4257;
 }
 
-.details-icon {
+.TopSystem-details-icon {
   margin-right: 5px;
 }
 
-.status-badge.unknown {
+.TopSystem-status-badge.unknown {
   background-color: #95a5a6;
   color: white;
 }
 
-.top-doctors-empty {
+.TopSystem-empty {
   display: flex;
   flex-direction: column;
   align-items: center;

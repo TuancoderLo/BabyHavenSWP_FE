@@ -146,22 +146,23 @@ function TopSystem() {
 
   if (loading)
     return (
-      <div className="top-doctors-loading">
-        <div className="loading-spinner"></div>
+      <div className="TopSystem-loading">
+        <div className="TopSystem-loading-spinner"></div>
         <p>Đang tải dữ liệu bác sĩ...</p>
       </div>
     );
 
-  if (error) return <div className="top-doctors-error">{error}</div>;
+  if (error) return <div className="TopSystem-error">{error}</div>;
 
   // Hiển thị thông báo nếu không có dữ liệu
   if (topDoctors.length === 0) {
     return (
-      <div className="top-doctors-container">
-        <h2 className="top-doctors-title">
-          <FaMedal className="title-icon" /> Top Bác Sĩ Được Yêu Cầu Nhiều Nhất
+      <div className="TopSystem-container">
+        <h2 className="TopSystem-title">
+          <FaMedal className="TopSystem-title-icon" /> Top Bác Sĩ Được Yêu Cầu
+          Nhiều Nhất
         </h2>
-        <div className="top-doctors-empty">
+        <div className="TopSystem-empty">
           Hiện không có dữ liệu về yêu cầu tư vấn bác sĩ.
         </div>
       </div>
@@ -169,23 +170,24 @@ function TopSystem() {
   }
 
   return (
-    <div className="top-doctors-container">
-      <h2 className="top-doctors-title">
-        <FaMedal className="title-icon" /> Top Bác Sĩ Được Yêu Cầu Nhiều Nhất
+    <div className="TopSystem-container">
+      <h2 className="TopSystem-title">
+        <FaMedal className="TopSystem-title-icon" /> Top Bác Sĩ Được Yêu Cầu
+        Nhiều Nhất
       </h2>
-      <div className="top-doctors-grid">
+      <div className="TopSystem-grid">
         {topDoctors.map((doctor, index) => (
           <div
             key={doctor.doctorId}
-            className={`doctor-card ${
+            className={`TopSystem-doctor-card ${
               showDetailIndex === index ? "expanded" : ""
             }`}
             onClick={() => toggleDoctorDetail(index)}
           >
-            <div className="doctor-rank">{index + 1}</div>
-            <div className="doctor-card-inner">
-              <div className="doctor-card-front">
-                <div className="doctor-avatar">
+            <div className="TopSystem-doctor-rank">{index + 1}</div>
+            <div className="TopSystem-doctor-card-inner">
+              <div className="TopSystem-doctor-card-front">
+                <div className="TopSystem-doctor-avatar">
                   <img
                     src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
                       doctor.name || "Doctor"
@@ -193,38 +195,42 @@ function TopSystem() {
                     alt={doctor.name || "Doctor"}
                   />
                 </div>
-                <div className="doctor-info">
+                <div className="TopSystem-doctor-info">
                   <h3>{doctor.name || "Không có tên"}</h3>
-                  <p className="doctor-degree">
+                  <p className="TopSystem-doctor-degree">
                     {doctor.degree || "Không có thông tin"}
                   </p>
-                  <p className="doctor-hospital">
-                    <FaHospital className="info-icon" />{" "}
+                  <p className="TopSystem-doctor-hospital">
+                    <FaHospital className="TopSystem-info-icon" />{" "}
                     {doctor.hospitalName || "Không có thông tin"}
                   </p>
-                  <div className="request-count">
-                    <span className="count-number">{doctor.requestCount}</span>
-                    <span className="count-label">yêu cầu tư vấn</span>
+                  <div className="TopSystem-request-count">
+                    <span className="TopSystem-count-number">
+                      {doctor.requestCount}
+                    </span>
+                    <span className="TopSystem-count-label">
+                      yêu cầu tư vấn
+                    </span>
                   </div>
-                  <div className="view-details">
-                    <FaUserMd className="details-icon" /> Xem chi tiết
+                  <div className="TopSystem-view-details">
+                    <FaUserMd className="TopSystem-details-icon" /> Xem chi tiết
                   </div>
                 </div>
               </div>
 
               {showDetailIndex === index && (
-                <div className="doctor-card-back">
-                  <div className="doctor-detail">
+                <div className="TopSystem-doctor-card-back">
+                  <div className="TopSystem-doctor-detail">
                     <h4>Thông tin liên hệ</h4>
                     {doctor.email && (
                       <p>
-                        <FaEnvelope className="detail-icon" />
+                        <FaEnvelope className="TopSystem-detail-icon" />
                         <a href={`mailto:${doctor.email}`}>{doctor.email}</a>
                       </p>
                     )}
                     {doctor.phoneNumber && (
                       <p>
-                        <FaPhone className="detail-icon" />
+                        <FaPhone className="TopSystem-detail-icon" />
                         <a href={`tel:${doctor.phoneNumber}`}>
                           {doctor.phoneNumber}
                         </a>
@@ -232,7 +238,7 @@ function TopSystem() {
                     )}
                     {doctor.hospitalAddress && (
                       <p>
-                        <FaMapMarkerAlt className="detail-icon" />
+                        <FaMapMarkerAlt className="TopSystem-detail-icon" />
                         {doctor.hospitalAddress}
                       </p>
                     )}
@@ -240,27 +246,32 @@ function TopSystem() {
                     {doctor.biography && (
                       <>
                         <h4>Tiểu sử</h4>
-                        <p className="doctor-biography">{doctor.biography}</p>
+                        <p className="TopSystem-doctor-biography">
+                          {doctor.biography}
+                        </p>
                       </>
                     )}
 
                     <h4>Thống kê yêu cầu tư vấn</h4>
-                    <div className="request-stats">
-                      <div className="stat-item">
-                        <FaCalendarCheck className="stat-icon" />
+                    <div className="TopSystem-request-stats">
+                      <div className="TopSystem-stat-item">
+                        <FaCalendarCheck className="TopSystem-stat-icon" />
                         <span>Tổng số: {doctor.requestCount} yêu cầu</span>
                       </div>
 
                       {doctor.requestsByCategory &&
                         Object.keys(doctor.requestsByCategory).length > 0 && (
-                          <div className="category-stats">
+                          <div className="TopSystem-category-stats">
                             <h5>Theo danh mục:</h5>
                             {Object.entries(doctor.requestsByCategory).map(
                               ([category, count]) => (
-                                <div className="category-item" key={category}>
-                                  <FaChild className="category-icon" />
+                                <div
+                                  className="TopSystem-category-item"
+                                  key={category}
+                                >
+                                  <FaChild className="TopSystem-category-icon" />
                                   <span>{category}: </span>
-                                  <span className="category-count">
+                                  <span className="TopSystem-category-count">
                                     {count} yêu cầu
                                   </span>
                                 </div>
@@ -270,9 +281,9 @@ function TopSystem() {
                         )}
                     </div>
 
-                    <div className="doctor-status">
+                    <div className="TopSystem-doctor-status">
                       <span
-                        className={`status-badge ${(
+                        className={`TopSystem-status-badge ${(
                           doctor.status || "unknown"
                         ).toLowerCase()}`}
                       >
@@ -281,7 +292,7 @@ function TopSystem() {
                     </div>
 
                     <button
-                      className="back-button"
+                      className="TopSystem-back-button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setShowDetailIndex(null);
