@@ -9,6 +9,7 @@ function Sidebar() {
   const navigate = useNavigate();
 
   const handleSignOut = () => {
+    localStorage.clear();
     navigate("/login");
   };
   const [activePath, setActivePath] = useState(location.pathname);
