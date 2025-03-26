@@ -6,6 +6,7 @@ import Topbar from "../../layouts/Admin/Topbar/Topbar";
 import PackageChart from "./Chard/PackageChart/PackageChart";
 import RevenueChart from "./Chard/RevenueChart/RevenueChart";
 import MemberChart from "./Chard/MemberChart/MemberChart";
+import TopSystem from "./Chard/Topsystem/TopSystem";
 import "./Admin.css";
 
 function Admin() {
@@ -55,6 +56,9 @@ function Admin() {
           {/* Hiển thị dashboard khi ở trang admin chính */}
           {location.pathname === "/admin" && (
             <div className="admin-dashboard">
+              {/* Hiển thị Top 3 bác sĩ được yêu cầu nhiều nhất */}
+              <TopSystem />
+
               {/* Nút chuyển đổi biểu đồ */}
               <div className="chart-tabs">
                 <button
