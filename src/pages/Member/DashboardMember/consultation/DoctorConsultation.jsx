@@ -3,29 +3,38 @@ import "./DoctorConsultation.css";
 import childApi from "../../../../services/childApi";
 import doctorApi from "../../../../services/DoctorApi";
 import TextEditor from "../../../../pages/Admin/DashboardAdmin/blog/textEditor";
+import moment from "moment";
+
 
 // Thành phần cho thẻ yêu cầu đã gửi
 function ExpandableSentRequestCard({ request, onClick }) {
-  const truncatedText = `ID: ${request.requestId} | Child: ${request.childName} | Category: ${request.category} | Date: ${request.requestDate}`.slice(0, 100) + "...";
-  return (
-    <div className="consultation-sent-card" onClick={() => onClick(request)}>
-      <div className="sent-header">
-        <span className="sent-date">{request.requestDate}</span>
-        <span className="sent-status">{request.status}</span>
+  const truncatedText =
+  `ID: ${request.requestId} | Child: ${request.childName} | ` +
+  `Category: ${request.category} | Date: ${request.requestDate}`
+    .slice(0, 100) + "...";
+    return (
+      <div className="consultation-sent-card" onClick={() => onClick(request)}>
+        <div className="sent-header">
+        <span className="sent-date">
+  {moment(request.requestDate).format("DD/MM/YYYY HH:mm")}
+</span>
+          <span className="sent-status">{request.status}</span>
+        </div>
+        <div className="sent-summary">
+          <p><strong>ID:</strong> {request.requestId}</p>
+          <p><strong>Child:</strong> {request.childName}</p>
+          <p><strong>Category:</strong> {request.category}</p>
+        </div>
+        <div className="truncated-content">{truncatedText}</div>
       </div>
-      <div className="sent-summary">
-        <p><strong>ID:</strong> {request.requestId}</p>
-        <p><strong>Child:</strong> {request.childName}</p>
-        <p><strong>Category:</strong> {request.category}</p>
-      </div>
-      <div className="truncated-content">{truncatedText}</div>
-    </div>
-  );
+    );
 }
 
 // Thành phần cho thẻ phản hồi đã cung cấp
 function ExpandableFeedbackEntry({ feedback, onClick }) {
-  const truncatedText = `Child: ${feedback.childName} | Doctor: ${feedback.doctorName} | Rating: ${feedback.rating} stars`.slice(0, 100) + "...";
+  const truncatedText =
+    `Child: ${feedback.childName} | Doctor: ${feedback.doctorName} | Rating: ${feedback.rating} stars`.slice(0, 100) +
+    "...";
   return (
     <div className="consultation-feedback-card" onClick={() => onClick(feedback)}>
       <div className="feedback-header">
@@ -33,9 +42,15 @@ function ExpandableFeedbackEntry({ feedback, onClick }) {
         <span className="feedback-rating">{feedback.rating} ★</span>
       </div>
       <div className="feedback-summary">
-        <p><strong>Child:</strong> {feedback.childName}</p>
-        <p><strong>Doctor:</strong> {feedback.doctorName}</p>
-        <p><strong>Comment:</strong> {feedback.comment.slice(0, 50)}...</p>
+        <p>
+          <strong>Child:</strong> {feedback.childName}
+        </p>
+        <p>
+          <strong>Doctor:</strong> {feedback.doctorName}
+        </p>
+        <p>
+          <strong>Comment:</strong> {feedback.comment.slice(0, 50)}...
+        </p>
       </div>
       <div className="truncated-content">{truncatedText}</div>
     </div>
@@ -58,10 +73,15 @@ function DoctorConsultation() {
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+
   const steps = ["Enter Information", "Select Doctor", "Confirm"];
+
+  // Dữ liệu phản hồi
   const [consultationResponses, setConsultationResponses] = useState([]);
   const [consultationRequests, setConsultationRequests] = useState({});
   const [sentRequests, setSentRequests] = useState([]);
+
+  // Quản lý modal / phản hồi / feedback
   const [selectedResponse, setSelectedResponse] = useState(null);
   const [selectedSentRequest, setSelectedSentRequest] = useState(null);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
@@ -70,10 +90,10 @@ function DoctorConsultation() {
 
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [rating, setRating] = useState(0);
-  const handleStarClick = (starValue) => setRating(starValue);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedbackSubmitError, setFeedbackSubmitError] = useState("");
+
   const [userFeedback, setUserFeedback] = useState([]);
   const [currentTab, setCurrentTab] = useState("responses");
 
@@ -87,6 +107,7 @@ function DoctorConsultation() {
   }, []);
 
   useEffect(() => {
+    // Mỗi lần chọn response khác => reset form feedback
     setShowFeedbackForm(false);
     setRating(0);
     setComment("");
@@ -94,6 +115,7 @@ function DoctorConsultation() {
     setFeedbackSubmitError("");
   }, [selectedResponse]);
 
+  // Lấy danh sách trẻ
   const fetchChildren = async () => {
     try {
       setLoading(true);
@@ -117,6 +139,7 @@ function DoctorConsultation() {
     }
   };
 
+  // Lấy danh sách bác sĩ
   const fetchDoctors = async () => {
     try {
       const response = await doctorApi.getAllDoctors();
@@ -129,6 +152,7 @@ function DoctorConsultation() {
     }
   };
 
+  // Lấy chuyên môn của bác sĩ
   const fetchDoctorSpecializations = async (doctorId) => {
     try {
       const response = await doctorApi.getDoctorSpecializations(doctorId);
@@ -143,6 +167,7 @@ function DoctorConsultation() {
     }
   };
 
+  // Lấy danh sách Category
   const fetchCategories = async () => {
     try {
       setLoadingCategories(true);
@@ -158,6 +183,7 @@ function DoctorConsultation() {
     }
   };
 
+  // Giúp parse content JSON hoặc text
   const parseContentToObject = (content) => {
     try {
       return JSON.parse(content);
@@ -175,18 +201,22 @@ function DoctorConsultation() {
     }
   };
 
+  // Lấy danh sách phản hồi (ConsultationResponses) của Member
   const fetchConsultationResponses = async () => {
     try {
       const memberId = localStorage.getItem("memberId");
       if (!memberId) throw new Error("Please login to fetch consultation responses");
       const res = await doctorApi.getConsultationResponses(memberId);
       let responses = Array.isArray(res?.data) ? res.data : [res.data];
+
+      // Parse nội dung JSON
       const parsedResponses = responses.map((item) => ({
         ...item,
         content: typeof item.content === "string" ? parseContentToObject(item.content) : item.content,
       }));
       setConsultationResponses(parsedResponses);
 
+      // Lấy chi tiết Request cho mỗi Response
       const requests = {};
       for (const response of parsedResponses) {
         if (response.requestId) {
@@ -200,49 +230,68 @@ function DoctorConsultation() {
     }
   };
 
+  // Lấy danh sách request đã gửi
   const fetchSentRequests = async () => {
     try {
       const memberId = localStorage.getItem("memberId");
-      if (!memberId) throw new Error("Please login to fetch sent requests");
-      const res = await doctorApi.getSentRequests(memberId); // Giả định endpoint tồn tại
-      setSentRequests(Array.isArray(res?.data) ? res.data : []);
+      const res = await doctorApi.getConsultationRequestsByMemberId(memberId);
+      const requestsData = Array.isArray(res.value) 
+      ? res.data.value : Array.isArray(res.data) ? res.data : [];
+      setSentRequests(requestsData);
     } catch (error) {
       console.error("Error fetching sent requests:", error);
+      setSentRequests([]);
     }
   };
 
+  // Lấy feedback của người dùng
   const fetchUserFeedback = async () => {
     try {
       const userId = localStorage.getItem("userId");
       if (!userId) throw new Error("Please login to fetch user feedback");
       const res = await doctorApi.getUserFeedbackOData(userId);
-      const feedbackData = Array.isArray(res.data.value) ? res.data.value : Array.isArray(res.data) ? res.data : [];
+      const feedbackData = Array.isArray(res.data.value)
+        ? res.data.value
+        : Array.isArray(res.data)
+        ? res.data
+        : [];
       setUserFeedback(feedbackData);
     } catch (error) {
       console.error("Error fetching user feedback:", error);
-      setUserFeedback([]); // Đặt về mảng rỗng nếu có lỗi
+      setUserFeedback([]);
     }
   };
 
+  // Chọn child
   const handleChildSelect = (child) => setSelectedChild(child);
+
+  // Chuyển step
   const handleNextStep = () => currentStep < steps.length - 1 && setCurrentStep(currentStep + 1);
   const handleBackStep = () => currentStep > 0 && setCurrentStep(currentStep - 1);
+
+  // Loại bỏ tag HTML
   const stripHtml = (html) => {
     const tmp = document.createElement("div");
     tmp.innerHTML = html;
     return tmp.textContent || tmp.innerText || "";
   };
 
+  // Gửi request mới => status = Pending
   const handleSubmit = async () => {
     try {
       setSubmitLoading(true);
       setSubmitError(null);
+
       const memberId = localStorage.getItem("memberId");
       if (!memberId) throw new Error("Please login to continue");
       if (!selectedChild) throw new Error("Please select a child");
       if (!selectedDoctor) throw new Error("Please select a doctor");
+
       const currentDate = new Date();
-      const requestDate = `${currentDate.toISOString().slice(0, 10)} ${currentDate.toTimeString().slice(0, 8)}.${currentDate.getMilliseconds().toString().padEnd(3, "0")}`;
+      const requestDate = `${currentDate.toISOString().slice(0, 10)} ${currentDate
+        .toTimeString()
+        .slice(0, 8)}.${currentDate.getMilliseconds().toString().padEnd(3, "0")}`;
+
       const plainDescription = stripHtml(consultationContent);
 
       const payload = {
@@ -251,7 +300,7 @@ function DoctorConsultation() {
         childBirth: selectedChild.childBirth,
         doctorId: selectedDoctor.doctorId,
         requestDate,
-        status: "pending",
+        status: "Pending", // Dùng "Pending" để khớp enum
         urgency,
         ...(selectedCategory && { category: selectedCategory }),
         description: plainDescription,
@@ -261,46 +310,80 @@ function DoctorConsultation() {
       await fetchConsultationResponses();
       await fetchSentRequests();
       setShowSuccessModal(true);
+
+      // Reset form
       setCurrentStep(0);
       setSelectedCategory("");
       setConsultationContent("");
       setSelectedDoctor(null);
     } catch (error) {
-      setSubmitError(error.response?.data?.title || error.message || "Unable to send consultation request");
+      setSubmitError(
+        error.response?.data?.title || error.message || "Unable to send consultation request"
+      );
     } finally {
       setSubmitLoading(false);
     }
   };
 
-  const handleSubmitFeedbackAndUpdateStatus = async () => {
-    try {
-      setIsSubmitting(true); // Thêm setIsSubmitting vào đây
-      const userId = localStorage.getItem("userId");
-      if (!userId) throw new Error("Please login to submit feedback");
-      const requestId = Number(selectedResponse.response.requestId);
-      const odataQuery = `?$filter=requestId eq ${requestId}`;
-      const odataRes = await doctorApi.getConsultationResponsesOData(odataQuery);
-      const odataResponses = Array.isArray(odataRes.data) ? odataRes.data : [odataRes.data];
-      const matchingResponse = odataResponses.find((resp) => resp.requestId === requestId);
-      const responseId = matchingResponse?.responseId;
-      if (!responseId) throw new Error("No response ID found for this request");
-      if (rating < 1 || rating > 5) throw new Error("Please select a rating");
-      if (!comment.trim()) throw new Error("Comment cannot be empty");
+  // Thành viên đánh giá + cập nhật status response => Completed
+const handleSubmitFeedbackAndUpdateStatus = async () => {
+  try {
+    setIsSubmitting(true);
 
-      const feedbackDate = new Date().toISOString();
-      const payload = { userId, responseId, rating, comment, feedbackDate, feedbackType: 0, status: 0 };
-      await doctorApi.createRatingFeedback(payload);
-      await doctorApi.updateConsultationResponseStatus(responseId, "Completed");
-      await fetchConsultationResponses();
-      await fetchUserFeedback();
-      setShowFeedbackForm(false);
-    } catch (error) {
-      setFeedbackSubmitError(error.message || "Unable to submit feedback");
-    } finally {
-      setIsSubmitting(false);
+    const userId = localStorage.getItem("userId");
+    if (!userId) throw new Error("Please login to submit feedback");
+
+    // Lấy sẵn responseId từ selectedResponse
+    const responseId = selectedResponse?.response?.responseId;
+    if (!responseId) {
+      throw new Error("No response ID found in selectedResponse!");
     }
-  };
 
+    // Kiểm tra rating & comment
+    if (rating < 1 || rating > 5) {
+      throw new Error("Please select a rating");
+    }
+    if (!comment.trim()) {
+      throw new Error("Comment cannot be empty");
+    }
+
+    // Tạo payload gửi lên API
+    const feedbackDate = new Date().toISOString();
+    const payload = {
+      userId,
+      responseId,
+      rating,
+      comment,
+      feedbackDate,
+      feedbackType: 0,
+      status: 0,  // tuỳ ý bạn sử dụng
+    };
+
+    // Gửi feedback
+    await doctorApi.createRatingFeedback(payload);
+
+    // Cập nhật status của Response => "Completed"
+    await doctorApi.updateConsultationResponseStatus(responseId, "Completed");
+
+    // (Tuỳ chọn) Nếu muốn Request cũng chuyển "Completed", gọi:
+    // const requestId = selectedResponse.response.requestId;
+    // await doctorApi.updateConsultationRequestStatus(requestId, "Completed");
+
+    // Làm mới danh sách Responses & Feedback
+    await fetchConsultationResponses();
+    await fetchUserFeedback();
+
+    // Đóng form feedback
+    setShowFeedbackForm(false);
+
+  } catch (error) {
+    setFeedbackSubmitError(error.message || "Unable to submit feedback");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+  // Render nội dung form theo bước
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
@@ -308,12 +391,21 @@ function DoctorConsultation() {
           <div className="doctor-consultation-form">
             <h3 className="doctor-section-title">Enter Consultation Information</h3>
             <div className="form-container">
+              {/* Chọn child */}
               <div className="input-group">
                 <label htmlFor="child-select">Select Child</label>
                 {loading ? (
-                  <div className="loading-state"><span className="loading-spinner"></span><p>Loading children...</p></div>
+                  <div className="loading-state">
+                    <span className="loading-spinner"></span>
+                    <p>Loading children...</p>
+                  </div>
                 ) : error ? (
-                  <div className="error-state"><p>{error}</p><button onClick={fetchChildren} className="retry-button">Retry</button></div>
+                  <div className="error-state">
+                    <p>{error}</p>
+                    <button onClick={fetchChildren} className="retry-button">
+                      Retry
+                    </button>
+                  </div>
                 ) : children.length === 0 ? (
                   <p>No children found</p>
                 ) : (
@@ -321,15 +413,21 @@ function DoctorConsultation() {
                     id="child-select"
                     className="doctor-child-select"
                     value={selectedChild?.name || ""}
-                    onChange={(e) => handleChildSelect(children.find((child) => child.name === e.target.value))}
+                    onChange={(e) =>
+                      handleChildSelect(children.find((child) => child.name === e.target.value))
+                    }
                   >
                     <option value="">Select a child</option>
                     {children.map((child) => (
-                      <option key={child.name} value={child.name}>{child.name}</option>
+                      <option key={child.name} value={child.name}>
+                        {child.name}
+                      </option>
                     ))}
                   </select>
                 )}
               </div>
+
+              {/* Category */}
               <div className="input-group">
                 <label htmlFor="category-select">Category</label>
                 <select
@@ -347,6 +445,8 @@ function DoctorConsultation() {
                 </select>
                 {loadingCategories && <span className="loading-spinner-small"></span>}
               </div>
+
+              {/* Urgency */}
               <div className="input-group">
                 <label htmlFor="urgency-select">Urgency</label>
                 <select
@@ -362,11 +462,14 @@ function DoctorConsultation() {
                 </select>
               </div>
             </div>
+
+            {/* Nội dung mô tả (TextEditor) */}
             <div className="editor-wrapper">
               <TextEditor value={consultationContent} onChange={setConsultationContent} />
             </div>
           </div>
         );
+
       case 1:
         return (
           <div className="doctor-selection-container">
@@ -375,12 +478,17 @@ function DoctorConsultation() {
               {doctors.map((doctor) => (
                 <div
                   key={doctor.doctorId}
-                  className={`doctor-card ${selectedDoctor?.doctorId === doctor.doctorId ? "selected" : ""}`}
+                  className={`doctor-card ${
+                    selectedDoctor?.doctorId === doctor.doctorId ? "selected" : ""
+                  }`}
                   onClick={() => setSelectedDoctor(doctor)}
                 >
                   <div className="doctor-avatar">
                     <img
-                      src={doctor.user?.profilePicture || `https://ui-avatars.com/api/?name=${doctor.name}&background=random`}
+                      src={
+                        doctor.user?.profilePicture ||
+                        `https://ui-avatars.com/api/?name=${doctor.name}&background=random`
+                      }
                       alt={doctor.name}
                     />
                   </div>
@@ -392,7 +500,9 @@ function DoctorConsultation() {
                     {Array.isArray(doctorSpecializations[doctor.doctorId]) && (
                       <div className="doctor-specializations">
                         {doctorSpecializations[doctor.doctorId].map((spec, index) => (
-                          <p key={index} className="doctor-specialization">{spec.name}</p>
+                          <p key={index} className="doctor-specialization">
+                            {spec.name}
+                          </p>
                         ))}
                       </div>
                     )}
@@ -402,26 +512,40 @@ function DoctorConsultation() {
             </div>
           </div>
         );
+
       case 2:
         return (
           <div className="doctor-review-container">
             <h3 className="doctor-section-title">Review Consultation Information</h3>
             <div className="review-section">
-              <div className="review-item"><strong>Child:</strong> {selectedChild?.name || "Not selected"}</div>
-              <div className="review-item"><strong>Category:</strong> {selectedCategory || "N/A"}</div>
-              <div className="review-item"><strong>Urgency:</strong> {urgency}</div>
+              <div className="review-item">
+                <strong>Child:</strong> {selectedChild?.name || "Not selected"}
+              </div>
+              <div className="review-item">
+                <strong>Category:</strong> {selectedCategory || "N/A"}
+              </div>
+              <div className="review-item">
+                <strong>Urgency:</strong> {urgency}
+              </div>
               <div className="review-item consultation-details">
                 <strong>Details:</strong>
-                <div className="consultation-details-content" dangerouslySetInnerHTML={{ __html: consultationContent }} />
+                <div
+                  className="consultation-details-content"
+                  dangerouslySetInnerHTML={{ __html: consultationContent }}
+                />
               </div>
             </div>
+
             {selectedDoctor && (
               <div className="doctor-review-section">
                 <h4 className="doctor-section-title">Selected Doctor</h4>
                 <div className="doctor-profile-card selected">
                   <div className="doctor-profile-header">
                     <img
-                      src={selectedDoctor.user?.profilePicture || `https://ui-avatars.com/api/?name=${selectedDoctor.name}&background=random`}
+                      src={
+                        selectedDoctor.user?.profilePicture ||
+                        `https://ui-avatars.com/api/?name=${selectedDoctor.name}&background=random`
+                      }
                       alt={selectedDoctor.name}
                       className="doctor-profile-avatar"
                     />
@@ -436,7 +560,9 @@ function DoctorConsultation() {
                     {Array.isArray(doctorSpecializations[selectedDoctor.doctorId]) && (
                       <div className="doctor-specializations">
                         {doctorSpecializations[selectedDoctor.doctorId].map((spec, index) => (
-                          <p key={index} className="doctor-profile-specialization">{spec.name}</p>
+                          <p key={index} className="doctor-profile-specialization">
+                            {spec.name}
+                          </p>
                         ))}
                       </div>
                     )}
@@ -444,6 +570,7 @@ function DoctorConsultation() {
                 </div>
               </div>
             )}
+
             <div className="submit-section">
               {submitError && <div className="submit-error">{submitError}</div>}
               <button className="doctor-action-button" onClick={handleSubmit} disabled={submitLoading}>
@@ -452,11 +579,13 @@ function DoctorConsultation() {
             </div>
           </div>
         );
+
       default:
         return null;
     }
   };
 
+  // Render nội dung của các tab (History)
   const renderTabContent = () => {
     switch (currentTab) {
       case "responses":
@@ -472,14 +601,20 @@ function DoctorConsultation() {
         ) : (
           <p>No consultation responses available.</p>
         );
-      case "sentRequests":
-        return sentRequests.length > 0 ? (
-          sentRequests.map((req, index) => (
-            <ExpandableSentRequestCard key={index} request={req} onClick={setSelectedSentRequest} />
-          ))
-        ) : (
-          <p>No sent requests available.</p>
-        );
+
+        case "sentRequests":
+          return sentRequests.length > 0 ? (
+            sentRequests.map((req, index) => (
+              <ExpandableSentRequestCard
+                key={index}
+                request={req}
+                onClick={setSelectedSentRequest}
+              />
+            ))
+          ) : (
+            <p>No sent requests available.</p>
+          );
+
       case "feedback":
         return userFeedback.length > 0 ? (
           userFeedback.map((fb, index) => (
@@ -488,6 +623,7 @@ function DoctorConsultation() {
         ) : (
           <p>No feedback provided yet.</p>
         );
+
       default:
         return null;
     }
@@ -496,13 +632,16 @@ function DoctorConsultation() {
   return (
     <div className="doctor-consultation">
       <div className="doctor-grid-container">
+        {/* Cột gửi yêu cầu */}
         <main className="doctor-request-column">
           <div className="doctor-request">
             <div className="doctor-steps">
               {steps.map((step, index) => (
                 <div
                   key={index}
-                  className={`doctor-step-item ${currentStep === index ? "active" : ""} ${currentStep > index ? "completed" : ""}`}
+                  className={`doctor-step-item ${
+                    currentStep === index ? "active" : ""
+                  } ${currentStep > index ? "completed" : ""}`}
                 >
                   <div className="step-circle">{index + 1}</div>
                   <span className="step-label">{step}</span>
@@ -513,16 +652,21 @@ function DoctorConsultation() {
               {renderStepContent()}
               <div className="doctor-navigation-buttons">
                 {currentStep > 0 && (
-                  <button className="doctor-back-button" onClick={handleBackStep}>Back</button>
+                  <button className="doctor-back-button" onClick={handleBackStep}>
+                    Back
+                  </button>
                 )}
                 {currentStep < steps.length - 1 && (
-                  <button className="doctor-next-button" onClick={handleNextStep}>Next</button>
+                  <button className="doctor-next-button" onClick={handleNextStep}>
+                    Next
+                  </button>
                 )}
               </div>
             </section>
           </div>
         </main>
 
+        {/* Cột History */}
         <aside className="doctor-response-column">
           <h3 className="section-title">History</h3>
           <div className="tab-container">
@@ -549,10 +693,13 @@ function DoctorConsultation() {
         </aside>
       </div>
 
+      {/* Modal: Xem chi tiết Response */}
       {selectedResponse && (
         <div className="modal-overlay" onClick={() => setSelectedResponse(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedResponse(null)}>×</button>
+            <button className="modal-close" onClick={() => setSelectedResponse(null)}>
+              ×
+            </button>
             <h3 className="modal-title">Consultation Response Details</h3>
             <button
               className="feedback-button"
@@ -566,12 +713,24 @@ function DoctorConsultation() {
                 <h4>Request Information</h4>
                 {selectedResponse.request ? (
                   <>
-                    <p><strong>Member:</strong> {selectedResponse.request.memberName}</p>
-                    <p><strong>Child:</strong> {selectedResponse.request.childName}</p>
-                    <p><strong>Category:</strong> {selectedResponse.request.category}</p>
-                    <p><strong>Urgency:</strong> {selectedResponse.request.urgency}</p>
-                    <p><strong>Description:</strong> {selectedResponse.request.description}</p>
-                    <p><strong>Request Date:</strong> {selectedResponse.request.requestDate}</p>
+                    <p>
+                      <strong>Member:</strong> {selectedResponse.request.memberName}
+                    </p>
+                    <p>
+                      <strong>Child:</strong> {selectedResponse.request.childName}
+                    </p>
+                    <p>
+                      <strong>Category:</strong> {selectedResponse.request.category}
+                    </p>
+                    <p>
+                      <strong>Urgency:</strong> {selectedResponse.request.urgency}
+                    </p>
+                    <p>
+                      <strong>Description:</strong> {selectedResponse.request.description}
+                    </p>
+                    <p>
+                      <strong>Request Date:</strong> {selectedResponse.request.requestDate}
+                    </p>
                   </>
                 ) : (
                   <p>No request details available.</p>
@@ -579,15 +738,37 @@ function DoctorConsultation() {
               </div>
               <div className="response-section">
                 <h4>Response Information</h4>
-                <p><strong>Date:</strong> {selectedResponse.response.responseDate}</p>
-                <p><strong>Doctor:</strong> {selectedResponse.response.doctorName}</p>
-                <p><strong>Status:</strong> {selectedResponse.response.status}</p>
-                <p><strong>Greeting:</strong> {selectedResponse.response.content.greeting || "N/A"}</p>
-                <p><strong>Approval Message:</strong> {selectedResponse.response.content.approvalMessage || "N/A"}</p>
-                <p><strong>Advice:</strong> {selectedResponse.response.content.advice || "N/A"}</p>
-                <p><strong>Follow-Up:</strong> {selectedResponse.response.content.followUp || "N/A"}</p>
-                <p><strong>Helpful:</strong> {selectedResponse.response.isHelpful ? "Yes" : "No"}</p>
+                <p>
+                  <strong>Date:</strong> {selectedResponse.response.responseDate}
+                </p>
+                <p>
+                  <strong>Doctor:</strong> {selectedResponse.response.doctorName}
+                </p>
+                <p>
+                  <strong>Status:</strong> {selectedResponse.response.status}
+                </p>
+                <p>
+                  <strong>Greeting:</strong>{" "}
+                  {selectedResponse.response.content.greeting || "N/A"}
+                </p>
+                <p>
+                  <strong>Approval Message:</strong>{" "}
+                  {selectedResponse.response.content.approvalMessage || "N/A"}
+                </p>
+                <p>
+                  <strong>Advice:</strong>{" "}
+                  {selectedResponse.response.content.advice || "N/A"}
+                </p>
+                <p>
+                  <strong>Follow-Up:</strong>{" "}
+                  {selectedResponse.response.content.followUp || "N/A"}
+                </p>
+                <p>
+                  <strong>Helpful:</strong>{" "}
+                  {selectedResponse.response.isHelpful ? "Yes" : "No"}
+                </p>
               </div>
+
               {showFeedbackForm && (
                 <div className="feedback-form">
                   <h4>Rating and Feedback</h4>
@@ -596,7 +777,7 @@ function DoctorConsultation() {
                       <span
                         key={star}
                         className={`star ${star <= rating ? "selected" : ""}`}
-                        onClick={() => handleStarClick(star)}
+                        onClick={() => setRating(star)}
                       >
                         ★
                       </span>
@@ -619,7 +800,9 @@ function DoctorConsultation() {
                   >
                     {isSubmitting ? "Submitting..." : "Submit Feedback"}
                   </button>
-                  {feedbackSubmitError && <p className="submit-error">{feedbackSubmitError}</p>}
+                  {feedbackSubmitError && (
+                    <p className="submit-error">{feedbackSubmitError}</p>
+                  )}
                 </div>
               )}
             </div>
@@ -627,59 +810,96 @@ function DoctorConsultation() {
         </div>
       )}
 
+      {/* Modal: Xem chi tiết Sent Request */}
       {selectedSentRequest && (
         <div className="modal-overlay" onClick={() => setSelectedSentRequest(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedSentRequest(null)}>×</button>
+            <button className="modal-close" onClick={() => setSelectedSentRequest(null)}>
+              ×
+            </button>
             <h3 className="modal-title">Sent Request Details</h3>
             <div className="response-details">
               <div className="request-section">
                 <h4>Request Information</h4>
-                <p><strong>ID:</strong> {selectedSentRequest.requestId}</p>
-                <p><strong>Child:</strong> {selectedSentRequest.childName}</p>
-                <p><strong>Category:</strong> {selectedSentRequest.category}</p>
-                <p><strong>Urgency:</strong> {selectedSentRequest.urgency}</p>
-                <p><strong>Description:</strong> {selectedSentRequest.description}</p>
-                <p><strong>Date:</strong> {selectedSentRequest.requestDate}</p>
-                <p><strong>Status:</strong> {selectedSentRequest.status}</p>
+                <p>
+                  <strong>ID:</strong> {selectedSentRequest.requestId}
+                </p>
+                <p>
+                  <strong>Child:</strong> {selectedSentRequest.childName}
+                </p>
+                <p>
+                  <strong>Category:</strong> {selectedSentRequest.category}
+                </p>
+                <p>
+                  <strong>Urgency:</strong> {selectedSentRequest.urgency}
+                </p>
+                <p>
+                  <strong>Description:</strong> {selectedSentRequest.description}
+                </p>
+                <p>
+                  <strong>Date:</strong> {selectedSentRequest.requestDate}
+                </p>
+                <p>
+                  <strong>Status:</strong> {selectedSentRequest.status}
+                </p>
               </div>
             </div>
           </div>
         </div>
       )}
 
+      {/* Modal: Xem chi tiết Feedback */}
       {selectedFeedback && (
         <div className="modal-overlay" onClick={() => setSelectedFeedback(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedFeedback(null)}>×</button>
+            <button className="modal-close" onClick={() => setSelectedFeedback(null)}>
+              ×
+            </button>
             <h3 className="modal-title">Feedback Details</h3>
             <div className="response-details">
               <div className="feedback-section">
                 <h4>Feedback Information</h4>
-                <p><strong>Child:</strong> {selectedFeedback.childName}</p>
-                <p><strong>Doctor:</strong> {selectedFeedback.doctorName}</p>
-                <p><strong>Category:</strong> {selectedFeedback.categoryName}</p>
-                <p><strong>Rating:</strong> {selectedFeedback.rating} ★</p>
-                <p><strong>Comment:</strong> {selectedFeedback.comment}</p>
-                <p><strong>Date:</strong> {selectedFeedback.feedbackDate}</p>
+                <p>
+                  <strong>Child:</strong> {selectedFeedback.childName}
+                </p>
+                <p>
+                  <strong>Doctor:</strong> {selectedFeedback.doctorName}
+                </p>
+                <p>
+                  <strong>Category:</strong> {selectedFeedback.categoryName}
+                </p>
+                <p>
+                  <strong>Rating:</strong> {selectedFeedback.rating} ★
+                </p>
+                <p>
+                  <strong>Comment:</strong> {selectedFeedback.comment}
+                </p>
+                <p>
+                  <strong>Date:</strong> {selectedFeedback.feedbackDate}
+                </p>
               </div>
             </div>
           </div>
         </div>
       )}
 
+      {/* Modal: Thông báo success */}
       {showSuccessModal && (
         <div className="modal-overlay" onClick={() => setShowSuccessModal(false)}>
           <div className="success-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="success-modal-header">
               <h3>Success!</h3>
-              <button className="modal-close" onClick={() => setShowSuccessModal(false)}>×</button>
+              <button className="modal-close" onClick={() => setShowSuccessModal(false)}>
+                ×
+              </button>
             </div>
             <div className="success-modal-body">
               <p>Consultation request sent successfully!</p>
             </div>
             <div className="success-modal-footer">
-              <button className="success-modal-button" onClick={() => setShowSuccessModal(false)}>OK</button>
+              <button className="success-modal-button" onClick={() => setShowSuccessModal(false)}>
+                OK
+              </button>
             </div>
           </div>
         </div>
@@ -688,9 +908,13 @@ function DoctorConsultation() {
   );
 }
 
+// Card hiển thị mỗi response
 function ExpandableResponseCard({ response, request, onClick }) {
-  const combinedText = `Date: ${response.responseDate} | Doctor: ${response.doctorName} | Child: ${request?.childName || "N/A"} | Category: ${request?.category || "N/A"}`;
-  const truncatedText = combinedText.length > 100 ? combinedText.slice(0, 100) + "..." : combinedText;
+  const combinedText = `Date: ${response.responseDate} | Doctor: ${
+    response.doctorName
+  } | Child: ${request?.childName || "N/A"} | Category: ${request?.category || "N/A"}`;
+  const truncatedText =
+    combinedText.length > 100 ? combinedText.slice(0, 100) + "..." : combinedText;
 
   return (
     <div className="consultation-response-card" onClick={() => onClick({ response, request })}>
@@ -699,9 +923,15 @@ function ExpandableResponseCard({ response, request, onClick }) {
         <span className="response-status">{response.status}</span>
       </div>
       <div className="response-summary">
-        <p><strong>Doctor:</strong> {response.doctorName}</p>
-        <p><strong>Child:</strong> {request?.childName || "N/A"}</p>
-        <p><strong>Category:</strong> {request?.category || "N/A"}</p>
+        <p>
+          <strong>Doctor:</strong> {response.doctorName}
+        </p>
+        <p>
+          <strong>Child:</strong> {request?.childName || "N/A"}
+        </p>
+        <p>
+          <strong>Category:</strong> {request?.category || "N/A"}
+        </p>
       </div>
       <div className="truncated-content">{truncatedText}</div>
     </div>
