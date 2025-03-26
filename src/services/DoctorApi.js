@@ -36,10 +36,8 @@ const doctorApi = {
   },
 
   // Thêm hàm updateConsultationRequestStatus
-  updateConsultationRequestStatus: async (requestId, status) => {
-    const response = await api.put(`/api/ConsultationRequests/${requestId}`, {
-      status,
-    });
+  updateConsultationRequestsStatus: async (requestId, statusString) => {
+    const response = await api.put(`/ConsultationRequests/${requestId}/${statusString}`);
     return response.data;
   },
 
@@ -70,17 +68,13 @@ const doctorApi = {
   },
   
   updateConsultationResponseStatus: async (responseId, statusString) => {
-  try {
-    const response = await api.put(`/ConsultationResponses/${responseId}/status`, { status: statusString });
+    const response = await api.put(`/ConsultationResponses/${responseId}/${statusString}`);
     return response.data;
-  } catch (error) {
-    console.error("Error updating ConsultationResponse status:", error);
-    throw error;
-  }
-},
+  },
+
 getUserFeedbackOData: async (userId) => {
   try {
-    const query = `?$filter=userId eq '${userId}'`; // Lọc theo userId
+    const query = `?$filter=userId eq ${userId}`; // Lọc theo userId
     const response = await api.get(`/RatingFeedback/odata${query}`);
     console.log("Raw OData Feedback Response:", response); // Log để kiểm tra
     return response;
@@ -90,11 +84,27 @@ getUserFeedbackOData: async (userId) => {
   }
 },
 
+getConsultationRequestsByMemberId: async (memberId) => {
+  try {
+    const query = `?$filter=memberId eq ${memberId}`;
+    const response = await api.get(`/ConsultationRequests/odata${query}`);
+    console.log("Raw OData Response from API:", response);
+    return response; 
+  } catch (error) {
+    console.error("Error fetching OData requests:", error.response || error.message);
+    throw error;
+  } 
+},
+
   getDoctorsFromEndpoint: async () => {
     const response = await api.get("/Doctors");
     return response.data;
   },
 
+
+
+
+//admin api
   // Thêm hàm mới để lấy Top N bác sĩ được yêu cầu nhiều nhất
   getTopRequestedDoctors: async (limit = 3) => {
     try {
