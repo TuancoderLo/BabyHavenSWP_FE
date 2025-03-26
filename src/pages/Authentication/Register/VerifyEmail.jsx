@@ -1,32 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./VerifyEmail.css"; // Sử dụng file CSS riêng
+import "./VerifyEmail.css"; // Using separate CSS file
 import api from "../../../config/axios";
 
 const VerifyEmail = () => {
-  const [step, setStep] = useState(1); // 1: Nhập OTP, 2: Hoàn thành
+  const [step, setStep] = useState(1); // 1: Enter OTP, 2: Completed
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [registrationData, setRegistrationData] = useState(null);
-  const [remainingTime, setRemainingTime] = useState(60); // Giảm xuống 1 phút (60 giây)
+  const [remainingTime, setRemainingTime] = useState(60); // Reduced to 1 minute (60 seconds)
   const navigate = useNavigate();
 
-  // Email từ quá trình đăng ký
+  // Email from registration process
   const email = localStorage.getItem("pending_email") || "";
 
   useEffect(() => {
-    // Lấy dữ liệu đăng ký từ localStorage
+    // Get registration data from localStorage
     const storedData = localStorage.getItem("registration_data");
     if (storedData) {
       setRegistrationData(JSON.parse(storedData));
     } else {
-      // Nếu không có dữ liệu, chuyển hướng về trang đăng ký
+      // If no data, redirect to registration page
       navigate("/register");
     }
   }, [navigate]);
 
-  // Đếm ngược thời gian OTP - giảm xuống còn 1 phút
+  // OTP countdown timer - reduced to 1 minute
   useEffect(() => {
     if (step === 1 && remainingTime > 0) {
       const timer = setTimeout(() => {
@@ -34,19 +34,19 @@ const VerifyEmail = () => {
       }, 1000);
       return () => clearTimeout(timer);
     } else if (step === 1 && remainingTime <= 0) {
-      // Khi thời gian OTP hết hạn (đạt 0), đợi 2 giây và chuyển hướng
+      // When OTP time expires (reaches 0), wait 2 seconds and redirect
       const redirectTimer = setTimeout(() => {
-        // Hiển thị thông báo
+        // Display notification
         setError(
-          "Thời gian nhập OTP đã hết. Hệ thống sẽ chuyển hướng về trang đăng ký."
+          "OTP entry time has expired. The system will redirect you to the registration page."
         );
 
-        // Đợi 2 giây trước khi chuyển hướng
+        // Wait 2 seconds before redirecting
         setTimeout(() => {
-          // Xóa dữ liệu đăng ký tạm thời
+          // Remove temporary registration data
           localStorage.removeItem("registration_data");
           localStorage.removeItem("pending_email");
-          // Chuyển hướng về trang đăng ký
+          // Redirect to registration page
           navigate("/register");
         }, 2000);
       }, 500);
@@ -55,41 +55,41 @@ const VerifyEmail = () => {
     }
   }, [remainingTime, step, navigate]);
 
-  // Format thời gian đếm ngược
+  // Format countdown time
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
-  // Kiểm tra nếu thời gian sắp hết
-  const isTimeExpiring = remainingTime <= 20; // 20 giây cuối cho thời gian 1 phút
+  // Check if time is about to expire
+  const isTimeExpiring = remainingTime <= 20; // Last 20 seconds for 1 minute time
 
-  // Xử lý khi submit form nhập OTP
+  // Handle OTP form submission
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    // Kiểm tra OTP đơn giản
+    // Simple OTP validation
     if (otp.length !== 6 || isNaN(Number(otp))) {
-      setError("OTP phải có 6 chữ số");
+      setError("OTP must be 6 digits");
       return;
     }
 
     try {
       setIsLoading(true);
 
-      // Lấy email và dữ liệu đăng ký từ localStorage
+      // Get email and registration data from localStorage
       const email = localStorage.getItem("pending_email");
       const userData = JSON.parse(localStorage.getItem("registration_data"));
 
       if (!userData || !email) {
-        setError("Không tìm thấy thông tin đăng ký!");
+        setError("Registration information not found!");
         setIsLoading(false);
         return;
       }
 
-      // Cấu trúc lại dữ liệu theo đúng định dạng mà API yêu cầu
+      // Restructure data according to API requirements
       const verifyData = {
         email: userData.email,
         username: userData.username,
@@ -104,7 +104,7 @@ const VerifyEmail = () => {
 
       console.log("Sending verification data:", verifyData);
 
-      // Gọi API để xác thực OTP và hoàn tất đăng ký
+      // Call API to verify OTP and complete registration
       const response = await api.post(
         `Authentication/VerifyRegistrationOtp?otp=${otp}`,
         verifyData
@@ -113,22 +113,20 @@ const VerifyEmail = () => {
       console.log("Verification response:", response.data);
 
       if (response.data.status === 1) {
-        // Xác thực thành công, tài khoản đã được tạo
-        // Xóa dữ liệu đăng ký tạm thời
+        // Verification successful, account has been created
+        // Remove temporary registration data
         localStorage.removeItem("registration_data");
         localStorage.removeItem("pending_email");
 
-        setStep(2); // Chuyển tới bước hoàn thành
+        setStep(2); // Move to completion step
       } else {
-        setError(
-          response.data.message || "Mã OTP không hợp lệ. Vui lòng thử lại."
-        );
+        setError(response.data.message || "Invalid OTP. Please try again.");
 
-        // Nếu nhập sai OTP và còn ít thời gian (dưới 10 giây), tự động chuyển về trang đăng ký
+        // If OTP is incorrect and little time remains (under 10 seconds), automatically redirect to registration page
         if (remainingTime <= 10) {
           setTimeout(() => {
             setError(
-              "Thời gian xác thực đã gần hết. Hệ thống sẽ chuyển hướng về trang đăng ký."
+              "Verification time is almost up. The system will redirect you to the registration page."
             );
 
             setTimeout(() => {
@@ -140,66 +138,65 @@ const VerifyEmail = () => {
         }
       }
     } catch (error) {
-      console.error("Lỗi khi xác thực OTP:", error);
+      console.error("Error verifying OTP:", error);
       setError(
-        error.response?.data?.message || "Đã xảy ra lỗi. Vui lòng thử lại."
+        error.response?.data?.message || "An error occurred. Please try again."
       );
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Gửi lại OTP
+  // Resend OTP
   const handleResendOtp = async () => {
     try {
       setIsLoading(true);
-      // Reset thời gian ngay khi bấm vào nút gửi lại
+      // Reset the timer immediately when clicking the resend button
       setRemainingTime(60);
 
-      // Lấy email từ localStorage
+      // Get email from localStorage
       const email = localStorage.getItem("pending_email");
 
       if (!email) {
-        setError("Không tìm thấy thông tin email!");
+        setError("Email information not found!");
         setIsLoading(false);
         return;
       }
 
-      // Gọi API để gửi lại OTP - sử dụng endpoint Register
+      // Call API to resend OTP - use Register endpoint
       const response = await api.post("Authentication/Register", {
         email: email,
       });
 
       if (response.data.status === 1) {
-        // Đã reset thời gian ở trên rồi
-        setError(""); // Xóa thông báo lỗi (nếu có)
+        // Time has already been reset above
+        setError(""); // Clear error message (if any)
       } else {
         setError(
-          response.data.message ||
-            "Không thể gửi lại OTP. Vui lòng thử lại sau."
+          response.data.message || "Cannot resend OTP. Please try again later."
         );
       }
     } catch (error) {
-      console.error("Lỗi khi gửi lại OTP:", error);
+      console.error("Error resending OTP:", error);
       setError(
-        error.response?.data?.message || "Đã xảy ra lỗi. Vui lòng thử lại."
+        error.response?.data?.message || "An error occurred. Please try again."
       );
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Quay về trang đăng nhập
+  // Return to login page
   const handleReturnToLogin = () => {
     navigate("/login");
   };
 
-  // Xử lý khi người dùng nhập OTP
+  // Handle OTP input
   const handleOtpChange = (e) => {
-    // Nếu OTP đã hết hạn, không cho phép nhập
+    // If OTP has expired, do not allow input
     if (remainingTime <= 0) {
       setError(
-        "Thời gian nhập OTP đã hết. Vui lòng đợi hệ thống chuyển hướng về trang đăng ký."
+        "OTP entry time has expired. Please wait for the system to redirect to the registration page."
       );
       return;
     }
@@ -211,109 +208,113 @@ const VerifyEmail = () => {
     <div className="verify-email-container">
       <div className="verify-email-card">
         <h2 className="verify-email-title">
-          {step === 1 && "Xác thực email"}
-          {step === 2 && "Hoàn tất"}
+          {step === 1 && "Email Verification"}
+          {step === 2 && "Completed"}
         </h2>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && <div className="verify-email-error-message">{error}</div>}
 
-        {/* Bước 1: Nhập OTP */}
+        {/* Step 1: Enter OTP */}
         {step === 1 && (
           <form onSubmit={handleOtpSubmit}>
-            <p className="instruction-text">
-              Vui lòng nhập mã xác thực gồm 6 chữ số đã được gửi đến email{" "}
-              <strong>{email}</strong> của bạn để hoàn tất việc đăng ký tài
-              khoản. Bạn có <strong>1 phút</strong> để nhập mã xác thực.
+            <p className="verify-email-instruction-text">
+              Please enter the 6-digit verification code sent to your email{" "}
+              <strong>{email}</strong> to complete your account registration.
+              You have <strong>1 minute</strong> to enter the verification code.
               {remainingTime <= 20 && (
-                <span className="warning-text">
+                <span className="verify-email-warning-text">
                   <br />
-                  Thời gian nhập mã sắp hết! Vui lòng nhập nhanh.
+                  Time is running out! Please enter quickly.
                 </span>
               )}
             </p>
-            <div className="form-group">
-              <label htmlFor="otp">Mã xác thực</label>
+            <div className="verify-email-form-group">
+              <label htmlFor="otp">Verification Code</label>
               <input
                 type="text"
                 id="otp"
                 value={otp}
                 onChange={handleOtpChange}
-                placeholder="Nhập mã OTP 6 chữ số"
+                placeholder="Enter 6-digit OTP"
                 maxLength={6}
                 required
-                className="otp-input"
+                className="verify-email-otp-input"
                 autoComplete="off"
                 disabled={remainingTime <= 0}
               />
             </div>
 
-            <p className={`time-remaining ${isTimeExpiring ? "expiring" : ""}`}>
-              Thời gian còn lại: {formatTime(remainingTime)}
+            <p
+              className={`verify-email-time-remaining ${
+                isTimeExpiring ? "expiring" : ""
+              }`}
+            >
+              Time remaining: {formatTime(remainingTime)}
             </p>
 
             {remainingTime <= 0 ? (
-              <p className="expired-message">
-                Thời gian nhập mã đã hết. Đang chuyển hướng về trang đăng ký...
+              <p className="verify-email-expired-message">
+                Code entry time has expired. Redirecting to registration page...
               </p>
             ) : remainingTime <= 20 ? (
-              <p className="resend-link urgent">
+              <p className="verify-email-resend-link urgent">
                 <button
                   type="button"
                   onClick={handleResendOtp}
-                  className="resend-button urgent"
+                  className="verify-email-resend-button urgent"
                   disabled={isLoading}
                 >
-                  Gửi lại mã ngay
+                  Resend code now
                 </button>
               </p>
             ) : (
-              <p className="resend-link">
-                Không nhận được mã?
+              <p className="verify-email-resend-link">
+                Didn't receive the code?
                 <button
                   type="button"
                   onClick={handleResendOtp}
-                  className="resend-button"
+                  className="verify-email-resend-button"
                   disabled={isLoading}
                 >
-                  Gửi lại mã
+                  Resend code
                 </button>
               </p>
             )}
 
-            <div className="button-group">
+            <div className="verify-email-button-group">
               <button
                 type="button"
-                className="secondary-button"
+                className="verify-email-secondary-button"
                 onClick={handleReturnToLogin}
                 disabled={isLoading}
               >
-                Hủy
+                Cancel
               </button>
               <button
                 type="submit"
-                className="primary-button"
+                className="verify-email-primary-button"
                 disabled={isLoading || remainingTime <= 0}
               >
-                {isLoading ? "Đang xử lý..." : "Xác nhận"}
+                {isLoading ? "Processing..." : "Confirm"}
               </button>
             </div>
           </form>
         )}
 
-        {/* Bước 2: Hoàn tất */}
+        {/* Step 2: Complete */}
         {step === 2 && (
-          <div className="success-container">
-            <div className="success-icon">✓</div>
-            <p className="success-message">
-              Chúc mừng! Bạn đã đăng ký tài khoản thành công. Giờ đây bạn có thể
-              đăng nhập để sử dụng các dịch vụ của chúng tôi.
+          <div className="verify-email-success-container">
+            <div className="verify-email-success-icon">✓</div>
+            <p className="verify-email-success-message">
+              Congratulations! You have successfully registered your account.
+              You can now log in to use our services.
             </p>
             <button
               type="button"
-              className="primary-button"
+              className="verify-email-primary-button"
               onClick={handleReturnToLogin}
             >
-              Đăng nhập ngay
+              Log in now
             </button>
           </div>
         )}

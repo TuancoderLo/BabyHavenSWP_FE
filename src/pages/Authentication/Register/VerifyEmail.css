@@ -50,11 +50,11 @@
 }
 
 /* Thiết kế form */
-.form-group {
+.verify-email-form-group {
   margin-bottom: 25px;
 }
 
-.form-group label {
+.verify-email-form-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
@@ -62,7 +62,7 @@
   font-size: 16px;
 }
 
-.form-group input {
+.verify-email-form-group input {
   width: 100%;
   padding: 14px;
   border: 1px solid #ddd;
@@ -72,7 +72,7 @@
   background-color: #f8f9fa;
 }
 
-.form-group input:focus {
+.verify-email-form-group input:focus {
   border-color: #6a11cb;
   outline: none;
   background-color: #fff;
@@ -80,23 +80,33 @@
 }
 
 /* OTP Input */
-.otp-input {
-  letter-spacing: 4px;
+.verify-email-otp-input {
+  letter-spacing: normal;
   font-size: 20px;
   text-align: center;
   font-weight: 600;
 }
 
+/* Chỉ áp dụng letter-spacing cho input khi đã có giá trị (không phải placeholder) */
+.verify-email-otp-input[value]:not([value=""]) {
+  letter-spacing: 4px;
+}
+
+/* Hoặc thêm style riêng cho placeholder */
+.verify-email-otp-input::placeholder {
+  letter-spacing: normal;
+}
+
 /* Buttons */
-.button-group {
+.verify-email-button-group {
   display: flex;
   justify-content: space-between;
   gap: 15px;
   margin-top: 30px;
 }
 
-.primary-button,
-.secondary-button {
+.verify-email-primary-button,
+.verify-email-secondary-button {
   padding: 12px 24px;
   border: none;
   border-radius: 8px;
@@ -107,29 +117,29 @@
   width: 100%;
 }
 
-.primary-button {
+.verify-email-primary-button {
   background: linear-gradient(to right, #6a11cb 0%, #2575fc 100%);
   color: white;
 }
 
-.primary-button:hover {
+.verify-email-primary-button:hover {
   background: linear-gradient(to right, #5b0fb0 0%, #1e65d6 100%);
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(106, 17, 203, 0.3);
 }
 
-.secondary-button {
+.verify-email-secondary-button {
   background-color: #f1f1f1;
   color: #333;
 }
 
-.secondary-button:hover {
+.verify-email-secondary-button:hover {
   background-color: #e0e0e0;
   transform: translateY(-2px);
 }
 
 /* Thông báo lỗi */
-.error-message {
+.verify-email-error-message {
   background-color: rgba(244, 67, 54, 0.1);
   color: #f44336;
   padding: 12px;
@@ -141,7 +151,7 @@
 }
 
 /* Hướng dẫn */
-.instruction-text {
+.verify-email-instruction-text {
   margin-bottom: 25px;
   color: #666;
   text-align: center;
@@ -152,14 +162,14 @@
 }
 
 /* Màn hình thành công */
-.success-container {
+.verify-email-success-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
 }
 
-.success-icon {
+.verify-email-success-icon {
   font-size: 80px;
   color: #4caf50;
   margin-bottom: 20px;
@@ -170,10 +180,10 @@
   justify-content: center;
   align-items: center;
   border-radius: 50%;
-  animation: pulse 1.5s infinite;
+  animation: verify-email-pulse 1.5s infinite;
 }
 
-@keyframes pulse {
+@keyframes verify-email-pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
   }
@@ -185,7 +195,7 @@
   }
 }
 
-.success-message {
+.verify-email-success-message {
   font-size: 18px;
   margin-bottom: 30px;
   color: #333;
@@ -193,7 +203,7 @@
 }
 
 /* Thời gian đếm ngược - hiệu ứng mạnh hơn cho thời gian 1 phút */
-.time-remaining {
+.verify-email-time-remaining {
   text-align: center;
   margin: 15px 0;
   font-size: 20px;
@@ -207,20 +217,20 @@
   align-items: center;
 }
 
-.time-remaining:before {
+.verify-email-time-remaining:before {
   content: "⏱️";
   margin-right: 8px;
   font-size: 20px;
 }
 
-.time-remaining.expiring {
+.verify-email-time-remaining.expiring {
   color: #f44336;
   background-color: rgba(244, 67, 54, 0.1);
-  animation: fastBlink 0.8s ease-in-out infinite alternate;
+  animation: verify-email-fastBlink 0.8s ease-in-out infinite alternate;
   font-size: 22px;
 }
 
-@keyframes fastBlink {
+@keyframes verify-email-fastBlink {
   from {
     opacity: 1;
     transform: scale(1);
@@ -232,13 +242,13 @@
 }
 
 /* Nút gửi lại mã */
-.resend-link {
+.verify-email-resend-link {
   text-align: center;
   margin: 15px 0;
   color: #666;
 }
 
-.resend-button {
+.verify-email-resend-button {
   background: none;
   border: none;
   color: #6a11cb;
@@ -249,12 +259,12 @@
   transition: color 0.3s;
 }
 
-.resend-button:hover {
+.verify-email-resend-button:hover {
   color: #2575fc;
 }
 
 /* Thông báo khi OTP hết hạn */
-.expired-message {
+.verify-email-expired-message {
   text-align: center;
   margin: 15px 0;
   color: #f44336;
@@ -262,10 +272,10 @@
   background-color: rgba(244, 67, 54, 0.1);
   padding: 12px;
   border-radius: 8px;
-  animation: fadeInOut 2s infinite;
+  animation: verify-email-fadeInOut 2s infinite;
 }
 
-@keyframes fadeInOut {
+@keyframes verify-email-fadeInOut {
   0% {
     opacity: 0.7;
   }
@@ -278,15 +288,15 @@
 }
 
 /* Cảnh báo nghiêm trọng hơn khi thời gian gần hết */
-.warning-text {
+.verify-email-warning-text {
   color: #f44336;
   font-weight: 700;
   margin-top: 12px;
   display: block;
-  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  animation: verify-email-shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
-@keyframes shake {
+@keyframes verify-email-shake {
   10%,
   90% {
     transform: translate3d(-1px, 0, 0);
@@ -307,7 +317,7 @@
 }
 
 /* Làm nổi bật nút khẩn cấp hơn */
-.resend-button.urgent {
+.verify-email-resend-button.urgent {
   color: white;
   font-weight: 700;
   font-size: 16px;
@@ -315,26 +325,26 @@
   background-color: #f44336;
   padding: 8px 15px;
   border-radius: 4px;
-  animation: pulse 1.5s infinite;
+  animation: verify-email-pulse 1.5s infinite;
   box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
 }
 
-.resend-button.urgent:hover {
+.verify-email-resend-button.urgent:hover {
   background-color: #d32f2f;
 }
 
 /* Hiệu ứng loading chuyển hướng */
-.redirect-loading {
+.verify-email-redirect-loading {
   display: inline-block;
   margin-left: 5px;
 }
 
-.redirect-loading:after {
+.verify-email-redirect-loading:after {
   content: "...";
-  animation: dots 1.5s steps(4, end) infinite;
+  animation: verify-email-dots 1.5s steps(4, end) infinite;
 }
 
-@keyframes dots {
+@keyframes verify-email-dots {
   0%,
   20% {
     content: ".";
@@ -361,16 +371,16 @@
     font-size: 24px;
   }
 
-  .form-group input {
+  .verify-email-form-group input {
     padding: 12px;
   }
 
-  .primary-button,
-  .secondary-button {
+  .verify-email-primary-button,
+  .verify-email-secondary-button {
     padding: 10px 20px;
   }
 
-  .success-icon {
+  .verify-email-success-icon {
     font-size: 60px;
     width: 100px;
     height: 100px;
