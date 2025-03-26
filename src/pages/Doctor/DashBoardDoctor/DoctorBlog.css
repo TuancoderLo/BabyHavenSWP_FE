@@ -892,3 +892,33 @@
     padding: 10px;
   }
 }
+
+/* Cập nhật CSS cho thanh tìm kiếm đơn giản */
+.DoctorRoleID2-doctor-blog__search-simple {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.DoctorRoleID2-doctor-blog__search-simple .ant-input-search {
+  width: 280px;
+}
+
+/* Responsive styling */
+@media (max-width: 1280px) {
+  .DoctorRoleID2-doctor-blog__search-simple {
+    width: 35%;
+    margin-top: 8px;
+  }
+}
+
+@media (max-width: 992px) {
+  .DoctorRoleID2-doctor-blog__search-simple {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .DoctorRoleID2-doctor-blog__search-simple .ant-input-search {
+    width: 100%;
+  }
+}

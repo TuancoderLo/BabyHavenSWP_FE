@@ -46,7 +46,6 @@ const DoctorBlog = () => {
   const [activeTab, setActiveTab] = useState("1");
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchText, setSearchText] = useState("");
-  const [searchType, setSearchType] = useState("title");
 
   useEffect(() => {
     fetchBlogs();
@@ -259,17 +258,17 @@ const DoctorBlog = () => {
       });
     }
 
-    // Lọc theo search text nếu có
+    // Lọc theo search text nếu có (tìm kiếm đồng thời cả title và category)
     if (searchText) {
       return filteredByStatus.filter((blog) => {
-        if (searchType === "title") {
-          return blog.title.toLowerCase().includes(searchText.toLowerCase());
-        } else if (searchType === "category") {
-          return blog.categoryName
-            .toLowerCase()
-            .includes(searchText.toLowerCase());
-        }
-        return true;
+        const titleMatch = blog.title
+          .toLowerCase()
+          .includes(searchText.toLowerCase());
+        const categoryMatch = blog.categoryName
+          .toLowerCase()
+          .includes(searchText.toLowerCase());
+        // Trả về true nếu từ khóa tìm kiếm khớp với title HOẶC category
+        return titleMatch || categoryMatch;
       });
     }
 
@@ -278,10 +277,6 @@ const DoctorBlog = () => {
 
   const handleSearch = (value) => {
     setSearchText(value);
-  };
-
-  const handleSearchTypeChange = (value) => {
-    setSearchType(value);
   };
 
   const columns = [
@@ -664,17 +659,9 @@ const DoctorBlog = () => {
                   Draft
                 </Button>
               </div>
-              <div className="DoctorRoleID2-doctor-blog__search-inline">
-                <Select
-                  defaultValue="title"
-                  onChange={handleSearchTypeChange}
-                  className="DoctorRoleID2-doctor-blog__search-type-dropdown"
-                >
-                  <Option value="title">Title</Option>
-                  <Option value="category">Category</Option>
-                </Select>
+              <div className="DoctorRoleID2-doctor-blog__search-simple">
                 <Input.Search
-                  placeholder={`Search by ${searchType}...`}
+                  placeholder="Search by title or category..."
                   onSearch={handleSearch}
                   onChange={(e) => setSearchText(e.target.value)}
                   allowClear
