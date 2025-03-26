@@ -110,6 +110,8 @@
     background: rgb(255, 249, 249); /* Màu hồng nhạt thống nhất khi được chọn */
     border: 2px solid #575757;
     border-radius: 8px;
+    transition: 0.3s ease;
+    transform: scale(1.05);
 }
 
 .child-avatar-ai {
