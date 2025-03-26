@@ -1,78 +1,105 @@
-// AIChat.jsx
 import React, { useState, useEffect, useRef } from "react";
-import childApi from "../../../../services/childApi"; // Import childApi to fetch children
+import childApi from "../../../../services/childApi";
+import Logo from "../../../../assets/full_logo.png";
 import "./AIChat.css";
 
 const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
-  const [messages, setMessages] = useState([
-    {
-      sender: "AI",
-      text: "Hello! I'm BabyHaven AI, here to assist you on your parenting journey. How can I help you today?",
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [hasStartedChat, setHasStartedChat] = useState(false);
-  const [childrenList, setChildrenList] = useState([]); // State for the list of children
-  const [selectedChild, setSelectedChild] = useState(null); // State for the currently selected child in AIChat
+  const [childrenList, setChildrenList] = useState([]);
+  const [selectedChild, setSelectedChild] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const chatContainerRef = useRef(null);
 
-  // Fetch the list of children when the modal opens
+  // Debug newMessage
+  useEffect(() => {
+    console.log("newMessage:", newMessage);
+  }, [newMessage]);
+
+  // Fetch danh sách trẻ khi modal mở và tự động chọn trẻ đầu tiên
   useEffect(() => {
     if (isOpen) {
       const memberId = localStorage.getItem("memberId");
       if (!memberId) {
-        console.error("No memberId found in localStorage");
+        setError("No member ID found. Please log in again.");
         return;
       }
 
+      setLoading(true);
       childApi
         .getByMember(memberId)
         .then((response) => {
           if (response.data && response.data.data) {
             const list = response.data.data;
             setChildrenList(list);
-            // Default to the first child in the list, or fall back to the initialSelectedChild
             if (list.length > 0) {
-              setSelectedChild(list[0]);
+              // Tự động chọn trẻ đầu tiên và load đoạn chat
+              const firstChild = list[0];
+              setSelectedChild(firstChild);
+              const storedMessages = localStorage.getItem(`chatMessages_${firstChild.name}`);
+              setMessages(storedMessages ? JSON.parse(storedMessages) : []);
             } else if (initialSelectedChild) {
               setSelectedChild(initialSelectedChild);
-              setChildrenList([initialSelectedChild]); // Add the initial child to the list if no children are fetched
+              setChildrenList([initialSelectedChild]);
+              const storedMessages = localStorage.getItem(`chatMessages_${initialSelectedChild.name}`);
+              setMessages(storedMessages ? JSON.parse(storedMessages) : []);
             }
           }
         })
         .catch((error) => {
           console.error("Error fetching children:", error);
-          // Fallback to initialSelectedChild if API fails
+          setError("Failed to load children. Please try again later.");
           if (initialSelectedChild) {
             setSelectedChild(initialSelectedChild);
             setChildrenList([initialSelectedChild]);
+            const storedMessages = localStorage.getItem(`chatMessages_${initialSelectedChild.name}`);
+            setMessages(storedMessages ? JSON.parse(storedMessages) : []);
           }
+        })
+        .finally(() => {
+          setLoading(false);
         });
     }
   }, [isOpen, initialSelectedChild]);
 
-  // Handle sending a message
-  const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
-
-    if (!hasStartedChat) {
-      setHasStartedChat(true);
+  // Lưu messages vào localStorage mỗi khi messages thay đổi
+  useEffect(() => {
+    if (messages.length > 0 && selectedChild) {
+      localStorage.setItem(`chatMessages_${selectedChild.name}`, JSON.stringify(messages));
     }
+  }, [messages, selectedChild]);
 
-    const userMessage = { sender: "User", text: newMessage };
+  // Handle sending a message
+  const handleSendMessage = async (text) => {
+    const trimmedText = typeof text === "string" ? text.trim() : "";
+    if (!trimmedText) return;
+
+    const userMessage = {
+      sender: "User",
+      text: trimmedText,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
     setMessages((prev) => [...prev, userMessage]);
     setNewMessage("");
     setIsTyping(true);
 
     try {
-      const response = await sendMessageToAI(newMessage, selectedChild);
-      const aiMessage = { sender: "AI", text: response };
+      const response = await sendMessageToAI(trimmedText, selectedChild);
+      console.log("Response from sendMessageToAI:", response); // Debug response
+      const aiResponseText = typeof response === "string" ? response : "[Error: Invalid Response]";
+      const aiMessage = {
+        sender: "AI",
+        text: aiResponseText,
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       const errorMessage = {
         sender: "AI",
         text: "Sorry, an error occurred. Please try again!",
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -80,13 +107,27 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
     }
   };
 
-  // Simulate sending message to backend
+  // Simulate sending message to backend with specific responses for suggestions
   const sendMessageToAI = async (message, child) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve(
-          `I've analyzed the data for ${child?.name || "your child"}. Would you like to know more about nutrition or development?`
-        );
+        if (message === "Analyze growth record") {
+          resolve(
+            `Here is the growth analysis for ${child?.name || "your child"}: Based on the latest data, their height and weight are within the 75th percentile for their age. Would you like a detailed chart?`
+          );
+        } else if (message === "Health Consultation") {
+          resolve(
+            `For ${child?.name || "your child"}, I recommend scheduling a health checkup if they haven't had one recently. Common concerns at this age include nutrition and sleep patterns. Would you like tips on these topics?`
+          );
+        } else if (message === "Growth Advice") {
+          resolve(
+            `To support ${child?.name || "your child"}'s growth, ensure they have a balanced diet rich in protein, calcium, and vitamins. Regular physical activity is also key. Would you like a sample meal plan?`
+          );
+        } else {
+          resolve(
+            `I have analyzed the data for ${child?.name || "your child"}. Would you like to know more about nutrition or development?`
+          );
+        }
       }, 1500);
     });
   };
@@ -96,140 +137,217 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, isTyping]);
 
-  // Reset messages and chat state when modal closes
+  // Reset state when modal closes
   useEffect(() => {
     if (!isOpen) {
-      setMessages([
-        {
-          sender: "AI",
-          text: "Hello! I'm BabyHaven AI, here to assist you on your parenting journey. How can I help you today?",
-        },
-      ]);
+      setMessages([]);
       setNewMessage("");
       setIsTyping(false);
-      setHasStartedChat(false);
-      setChildrenList([]); // Reset children list
-      setSelectedChild(null); // Reset selected child
+      setChildrenList([]);
+      setSelectedChild(null);
+      setLoading(false);
+      setError(null);
+      // Không xóa localStorage ở đây vì đã có logic xóa khi sign out
     }
   }, [isOpen]);
 
+  // Debug messages
+  useEffect(() => {
+    console.log("Messages:", messages);
+  }, [messages]);
+
   // Handle child selection
   const handleSelectChild = (child) => {
+    // Reset messages và khôi phục từ localStorage ngay lập tức (đồng bộ)
+    const storedMessages = localStorage.getItem(`chatMessages_${child.name}`);
+    setMessages(storedMessages ? JSON.parse(storedMessages) : []);
     setSelectedChild(child);
-    // Optionally reset the chat when a new child is selected
-    setMessages([
-      {
-        sender: "AI",
-        text: `Hello! I'm BabyHaven AI, here to assist you with ${child.name}. How can I help you today?`,
-      },
-    ]);
-    setHasStartedChat(false); // Reset chat state to show placeholder
+  };
+
+  // Handle suggestion button clicks
+  const handleSuggestionClick = (suggestion) => {
+    handleSendMessage(suggestion);
   };
 
   if (!isOpen) return null;
 
+  // Check if the chat has started (any messages exist)
+  const hasStartedChat = messages.length > 0;
+
   return (
-    <div className="chat-modal-overlay" onClick={onClose}>
-      <div className="chat-modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="chat-modal-flex">
+    <div className="chat-modal-overlay-ai" onClick={onClose}>
+      <div className="chat-modal-content-ai" onClick={(e) => e.stopPropagation()}>
+        <div className="chat-modal-flex-ai">
           {/* Sidebar for Children List */}
-          <div className="chat-sidebar">
-            <h4 className="sidebar-title">Select a Child</h4>
-            {childrenList.length > 0 ? (
-              <ul className="children-list">
+          <div className="chat-sidebar-ai" role="navigation" aria-label="Child selection">
+            {loading ? (
+              <div className="loading-spinner-ai">Loading...</div>
+            ) : error ? (
+              <p className="error-message-ai">{error}</p>
+            ) : childrenList.length > 0 ? (
+              <ul className="children-list-ai" role="listbox">
                 {childrenList.map((child) => (
                   <li
                     key={child.name}
-                    className={`child-item ${
-                      selectedChild?.name === child.name ? "selected" : ""
+                    className={`child-item-ai ${
+                      selectedChild?.name === child.name ? "selected-ai" : ""
                     }`}
                     onClick={() => handleSelectChild(child)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSelectChild(child)}
+                    tabIndex={0}
+                    role="option"
+                    aria-selected={selectedChild?.name === child.name}
                   >
-                    <span className="child-name">{child.name}</span>
-                    <span className="child-age">
-                      {calculateAge(child.dateOfBirth)}
-                    </span>
+                    <div className="child-avatar-ai">
+                      {child.avatar ? (
+                        <img src={child.avatar} alt={`${child.name}'s avatar`} />
+                      ) : (
+                        <div className="avatar-placeholder-ai">
+                          {child.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="child-info-ai">
+                      <span className="child-name-ai">{child.name}</span>
+                      <span className="child-age-ai">{calculateAge(child.dateOfBirth)}</span>
+                    </div>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="no-children">No children found.</p>
+              <p className="no-children-ai">No children found.</p>
             )}
           </div>
 
           {/* Main Chat Area */}
-          <div className="chat-main">
-            {/* Header */}
-            <div className="chat-modal-header">
-              <h3>Chat with BabyHaven AI {selectedChild ? `for ${selectedChild.name}` : ""}</h3>
-              <button className="chat-modal-close" onClick={onClose}>
-                ×
-              </button>
-            </div>
-
-            {/* Main Content Area */}
-            {hasStartedChat ? (
-              <>
-                {/* Chat Messages Area - Shown after the user sends a message */}
-                <div className="chat-messages" ref={chatContainerRef}>
+          <div className="chat-main-ai">
+            <img src={Logo} alt="logo" className="logo-ai" />
+            <button className="chat-modal-close-ai" onClick={onClose}>
+              ×
+            </button>
+            {/* Messages Area */}
+            <div className="chat-messages-ai" ref={chatContainerRef}>
+              {hasStartedChat ? (
+                <>
                   {messages.map((msg, index) => (
                     <div
                       key={index}
-                      className={`chat-message ${msg.sender === "User" ? "user" : "ai"}`}
+                      className={`chat-message-ai ${msg.sender === "User" ? "user-ai" : "ai-ai"}`}
                     >
-                      {msg.sender === "AI" && <span className="chat-avatar">🤖</span>}
-                      <div className="chat-text">{msg.text}</div>
+                      <div className="chat-text-wrapper-ai">
+                        <div className="chat-text-ai">
+                          {typeof msg.text === "string" ? msg.text : "[Invalid Message]"}
+                        </div>
+                        <div className="chat-timestamp-ai">{msg.timestamp}</div>
+                      </div>
                     </div>
                   ))}
                   {isTyping && (
-                    <div className="chat-message ai">
-                      <span className="chat-avatar">🤖</span>
-                      <div className="chat-text typing">
-                        <span className="dot"></span>
-                        <span className="dot"></span>
-                        <span className="dot"></span>
+                    <div className="chat-message-ai ai-ai">
+                      <div className="chat-avatar-ai"></div>
+                      <div className="chat-text-wrapper-ai">
+                        <div className="chat-text-ai typing-ai">
+                          <span className="dot-ai"></span>
+                          <span className="dot-ai"></span>
+                          <span className="dot-ai"></span>
+                        </div>
                       </div>
                     </div>
                   )}
+                </>
+              ) : (
+                <div className="welcome-container-ai">
+                  {/* Welcome Title */}
+                  {selectedChild && (
+                    <div className="welcome-title-wrapper-ai">
+                      <h2 className="welcome-title-ai">
+                        Hello! I am <span className="highlight">BabyHaven AI</span>, ready to assist you with {selectedChild.name}.
+                      </h2>
+                      <h2 className="welcome-title-ai below">
+                        How can I help you today?
+                      </h2>
+                    </div>
+                  )}
+                  <div className="chat-input-and-suggestions-ai">
+                    <div className="chat-input-container-ai">
+                      <div className="chat-input-area-ai">
+                        <input
+                          type="text"
+                          value={newMessage}
+                          onChange={(e) => setNewMessage(String(e.target.value || ""))}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              console.log("Sending message on Enter:", newMessage);
+                              handleSendMessage(newMessage);
+                            }
+                          }}
+                          placeholder="Type a message..."
+                          className="chat-input-ai"
+                        />
+                        <button
+                          onClick={() => {
+                            console.log("Sending message on button click:", newMessage);
+                            handleSendMessage(newMessage);
+                          }}
+                          className="chat-send-btn-ai"
+                        >
+                          <i className="fas fa-paper-plane"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div className="suggestion-buttons-ai">
+                      <button
+                        className="suggestion-btn-ai"
+                        onClick={() => handleSuggestionClick("Analyze growth record")}
+                      >
+                        Analyze growth record
+                      </button>
+                      <button
+                        className="suggestion-btn-ai"
+                        onClick={() => handleSuggestionClick("Health Consultation")}
+                      >
+                        Health Consultation
+                      </button>
+                      <button
+                        className="suggestion-btn-ai"
+                        onClick={() => handleSuggestionClick("Growth Advice")}
+                      >
+                        Growth Advice
+                      </button>
+                    </div>
+                  </div>
                 </div>
+              )}
+            </div>
 
-                {/* Input Area - At the bottom when chat has started */}
-                <div className="chat-input-container">
-                  <div className="chat-input-area">
-                    <input
-                      type="text"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                      placeholder="Type your message..."
-                      className="chat-input"
-                    />
-                    <button onClick={handleSendMessage} className="chat-send-btn">
-                      <i className="fas fa-paper-plane"></i>
-                    </button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="chat-placeholder">
-                <p>Type a message to start the conversation...</p>
-                {/* Input Area - Centered when chat hasn't started */}
-                <div className="chat-input-container centered">
-                  <div className="chat-input-area">
-                    <input
-                      type="text"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                      placeholder="Type your message..."
-                      className="chat-input"
-                    />
-                    <button onClick={handleSendMessage} className="chat-send-btn">
-                      <i className="fas fa-paper-plane"></i>
-                    </button>
-                  </div>
+            {/* Input Area (when chat has started) */}
+            {hasStartedChat && (
+              <div className="chat-input-container-ai">
+                <div className="chat-input-area-ai">
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(String(e.target.value || ""))}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        console.log("Sending message on Enter:", newMessage);
+                        handleSendMessage(newMessage);
+                      }
+                    }}
+                    placeholder="Type a message..."
+                    className="chat-input-ai"
+                  />
+                  <button
+                    onClick={() => {
+                      console.log("Sending message on button click:", newMessage);
+                      handleSendMessage(newMessage);
+                    }}
+                    className="chat-send-btn-ai"
+                  >
+                    <i className="fas fa-paper-plane"></i>
+                  </button>
                 </div>
               </div>
             )}
@@ -240,7 +358,7 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
   );
 };
 
-// Helper function to calculate age (copied from ChildrenPage)
+// Helper function to calculate age
 const calculateAge = (dateOfBirth) => {
   if (!dateOfBirth) return "0 days";
 
