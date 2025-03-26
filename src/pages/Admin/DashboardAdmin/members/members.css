@@ -518,3 +518,15 @@
     font-size: 12px;
   }
 }
+
+/* Thêm style cho member list tìm kiếm */
+.MemberAdmin-members-search-container {
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .MemberAdmin-members-search-container {
+    max-width: 400px;
+  }
+}

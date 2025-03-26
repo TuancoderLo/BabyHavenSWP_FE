@@ -59,6 +59,7 @@ const Members = () => {
   const [memberModalVisible, setMemberModalVisible] = useState(false);
   const [memberForm] = Form.useForm();
   const [editingMember, setEditingMember] = useState(null);
+  const [memberSearchText, setMemberSearchText] = useState("");
 
   // State for MemberMemberships
   const [memberships, setMemberships] = useState([]);
@@ -66,6 +67,7 @@ const Members = () => {
   const [membershipForm] = Form.useForm();
   const [editingMembership, setEditingMembership] = useState(null);
   const [membershipPackages, setMembershipPackages] = useState([]);
+  const [membershipSearchText, setMembershipSearchText] = useState("");
 
   // Thêm state cho xử lý upload image
   const [imageUrl, setImageUrl] = useState("");
@@ -712,6 +714,16 @@ const Members = () => {
     setSearchText(e.target.value);
   };
 
+  // Thêm hàm xử lý thay đổi tìm kiếm cho Members
+  const handleMemberSearchChange = (e) => {
+    setMemberSearchText(e.target.value);
+  };
+
+  // Thêm hàm xử lý thay đổi tìm kiếm cho Memberships
+  const handleMembershipSearchChange = (e) => {
+    setMembershipSearchText(e.target.value);
+  };
+
   // Cập nhật hàm lọc dữ liệu user accounts để bao gồm cả tìm kiếm
   const filteredUserAccounts = userAccounts.filter((account) => {
     // Lọc theo vai trò
@@ -730,6 +742,76 @@ const Members = () => {
         account.phoneNumber.toLowerCase().includes(searchLower));
 
     return matchesRole && matchesSearch;
+  });
+
+  // Thêm hàm lọc dữ liệu members dựa trên tìm kiếm
+  const filteredMembers = members.filter((member) => {
+    const searchLower = memberSearchText.toLowerCase();
+
+    // Nếu không có từ khóa tìm kiếm, hiển thị tất cả
+    if (!memberSearchText) return true;
+
+    // Tìm theo tên thành viên
+    if (
+      member.memberName &&
+      member.memberName.toLowerCase().includes(searchLower)
+    ) {
+      return true;
+    }
+
+    // Tìm trong thông tin liên hệ khẩn cấp
+    if (member.emergencyContact) {
+      const contactLower = member.emergencyContact.toLowerCase();
+
+      // Kiểm tra xem chuỗi tìm kiếm có xuất hiện trong thông tin liên hệ không
+      if (contactLower.includes(searchLower)) {
+        return true;
+      }
+
+      // Tách thông tin liên hệ khẩn cấp để tìm kiếm chi tiết hơn
+      // Giả định định dạng là "Tên - SĐT"
+      const parts = contactLower.split("-");
+      if (parts.length === 2) {
+        const contactName = parts[0].trim();
+        const contactPhone = parts[1].trim();
+
+        // Tìm theo tên hoặc số điện thoại trong thông tin liên hệ
+        if (
+          contactName.includes(searchLower) ||
+          contactPhone.includes(searchLower)
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  });
+
+  // Thêm hàm lọc dữ liệu memberships dựa trên tìm kiếm
+  const filteredMemberships = memberships.filter((membership) => {
+    const searchLower = membershipSearchText.toLowerCase();
+
+    // Nếu không có từ khóa tìm kiếm, hiển thị tất cả
+    if (!membershipSearchText) return true;
+
+    // Tìm theo tên thành viên
+    if (
+      membership.memberName &&
+      membership.memberName.toLowerCase().includes(searchLower)
+    ) {
+      return true;
+    }
+
+    // Tìm theo tên gói thành viên
+    if (
+      membership.packageName &&
+      membership.packageName.toLowerCase().includes(searchLower)
+    ) {
+      return true;
+    }
+
+    return false;
   });
 
   // Thêm hàm xử lý khi thay đổi role
@@ -824,19 +906,32 @@ const Members = () => {
         <TabPane tab="Members" key="2">
           <div className="MemberAdmin-tab-header">
             <div className="MemberAdmin-tab-header-title">Members List</div>
-            <div className="MemberAdmin-tab-header-actions">
-              <Button
-                type="primary"
-                onClick={handleAddMember}
-                icon={<PlusOutlined />}
-              >
-                Add New Member
-              </Button>
+            <div className="MemberAdmin-user-accounts-actions">
+              <div className="MemberAdmin-search-input-container">
+                <Input
+                  placeholder="Tìm theo tên thành viên hoặc thông tin liên hệ"
+                  value={memberSearchText}
+                  onChange={handleMemberSearchChange}
+                  allowClear
+                  className="MemberAdmin-search-input"
+                  prefix={<SearchOutlined />}
+                />
+              </div>
+              <div className="MemberAdmin-filter-action-container">
+                <Button
+                  type="primary"
+                  onClick={handleAddMember}
+                  icon={<PlusOutlined />}
+                  className="MemberAdmin-add-account-button"
+                >
+                  Add New Member
+                </Button>
+              </div>
             </div>
           </div>
           <Table
             columns={memberColumns}
-            dataSource={members}
+            dataSource={filteredMembers}
             rowKey="memberId"
             loading={loading}
             pagination={{
@@ -853,19 +948,32 @@ const Members = () => {
         <TabPane tab="Memberships" key="3">
           <div className="MemberAdmin-tab-header">
             <div className="MemberAdmin-tab-header-title">Memberships List</div>
-            <div className="MemberAdmin-tab-header-actions">
-              <Button
-                type="primary"
-                onClick={handleAddMembership}
-                icon={<PlusOutlined />}
-              >
-                Add New Membership
-              </Button>
+            <div className="MemberAdmin-user-accounts-actions">
+              <div className="MemberAdmin-search-input-container">
+                <Input
+                  placeholder="Tìm theo tên thành viên hoặc tên gói"
+                  value={membershipSearchText}
+                  onChange={handleMembershipSearchChange}
+                  allowClear
+                  className="MemberAdmin-search-input"
+                  prefix={<SearchOutlined />}
+                />
+              </div>
+              <div className="MemberAdmin-filter-action-container">
+                <Button
+                  type="primary"
+                  onClick={handleAddMembership}
+                  icon={<PlusOutlined />}
+                  className="MemberAdmin-add-account-button"
+                >
+                  Add New Membership
+                </Button>
+              </div>
             </div>
           </div>
           <Table
             columns={membershipColumns}
-            dataSource={memberships}
+            dataSource={filteredMemberships}
             rowKey="memberMembershipId"
             loading={loading}
             pagination={{
