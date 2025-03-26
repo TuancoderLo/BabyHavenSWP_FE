@@ -81,13 +81,24 @@ const RevenueChart = () => {
 
   // Tính toán doanh thu theo tháng
   const calculateRevenueByMonth = (transactions) => {
-    // Lấy 12 tháng gần nhất
-    const months = [];
-    const currentDate = new Date();
+    // Thiết lập ngày bắt đầu là 9/2024
+    const startDate = new Date(2024, 8, 1); // Tháng 9 (index 8)
+    // Thiết lập ngày hiện tại là 26/3/2025
+    const currentDate = new Date(2025, 2, 26); // Tháng 3 (index 2)
 
-    for (let i = 11; i >= 0; i--) {
-      const date = new Date(currentDate);
-      date.setMonth(currentDate.getMonth() - i);
+    // Tính số tháng từ tháng 9/2024 đến tháng hiện tại (3/2025)
+    const monthDiff =
+      (currentDate.getFullYear() - startDate.getFullYear()) * 12 +
+      (currentDate.getMonth() - startDate.getMonth()) +
+      1; // +1 để bao gồm cả tháng hiện tại
+
+    // Mảng để lưu dữ liệu của các tháng
+    const months = [];
+
+    // Chỉ tạo dữ liệu cho các tháng từ 9/2024 đến 3/2025
+    for (let i = 0; i < monthDiff; i++) {
+      const date = new Date(startDate);
+      date.setMonth(startDate.getMonth() + i);
       const month = `${String(date.getMonth() + 1).padStart(
         2,
         "0"
@@ -512,9 +523,11 @@ const RevenueChart = () => {
               {new Intl.NumberFormat("vi-VN", {
                 style: "currency",
                 currency: "VND",
-              }).format(totalRevenue / 12)}
+              }).format(totalRevenue / revenueData.length)}
             </div>
-            <div className="package-percentage">Based on last 12 months</div>
+            <div className="package-percentage">
+              Based on last {revenueData.length} months
+            </div>
           </div>
         </div>
 
@@ -563,7 +576,7 @@ const RevenueChart = () => {
         </div>
       </div>
 
-      {/* Chart navigation with Detail button */}
+      {/* Chart navigation with Detail button - Removed comparison tab */}
       <div className="chart-navigation">
         <button
           className={activeTab === "overview" ? "active" : ""}
@@ -576,12 +589,6 @@ const RevenueChart = () => {
           onClick={() => setActiveTab("packages")}
         >
           <i className="fas fa-boxes"></i> Package Analysis
-        </button>
-        <button
-          className={activeTab === "comparison" ? "active" : ""}
-          onClick={() => setActiveTab("comparison")}
-        >
-          <i className="fas fa-balance-scale"></i> Comparison
         </button>
         <button
           className={activeTab === "details" ? "active" : ""}
@@ -626,24 +633,7 @@ const RevenueChart = () => {
           </div>
         )}
 
-        {activeTab === "comparison" && (
-          <div className="chart-panel">
-            <div className="chart-card">
-              <h3>
-                <i className="fas fa-balance-scale"></i> Package Revenue
-                Comparison
-              </h3>
-              <div className="chart-area">
-                {packageTotalChartData && (
-                  <Bar
-                    data={packageTotalChartData}
-                    options={packageTotalChartOptions}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Removed comparison tab section */}
 
         {/* Improved Detail tab */}
         {activeTab === "details" && (
