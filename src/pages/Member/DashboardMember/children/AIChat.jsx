@@ -35,7 +35,6 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
             const list = response.data.data;
             setChildrenList(list);
             if (list.length > 0) {
-              // Tự động chọn trẻ đầu tiên và load đoạn chat
               const firstChild = list[0];
               setSelectedChild(firstChild);
               const storedMessages = localStorage.getItem(`chatMessages_${firstChild.name}`);
@@ -87,7 +86,7 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
 
     try {
       const response = await sendMessageToAI(trimmedText, selectedChild);
-      console.log("Response from sendMessageToAI:", response); // Debug response
+      console.log("Response from sendMessageToAI:", response);
       const aiResponseText = typeof response === "string" ? response : "[Error: Invalid Response]";
       const aiMessage = {
         sender: "AI",
@@ -149,7 +148,6 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
       setSelectedChild(null);
       setLoading(false);
       setError(null);
-      // Không xóa localStorage ở đây vì đã có logic xóa khi sign out
     }
   }, [isOpen]);
 
@@ -160,7 +158,6 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
 
   // Handle child selection
   const handleSelectChild = (child) => {
-    // Reset messages và khôi phục từ localStorage ngay lập tức (đồng bộ)
     const storedMessages = localStorage.getItem(`chatMessages_${child.name}`);
     setMessages(storedMessages ? JSON.parse(storedMessages) : []);
     setSelectedChild(child);
@@ -173,7 +170,6 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
 
   if (!isOpen) return null;
 
-  // Check if the chat has started (any messages exist)
   const hasStartedChat = messages.length > 0;
 
   return (
@@ -223,10 +219,12 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
 
           {/* Main Chat Area */}
           <div className="chat-main-ai">
-            <img src={Logo} alt="logo" className="logo-ai" />
-            <button className="chat-modal-close-ai" onClick={onClose}>
-              ×
-            </button>
+            <div className="chat-main-header-ai">
+                <img src={Logo} alt="logo" className="logo-ai" />
+                <button className="chat-modal-close-ai" onClick={onClose}>
+                ×
+                </button>
+            </div>
             {/* Messages Area */}
             <div className="chat-messages-ai" ref={chatContainerRef}>
               {hasStartedChat ? (
@@ -234,7 +232,9 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
                   {messages.map((msg, index) => (
                     <div
                       key={index}
-                      className={`chat-message-ai ${msg.sender === "User" ? "user-ai" : "ai-ai"}`}
+                      className={`chat-message-container-ai chat-message-ai ${
+                        msg.sender === "User" ? "user-ai" : "ai-ai"
+                      }`}
                     >
                       <div className="chat-text-wrapper-ai">
                         <div className="chat-text-ai">
@@ -245,8 +245,8 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
                     </div>
                   ))}
                   {isTyping && (
-                    <div className="chat-message-ai ai-ai">
-                      <div className="chat-avatar-ai"></div>
+                    <div className="chat-message-container-ai chat-message-ai ai-ai">
+                    <div className="chat-avatar-ai"></div>
                       <div className="chat-text-wrapper-ai">
                         <div className="chat-text-ai typing-ai">
                           <span className="dot-ai"></span>
@@ -259,7 +259,6 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
                 </>
               ) : (
                 <div className="welcome-container-ai">
-                  {/* Welcome Title */}
                   {selectedChild && (
                     <div className="welcome-title-wrapper-ai">
                       <h2 className="welcome-title-ai">
