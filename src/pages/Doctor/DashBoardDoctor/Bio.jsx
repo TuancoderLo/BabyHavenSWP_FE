@@ -22,7 +22,7 @@ import {
 } from "@ant-design/icons";
 import moment from "moment";
 import locale from "antd/es/date-picker/locale/vi_VN";
-import axios from "axios";
+import doctorApi from "../../../services/DoctorApi";
 import "./Bio.css";
 
 const { Title, Text } = Typography;
@@ -34,6 +34,7 @@ const Bio = () => {
   const [editing, setEditing] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [doctorData, setDoctorData] = useState({
+    userName: "",
     name: "",
     email: "",
     phoneNumber: "",
@@ -53,30 +54,26 @@ const Bio = () => {
     const fetchDoctorData = async () => {
       try {
         setLoading(true);
-        const email = localStorage.getItem("email");
-        if (!email) {
-          message.error("Email information not found!");
+        const doctorId = localStorage.getItem("doctorId");
+        if (!doctorId) {
+          message.error("Doctor ID not found!");
           setLoading(false);
           return;
         }
 
-        const response = await axios.get("https://localhost:7279/api/Doctors");
-        if (response.data.status !== 1 || !Array.isArray(response.data.data)) {
+        setDoctorId(doctorId);
+
+        const doctorResponse = await doctorApi.getDoctorById(doctorId);
+        if (doctorResponse.status !== 1 || !doctorResponse.data) {
           message.error("Data format is incorrect!");
           setLoading(false);
           return;
         }
 
-        const doctor = response.data.data.find((doc) => doc.email === email);
-        if (!doctor) {
-          message.error("Doctor information not found!");
-          setLoading(false);
-          return;
-        }
-
-        setDoctorId(doctor.doctorId);
+        const doctor = doctorResponse.data;
 
         const combinedData = {
+          userName: doctor.userName || "",
           name: doctor.name || "",
           email: doctor.email || "",
           phoneNumber: doctor.phoneNumber || "",
@@ -85,36 +82,34 @@ const Bio = () => {
           hospitalAddress: doctor.hospitalAddress || "",
           biography: doctor.biography || "",
           status: doctor.status || "",
-          dateOfBirth: doctor.user?.dateOfBirth
-            ? moment(doctor.user.dateOfBirth)
-            : null,
-          profilePicture: doctor.user?.profilePicture || "",
+          dateOfBirth: null,
+          profilePicture: "",
           specializationName: "",
           description: "",
         };
 
         try {
-          const specialization = await axios.get(
-            `https://localhost:7279/api/Specializations/${doctor.doctorId}`
+          const specialization = await doctorApi.getDoctorSpecializations(
+            doctorId
           );
-          if (specialization.data.status === 1 && specialization.data.data) {
+          if (specialization.status === 1 && specialization.data) {
             combinedData.specializationName =
-              specialization.data.data.specializationName || "";
-            combinedData.description =
-              specialization.data.data.description || "";
+              specialization.data.specializationName || "";
+            combinedData.description = specialization.data.description || "";
           }
         } catch (error) {
           message.warning("Unable to load specialization information!");
         }
 
         setDoctorData(combinedData);
-        setImageUrl(doctor.user?.profilePicture || "");
+        setImageUrl("");
         form.setFieldsValue({
           ...combinedData,
-          dateOfBirth: combinedData.dateOfBirth,
+          dateOfBirth: null,
         });
       } catch (error) {
         message.error("An error occurred while loading doctor information!");
+        console.error("Error fetching doctor data:", error);
       } finally {
         setLoading(false);
       }
@@ -135,7 +130,23 @@ const Bio = () => {
         return;
       }
 
+      let statusValue = values.status;
+      if (typeof values.status === "string") {
+        if (values.status.toLowerCase() === "active") {
+          statusValue = 1;
+        } else if (values.status.toLowerCase() === "inactive") {
+          statusValue = 0;
+        } else {
+          try {
+            statusValue = parseInt(values.status);
+          } catch (error) {
+            statusValue = 0;
+          }
+        }
+      }
+
       const doctorDataToUpdate = {
+        doctorId: parseInt(doctorId),
         userName: values.userName || "",
         name: values.name,
         email: values.email,
@@ -144,7 +155,7 @@ const Bio = () => {
         hospitalName: values.hospitalName,
         hospitalAddress: values.hospitalAddress,
         biography: values.biography,
-        status: values.status,
+        status: statusValue,
       };
 
       const specializationData = {
@@ -153,32 +164,38 @@ const Bio = () => {
       };
 
       try {
-        await axios.put(
-          `https://localhost:7279/api/Doctors/${doctorId}`,
-          doctorDataToUpdate
-        );
+        await doctorApi.updateDoctor(doctorId, doctorDataToUpdate);
       } catch (error) {
         message.error("Failed to update doctor information!");
+        console.error("Error updating doctor information:", error);
         return;
       }
 
       try {
-        await axios.put(
-          `https://localhost:7279/api/Specializations/${doctorId}`,
+        await doctorApi.updateDoctorSpecialization(
+          doctorId,
           specializationData
         );
       } catch (error) {
         message.warning("Failed to update specialization information!");
+        console.error("Error updating specialization information:", error);
       }
 
       setDoctorData({
         ...doctorDataToUpdate,
         ...specializationData,
+        status:
+          typeof doctorDataToUpdate.status === "number"
+            ? doctorDataToUpdate.status === 1
+              ? "Active"
+              : "Inactive"
+            : doctorDataToUpdate.status,
       });
       setEditing(false);
       message.success("Information updated successfully!");
     } catch (error) {
       message.error("An error occurred while updating information!");
+      console.error("General error during update:", error);
     } finally {
       setLoading(false);
     }
@@ -267,7 +284,11 @@ const Bio = () => {
                     <img
                       src={imageUrl}
                       alt="avatar"
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
                     />
                   ) : (
                     uploadButton
@@ -293,7 +314,11 @@ const Bio = () => {
                 </Button>
               ) : (
                 <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
-                  <Button onClick={handleCancel} block className="bio-cancel-btn">
+                  <Button
+                    onClick={handleCancel}
+                    block
+                    className="bio-cancel-btn"
+                  >
                     Cancel
                   </Button>
                   <Button
@@ -319,9 +344,28 @@ const Bio = () => {
               <Row gutter={[16, 16]}>
                 <Col xs={24} md={12}>
                   <Form.Item
+                    name="userName"
+                    label="Username"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please enter your username",
+                      },
+                    ]}
+                  >
+                    <Input disabled={!editing} />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item
                     name="name"
                     label="Full Name"
-                    rules={[{ required: true, message: "Please enter your full name" }]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please enter your full name",
+                      },
+                    ]}
                   >
                     <Input prefix={<UserOutlined />} disabled={!editing} />
                   </Form.Item>

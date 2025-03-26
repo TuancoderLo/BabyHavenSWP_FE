@@ -84,9 +84,8 @@ const Consultations = () => {
       const detailedRequests = await Promise.all(
         filteredByDoctor.map(async (request) => {
           try {
-            const detailedResponse = await doctorApi.getConsultationRequestsById(
-              request.requestId
-            );
+            const detailedResponse =
+              await doctorApi.getConsultationRequestsById(request.requestId);
             const detailedData = detailedResponse.data;
 
             return {
@@ -133,7 +132,9 @@ const Consultations = () => {
           break;
         case "ongoing":
           // "Ongoing" -> hiển thị những request "Approved"
-          filteredData = mappedData.filter((item) => item.status === "Approved");
+          filteredData = mappedData.filter(
+            (item) => item.status === "Approved"
+          );
           break;
         case "completed":
           // "Completed"
@@ -245,7 +246,9 @@ const Consultations = () => {
               response: values.response,
               responseDate: moment().format("YYYY-MM-DD HH:mm:ss"),
               appointmentDate:
-                values.action === "approved" ? values.appointmentDate : undefined,
+                values.action === "approved"
+                  ? values.appointmentDate
+                  : undefined,
               rejectReason:
                 values.action === "rejected" ? values.rejectReason : undefined,
             }
@@ -442,7 +445,10 @@ const Consultations = () => {
       key: "action",
       render: (_, record) => (
         <Space>
-          <Button icon={<EyeOutlined />} onClick={() => handleViewDetail(record)}>
+          <Button
+            icon={<EyeOutlined />}
+            onClick={() => handleViewDetail(record)}
+          >
             Details
           </Button>
           {/* Nếu đang "Pending" -> Respond */}
@@ -591,7 +597,8 @@ const Consultations = () => {
                 {selectedConsultation.parentName}
               </Descriptions.Item>
               <Descriptions.Item label="Child">
-                {selectedConsultation.childName} ({selectedConsultation.childAge})
+                {selectedConsultation.childName} (
+                {selectedConsultation.childAge})
               </Descriptions.Item>
               <Descriptions.Item label="Topic">
                 {selectedConsultation.topic}
@@ -680,7 +687,9 @@ const Consultations = () => {
 
             <Form.Item>
               <div className="consult-modal-buttons">
-                <Button onClick={() => setResponseVisible(false)}>Cancel</Button>
+                <Button onClick={() => setResponseVisible(false)}>
+                  Cancel
+                </Button>
                 <Button type="primary" htmlType="submit" loading={loading}>
                   Send Response
                 </Button>
@@ -715,7 +724,8 @@ const Consultations = () => {
                 </div>
               </Descriptions.Item>
               <Descriptions.Item label="Child">
-                {selectedConsultation.childName} ({selectedConsultation.childAge})
+                {selectedConsultation.childName} (
+                {selectedConsultation.childAge})
               </Descriptions.Item>
               <Descriptions.Item label="Topic">
                 {selectedConsultation.topic}

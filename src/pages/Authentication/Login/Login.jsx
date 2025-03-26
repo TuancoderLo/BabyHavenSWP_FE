@@ -4,6 +4,7 @@ import "./Login.css";
 import api from "../../../config/axios";
 import "react-toastify/dist/ReactToastify.css";
 import { jwtDecode } from "jwt-decode";
+import DoctorApi from "../../../services/DoctorApi";
 
 function Login({ onLoginSuccess }) {
   console.log("Login component rendered");
@@ -103,6 +104,16 @@ function Login({ onLoginSuccess }) {
               localStorage.setItem("memberId", member.data.data.memberId);
             } catch (error) {
               console.error("Error fetching member:", error);
+            }
+          }
+
+          if (user.roleId === "2") {
+            //Nếu là role member thì lưu memberId vào localStorage
+            try {
+              const doctor = await DoctorApi.getDoctorByUserId(user.userId);
+              localStorage.setItem("doctorId", doctor.data.doctorId);
+            } catch (error) {
+              console.error("Error fetching doctor:", error);
             }
           }
 

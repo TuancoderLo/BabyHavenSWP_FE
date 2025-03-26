@@ -21,7 +21,7 @@
 .blog-section-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 16px;
 }
 
@@ -33,6 +33,13 @@
 /* Filter buttons group */
 .blog-filters {
   margin-top: 8px;
+}
+
+/* Add styles for the actions container */
+.blog-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 /* ==========================================================================
@@ -94,6 +101,19 @@
   .blog-filters {
     width: 100%;
     overflow-x: auto;
+  }
+
+  /* Full width search on mobile */
+  .blog-actions {
+    width: 100%;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .blog-actions .ant-input-search {
+    width: 100% !important;
+    margin-right: 0 !important;
+    margin-bottom: 8px;
   }
 }
 

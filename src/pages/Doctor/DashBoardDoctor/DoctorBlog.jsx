@@ -44,6 +44,8 @@ const DoctorBlog = () => {
   const [content, setContent] = useState("");
   const [categories, setCategories] = useState([]);
   const [activeTab, setActiveTab] = useState("1");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     fetchBlogs();
@@ -234,6 +236,47 @@ const DoctorBlog = () => {
       message.error("Unable to delete blog");
       console.error("Error when deleting blog:", error);
     }
+  };
+
+  const getFilteredBlogs = () => {
+    let filteredByStatus = blogs;
+
+    // Lọc theo status
+    if (statusFilter !== "all") {
+      filteredByStatus = blogs.filter((blog) => {
+        if (typeof blog.status === "string") {
+          return blog.status === statusFilter;
+        } else {
+          const statusMap = {
+            0: "PendingApproval",
+            1: "Approved",
+            2: "Rejected",
+            3: "Draft",
+          };
+          return statusMap[blog.status] === statusFilter;
+        }
+      });
+    }
+
+    // Lọc theo search text nếu có (tìm kiếm đồng thời cả title và category)
+    if (searchText) {
+      return filteredByStatus.filter((blog) => {
+        const titleMatch = blog.title
+          .toLowerCase()
+          .includes(searchText.toLowerCase());
+        const categoryMatch = blog.categoryName
+          .toLowerCase()
+          .includes(searchText.toLowerCase());
+        // Trả về true nếu từ khóa tìm kiếm khớp với title HOẶC category
+        return titleMatch || categoryMatch;
+      });
+    }
+
+    return filteredByStatus;
+  };
+
+  const handleSearch = (value) => {
+    setSearchText(value);
   };
 
   const columns = [
@@ -578,9 +621,57 @@ const DoctorBlog = () => {
           </TabPane>
 
           <TabPane tab="Blog List" key="2">
+            <div className="DoctorRoleID2-doctor-blog__filter-row">
+              <div className="DoctorRoleID2-doctor-blog__filter-icon">
+                <i className="fas fa-filter"></i> Filter by status:
+              </div>
+              <div className="DoctorRoleID2-doctor-blog__filter-buttons-inline">
+                <Button
+                  type={statusFilter === "all" ? "primary" : "default"}
+                  onClick={() => setStatusFilter("all")}
+                >
+                  All
+                </Button>
+                <Button
+                  type={statusFilter === "Approved" ? "primary" : "default"}
+                  onClick={() => setStatusFilter("Approved")}
+                >
+                  Approved
+                </Button>
+                <Button
+                  type={statusFilter === "Rejected" ? "primary" : "default"}
+                  onClick={() => setStatusFilter("Rejected")}
+                >
+                  Rejected
+                </Button>
+                <Button
+                  type={
+                    statusFilter === "PendingApproval" ? "primary" : "default"
+                  }
+                  onClick={() => setStatusFilter("PendingApproval")}
+                >
+                  Pending Approval
+                </Button>
+                <Button
+                  type={statusFilter === "Draft" ? "primary" : "default"}
+                  onClick={() => setStatusFilter("Draft")}
+                >
+                  Draft
+                </Button>
+              </div>
+              <div className="DoctorRoleID2-doctor-blog__search-simple">
+                <Input.Search
+                  placeholder="Search by title or category..."
+                  onSearch={handleSearch}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  allowClear
+                />
+              </div>
+            </div>
+
             <Table
               columns={columns}
-              dataSource={blogs}
+              dataSource={getFilteredBlogs()}
               loading={loading}
               pagination={{
                 defaultPageSize: 10,

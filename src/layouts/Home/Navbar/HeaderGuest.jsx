@@ -136,7 +136,7 @@ function HeaderGuest() {
 
         <div className="auth-buttons">
           <NavLink className="join-btn" to={"/register"}>
-            Join
+            Sign Up
           </NavLink>
           <button className="sign-in-btn" onClick={() => navigate("/login")}>
             Sign In
