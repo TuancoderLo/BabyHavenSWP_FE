@@ -502,6 +502,22 @@ const RevenueChart = () => {
           </div>
         </div>
 
+        <div className="summary-card monthly-average">
+          <div className="card-icon">
+            <i className="fas fa-calendar-alt"></i>
+          </div>
+          <div className="card-content">
+            <h4>Average Monthly Revenue</h4>
+            <div className="card-value">
+              {new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(totalRevenue / 12)}
+            </div>
+            <div className="package-percentage">Based on last 12 months</div>
+          </div>
+        </div>
+
         <div className="summary-card standard-revenue">
           <div className="card-icon">
             <i className="fas fa-box"></i>
@@ -543,22 +559,6 @@ const RevenueChart = () => {
                 : 0}
               % of total revenue
             </div>
-          </div>
-        </div>
-
-        <div className="summary-card monthly-average">
-          <div className="card-icon">
-            <i className="fas fa-calendar-alt"></i>
-          </div>
-          <div className="card-content">
-            <h4>Average Monthly Revenue</h4>
-            <div className="card-value">
-              {new Intl.NumberFormat("vi-VN", {
-                style: "currency",
-                currency: "VND",
-              }).format(totalRevenue / 12)}
-            </div>
-            <div className="package-percentage">Based on last 12 months</div>
           </div>
         </div>
       </div>
