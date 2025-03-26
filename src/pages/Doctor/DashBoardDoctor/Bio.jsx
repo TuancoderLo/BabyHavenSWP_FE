@@ -22,7 +22,7 @@ import {
 } from "@ant-design/icons";
 import moment from "moment";
 import locale from "antd/es/date-picker/locale/vi_VN";
-import axios from "axios";
+import doctorApi from "../../../services/DoctorApi";
 import "./Bio.css";
 
 const { Title, Text } = Typography;
@@ -60,14 +60,14 @@ const Bio = () => {
           return;
         }
 
-        const response = await axios.get("https://localhost:7279/api/Doctors");
-        if (response.data.status !== 1 || !Array.isArray(response.data.data)) {
+        const response = await doctorApi.getAllDoctors();
+        if (response.status !== 1 || !Array.isArray(response.data)) {
           message.error("Data format is incorrect!");
           setLoading(false);
           return;
         }
 
-        const doctor = response.data.data.find((doc) => doc.email === email);
+        const doctor = response.data.find((doc) => doc.email === email);
         if (!doctor) {
           message.error("Doctor information not found!");
           setLoading(false);
@@ -94,14 +94,13 @@ const Bio = () => {
         };
 
         try {
-          const specialization = await axios.get(
-            `https://localhost:7279/api/Specializations/${doctor.doctorId}`
+          const specialization = await doctorApi.getDoctorSpecializations(
+            doctor.doctorId
           );
-          if (specialization.data.status === 1 && specialization.data.data) {
+          if (specialization.status === 1 && specialization.data) {
             combinedData.specializationName =
-              specialization.data.data.specializationName || "";
-            combinedData.description =
-              specialization.data.data.description || "";
+              specialization.data.specializationName || "";
+            combinedData.description = specialization.data.description || "";
           }
         } catch (error) {
           message.warning("Unable to load specialization information!");
@@ -153,18 +152,15 @@ const Bio = () => {
       };
 
       try {
-        await axios.put(
-          `https://localhost:7279/api/Doctors/${doctorId}`,
-          doctorDataToUpdate
-        );
+        await doctorApi.updateDoctor(doctorId, doctorDataToUpdate);
       } catch (error) {
         message.error("Failed to update doctor information!");
         return;
       }
 
       try {
-        await axios.put(
-          `https://localhost:7279/api/Specializations/${doctorId}`,
+        await doctorApi.updateDoctorSpecialization(
+          doctorId,
           specializationData
         );
       } catch (error) {
@@ -267,7 +263,11 @@ const Bio = () => {
                     <img
                       src={imageUrl}
                       alt="avatar"
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
                     />
                   ) : (
                     uploadButton
@@ -293,7 +293,11 @@ const Bio = () => {
                 </Button>
               ) : (
                 <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
-                  <Button onClick={handleCancel} block className="bio-cancel-btn">
+                  <Button
+                    onClick={handleCancel}
+                    block
+                    className="bio-cancel-btn"
+                  >
                     Cancel
                   </Button>
                   <Button
@@ -321,7 +325,12 @@ const Bio = () => {
                   <Form.Item
                     name="name"
                     label="Full Name"
-                    rules={[{ required: true, message: "Please enter your full name" }]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please enter your full name",
+                      },
+                    ]}
                   >
                     <Input prefix={<UserOutlined />} disabled={!editing} />
                   </Form.Item>

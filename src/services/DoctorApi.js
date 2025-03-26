@@ -37,7 +37,9 @@ const doctorApi = {
 
   // Thêm hàm updateConsultationRequestStatus
   updateConsultationRequestsStatus: async (requestId, statusString) => {
-    const response = await api.put(`/ConsultationRequests/${requestId}/${statusString}`);
+    const response = await api.put(
+      `/ConsultationRequests/${requestId}/${statusString}`
+    );
     return response.data;
   },
 
@@ -57,7 +59,10 @@ const doctorApi = {
       console.log("Raw OData Response from API:", response); // Log response từ axios
       return response;
     } catch (error) {
-      console.error("Error fetching OData responses:", error.response || error.message);
+      console.error(
+        "Error fetching OData responses:",
+        error.response || error.message
+      );
       throw error; // Ném lỗi để xử lý ở nơi gọi
     }
   },
@@ -66,45 +71,50 @@ const doctorApi = {
     const response = await api.post("/RatingFeedback", data);
     return response.data;
   },
-  
+
   updateConsultationResponseStatus: async (responseId, statusString) => {
-    const response = await api.put(`/ConsultationResponses/${responseId}/${statusString}`);
+    const response = await api.put(
+      `/ConsultationResponses/${responseId}/${statusString}`
+    );
     return response.data;
   },
 
-getUserFeedbackOData: async (userId) => {
-  try {
-    const query = `?$filter=userId eq ${userId}`; // Lọc theo userId
-    const response = await api.get(`/RatingFeedback/odata${query}`);
-    console.log("Raw OData Feedback Response:", response); // Log để kiểm tra
-    return response;
-  } catch (error) {
-    console.error("Error fetching OData feedback:", error.response || error.message);
-    throw error;
-  }
-},
+  getUserFeedbackOData: async (userId) => {
+    try {
+      const query = `?$filter=userId eq ${userId}`; // Lọc theo userId
+      const response = await api.get(`/RatingFeedback/odata${query}`);
+      console.log("Raw OData Feedback Response:", response); // Log để kiểm tra
+      return response;
+    } catch (error) {
+      console.error(
+        "Error fetching OData feedback:",
+        error.response || error.message
+      );
+      throw error;
+    }
+  },
 
-getConsultationRequestsByMemberId: async (memberId) => {
-  try {
-    const query = `?$filter=memberId eq ${memberId}`;
-    const response = await api.get(`/ConsultationRequests/odata${query}`);
-    console.log("Raw OData Response from API:", response);
-    return response; 
-  } catch (error) {
-    console.error("Error fetching OData requests:", error.response || error.message);
-    throw error;
-  } 
-},
+  getConsultationRequestsByMemberId: async (memberId) => {
+    try {
+      const query = `?$filter=memberId eq ${memberId}`;
+      const response = await api.get(`/ConsultationRequests/odata${query}`);
+      console.log("Raw OData Response from API:", response);
+      return response;
+    } catch (error) {
+      console.error(
+        "Error fetching OData requests:",
+        error.response || error.message
+      );
+      throw error;
+    }
+  },
 
   getDoctorsFromEndpoint: async () => {
     const response = await api.get("/Doctors");
     return response.data;
   },
 
-
-
-
-//admin api
+  //admin api
   // Thêm hàm mới để lấy Top N bác sĩ được yêu cầu nhiều nhất
   getTopRequestedDoctors: async (limit = 3) => {
     try {
@@ -139,6 +149,16 @@ getConsultationRequestsByMemberId: async (memberId) => {
       console.error("Lỗi khi lấy top bác sĩ:", error);
       throw error;
     }
+  },
+
+  updateDoctor: async (doctorId, data) => {
+    const response = await api.put(`/Doctors/${doctorId}`, data);
+    return response.data;
+  },
+
+  updateDoctorSpecialization: async (doctorId, data) => {
+    const response = await api.put(`/Specializations/${doctorId}`, data);
+    return response.data;
   },
 };
 
