@@ -15,6 +15,8 @@ import {
   Menu,
   Dropdown,
   Upload,
+  Card,
+  Divider,
 } from "antd";
 import axios from "axios";
 import membershipApi from "../../../../services/memberShipApi";
@@ -820,173 +822,195 @@ const Members = () => {
   };
 
   return (
-    <div className="MemberAdmin-container">
-      <div className="MemberAdmin-header">
-        <Title level={4} className="MemberAdmin-title">
-          Member Management
-        </Title>
-      </div>
+    <div
+      className="MemberAdmin-container"
+      style={{ backgroundColor: "#f5f5f5", padding: "24px" }}
+    >
+      <Card sx={{ mb: 3, boxShadow: "0 4px 6px rgba(0,0,0,0.1)" }}>
+        <div
+          className="MemberAdmin-header"
+          style={{ borderBottom: "none", marginBottom: 0 }}
+        >
+          <div>
+            <Typography.Title
+              level={5}
+              style={{
+                fontWeight: "bold",
+                color: "#1976d2",
+                margin: 0,
+                fontSize: "25px",
+              }}
+            >
+              Member Management
+            </Typography.Title>
+          </div>
+        </div>
 
-      <Tabs activeKey={activeTab} onChange={setActiveTab}>
-        <TabPane tab="User Accounts" key="1">
-          <div className="MemberAdmin-tab-header">
-            <div className="MemberAdmin-tab-header-title">
-              User Accounts List
-            </div>
-            <div className="MemberAdmin-user-accounts-actions">
-              <div className="MemberAdmin-search-input-container">
-                <Input
-                  placeholder="Tìm theo tên, username, email, SĐT"
-                  value={searchText}
-                  onChange={handleSearchChange}
-                  allowClear
-                  className="MemberAdmin-search-input"
-                  prefix={<SearchOutlined />}
-                />
+        <Divider style={{ margin: "16px 0" }} />
+
+        <Tabs activeKey={activeTab} onChange={setActiveTab}>
+          <TabPane tab="User Accounts" key="1">
+            <div className="MemberAdmin-tab-header">
+              <div className="MemberAdmin-tab-header-title">
+                User Accounts List
               </div>
-              <div className="MemberAdmin-filter-action-container">
-                <div className="MemberAdmin-role-filter">
+              <div className="MemberAdmin-user-accounts-actions">
+                <div className="MemberAdmin-search-input-container">
+                  <Input
+                    placeholder="Tìm theo tên, username, email, SĐT"
+                    value={searchText}
+                    onChange={handleSearchChange}
+                    allowClear
+                    className="MemberAdmin-search-input"
+                    prefix={<SearchOutlined />}
+                  />
+                </div>
+                <div className="MemberAdmin-filter-action-container">
+                  <div className="MemberAdmin-role-filter">
+                    <Button
+                      type={selectedRole === "All" ? "primary" : "default"}
+                      onClick={() => handleRoleChange("All")}
+                      className="MemberAdmin-filter-button"
+                    >
+                      All
+                    </Button>
+                    <Button
+                      type={selectedRole === "Member" ? "primary" : "default"}
+                      onClick={() => handleRoleChange("Member")}
+                      className="MemberAdmin-filter-button"
+                    >
+                      Member
+                    </Button>
+                    <Button
+                      type={selectedRole === "Doctor" ? "primary" : "default"}
+                      onClick={() => handleRoleChange("Doctor")}
+                      className="MemberAdmin-filter-button"
+                    >
+                      Doctor
+                    </Button>
+                    <Button
+                      type={selectedRole === "Admin" ? "primary" : "default"}
+                      onClick={() => handleRoleChange("Admin")}
+                      className="MemberAdmin-filter-button"
+                    >
+                      Admin
+                    </Button>
+                  </div>
                   <Button
-                    type={selectedRole === "All" ? "primary" : "default"}
-                    onClick={() => handleRoleChange("All")}
-                    className="MemberAdmin-filter-button"
+                    type="primary"
+                    onClick={handleAddUserAccount}
+                    icon={<PlusOutlined />}
+                    className="MemberAdmin-add-account-button"
                   >
-                    All
-                  </Button>
-                  <Button
-                    type={selectedRole === "Member" ? "primary" : "default"}
-                    onClick={() => handleRoleChange("Member")}
-                    className="MemberAdmin-filter-button"
-                  >
-                    Member
-                  </Button>
-                  <Button
-                    type={selectedRole === "Doctor" ? "primary" : "default"}
-                    onClick={() => handleRoleChange("Doctor")}
-                    className="MemberAdmin-filter-button"
-                  >
-                    Doctor
-                  </Button>
-                  <Button
-                    type={selectedRole === "Admin" ? "primary" : "default"}
-                    onClick={() => handleRoleChange("Admin")}
-                    className="MemberAdmin-filter-button"
-                  >
-                    Admin
+                    Add New Account
                   </Button>
                 </div>
-                <Button
-                  type="primary"
-                  onClick={handleAddUserAccount}
-                  icon={<PlusOutlined />}
-                  className="MemberAdmin-add-account-button"
-                >
-                  Add New Account
-                </Button>
               </div>
             </div>
-          </div>
-          <Table
-            columns={userAccountColumns}
-            dataSource={filteredUserAccounts}
-            rowKey="userId"
-            loading={loading}
-            scroll={{ x: 1300 }}
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              showTotal: (total) => `Total ${total} accounts`,
-              showQuickJumper: true,
-            }}
-            size="middle"
-            bordered
-          />
-        </TabPane>
+            <Table
+              columns={userAccountColumns}
+              dataSource={filteredUserAccounts}
+              rowKey="userId"
+              loading={loading}
+              scroll={{ x: 1300 }}
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: true,
+                showTotal: (total) => `Total ${total} accounts`,
+                showQuickJumper: true,
+              }}
+              size="middle"
+              bordered
+            />
+          </TabPane>
 
-        <TabPane tab="Members" key="2">
-          <div className="MemberAdmin-tab-header">
-            <div className="MemberAdmin-tab-header-title">Members List</div>
-            <div className="MemberAdmin-user-accounts-actions">
-              <div className="MemberAdmin-search-input-container">
-                <Input
-                  placeholder="Tìm theo tên thành viên hoặc thông tin liên hệ"
-                  value={memberSearchText}
-                  onChange={handleMemberSearchChange}
-                  allowClear
-                  className="MemberAdmin-search-input"
-                  prefix={<SearchOutlined />}
-                />
-              </div>
-              <div className="MemberAdmin-filter-action-container">
-                <Button
-                  type="primary"
-                  onClick={handleAddMember}
-                  icon={<PlusOutlined />}
-                  className="MemberAdmin-add-account-button"
-                >
-                  Add New Member
-                </Button>
+          <TabPane tab="Members" key="2">
+            <div className="MemberAdmin-tab-header">
+              <div className="MemberAdmin-tab-header-title">Members List</div>
+              <div className="MemberAdmin-user-accounts-actions">
+                <div className="MemberAdmin-search-input-container">
+                  <Input
+                    placeholder="Tìm theo tên thành viên hoặc thông tin liên hệ"
+                    value={memberSearchText}
+                    onChange={handleMemberSearchChange}
+                    allowClear
+                    className="MemberAdmin-search-input"
+                    prefix={<SearchOutlined />}
+                  />
+                </div>
+                <div className="MemberAdmin-filter-action-container">
+                  <Button
+                    type="primary"
+                    onClick={handleAddMember}
+                    icon={<PlusOutlined />}
+                    className="MemberAdmin-add-account-button"
+                  >
+                    Add New Member
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-          <Table
-            columns={memberColumns}
-            dataSource={filteredMembers}
-            rowKey="memberId"
-            loading={loading}
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              showTotal: (total) => `Total ${total} members`,
-              showQuickJumper: true,
-            }}
-            size="middle"
-            bordered
-          />
-        </TabPane>
+            <Table
+              columns={memberColumns}
+              dataSource={filteredMembers}
+              rowKey="memberId"
+              loading={loading}
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: true,
+                showTotal: (total) => `Total ${total} members`,
+                showQuickJumper: true,
+              }}
+              size="middle"
+              bordered
+            />
+          </TabPane>
 
-        <TabPane tab="Memberships" key="3">
-          <div className="MemberAdmin-tab-header">
-            <div className="MemberAdmin-tab-header-title">Memberships List</div>
-            <div className="MemberAdmin-user-accounts-actions">
-              <div className="MemberAdmin-search-input-container">
-                <Input
-                  placeholder="Tìm theo tên thành viên hoặc tên gói"
-                  value={membershipSearchText}
-                  onChange={handleMembershipSearchChange}
-                  allowClear
-                  className="MemberAdmin-search-input"
-                  prefix={<SearchOutlined />}
-                />
+          <TabPane tab="Memberships" key="3">
+            <div className="MemberAdmin-tab-header">
+              <div className="MemberAdmin-tab-header-title">
+                Memberships List
               </div>
-              <div className="MemberAdmin-filter-action-container">
-                <Button
-                  type="primary"
-                  onClick={handleAddMembership}
-                  icon={<PlusOutlined />}
-                  className="MemberAdmin-add-account-button"
-                >
-                  Add New Membership
-                </Button>
+              <div className="MemberAdmin-user-accounts-actions">
+                <div className="MemberAdmin-search-input-container">
+                  <Input
+                    placeholder="Tìm theo tên thành viên hoặc tên gói"
+                    value={membershipSearchText}
+                    onChange={handleMembershipSearchChange}
+                    allowClear
+                    className="MemberAdmin-search-input"
+                    prefix={<SearchOutlined />}
+                  />
+                </div>
+                <div className="MemberAdmin-filter-action-container">
+                  <Button
+                    type="primary"
+                    onClick={handleAddMembership}
+                    icon={<PlusOutlined />}
+                    className="MemberAdmin-add-account-button"
+                  >
+                    Add New Membership
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-          <Table
-            columns={membershipColumns}
-            dataSource={filteredMemberships}
-            rowKey="memberMembershipId"
-            loading={loading}
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              showTotal: (total) => `Total ${total} memberships`,
-              showQuickJumper: true,
-            }}
-            size="middle"
-            bordered
-          />
-        </TabPane>
-      </Tabs>
+            <Table
+              columns={membershipColumns}
+              dataSource={filteredMemberships}
+              rowKey="memberMembershipId"
+              loading={loading}
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: true,
+                showTotal: (total) => `Total ${total} memberships`,
+                showQuickJumper: true,
+              }}
+              size="middle"
+              bordered
+            />
+          </TabPane>
+        </Tabs>
+      </Card>
 
       {/* User Account Modal */}
       <Modal
