@@ -11,6 +11,7 @@ const BlogSection = ({ parentCategoryId }) => {
   const [blogs, setBlogs] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [autoLoaded, setAutoLoaded] = useState(false);
   const navigate = useNavigate();
 
   // Fetch tất cả danh mục cha
@@ -25,18 +26,23 @@ const BlogSection = ({ parentCategoryId }) => {
           );
           setParentCategories(parents);
 
-          // Nếu có parentCategoryId được truyền vào, set danh mục đó làm mặc định
+          // Xác định danh mục cha mặc định
+          let defaultParent;
           if (parentCategoryId) {
-            const selectedParent = parents.find(
+            defaultParent = parents.find(
               (category) => category.categoryId === parentCategoryId
             );
-            setSelectedParentCategory(
-              selectedParent || (parents.length > 0 ? parents[0] : null)
-            );
-          } else if (parents.length > 0) {
-            // Nếu không có parentCategoryId, set danh mục đầu tiên làm mặc định
-            setSelectedParentCategory(parents[0]);
           }
+
+          // Nếu không tìm thấy danh mục đã chỉ định hoặc không có chỉ định, lấy danh mục đầu tiên
+          if (!defaultParent && parents.length > 0) {
+            defaultParent = parents[0];
+          }
+
+          setSelectedParentCategory(defaultParent);
+
+          // Đánh dấu là đã tự động tải
+          setAutoLoaded(true);
         }
       } catch (error) {
         console.error("Error fetching parent categories:", error);
@@ -59,15 +65,18 @@ const BlogSection = ({ parentCategoryId }) => {
               category.parentCategoryId === selectedParentCategory.categoryId
           );
           setChildCategories(children);
-          // Reset selected category về "all"
-          setSelectedCategory("all");
+
+          // Không reset selected category khi đã tự động tải
+          if (!autoLoaded) {
+            setSelectedCategory("all");
+          }
         }
       } catch (error) {
         console.error("Error fetching child categories:", error);
       }
     };
     fetchChildCategories();
-  }, [selectedParentCategory]);
+  }, [selectedParentCategory, autoLoaded]);
 
   // Fetch blogs dựa trên category được chọn
   useEffect(() => {
@@ -100,6 +109,11 @@ const BlogSection = ({ parentCategoryId }) => {
           .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
           .slice(0, 4);
         setBlogs(sortedBlogs);
+
+        // Reset trạng thái autoLoaded sau khi đã tải
+        if (autoLoaded) {
+          setAutoLoaded(false);
+        }
       } catch (error) {
         console.error("Error fetching blogs:", error);
       } finally {
@@ -108,7 +122,7 @@ const BlogSection = ({ parentCategoryId }) => {
     };
 
     fetchBlogs();
-  }, [selectedCategory, selectedParentCategory]);
+  }, [selectedCategory, selectedParentCategory, autoLoaded]);
 
   // Handler khi chọn danh mục cha
   const handleParentCategorySelect = (category) => {
@@ -117,8 +131,8 @@ const BlogSection = ({ parentCategoryId }) => {
 
   return (
     <div className="blog-section">
-      {/* Hiển thị danh sách danh mục cha */}
-      <div className="blog-section-parent-categories">
+      {/* Bỏ phần này vì đã có 5 nút category cha ở trên đầu trang */}
+      {/* <div className="blog-section-parent-categories">
         {parentCategories.map((category) => (
           <button
             key={category.categoryId}
@@ -132,15 +146,16 @@ const BlogSection = ({ parentCategoryId }) => {
             {category.categoryName}
           </button>
         ))}
-      </div>
+      </div> */}
 
+      {/* Vẫn giữ tiêu đề category cha đang chọn */}
       {selectedParentCategory && (
         <h2 className="section-topics">
           {selectedParentCategory.categoryName}
         </h2>
       )}
 
-      {/* Navigation danh mục con */}
+      {/* Giữ nguyên phần còn lại */}
       <div className="category-nav">
         <button
           className={`nav-item ${selectedCategory === "all" ? "active" : ""}`}
@@ -161,7 +176,6 @@ const BlogSection = ({ parentCategoryId }) => {
         ))}
       </div>
 
-      {/* Blog Cards */}
       <div className="blog-cards">
         {loading ? (
           <div className="loading-indicator">
