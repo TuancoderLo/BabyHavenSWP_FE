@@ -42,6 +42,8 @@ function Blog() {
   const [parentNames, setParentNames] = useState({}); // Lưu tên của category cha
   const [categoryFilter, setCategoryFilter] = useState("all"); // Filter cho categories
   const [editingId, setEditingId] = useState(null); // ID của category đang edit
+  // Thêm state cho search query
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Blog States
   const [blogs, setBlogs] = useState([]); // Lưu danh sách blogs
@@ -129,16 +131,35 @@ function Blog() {
   /* ==========================================================================
      FILTER FUNCTIONS
      ========================================================================== */
-  // Lọc categories theo parent/child
+  // Lọc categories theo parent/child và search query
   const getFilteredCategories = () => {
+    let filteredData = categories;
+
+    // Lọc theo parent/child
     switch (categoryFilter) {
       case "parent":
-        return categories.filter((cat) => cat.parentCategoryId === null);
+        filteredData = categories.filter(
+          (cat) => cat.parentCategoryId === null
+        );
+        break;
       case "child":
-        return categories.filter((cat) => cat.parentCategoryId !== null);
+        filteredData = categories.filter(
+          (cat) => cat.parentCategoryId !== null
+        );
+        break;
       default:
-        return categories;
+        filteredData = categories;
     }
+
+    // Lọc theo search query nếu có
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filteredData = filteredData.filter((cat) =>
+        cat.categoryName.toLowerCase().includes(query)
+      );
+    }
+
+    return filteredData;
   };
 
   // Lọc blogs theo status
@@ -607,17 +628,49 @@ function Blog() {
                 <Radio.Button value="child">Child Categories</Radio.Button>
               </Radio.Group>
             </div>
-            <Button
-              type="primary"
-              onClick={() => {
-                setEditingId(null);
-                form.resetFields();
-                setIsModalVisible(true);
-              }}
-            >
-              Add New Category
-            </Button>
+            <div className="blog-actions">
+              {/* Thêm ô tìm kiếm */}
+              <Input.Search
+                placeholder="Tìm kiếm theo tên danh mục..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onSearch={(value) => setSearchQuery(value)}
+                style={{ width: 300, marginRight: 16 }}
+                allowClear
+              />
+              <Button
+                type="primary"
+                onClick={() => {
+                  setEditingId(null);
+                  form.resetFields();
+                  setIsModalVisible(true);
+                }}
+              >
+                Add New Category
+              </Button>
+            </div>
           </div>
+
+          {/* Hiển thị một thông báo về kết quả tìm kiếm */}
+          {searchQuery.trim() && (
+            <div style={{ marginBottom: 16 }}>
+              <span>
+                Kết quả tìm kiếm cho "{searchQuery}" trong
+                {categoryFilter === "parent"
+                  ? " Parent Categories"
+                  : categoryFilter === "child"
+                  ? " Child Categories"
+                  : " All Categories"}
+              </span>
+              <Button
+                type="link"
+                onClick={() => setSearchQuery("")}
+                style={{ marginLeft: 8 }}
+              >
+                Xóa tìm kiếm
+              </Button>
+            </div>
+          )}
 
           <Table
             className="blog-table"
