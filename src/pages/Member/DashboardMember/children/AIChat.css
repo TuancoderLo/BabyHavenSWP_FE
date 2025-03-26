@@ -17,44 +17,144 @@
     background: #ffffff;
     border-radius: 16px;
     width: 90%;
-    max-width: 500px;
-    height: 70vh;
+    max-width: 1300px;
+    height: 100vh;
     max-height: 600px;
-    display: flex;
-    flex-direction: column;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     animation: slideUp 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
   }
   
-  .chat-modal-header {
-    padding: 15px 20px;
-    background: linear-gradient(135deg, #72DEFF, #A8E6CF);
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
+  /* Flex container for sidebar and main chat area */
+  .chat-modal-flex {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+  
+  /* Sidebar styling */
+  .chat-sidebar {
+    width: 250px;
+    background: #f4f4f4;
+    border-right: 1px solid #e0e0e0;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  .sidebar-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 15px;
+  }
+  
+  .children-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .child-item {
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background 0.3s ease;
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
   
+  .child-item:hover {
+    background: #e0e0e0;
+  }
+  
+  .child-item.selected {
+    background: #72DEFF;
+    color: #ffffff;
+  }
+  
+  .child-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  .child-age {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: #666666;
+  }
+  
+  .child-item.selected .child-age {
+    color: #ffffff;
+  }
+  
+  .no-children {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #666666;
+    text-align: center;
+  }
+  
+  /* Main chat area */
+  .chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .chat-modal-header {
+    padding: 15px 20px;
+    background: transparent;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+  
   .chat-modal-header h3 {
     margin: 0;
-    font-family: 'Inter', sans-serif;
     font-size: 18px;
     font-weight: 600;
-    color: #ffffff;
+    text-align: center;
+    color: #000000;
+    flex: 1;
   }
   
   .chat-modal-close {
     background: none;
     border: none;
     font-size: 24px;
-    color: #ffffff;
+    color: #000000;
     cursor: pointer;
     transition: color 0.3s ease;
   }
   
   .chat-modal-close:hover {
     color: #ff6b6b;
+  }
+  
+  .chat-placeholder {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #f9f9f9;
+    color: #666666;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .chat-placeholder p {
+    margin-bottom: 20px;
   }
   
   .chat-messages {
@@ -139,6 +239,17 @@
     }
   }
   
+  .chat-input-container {
+    width: 100%;
+  }
+  
+  .chat-input-container.centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+  
   .chat-input-area {
     padding: 15px 20px;
     border-top: 1px solid #e0e0e0;
@@ -148,6 +259,14 @@
     background: #ffffff;
     border-bottom-left-radius: 16px;
     border-bottom-right-radius: 16px;
+    width: 100%;
+    max-width: 600px;
+  }
+  
+  .chat-input-container.centered .chat-input-area {
+    border-top: none;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
   
   .chat-input {
@@ -218,11 +337,36 @@
       padding: 15px;
     }
   
+    .chat-placeholder {
+      font-size: 14px;
+      padding: 15px;
+    }
+  
     .chat-text {
       font-size: 13px;
     }
   
     .chat-input {
       font-size: 13px;
+    }
+  
+    .chat-input-area {
+      max-width: 100%;
+    }
+  
+    .chat-sidebar {
+      width: 200px;
+    }
+  
+    .child-item {
+      padding: 8px 10px;
+    }
+  
+    .child-name {
+      font-size: 13px;
+    }
+  
+    .child-age {
+      font-size: 11px;
     }
   }
