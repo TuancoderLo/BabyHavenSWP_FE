@@ -17,8 +17,14 @@ import {
   Typography,
   Box,
 } from "@mui/material";
-import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Create as PencilIcon,
+  DeleteOutline as TrashIcon,
+} from "@mui/icons-material";
 import packageApi from "../../../../services/packageApi";
+import "./ManagePackage.css";
 
 function Packages() {
   const [packages, setPackages] = useState([]);
@@ -251,21 +257,22 @@ function Packages() {
   );
 
   return (
-    <Box p={3}>
-      <Box display="flex" justifyContent="space-between" mb={3}>
+    <Box className="ManagePackage-page-container">
+      <Box className="ManagePackage-page-header">
         <Typography variant="h4">Membership Package Management</Typography>
         <Button
           variant="contained"
           color="primary"
           onClick={() => handleOpen()}
+          className="ManagePackage-add-button"
         >
           ADD NEW PACKAGE
         </Button>
       </Box>
 
       <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
+        <Table className="ManagePackage-table">
+          <TableHead className="ManagePackage-table-header">
             <TableRow>
               <TableCell width="70px">No.</TableCell>
               <TableCell>Package Name</TableCell>
@@ -274,7 +281,9 @@ function Packages() {
               <TableCell>Duration (Months)</TableCell>
               <TableCell>Max Children Allowed</TableCell>
               <TableCell>Status</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell align="center" className="ManagePackage-action-cell">
+                <span className="ManagePackage-action-title">Actions</span>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -287,35 +296,19 @@ function Packages() {
                 <TableCell>{pkg.durationMonths}</TableCell>
                 <TableCell>{pkg.maxChildrenAllowed}</TableCell>
                 <TableCell>{pkg.status}</TableCell>
-                <TableCell>
-                  <Box sx={{ display: "flex", gap: 1 }}>
+                <TableCell align="center">
+                  <Box className="ManagePackage-action-button-container">
                     <IconButton
                       onClick={() => handleOpen(pkg)}
-                      sx={{
-                        backgroundColor: "#00E5BE",
-                        color: "white",
-                        borderRadius: "8px",
-                        padding: "8px",
-                        "&:hover": {
-                          backgroundColor: "#00D1AD",
-                        },
-                      }}
+                      className="ManagePackage-edit-button"
                     >
-                      <EditIcon />
+                      <EditIcon fontSize="small" />
                     </IconButton>
                     <IconButton
                       onClick={() => handleDelete(pkg)}
-                      sx={{
-                        backgroundColor: "#FF5252",
-                        color: "white",
-                        borderRadius: "8px",
-                        padding: "8px",
-                        "&:hover": {
-                          backgroundColor: "#FF1744",
-                        },
-                      }}
+                      className="ManagePackage-delete-button"
                     >
-                      <DeleteIcon />
+                      <DeleteIcon fontSize="small" />
                     </IconButton>
                   </Box>
                 </TableCell>
