@@ -12,6 +12,9 @@ import {
   FaChild,
   FaChartLine,
   FaListOl,
+  FaCalendarAlt,
+  FaFilter,
+  FaGlobeAsia,
 } from "react-icons/fa";
 
 function TopSystem() {
@@ -21,6 +24,11 @@ function TopSystem() {
   const [error, setError] = useState(null);
   const [showDetailIndex, setShowDetailIndex] = useState(null);
   const [showFullRanking, setShowFullRanking] = useState(false);
+
+  // State mới cho phần lọc theo tháng
+  const [availableMonths, setAvailableMonths] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState("all");
+  const [showMonthFilter, setShowMonthFilter] = useState(false);
 
   useEffect(() => {
     const fetchTopDoctors = async () => {
@@ -51,76 +59,24 @@ function TopSystem() {
 
         console.log("Danh sách yêu cầu sau khi xử lý:", requests);
 
-        // 2. Đếm số lượng yêu cầu cho mỗi bác sĩ
-        const doctorCounts = {};
+        // Tìm các tháng có sẵn từ dữ liệu yêu cầu
+        const months = {};
         requests.forEach((request) => {
-          if (request && request.doctorId) {
-            doctorCounts[request.doctorId] =
-              (doctorCounts[request.doctorId] || 0) + 1;
+          if (request && request.requestDate) {
+            const date = new Date(request.requestDate);
+            const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`; // Format: YYYY-MM
+            months[monthKey] = true;
           }
         });
 
-        console.log("Số lượng yêu cầu theo bác sĩ:", doctorCounts);
+        // Sắp xếp các tháng theo thứ tự giảm dần (mới đến cũ)
+        const sortedMonths = Object.keys(months).sort((a, b) =>
+          b.localeCompare(a)
+        );
+        setAvailableMonths(sortedMonths);
 
-        // 3. Sắp xếp và lấy top 10
-        const top10DoctorIds = Object.entries(doctorCounts)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 10)
-          .map(([id]) => parseInt(id));
-
-        console.log("Top 10 doctorId:", top10DoctorIds);
-
-        // 4. Tạo mảng promises để lấy thông tin bác sĩ từ API
-        const doctorPromises = top10DoctorIds.map(async (id) => {
-          try {
-            console.log(`Đang lấy thông tin bác sĩ ID ${id}...`);
-            const doctorResponse = await axios.get(
-              `https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/Doctors/${id}`
-            );
-
-            console.log(`Dữ liệu bác sĩ ID ${id}:`, doctorResponse.data);
-
-            // Kiểm tra cấu trúc response doctor
-            let doctorData = null;
-            if (doctorResponse.data && doctorResponse.data.data) {
-              doctorData = doctorResponse.data.data;
-            } else {
-              doctorData = doctorResponse.data;
-            }
-
-            // Kiểm tra xem đã lấy được dữ liệu cần thiết chưa
-            console.log(`Dữ liệu bác sĩ sau khi xử lý:`, {
-              id: doctorData.doctorId,
-              name: doctorData.name,
-              degree: doctorData.degree,
-              email: doctorData.email,
-            });
-
-            return {
-              ...doctorData,
-              requestCount: doctorCounts[id],
-              requestsByCategory: getCategoryStats(requests, id),
-            };
-          } catch (err) {
-            console.error(`Lỗi khi lấy thông tin bác sĩ ID ${id}:`, err);
-            // Trả về dữ liệu giả nếu không lấy được thông tin chi tiết
-            return {
-              doctorId: id,
-              name: `Bác sĩ ID: ${id}`,
-              degree: "Không có thông tin",
-              hospitalName: "Không có thông tin",
-              requestCount: doctorCounts[id],
-              status: "Unknown",
-            };
-          }
-        });
-
-        const doctorsInfo = await Promise.all(doctorPromises);
-        console.log("Danh sách bác sĩ đã lấy thông tin:", doctorsInfo);
-
-        setTopDoctors(doctorsInfo.slice(0, 3)); // Lấy 3 bác sĩ đầu tiên cho top 3
-        setAllTopDoctors(doctorsInfo); // Lưu toàn bộ danh sách top 10
-        setLoading(false);
+        // Khởi tạo với tất cả các tháng
+        processRequestsByMonth(requests, "all");
       } catch (err) {
         console.error("Lỗi khi lấy dữ liệu top bác sĩ:", err);
         setError("Không thể tải dữ liệu bác sĩ. Vui lòng thử lại sau.");
@@ -128,23 +84,120 @@ function TopSystem() {
       }
     };
 
-    // Hàm phụ để tính toán thống kê theo danh mục
-    const getCategoryStats = (requests, doctorId) => {
-      const categories = {};
-      const doctorRequests = requests.filter(
-        (req) => req.doctorId === doctorId
-      );
-
-      doctorRequests.forEach((req) => {
-        const category = req.category || "Khác";
-        categories[category] = (categories[category] || 0) + 1;
-      });
-
-      return categories;
-    };
-
     fetchTopDoctors();
   }, []);
+
+  // Hàm mới để xử lý yêu cầu theo tháng
+  const processRequestsByMonth = async (allRequests, monthFilter) => {
+    try {
+      // Lọc yêu cầu theo tháng nếu không phải 'all'
+      let filteredRequests = allRequests;
+      if (monthFilter !== "all") {
+        filteredRequests = allRequests.filter((request) => {
+          if (request && request.requestDate) {
+            const date = new Date(request.requestDate);
+            const requestMonthKey = `${date.getFullYear()}-${
+              date.getMonth() + 1
+            }`;
+            return requestMonthKey === monthFilter;
+          }
+          return false;
+        });
+      }
+
+      // 2. Đếm số lượng yêu cầu cho mỗi bác sĩ
+      const doctorCounts = {};
+      filteredRequests.forEach((request) => {
+        if (request && request.doctorId) {
+          doctorCounts[request.doctorId] =
+            (doctorCounts[request.doctorId] || 0) + 1;
+        }
+      });
+
+      console.log(
+        `Số lượng yêu cầu theo bác sĩ (${monthFilter}):`,
+        doctorCounts
+      );
+
+      // 3. Sắp xếp và lấy top 10
+      const top10DoctorIds = Object.entries(doctorCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([id]) => parseInt(id));
+
+      console.log(`Top 10 doctorId (${monthFilter}):`, top10DoctorIds);
+
+      if (top10DoctorIds.length === 0) {
+        setTopDoctors([]);
+        setAllTopDoctors([]);
+        setLoading(false);
+        return;
+      }
+
+      // 4. Tạo mảng promises để lấy thông tin bác sĩ từ API
+      const doctorPromises = top10DoctorIds.map(async (id) => {
+        try {
+          console.log(`Đang lấy thông tin bác sĩ ID ${id}...`);
+          const doctorResponse = await axios.get(
+            `https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/Doctors/${id}`
+          );
+
+          // Kiểm tra cấu trúc response doctor
+          let doctorData = null;
+          if (doctorResponse.data && doctorResponse.data.data) {
+            doctorData = doctorResponse.data.data;
+          } else {
+            doctorData = doctorResponse.data;
+          }
+
+          return {
+            ...doctorData,
+            requestCount: doctorCounts[id],
+            requestsByCategory: getCategoryStats(filteredRequests, id),
+          };
+        } catch (err) {
+          console.error(`Lỗi khi lấy thông tin bác sĩ ID ${id}:`, err);
+          // Trả về dữ liệu giả nếu không lấy được thông tin chi tiết
+          return {
+            doctorId: id,
+            name: `Bác sĩ ID: ${id}`,
+            degree: "Không có thông tin",
+            hospitalName: "Không có thông tin",
+            requestCount: doctorCounts[id],
+            status: "Unknown",
+          };
+        }
+      });
+
+      const doctorsInfo = await Promise.all(doctorPromises);
+      console.log(
+        `Danh sách bác sĩ đã lấy thông tin (${monthFilter}):`,
+        doctorsInfo
+      );
+
+      setTopDoctors(doctorsInfo.slice(0, 3)); // Lấy 3 bác sĩ đầu tiên cho top 3
+      setAllTopDoctors(doctorsInfo); // Lưu toàn bộ danh sách top 10
+      setSelectedMonth(monthFilter);
+      setLoading(false);
+    } catch (err) {
+      console.error("Lỗi khi xử lý dữ liệu theo tháng:", err);
+      setError("Không thể xử lý dữ liệu theo tháng. Vui lòng thử lại sau.");
+      setLoading(false);
+    }
+  };
+
+  // Hàm phụ để tính toán thống kê theo danh mục
+  const getCategoryStats = (requests, doctorId) => {
+    const categories = {};
+    const doctorRequests = requests.filter((req) => req.doctorId === doctorId);
+
+    doctorRequests.forEach((req) => {
+      const category = req.category || "Khác";
+      categories[category] = (categories[category] || 0) + 1;
+    });
+
+    return categories;
+  };
 
   const toggleDoctorDetail = (index) => {
     setShowDetailIndex(showDetailIndex === index ? null : index);
@@ -152,6 +205,56 @@ function TopSystem() {
 
   const toggleFullRanking = () => {
     setShowFullRanking(!showFullRanking);
+  };
+
+  const toggleMonthFilter = () => {
+    setShowMonthFilter(!showMonthFilter);
+  };
+
+  const handleMonthChange = async (monthKey) => {
+    setLoading(true);
+
+    try {
+      // Lấy lại dữ liệu yêu cầu tư vấn
+      const consultationResponse = await axios.get(
+        "https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/ConsultationRequests"
+      );
+
+      let requests = [];
+      if (
+        consultationResponse.data &&
+        consultationResponse.data.data &&
+        Array.isArray(consultationResponse.data.data)
+      ) {
+        requests = consultationResponse.data.data;
+      } else if (Array.isArray(consultationResponse.data)) {
+        requests = consultationResponse.data;
+      } else {
+        throw new Error("Dữ liệu API không đúng định dạng");
+      }
+
+      // Xử lý dữ liệu theo tháng đã chọn
+      await processRequestsByMonth(requests, monthKey);
+
+      // Đóng bộ lọc tháng sau khi đã chọn
+      setShowMonthFilter(false);
+    } catch (err) {
+      console.error("Lỗi khi thay đổi tháng:", err);
+      setError(
+        "Không thể tải dữ liệu cho tháng đã chọn. Vui lòng thử lại sau."
+      );
+      setLoading(false);
+    }
+  };
+
+  // Định dạng hiển thị tháng từ khóa YYYY-MM
+  const formatMonthDisplay = (monthKey) => {
+    if (monthKey === "all") return "Tất cả thời gian";
+
+    const [year, month] = monthKey.split("-");
+    const date = new Date(parseInt(year), parseInt(month) - 1);
+
+    return date.toLocaleDateString("vi-VN", { month: "long", year: "numeric" });
   };
 
   if (loading)
@@ -171,9 +274,46 @@ function TopSystem() {
         <h2 className="TopSystem-title">
           <FaMedal className="TopSystem-title-icon" /> Top Bác Sĩ Được Yêu Cầu
           Nhiều Nhất
+          <div className="TopSystem-month-selector">
+            <button
+              className="TopSystem-month-button"
+              onClick={toggleMonthFilter}
+            >
+              <FaCalendarAlt className="TopSystem-month-icon" />
+              {formatMonthDisplay(selectedMonth)}
+              <FaFilter className="TopSystem-filter-icon" />
+            </button>
+
+            {showMonthFilter && (
+              <div className="TopSystem-month-dropdown">
+                <div
+                  className={`TopSystem-month-item ${
+                    selectedMonth === "all" ? "active" : ""
+                  }`}
+                  onClick={() => handleMonthChange("all")}
+                >
+                  <FaGlobeAsia className="TopSystem-month-item-icon" />
+                  Tất cả thời gian
+                </div>
+                {availableMonths.map((month) => (
+                  <div
+                    key={month}
+                    className={`TopSystem-month-item ${
+                      selectedMonth === month ? "active" : ""
+                    }`}
+                    onClick={() => handleMonthChange(month)}
+                  >
+                    <FaCalendarAlt className="TopSystem-month-item-icon" />
+                    {formatMonthDisplay(month)}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </h2>
         <div className="TopSystem-empty">
-          Hiện không có dữ liệu về yêu cầu tư vấn bác sĩ.
+          Không có dữ liệu về yêu cầu tư vấn bác sĩ cho{" "}
+          {formatMonthDisplay(selectedMonth).toLowerCase()}.
         </div>
       </div>
     );
@@ -184,6 +324,42 @@ function TopSystem() {
       <h2 className="TopSystem-title">
         <FaMedal className="TopSystem-title-icon" /> Top Bác Sĩ Được Yêu Cầu
         Nhiều Nhất
+        <div className="TopSystem-month-selector">
+          <button
+            className="TopSystem-month-button"
+            onClick={toggleMonthFilter}
+          >
+            <FaCalendarAlt className="TopSystem-month-icon" />
+            {formatMonthDisplay(selectedMonth)}
+            <FaFilter className="TopSystem-filter-icon" />
+          </button>
+
+          {showMonthFilter && (
+            <div className="TopSystem-month-dropdown">
+              <div
+                className={`TopSystem-month-item ${
+                  selectedMonth === "all" ? "active" : ""
+                }`}
+                onClick={() => handleMonthChange("all")}
+              >
+                <FaGlobeAsia className="TopSystem-month-item-icon" />
+                Tất cả thời gian
+              </div>
+              {availableMonths.map((month) => (
+                <div
+                  key={month}
+                  className={`TopSystem-month-item ${
+                    selectedMonth === month ? "active" : ""
+                  }`}
+                  onClick={() => handleMonthChange(month)}
+                >
+                  <FaCalendarAlt className="TopSystem-month-item-icon" />
+                  {formatMonthDisplay(month)}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </h2>
 
       {/* Top 3 bác sĩ với card nổi bật */}
@@ -342,7 +518,10 @@ function TopSystem() {
         <div className="TopSystem-full-ranking">
           <h3 className="TopSystem-ranking-title">
             <FaListOl className="TopSystem-ranking-icon" /> Bảng Xếp Hạng Top 10
-            Bác Sĩ
+            Bác Sĩ{" "}
+            {selectedMonth !== "all"
+              ? `(${formatMonthDisplay(selectedMonth)})`
+              : ""}
           </h3>
           <div className="TopSystem-ranking-table-container">
             <table className="TopSystem-ranking-table">

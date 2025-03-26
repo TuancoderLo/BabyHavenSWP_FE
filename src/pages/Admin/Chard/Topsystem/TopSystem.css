@@ -663,3 +663,97 @@
     display: none;
   }
 }
+
+/* Month Selector */
+.TopSystem-month-selector {
+  position: relative;
+  margin-left: auto;
+}
+
+.TopSystem-month-button {
+  background: linear-gradient(135deg, #4361ee, #3a0ca3);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+}
+
+.TopSystem-month-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(67, 97, 238, 0.3);
+}
+
+.TopSystem-month-icon,
+.TopSystem-filter-icon {
+  font-size: 14px;
+}
+
+.TopSystem-month-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 240px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  padding: 10px 0;
+  margin-top: 8px;
+  animation: TopSystem-fadeIn 0.3s ease;
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.TopSystem-month-item {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #5a6474;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.TopSystem-month-item:hover {
+  background-color: #f8faff;
+}
+
+.TopSystem-month-item.active {
+  background-color: #f0f4ff;
+  color: #4361ee;
+  font-weight: 500;
+}
+
+.TopSystem-month-item-icon {
+  color: #4361ee;
+  font-size: 14px;
+}
+
+/* Đảm bảo responsive */
+@media (max-width: 768px) {
+  .TopSystem-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .TopSystem-month-selector {
+    margin-left: 0;
+    align-self: flex-start;
+  }
+
+  .TopSystem-month-dropdown {
+    width: 220px;
+    right: auto;
+    left: 0;
+  }
+}
