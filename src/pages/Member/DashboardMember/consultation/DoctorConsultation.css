@@ -7,9 +7,9 @@
 /* Grid Container */
 .doctor-grid-container {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 3fr 2fr;
   gap: 20px;
-  max-width: 1200px;
+  max-width: 1700px;
   margin: 0 auto;
 }
 
@@ -36,34 +36,34 @@
   text-align: center;
   position: relative;
   z-index: 1;
-  width: 33.33%; /* Chia đều cho 3 bước */
+  width: 33.33%;
 }
 
 .doctor-step-item::before {
   content: "";
   position: absolute;
-  top: 12px; /* Đặt đường nối ở giữa vòng tròn */
+  top: 12px;
   left: -50%;
   width: 100%;
   height: 4px;
-  background: #D1D5DB; /* Đường nối màu xám nhạt */
+  background: #D1D5DB;
   z-index: -1;
 }
 
 .doctor-step-item:first-child::before {
-  display: none; /* Ẩn đường nối ở bước đầu tiên */
+  display: none;
 }
 
 .doctor-step-item.completed::before,
 .doctor-step-item.active::before {
-  background: #3B82F6; /* Đường nối màu xanh dương khi hoàn thành hoặc đang active */
+  background: #3B82F6;
 }
 
 .step-circle {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #D1D5DB; /* Vòng tròn màu xám nhạt */
+  background: #D1D5DB;
   color: #fff;
   display: flex;
   align-items: center;
@@ -76,7 +76,7 @@
 
 .doctor-step-item.active .step-circle,
 .doctor-step-item.completed .step-circle {
-  background: #3B82F6; /* Vòng tròn màu xanh dương khi active hoặc hoàn thành */
+  background: #3B82F6;
 }
 
 .step-label {
@@ -87,7 +87,7 @@
 
 .doctor-step-item.active .step-label,
 .doctor-step-item.completed .step-label {
-  color: #3B82F6; /* Chữ màu xanh dương khi active hoặc hoàn thành */
+  color: #3B82F6;
 }
 
 .doctor-form-content {
@@ -124,7 +124,7 @@
 .doctor-category-select,
 .doctor-urgency-select {
   padding: 10px;
-  border: 1px solid #E1F5FE; /* Viền xanh nhạt */
+  border: 1px solid #E1F5FE;
   border-radius: 8px;
   font-size: 14px;
 }
@@ -133,7 +133,7 @@
   border: 1px solid #E1F5FE;
   border-radius: 8px;
   padding: 10px;
-  background: #E1F5FE; /* Nền xanh nhạt */
+  background: #E1F5FE;
 }
 
 /* Step 2: Select Doctor */
@@ -149,9 +149,9 @@
 }
 
 .doctor-card {
-width: 100%;
-  max-width: 400px; /* giới hạn chiều rộng nếu cần */
-  margin: 15px auto; /* căn giữa nếu muốn */
+  width: 100%;
+  max-width: 400px;
+  margin: 15px auto;
   padding: 15px;
   background: #E1F5FE;
   border-radius: 10px;
@@ -161,11 +161,11 @@ width: 100%;
 }
 
 .doctor-card:hover {
-  background: #B3E5FC; /* Xanh nhạt hơn khi hover */
+  background: #B3E5FC;
 }
 
 .doctor-card.selected {
-  border: 2px solid #5BC0EB; /* Viền xanh dương nhạt */
+  border: 2px solid #5BC0EB;
 }
 
 .doctor-avatar img {
@@ -261,12 +261,40 @@ width: 100%;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
+.tab-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.tab-button {
+  padding: 8px 16px;
+  background: #E1F5FE;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: background 0.3s ease;
+}
+
+.tab-button.active {
+  background: #5BC0EB;
+  color: #fff;
+}
+
+.tab-button:hover:not(.active) {
+  background: #B3E5FC;
+}
+
 .doctor-response {
   max-height: 500px;
   overflow-y: auto;
 }
 
-.consultation-response-card {
+.consultation-response-card,
+.consultation-sent-card,
+.consultation-feedback-card {
   padding: 15px;
   background: #E1F5FE;
   border-radius: 10px;
@@ -276,12 +304,16 @@ width: 100%;
   border: 1px solid #B3E5FC;
 }
 
-.consultation-response-card:hover {
+.consultation-response-card:hover,
+.consultation-sent-card:hover,
+.consultation-feedback-card:hover {
   background: #B3E5FC;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.response-header {
+.response-header,
+.sent-header,
+.feedback-header {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
@@ -289,22 +321,28 @@ width: 100%;
   margin-bottom: 8px;
 }
 
-.response-status {
+.response-status,
+.sent-status,
+.feedback-rating {
   padding: 2px 8px;
   border-radius: 12px;
   font-size: 12px;
   color: #fff;
-  background: #5BC0EB; /* Xanh dương nhạt */
+  background: #5BC0EB;
 }
 
-.response-summary {
+.response-summary,
+.sent-summary,
+.feedback-summary {
   display: flex;
   flex-direction: column;
   gap: 4px;
   margin-bottom: 8px;
 }
 
-.response-summary p {
+.response-summary p,
+.sent-summary p,
+.feedback-summary p {
   font-size: 14px;
   color: #333;
   margin: 0;
@@ -332,7 +370,7 @@ width: 100%;
   background: #fff;
   padding: 20px;
   border-radius: 12px;
-  max-width: 600px;
+  max-width: 900px;
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
@@ -351,42 +389,96 @@ width: 100%;
 
 .modal-title {
   font-size: 18px;
-  color: #5BC0EB; /* Xanh dương nhạt */
+  color: #5BC0EB;
   margin-bottom: 15px;
 }
 
 .response-details {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
 .response-section,
-.request-section {
+.request-section,
+.feedback-section {
   background: #E1F5FE;
   padding: 15px;
   border-radius: 8px;
 }
 
 .response-section h4,
-.request-section h4 {
+.request-section h4,
+.feedback-section h4 {
   font-size: 16px;
-  color: #F472B6; /* Thay màu vàng bằng hồng phấn */
+  color: #F472B6;
   margin-bottom: 10px;
 }
 
-.request-section h5 {
-  font-size: 14px;
-  color: #F472B6;
-  margin-top: 10px;
-  margin-bottom: 5px;
-}
-
 .response-section p,
-.request-section p {
+.request-section p,
+.feedback-section p {
   font-size: 14px;
   color: #333;
   margin-bottom: 5px;
+}
+
+/* Feedback Form */
+.feedback-form {
+  grid-column: span 1;
+}
+
+.feedback-form h4 {
+  font-size: 16px;
+  color: #F472B6;
+  margin-bottom: 15px;
+}
+
+.star {
+  font-size: 24px;
+  color: #D1D5DB;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.star.selected,
+.star:hover,
+.star:hover ~ .star {
+  color: #F472B6;
+}
+
+.feedback-textarea {
+  padding: 10px;
+  border: 1px solid #E1F5FE;
+  border-radius: 8px;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.feedback-button,
+.submit-feedback-button {
+  padding: 10px 20px;
+  background: #F472B6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.feedback-button:hover,
+.submit-feedback-button:hover {
+  background: #EC4899;
+}
+
+.submit-feedback-button:disabled {
+  background: #D1D5DB;
+  cursor: not-allowed;
 }
 
 /* Success Modal */
@@ -396,7 +488,7 @@ width: 100%;
   border-radius: 12px;
   max-width: 400px;
   width: 90%;
-  box-shadow: 0 4px 12px rgba(91, 192, 235, 0.3); /* Box-shadow xanh nhạt */
+  box-shadow: 0 4px 12px rgba(91, 192, 235, 0.3);
   text-align: center;
 }
 
@@ -430,7 +522,7 @@ width: 100%;
 .doctor-action-button,
 .success-modal-button {
   padding: 10px 30px;
-  background: #F472B6; /* Thay màu vàng bằng hồng phấn */
+  background: #F472B6;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -444,7 +536,7 @@ width: 100%;
 .doctor-next-button:hover,
 .doctor-action-button:hover,
 .success-modal-button:hover {
-  background: #EC4899; /* Hồng đậm hơn khi hover */
+  background: #EC4899;
 }
 
 .doctor-navigation-buttons {
@@ -456,7 +548,7 @@ width: 100%;
 /* Misc */
 .section-title {
   font-size: 18px;
-  color: #5BC0EB; /* Xanh dương nhạt */
+  color: #5BC0EB;
   margin-bottom: 15px;
 }
 
@@ -476,7 +568,7 @@ width: 100%;
 }
 
 .submit-error {
-  color: #FF8A80; /* Đỏ san hô, dịu hơn */
+  color: #FF8A80;
   font-size: 14px;
 }
 
@@ -500,6 +592,11 @@ width: 100%;
   }
 
   .doctor-step-item::before {
-    display: none; /* Ẩn đường nối khi ở chế độ mobile */
+    display: none;
+  }
+
+  .tab-container {
+    flex-direction: column;
+    gap: 5px;
   }
 }

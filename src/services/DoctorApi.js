@@ -34,6 +34,7 @@ const doctorApi = {
     const response = await api.post("/ConsultationResponses", data);
     return response.data;
   },
+
   // Thêm hàm updateConsultationRequestStatus
   updateConsultationRequestStatus: async (requestId, status) => {
     const response = await api.put(`/api/ConsultationRequests/${requestId}`, {
@@ -47,24 +48,47 @@ const doctorApi = {
     const response = await api.post("/ConsultationRequests", data);
     return response.data;
   },
-  getConsultationResponse: async () => {
-    const response = await api.get("/ConsultationResponses");
+  getConsultationResponses: async (id) => {
+    const response = await api.get(`/ConsultationResponses/member/${id}`);
     return response.data;
   },
-  getConsultationResponsesByDoctor: async (doctorName) => {
-    const response = await api.get(`/ConsultationResponses/odata`, {
-      params: { doctorName },
-    });
+
+  getConsultationResponsesOData: async (query = "") => {
+    try {
+      const response = await api.get(`/ConsultationResponses/odata${query}`);
+      console.log("Raw OData Response from API:", response); // Log response từ axios
+      return response;
+    } catch (error) {
+      console.error("Error fetching OData responses:", error.response || error.message);
+      throw error; // Ném lỗi để xử lý ở nơi gọi
+    }
+  },
+
+  createRatingFeedback: async (data) => {
+    const response = await api.post("/RatingFeedback", data);
     return response.data;
   },
-  // Updated updateConsultationRequestStatus
-  updateConsultationRequestStatus: async (requestId, statusString) => {
-    // statusString = 'pending' hoặc 'accepted' hoặc 'rejected', ...
-    const response = await api.put(
-      `/ConsultationRequests/${requestId}/${statusString}`
-    );
+  
+  updateConsultationResponseStatus: async (responseId, statusString) => {
+  try {
+    const response = await api.put(`/ConsultationResponses/${responseId}/status`, { status: statusString });
     return response.data;
-  },
+  } catch (error) {
+    console.error("Error updating ConsultationResponse status:", error);
+    throw error;
+  }
+},
+getUserFeedbackOData: async (userId) => {
+  try {
+    const query = `?$filter=userId eq '${userId}'`; // Lọc theo userId
+    const response = await api.get(`/RatingFeedback/odata${query}`);
+    console.log("Raw OData Feedback Response:", response); // Log để kiểm tra
+    return response;
+  } catch (error) {
+    console.error("Error fetching OData feedback:", error.response || error.message);
+    throw error;
+  }
+},
 
   getDoctorsFromEndpoint: async () => {
     const response = await api.get("/Doctors");
