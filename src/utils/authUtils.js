@@ -128,3 +128,66 @@ export const clearTemporaryData = (
 
   console.log("Đã xóa dữ liệu tạm thời thành công");
 };
+
+// Thiết lập thời gian sống cho dữ liệu tạm thời
+export const setTemporaryDataWithExpiry = (
+  key,
+  value,
+  expiryInMinutes = 10
+) => {
+  const now = new Date();
+  const item = {
+    value: value,
+    expiry: now.getTime() + expiryInMinutes * 60 * 1000,
+  };
+  localStorage.setItem(key, JSON.stringify(item));
+};
+
+// Lấy dữ liệu tạm thời có kiểm tra hết hạn
+export const getTemporaryDataWithExpiry = (key) => {
+  const itemStr = localStorage.getItem(key);
+  if (!itemStr) {
+    return null;
+  }
+
+  const item = JSON.parse(itemStr);
+  const now = new Date();
+
+  // So sánh thời gian hiện tại với thời gian hết hạn
+  if (now.getTime() > item.expiry) {
+    // Nếu đã hết hạn, xóa và trả về null
+    localStorage.removeItem(key);
+    return null;
+  }
+  return item.value;
+};
+
+// Hàm kiểm tra và xóa dữ liệu tạm thời đã hết hạn
+export const cleanupExpiredTemporaryData = () => {
+  // Danh sách các khóa có thể là dữ liệu tạm thời
+  const tempKeys = [
+    "registration_data",
+    "pending_email",
+    "verification_step",
+    "verification_token",
+    "payment_info",
+    "order_data",
+    "draft_content",
+    "temp_images",
+  ];
+
+  tempKeys.forEach((key) => {
+    const itemStr = localStorage.getItem(key);
+    if (itemStr) {
+      try {
+        const item = JSON.parse(itemStr);
+        if (item.expiry && new Date().getTime() > item.expiry) {
+          localStorage.removeItem(key);
+          console.log(`Đã xóa dữ liệu tạm thời hết hạn: ${key}`);
+        }
+      } catch (e) {
+        // Nếu không phải JSON hợp lệ hoặc không có expiry, bỏ qua
+      }
+    }
+  });
+};

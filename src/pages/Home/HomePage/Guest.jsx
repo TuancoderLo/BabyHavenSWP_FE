@@ -15,6 +15,8 @@ import Milestone from "../../../assets/ChildHeightPredictor.svg";
 import {
   checkAndClearSessionData,
   clearAuthData,
+  clearTemporaryData,
+  cleanupExpiredTemporaryData,
 } from "../../../utils/authUtils";
 
 function Guest() {
@@ -25,19 +27,31 @@ function Guest() {
   const [latestBlogs, setLatestBlogs] = useState([]);
   const [doctors, setDoctors] = useState([]);
 
-  // Thêm useEffect kiểm tra phiên mới
+  // Thêm useEffect để xóa dữ liệu đăng ký tạm thời
   useEffect(() => {
-    // Kiểm tra xem đây có phải là phiên mới không
-    const isNewSession = !sessionStorage.getItem("session_started");
+    // Kiểm tra phiên mới và xóa dữ liệu đăng nhập
+    checkAndClearSessionData();
 
-    if (isNewSession) {
-      // Sử dụng clearAuthData từ authUtils
-      clearAuthData();
+    // Xóa dữ liệu đăng ký tạm thời bất kể là phiên mới hay cũ
+    clearTemporaryData(["registration", "verification"]);
 
-      // Đánh dấu phiên đã bắt đầu
-      sessionStorage.setItem("session_started", "true");
-      console.log("Đã xóa dữ liệu đăng nhập cho phiên mới");
-    }
+    // Dọn dẹp bất kỳ dữ liệu tạm thời nào đã hết hạn
+    cleanupExpiredTemporaryData();
+
+    // Xóa dữ liệu đăng ký tạm thời khi tải trang Guest
+    const registrationKeys = [
+      "registration_data",
+      "pending_email",
+      "verification_step",
+      "verification_token",
+    ];
+
+    registrationKeys.forEach((key) => {
+      if (localStorage.getItem(key)) {
+        console.log(`Đã phát hiện và xóa dữ liệu đăng ký tạm thời: ${key}`);
+        localStorage.removeItem(key);
+      }
+    });
   }, []);
 
   // Fetch tất cả category cha (parentCategoryId = null)
