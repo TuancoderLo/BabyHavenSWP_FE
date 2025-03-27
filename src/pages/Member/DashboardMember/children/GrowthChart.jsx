@@ -11,44 +11,10 @@ import {
 } from "recharts";
 import "./GrowthChart.css";
 import childApi from "../../../../services/childApi";
-
-// Dữ liệu LMS từ WHO Growth Reference 5-19 years (mẫu cho nam, 108 tháng)
-const WHO_LMS_BMI = {
-  108: {
-    // 108 tháng = 9 tuổi, nam
-    L: -0.3529,
-    M: 16.8,
-    S: 0.1324,
-  },
-  // Có thể mở rộng cho các độ tuổi và giới tính khác
-};
-
-// Hàm tính độ tuổi bằng tháng
-const calculateAgeInMonths = (dateOfBirth) => {
-  if (!dateOfBirth) {
-    console.warn("dateOfBirth is not provided, defaulting to 108 months");
-    return 108; // Mặc định 108 tháng nếu không có dữ liệu
-  }
-
-  const birthDate = new Date(dateOfBirth);
-  const today = new Date();
-
-  let years = today.getFullYear() - birthDate.getFullYear();
-  let months = today.getMonth() - birthDate.getMonth();
-
-  if (months < 0) {
-    years--;
-    months += 12;
-  }
-
-  const totalMonths = years * 12 + months;
-  console.log("Calculated ageInMonths:", totalMonths);
-  return totalMonths;
-};
+import bmiPercentitleApi from "../../../../services/bmiPercentitleApi";
 
 // Hàm tính BMI từ z-score
-const calculateBMIFromZScore = (ageInMonths, zScore) => {
-  const lms = WHO_LMS_BMI[ageInMonths] || WHO_LMS_BMI[108];
+const calculateBMIFromZScore = (lms, zScore) => {
   const { L, M, S } = lms;
 
   if (L === 0) {
@@ -57,14 +23,68 @@ const calculateBMIFromZScore = (ageInMonths, zScore) => {
   return M * Math.pow(1 + L * S * zScore, 1 / L);
 };
 
-// Hàm lấy dữ liệu WHO BMI-for-age từ LMS cục bộ
-const getWHOBMIData = (ageInMonths) => {
+// Hàm lấy dữ liệu WHO BMI-for-age từ API hoặc localStorage
+const getWHOBMIData = async (ageInYears, gender) => {
   try {
-    const median = calculateBMIFromZScore(ageInMonths, 0);
-    const plus1SD = calculateBMIFromZScore(ageInMonths, 1);
-    const minus1SD = calculateBMIFromZScore(ageInMonths, -1);
-    const plus2SD = calculateBMIFromZScore(ageInMonths, 2);
-    const minus2SD = calculateBMIFromZScore(ageInMonths, -2);
+    const storageKey = "bmiPercentiles";
+    const dataKey = `${ageInYears}_${gender}`;
+
+    const storedData = localStorage.getItem(storageKey);
+    let bmiData = storedData ? JSON.parse(storedData) : {};
+
+    if (bmiData[dataKey]) {
+      console.log(`Using cached BMI data for ${dataKey} from localStorage`);
+      const lms = bmiData[dataKey];
+
+      const median = calculateBMIFromZScore(lms, 0);
+      const plus1SD = calculateBMIFromZScore(lms, 1);
+      const minus1SD = calculateBMIFromZScore(lms, -1);
+      const plus2SD = calculateBMIFromZScore(lms, 2);
+      const minus2SD = calculateBMIFromZScore(lms, -2);
+
+      const whoData = {
+        median: Number(median.toFixed(1)),
+        plus1SD: Number(plus1SD.toFixed(1)),
+        minus1SD: Number(minus1SD.toFixed(1)),
+        plus2SD: Number(plus2SD.toFixed(1)),
+        minus2SD: Number(minus2SD.toFixed(1)),
+      };
+
+      console.log("WHO BMI Data from localStorage:", whoData);
+      return whoData;
+    }
+
+    console.log(`Fetching BMI data for ${dataKey} from API`);
+    const response = await bmiPercentitleApi.getByAgeAndGender(ageInYears, gender);
+    console.log("API Response:", response);
+
+    const lms = response.data?.data || response.data;
+    console.log("LMS Data:", lms);
+
+    // Chuẩn hóa dữ liệu từ API
+    const normalizedLms = {
+      L: lms.L || lms.l,
+      M: lms.M || lms.m,
+      S: lms.S || lms.s,
+      P01: lms.P01 || lms.p01,
+      P50: lms.P50 || lms.p50,
+      P75: lms.P75 || lms.p75,
+      P99: lms.P99 || lms.p99,
+    };
+
+    if (!normalizedLms || !normalizedLms.L || !normalizedLms.M || !normalizedLms.S) {
+      throw new Error("Invalid LMS data from API");
+    }
+
+    bmiData[dataKey] = normalizedLms;
+    localStorage.setItem(storageKey, JSON.stringify(bmiData));
+    console.log(`Saved BMI data for ${dataKey} to localStorage`);
+
+    const median = calculateBMIFromZScore(normalizedLms, 0);
+    const plus1SD = calculateBMIFromZScore(normalizedLms, 1);
+    const minus1SD = calculateBMIFromZScore(normalizedLms, -1);
+    const plus2SD = calculateBMIFromZScore(normalizedLms, 2);
+    const minus2SD = calculateBMIFromZScore(normalizedLms, -2);
 
     const whoData = {
       median: Number(median.toFixed(1)),
@@ -74,10 +94,10 @@ const getWHOBMIData = (ageInMonths) => {
       minus2SD: Number(minus2SD.toFixed(1)),
     };
 
-    console.log("WHO BMI Data:", whoData);
+    console.log("WHO BMI Data from API:", whoData);
     return whoData;
   } catch (error) {
-    console.error("Error calculating WHO BMI data:", error);
+    console.error("Error fetching WHO BMI data:", error);
     return {
       median: 16.8,
       plus1SD: 18.5,
@@ -93,13 +113,14 @@ const GrowthChart = ({
   selectedTool,
   onRecordSelect,
   refreshTrigger = 0,
-  dateOfBirth,
+  gender,
+  ageInMonths, // Thêm prop ageInMonths
+  ageInYears, // Thêm prop ageInYears
 }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [whoBMIData, setWhoBMIData] = useState(null);
 
-  // Hàm tính BMI
   const calculateBMI = (weight, height) => {
     console.log("calculateBMI input:", { weight, height });
 
@@ -138,6 +159,20 @@ const GrowthChart = ({
         return;
       }
 
+      if (!gender || (gender !== "Male" && gender !== "Female")) {
+        console.error("Gender is invalid or not provided");
+        setLoading(false);
+        return;
+      }
+
+      if (ageInMonths === undefined || ageInYears === undefined) {
+        console.error("Age information is not provided");
+        setLoading(false);
+        setData([]);
+        alert("Age information is required to display the growth chart.");
+        return;
+      }
+
       setLoading(true);
       try {
         const parentName = localStorage.getItem("name");
@@ -145,14 +180,10 @@ const GrowthChart = ({
           throw new Error("parentName is undefined or empty");
         }
 
-        // Tính độ tuổi của trẻ từ dateOfBirth (truyền qua props)
-        const ageInMonths = calculateAgeInMonths(dateOfBirth);
-
-        // Lấy dữ liệu WHO BMI-for-age từ LMS cục bộ
-        const whoData = getWHOBMIData(ageInMonths);
+        // Lấy dữ liệu WHO BMI-for-age từ API hoặc localStorage
+        const whoData = await getWHOBMIData(ageInYears, gender);
         setWhoBMIData(whoData);
 
-        // Lấy dữ liệu tăng trưởng từ API
         const response = await childApi.getGrowthRecords(childName, parentName);
         console.log("Full API Response:", response);
 
@@ -197,9 +228,7 @@ const GrowthChart = ({
 
         console.log("Processed Records:", processedRecords);
 
-        // Tạo dữ liệu gộp cho biểu đồ
         const chartData = Array.from({ length: 12 }, (_, i) => {
-          // Lấy tất cả record trong tháng i
           const recordsInMonth = processedRecords.filter(
             (r) => Math.floor(r.x) === i
           );
@@ -208,7 +237,7 @@ const GrowthChart = ({
             month: new Date(2025, i).toLocaleDateString("en-US", {
               month: "short",
             }),
-            records: recordsInMonth, // Lưu tất cả record trong tháng
+            records: recordsInMonth,
             median: whoData.median,
             plus1SD: whoData.plus1SD,
             minus1SD: whoData.minus1SD,
@@ -228,7 +257,7 @@ const GrowthChart = ({
     };
 
     fetchGrowthData();
-  }, [childName, refreshTrigger, dateOfBirth]);
+  }, [childName, refreshTrigger, gender, ageInMonths, ageInYears]);
 
   if (loading) {
     return <div className="loading">Loading chart...</div>;
@@ -253,7 +282,6 @@ const GrowthChart = ({
           );
         }
 
-        // Tạo danh sách tất cả record để vẽ đường
         const allRecords = data.flatMap((monthData) => monthData.records);
 
         return (
