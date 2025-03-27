@@ -12,6 +12,7 @@ const ForgetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [resetToken, setResetToken] = useState(""); // Thêm state để lưu trữ resetToken
   const navigate = useNavigate();
 
   // Xử lý khi submit form nhập email
@@ -32,7 +33,11 @@ const ForgetPassword = () => {
         email,
       });
 
-      if (response.data.status === 1) {
+      // Log response để xem cấu trúc
+      console.log("API Response:", response.data);
+
+      // Điều chỉnh điều kiện dựa trên cấu trúc phản hồi thực tế
+      if (response.data) {
         // Lưu email để sử dụng ở các bước sau
         localStorage.setItem("reset_password_email", email);
         setStep(2); // Chuyển sang bước nhập OTP
@@ -73,7 +78,9 @@ const ForgetPassword = () => {
         otp: otp,
       });
 
-      if (response.data.status === 1) {
+      if (response.data.message === "OTP verified successfully.") {
+        // Lưu resetToken để sử dụng trong bước đặt lại mật khẩu
+        setResetToken(response.data.resetToken);
         setStep(3); // Chuyển sang bước đặt mật khẩu mới
       } else {
         setError(
@@ -108,16 +115,17 @@ const ForgetPassword = () => {
 
     try {
       setIsLoading(true);
-      // Lấy email đã lưu từ bước trước
-      const storedEmail = localStorage.getItem("reset_password_email");
 
-      // Gọi API để đặt lại mật khẩu
+      // Gọi API để đặt lại mật khẩu sử dụng resetToken
       const response = await api.post("Authentication/ResetPassword", {
-        email: storedEmail,
+        resetToken: resetToken,
         newPassword: newPassword,
       });
 
-      if (response.data.status === 1) {
+      if (
+        response.data.status === 1 ||
+        response.data.message === "Password reset successfully."
+      ) {
         // Xóa email đã lưu vì không cần nữa
         localStorage.removeItem("reset_password_email");
         setStep(4); // Chuyển sang bước hoàn thành
@@ -161,6 +169,10 @@ const ForgetPassword = () => {
         </h2>
 
         {error && <div className="error-message">{error}</div>}
+
+        <div style={{ display: "none" }}>
+          {console.log("Current Step:", step)}
+        </div>
 
         {/* Bước 1: Nhập email */}
         {step === 1 && (
