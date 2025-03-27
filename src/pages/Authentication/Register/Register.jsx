@@ -213,9 +213,9 @@ function Register() {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-left">
-        <div className="auth-image">
+    <div className="Register-auth-container">
+      <div className="Register-auth-left">
+        <div className="Register-auth-image">
           <img
             src={
               "https://cafefcdn.com/203337114487263232/2022/1/22/shutterstock1486364633-small-1024x683-16428607564401603370314.jpg"
@@ -225,19 +225,19 @@ function Register() {
         </div>
       </div>
 
-      <div className="auth-right">
-        <div className="home-link" onClick={() => navigate("/guest")}>
+      <div className="Register-auth-right">
+        <div className="Register-home-link" onClick={() => navigate("/guest")}>
           <i className="fas fa-home"></i>
         </div>
-        <div className="auth-box">
-          <div className="auth-header">
+        <div className="Register-auth-box">
+          <div className="Register-auth-header">
             <h1>Create Account</h1>
-            <p className="header-subtitle">
+            <p className="Register-header-subtitle">
               Join us to discover amazing experiences
             </p>
           </div>
 
-          {error && <div className="error-message">{error}</div>}
+          {error && <div className="Register-error-message">{error}</div>}
 
           {/* Hiển thị nút khi đã nhận được OTP */}
           {error && error.includes("OTP sent") && (
@@ -253,7 +253,7 @@ function Register() {
           )}
 
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
+            <div className="Register-form-group">
               <input
                 type="text"
                 name="username"
@@ -264,7 +264,7 @@ function Register() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="Register-form-group">
               <input
                 type="text"
                 name="name"
@@ -275,7 +275,7 @@ function Register() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="Register-form-group">
               <input
                 type="email"
                 name="email"
@@ -286,7 +286,7 @@ function Register() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="Register-form-group">
               <input
                 type="tel"
                 name="phoneNumber"
@@ -297,7 +297,7 @@ function Register() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="Register-form-group">
               <select
                 name="gender"
                 value={formData.gender}
@@ -311,7 +311,7 @@ function Register() {
               </select>
             </div>
 
-            <div className="form-group">
+            <div className="Register-form-group">
               <input
                 type="date"
                 name="dateOfBirth"
@@ -321,7 +321,7 @@ function Register() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="Register-form-group">
               <input
                 type="text"
                 name="address"
@@ -332,7 +332,7 @@ function Register() {
               />
             </div>
 
-            <div className="form-group password-group">
+            <div className="Register-form-group Register-password-group">
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
@@ -342,7 +342,7 @@ function Register() {
                 required
               />
               <span
-                className="password-toggle"
+                className="Register-password-toggle"
                 onClick={togglePasswordVisibility}
               >
                 <i
@@ -351,7 +351,7 @@ function Register() {
               </span>
             </div>
 
-            <div className="form-group password-group">
+            <div className="Register-form-group Register-password-group">
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
@@ -361,7 +361,7 @@ function Register() {
                 required
               />
               <span
-                className="password-toggle"
+                className="Register-password-toggle"
                 onClick={toggleConfirmPasswordVisibility}
               >
                 <i
@@ -372,24 +372,28 @@ function Register() {
               </span>
             </div>
 
-            <button type="submit" className="submit-btn" disabled={isLoading}>
+            <button
+              type="submit"
+              className="Register-submit-btn"
+              disabled={isLoading}
+            >
               {isLoading ? "Creating account..." : "Sign Up"}
             </button>
 
-            <div className="divider">
+            <div className="Register-divider">
               <span>or</span>
             </div>
 
             <button
               type="button"
-              className="social-btn"
+              className="Register-social-btn"
               onClick={handleGoogleRedirect}
             >
               <i className="fab fa-google"></i>
               <span>Continue with Google</span>
             </button>
 
-            <div className="toggle-form">
+            <div className="Register-toggle-form">
               Already have an account?
               <span onClick={() => navigate("/login")}>Sign in</span>
             </div>

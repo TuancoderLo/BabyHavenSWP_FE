@@ -1,2 +1,536 @@
 /* Tất cả styles được kế thừa từ ForgetPassword.css */
 /* Không cần thêm code vì đã import "../login/ForgetPassword.css" */
+
+/* Thiết kế chính cho trang xác thực email */
+.verify-email-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  background-image: url("https://i.pinimg.com/736x/69/30/ee/6930eed5ffee46e96d38c223b84400a2.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  overflow: hidden; /* Đảm bảo các icon không tràn ra ngoài container */
+}
+
+/* Thêm overlay để làm tối ảnh một chút và làm nổi bật nội dung */
+.verify-email-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.25); /* Giảm độ tối từ 0.4 xuống 0.25 */
+  z-index: 1;
+}
+
+/* Thay đổi hiệu ứng từ icon email thành tuyết rơi */
+.floating-icons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Đảm bảo người dùng có thể click qua các icon */
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* Style cho từng bông tuyết */
+.floating-email-icon {
+  position: absolute;
+  width: 10px; /* Kích thước nhỏ hơn cho bông tuyết */
+  height: 10px;
+  background-image: none; /* Xóa hình ảnh email */
+  background-color: white; /* Màu trắng cho tuyết */
+  border-radius: 50%; /* Hình tròn */
+  opacity: 0.8;
+  z-index: 0;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.8); /* Hiệu ứng sáng cho tuyết */
+
+  /* Tạo hiệu ứng tuyết rơi */
+  animation: snow-falling var(--fall-duration, 10s) linear infinite,
+    snow-shake var(--shake-duration, 3s) ease-in-out infinite alternate;
+}
+
+/* Tạo hình dạng tuyết đa dạng */
+.floating-email-icon:nth-child(3n + 1) {
+  clip-path: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
+}
+
+.floating-email-icon:nth-child(3n + 2) {
+  opacity: 0.6;
+  transform: rotate(45deg);
+}
+
+/* Hiệu ứng tuyết rơi chính */
+@keyframes snow-falling {
+  0% {
+    transform: translateY(-50px) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--opacity, 0.8);
+  }
+  90% {
+    opacity: var(--opacity, 0.8);
+  }
+  100% {
+    transform: translateY(calc(100vh + 50px))
+      translateX(var(--wind-shift, 20px));
+    opacity: 0;
+  }
+}
+
+/* Hiệu ứng lắc lư nhẹ */
+@keyframes snow-shake {
+  0% {
+    transform: translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: translateX(var(--shake-distance, 5px)) rotate(5deg);
+  }
+  50% {
+    transform: translateX(calc(var(--shake-distance, 5px) * -0.5)) rotate(-5deg);
+  }
+  75% {
+    transform: translateX(calc(var(--shake-distance, 5px) * 0.5)) rotate(3deg);
+  }
+  100% {
+    transform: translateX(calc(var(--shake-distance, 5px) * -1)) rotate(-3deg);
+  }
+}
+
+/* Tạo đa dạng tốc độ và kích thước cho các bông tuyết */
+.floating-email-icon:nth-child(2n) {
+  width: calc(var(--size, 10px) * 0.8);
+  height: calc(var(--size, 10px) * 0.8);
+  animation-delay: calc(var(--delay) * 1.5);
+}
+
+.floating-email-icon:nth-child(3n) {
+  width: calc(var(--size, 10px) * 1.2);
+  height: calc(var(--size, 10px) * 1.2);
+  animation-duration: calc(var(--fall-duration) * 0.8);
+}
+
+.floating-email-icon:nth-child(5n) {
+  opacity: 0.5;
+  animation-duration: calc(var(--fall-duration) * 1.2);
+  animation-delay: calc(var(--delay) * 0.7);
+}
+
+/* Đảm bảo card nổi trên overlay */
+.verify-email-card {
+  width: 100%;
+  max-width: 450px;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 30px;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 3; /* Cao hơn z-index của floating-icons */
+}
+
+.verify-email-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.18);
+}
+
+.verify-email-title {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #3a3a3a;
+  font-size: 28px;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.verify-email-title:after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(to right, #6a11cb 0%, #2575fc 100%);
+  border-radius: 3px;
+}
+
+/* Thiết kế form */
+.verify-email-form-group {
+  margin-bottom: 25px;
+}
+
+.verify-email-form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #555;
+  font-size: 16px;
+}
+
+.verify-email-form-group input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s;
+  background-color: #f8f9fa;
+}
+
+.verify-email-form-group input:focus {
+  border-color: #6a11cb;
+  outline: none;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
+}
+
+/* OTP Input */
+.verify-email-otp-input {
+  letter-spacing: normal;
+  font-size: 20px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Chỉ áp dụng letter-spacing cho input khi đã có giá trị (không phải placeholder) */
+.verify-email-otp-input[value]:not([value=""]) {
+  letter-spacing: 4px;
+}
+
+/* Hoặc thêm style riêng cho placeholder */
+.verify-email-otp-input::placeholder {
+  letter-spacing: normal;
+}
+
+/* Buttons */
+.verify-email-button-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.verify-email-primary-button,
+.verify-email-secondary-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  width: 100%;
+}
+
+.verify-email-primary-button {
+  background: linear-gradient(to right, #6a11cb 0%, #2575fc 100%);
+  color: white;
+}
+
+.verify-email-primary-button:hover {
+  background: linear-gradient(to right, #5b0fb0 0%, #1e65d6 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(106, 17, 203, 0.3);
+}
+
+.verify-email-secondary-button {
+  background-color: #f1f1f1;
+  color: #333;
+}
+
+.verify-email-secondary-button:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+/* Thông báo lỗi */
+.verify-email-error-message {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 500;
+  border-left: 4px solid #f44336;
+}
+
+/* Hướng dẫn */
+.verify-email-instruction-text {
+  margin-bottom: 25px;
+  color: #666;
+  text-align: center;
+  line-height: 1.5;
+  background-color: rgba(33, 150, 243, 0.08);
+  padding: 12px;
+  border-radius: 8px;
+}
+
+/* Màn hình thành công */
+.verify-email-success-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.verify-email-success-icon {
+  font-size: 80px;
+  color: #4caf50;
+  margin-bottom: 20px;
+  background: rgba(76, 175, 80, 0.1);
+  width: 120px;
+  height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  animation: verify-email-pulse 1.5s infinite;
+}
+
+@keyframes verify-email-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(76, 175, 80, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+.verify-email-success-message {
+  font-size: 18px;
+  margin-bottom: 30px;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Thời gian đếm ngược - hiệu ứng mạnh hơn cho thời gian 1 phút */
+.verify-email-time-remaining {
+  text-align: center;
+  margin: 15px 0;
+  font-size: 20px;
+  color: #666;
+  background-color: rgba(0, 0, 0, 0.03);
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.verify-email-time-remaining:before {
+  content: "⏱️";
+  margin-right: 8px;
+  font-size: 20px;
+}
+
+.verify-email-time-remaining.expiring {
+  color: #f44336;
+  background-color: rgba(244, 67, 54, 0.1);
+  animation: verify-email-fastBlink 0.8s ease-in-out infinite alternate;
+  font-size: 22px;
+}
+
+@keyframes verify-email-fastBlink {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0.8;
+    transform: scale(1.03);
+  }
+}
+
+/* Nút gửi lại mã */
+.verify-email-resend-link {
+  text-align: center;
+  margin: 15px 0;
+  color: #666;
+}
+
+.verify-email-resend-button {
+  background: none;
+  border: none;
+  color: #6a11cb;
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: 5px;
+  text-decoration: underline;
+  transition: color 0.3s;
+}
+
+.verify-email-resend-button:hover {
+  color: #2575fc;
+}
+
+/* Thông báo khi OTP hết hạn */
+.verify-email-expired-message {
+  text-align: center;
+  margin: 15px 0;
+  color: #f44336;
+  font-weight: 600;
+  background-color: rgba(244, 67, 54, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  animation: verify-email-fadeInOut 2s infinite;
+}
+
+@keyframes verify-email-fadeInOut {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+/* Cảnh báo nghiêm trọng hơn khi thời gian gần hết */
+.verify-email-warning-text {
+  color: #f44336;
+  font-weight: 700;
+  margin-top: 12px;
+  display: block;
+  animation: verify-email-shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes verify-email-shake {
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-3px, 0, 0);
+  }
+  40%,
+  60% {
+    transform: translate3d(3px, 0, 0);
+  }
+}
+
+/* Làm nổi bật nút khẩn cấp hơn */
+.verify-email-resend-button.urgent {
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  text-decoration: none;
+  background-color: #f44336;
+  padding: 8px 15px;
+  border-radius: 4px;
+  animation: verify-email-pulse 1.5s infinite;
+  box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+}
+
+.verify-email-resend-button.urgent:hover {
+  background-color: #d32f2f;
+}
+
+/* Hiệu ứng loading chuyển hướng */
+.verify-email-redirect-loading {
+  display: inline-block;
+  margin-left: 5px;
+}
+
+.verify-email-redirect-loading:after {
+  content: "...";
+  animation: verify-email-dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes verify-email-dots {
+  0%,
+  20% {
+    content: ".";
+  }
+  40% {
+    content: "..";
+  }
+  60% {
+    content: "...";
+  }
+  80%,
+  100% {
+    content: "";
+  }
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  .verify-email-card {
+    padding: 20px;
+  }
+
+  .verify-email-title {
+    font-size: 24px;
+  }
+
+  .verify-email-form-group input {
+    padding: 12px;
+  }
+
+  .verify-email-primary-button,
+  .verify-email-secondary-button {
+    padding: 10px 20px;
+  }
+
+  .verify-email-success-icon {
+    font-size: 60px;
+    width: 100px;
+    height: 100px;
+  }
+}
+
+/* Thêm class để phân biệt các loại icon với animation khác nhau */
+.floating-email-icon:nth-child(2n) {
+  animation-direction: alternate-reverse; /* Đảo ngược animation cho một số icon */
+}
+
+.floating-email-icon:nth-child(3n) {
+  animation-duration: calc(
+    var(--float-duration) * 1.2
+  ); /* Thay đổi thời gian cho một số icon */
+}
+
+.floating-email-icon:nth-child(5n) {
+  filter: hue-rotate(30deg) drop-shadow(0 0 3px rgba(255, 130, 180, 0.6)); /* Thay đổi màu sắc nhẹ */
+}
+
+/* Thêm hiệu ứng khi hover vào container */
+.verify-email-container:hover .floating-email-icon {
+  animation-play-state: paused; /* Tạm dừng animation khi hover vào container */
+}

@@ -1,11 +1,10 @@
-
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css");
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Inter', sans-serif; 
+  font-family: "Inter", sans-serif;
 }
 
 body,
@@ -17,7 +16,7 @@ html {
   overflow: hidden;
 }
 
-.auth-container {
+.Register-auth-container {
   width: 100vw;
   height: 100vh;
   display: flex;
@@ -30,7 +29,7 @@ html {
   bottom: 0;
 }
 
-.auth-left {
+.Register-auth-left {
   width: 70%;
   height: 100vh;
   position: relative;
@@ -39,7 +38,7 @@ html {
   display: block;
 }
 
-.auth-right {
+.Register-auth-right {
   width: 30%;
   height: 100vh;
   display: flex;
@@ -50,7 +49,7 @@ html {
   position: relative;
 }
 
-.auth-box {
+.Register-auth-box {
   width: 100%;
   max-width: 380px;
   padding: 60px;
@@ -60,7 +59,7 @@ html {
     0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.auth-image {
+.Register-auth-image {
   width: 100%;
   height: 100%;
   position: absolute;
@@ -68,14 +67,14 @@ html {
   left: 0;
 }
 
-.auth-image img {
+.Register-auth-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
 }
 
-.home-link {
+.Register-home-link {
   position: absolute;
   top: 16px;
   right: 16px;
@@ -84,34 +83,34 @@ html {
   cursor: pointer;
 }
 
-.auth-header {
+.Register-auth-header {
   margin-bottom: 30px;
 }
 
-.auth-header h1 {
+.Register-auth-header h1 {
   color: #00d0bc;
   font-size: 28px;
   font-weight: 600;
   margin-bottom: 10px;
 }
 
-.header-subtitle {
+.Register-header-subtitle {
   color: #64748b;
   font-size: 14px;
   line-height: 1.5;
 }
 
-.form-group {
+.Register-form-group {
   margin-bottom: 16px;
   position: relative;
 }
 
 /* Thêm CSS cho password-group */
-.password-group {
+.Register-password-group {
   position: relative;
 }
 
-.password-toggle {
+.Register-password-toggle {
   position: absolute;
   right: 14px;
   top: 50%;
@@ -123,11 +122,11 @@ html {
   transition: color 0.3s ease;
 }
 
-.password-toggle:hover {
+.Register-password-toggle:hover {
   color: #00bfa6;
 }
 
-.form-group input {
+.Register-form-group input {
   width: 100%;
   padding: 10px 14px;
   border: 1px solid #e2e8f0;
@@ -138,21 +137,21 @@ html {
 }
 
 /* Điều chỉnh padding cho input password để tránh chồng lên icon */
-.password-group input {
+.Register-password-group input {
   padding-right: 40px;
 }
 
-input:focus {
+.Register-form-group input:focus {
   outline: none;
   border-color: #00bfa6;
   box-shadow: 0 0 0 3px rgba(0, 191, 166, 0.1);
 }
 
-input::placeholder {
+.Register-form-group input::placeholder {
   color: #94a3b8;
 }
 
-.submit-btn {
+.Register-submit-btn {
   width: 100%;
   padding: 10px;
   background: #00bfa6;
@@ -166,28 +165,28 @@ input::placeholder {
   margin-bottom: 16px;
 }
 
-.submit-btn:hover {
+.Register-submit-btn:hover {
   background: #00a892;
 }
 
-.toggle-form {
+.Register-toggle-form {
   text-align: center;
   color: #64748b;
   font-size: 13px;
 }
 
-.toggle-form span {
+.Register-toggle-form span {
   color: #00bfa6;
   cursor: pointer;
   font-weight: 500;
   margin-left: 4px;
 }
 
-.toggle-form span:hover {
+.Register-toggle-form span:hover {
   text-decoration: underline;
 }
 
-.error-message {
+.Register-error-message {
   color: #dc2626;
   font-size: 14px;
   margin-bottom: 16px;
@@ -199,22 +198,30 @@ input::placeholder {
 }
 
 /* Style cho select */
-select {
+.Register-form-group select {
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg fill='none' stroke='%2364748b' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 8px center;
   background-size: 16px;
   padding-right: 32px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1e293b;
+  transition: all 0.3s ease;
 }
 
 /* Style cho date input */
-input[type="date"] {
+.Register-form-group input[type="date"] {
   padding-right: 8px;
+  width: 100%;
 }
 
 /* Style cho nút Google */
-.social-btn {
+.Register-social-btn {
   width: 100%;
   padding: 8px 12px;
   border: 1px solid #e2e8f0;
@@ -230,28 +237,47 @@ input[type="date"] {
   transition: all 0.2s ease;
 }
 
-.social-btn:hover {
+.Register-social-btn:hover {
   background: #f8fafc;
 }
 
-.social-btn i {
+.Register-social-btn i {
   font-size: 16px;
   color: #4285f4;
 }
 
+.Register-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 16px 0;
+}
+
+.Register-divider::before,
+.Register-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.Register-divider span {
+  padding: 0 10px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .auth-left {
+  .Register-auth-left {
     display: none;
   }
 
-  .auth-right {
+  .Register-auth-right {
     width: 100%;
     padding: 16px;
   }
 
-  .auth-box {
+  .Register-auth-box {
     max-width: 320px;
   }
 }
-

@@ -13,6 +13,7 @@ import name from "../../assets/Name.png";
 import api from "../../config/axios";
 import packageApi from "../../services/packageApi";
 import vnpayApi from "../../services/vnpayApi";
+import BabyHavenLogo from "/Logo.png"; // Đường dẫn từ thư mục public
 
 function Packages() {
   const [showOverlay, setShowOverlay] = useState(false);
@@ -27,6 +28,11 @@ function Packages() {
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [error, setError] = useState("");
   const [currentPlan, setCurrentPlan] = useState(null);
+
+  // Thêm state mới để kiểm tra trạng thái đăng nhập
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // State để hiển thị modal đăng nhập
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   // Kiểm tra URL param ?paymentStatus=success => Step 3
   useEffect(() => {
@@ -105,6 +111,18 @@ function Packages() {
       .catch((err) => console.error("Error fetching packages:", err));
   }, []);
 
+  // Thêm useEffect để kiểm tra trạng thái đăng nhập
+  useEffect(() => {
+    const checkLoginStatus = () => {
+      const memberId = localStorage.getItem("memberId");
+      const email = localStorage.getItem("email");
+      setIsLoggedIn(!!(memberId && email));
+    };
+
+    checkLoginStatus();
+    // Chạy kiểm tra mỗi khi overlay được mở
+  }, [showOverlay]);
+
   const handleOpenOverlay = () => {
     setShowOverlay(true);
     setCurrentStep(0);
@@ -123,6 +141,12 @@ function Packages() {
 
   // Step 0: Người dùng chọn gói
   const handleBuyPackage = (pkg) => {
+    if (!isLoggedIn) {
+      // Nếu chưa đăng nhập, hiển thị thông báo đăng nhập
+      setShowLoginPrompt(true);
+      return;
+    }
+
     setSelectedPackage(pkg);
     localStorage.setItem("selectedPackage", JSON.stringify(pkg));
     setCurrentStep(1);
@@ -233,6 +257,26 @@ function Packages() {
     }
   }, []);
 
+  // Hàm xử lý khi người dùng muốn đăng nhập
+  const handleLogin = () => {
+    // Đóng prompt đăng nhập
+    setShowLoginPrompt(false);
+    // Đóng overlay hiện tại
+    setShowOverlay(false);
+    // Chuyển hướng đến trang đăng nhập
+    navigate("/login");
+  };
+
+  // Hàm xử lý khi người dùng muốn đăng ký
+  const handleRegister = () => {
+    // Đóng prompt đăng nhập
+    setShowLoginPrompt(false);
+    // Đóng overlay hiện tại
+    setShowOverlay(false);
+    // Chuyển hướng đến trang đăng ký
+    navigate("/register");
+  };
+
   return (
     <>
       {/* Icon packages ở góc */}
@@ -299,7 +343,8 @@ function Packages() {
                         {
                           packagesData.find((p) => p.packageName === "Free")
                             ?.durationMonths
-                        }                      </span>
+                        }{" "}
+                      </span>
                       <span className="price-duration Free"> Months</span>
                     </div>
 
@@ -310,6 +355,14 @@ function Packages() {
                           : "Free"
                       }`}
                       disabled={currentPlan?.packageName === "Free"}
+                      onClick={() => {
+                        if (
+                          currentPlan?.packageName !== "Free" &&
+                          !isLoggedIn
+                        ) {
+                          setShowLoginPrompt(true);
+                        }
+                      }}
                     >
                       {currentPlan?.packageName === "Free"
                         ? "YOUR CURRENT PLAN"
@@ -490,8 +543,9 @@ function Packages() {
 
                 <div className="payment-method-options">
                   <button
-                    className={`payment-button ${paymentMethod === "CreditCard" ? "active" : ""
-                      }`}
+                    className={`payment-button ${
+                      paymentMethod === "CreditCard" ? "active" : ""
+                    }`}
                     onClick={() => {
                       handleSelectPayment("CreditCard");
                       setCurrentStep(2);
@@ -504,8 +558,9 @@ function Packages() {
                     </div>
                   </button>
                   <button
-                    className={`payment-button ${paymentMethod === "Momo" ? "active" : ""
-                      }`}
+                    className={`payment-button ${
+                      paymentMethod === "Momo" ? "active" : ""
+                    }`}
                     onClick={() => {
                       handleSelectPayment("Momo");
                       setCurrentStep(2);
@@ -681,6 +736,54 @@ function Packages() {
                 <button className="close-overlay" onClick={handleFinish}>
                   Close
                 </button>
+              </div>
+            )}
+
+            {/* Modal thông báo đăng nhập với logo mới */}
+            {showLoginPrompt && (
+              <div className="PackageHome-login-prompt-overlay">
+                <div className="PackageHome-login-prompt-modal">
+                  <div className="PackageHome-login-prompt-header">
+                    <img
+                      src={BabyHavenLogo}
+                      alt="BabyHaven Logo"
+                      className="PackageHome-prompt-logo"
+                    />
+                    <h3>Join BabyHaven Family</h3>
+                  </div>
+
+                  <div className="PackageHome-login-prompt-content">
+                    <p className="PackageHome-login-prompt-description">
+                      To unlock Package features and personalized child
+                      development tracking, please sign in or create a new
+                      account.
+                    </p>
+                  </div>
+
+                  <div className="PackageHome-login-prompt-buttons">
+                    <button
+                      className="PackageHome-login-button"
+                      onClick={handleLogin}
+                    >
+                      <i className="PackageHome-login-icon">→</i>
+                      <span>Sign In</span>
+                    </button>
+                    <button
+                      className="PackageHome-register-button"
+                      onClick={handleRegister}
+                    >
+                      <i className="PackageHome-register-icon">+</i>
+                      <span>Create Account</span>
+                    </button>
+                  </div>
+
+                  <button
+                    className="PackageHome-prompt-close-button"
+                    onClick={() => setShowLoginPrompt(false)}
+                  >
+                    <span>×</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
