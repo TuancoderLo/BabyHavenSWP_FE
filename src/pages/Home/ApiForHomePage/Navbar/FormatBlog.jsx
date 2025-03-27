@@ -491,7 +491,7 @@ function FormatBlog() {
       ) : blog ? (
         <main className="blog-content-container">
           <div className="blog-grid-layout">
-            {/* Nội dung bài viết chính - div6 */}
+            {/* Nội dung bài viết chính */}
             <div className="blog-main-content">
               <h1 className="blog-title">{blog.title}</h1>
 
@@ -529,10 +529,10 @@ function FormatBlog() {
               </div>
             </div>
 
-            {/* Thông tin tác giả - div7 */}
-            {renderAuthorInfo()}
+            {/* Thông tin tác giả - luôn hiển thị bên phải */}
+            <div className="blog-author-sidebar">{renderAuthorInfo()}</div>
 
-            {/* Các bài viết liên quan */}
+            {/* Các bài viết liên quan - chiếm toàn bộ chiều rộng */}
             {relatedBlogs.length > 0 ? (
               <div className="related-blogs-section">
                 <h2 className="related-blogs-title">Related Articles</h2>
