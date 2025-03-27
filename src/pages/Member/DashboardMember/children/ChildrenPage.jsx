@@ -392,6 +392,10 @@ function ChildrenPage() {
     return months;
   };
 
+  const getAgeInYears = (ageInMonths) => {
+    return Math.floor(ageInMonths / 12);
+  };
+
   const renderExpertAdvice = () => {
     if (!selectedChild || !selectedChild.dateOfBirth) {
       return (
@@ -796,13 +800,21 @@ function ChildrenPage() {
             <div className="chart-area">
               {selectedChild ? (
                 <>
-                  <GrowthChart
-                    childName={selectedChild.name}
-                    selectedTool={selectedTool}
-                    onRecordSelect={setSelectedRecord}
-                    refreshTrigger={refreshTrigger}
-                    dateOfbirth={selectedChild.dateOfBirth}
-                  />
+                  {(() => {
+                    const ageInMonths = getAgeInMonths(selectedChild.dateOfBirth);
+                    const ageInYears = getAgeInYears(ageInMonths);
+                    return (
+                      <GrowthChart
+                        childName={selectedChild.name}
+                        selectedTool={selectedTool}
+                        onRecordSelect={setSelectedRecord}
+                        refreshTrigger={refreshTrigger}
+                        gender={selectedChild.gender}
+                        ageInMonths={ageInMonths}
+                        ageInYears={ageInYears}
+                      />
+                    );
+                  })()}
                 </>
               ) : (
                 <div className="no-child-selected">
