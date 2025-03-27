@@ -38,7 +38,6 @@ function Blog() {
      ========================================================================== */
   // Category States
   const [categories, setCategories] = useState([]); // Lưu danh sách categories
-  const [parentCategories, setParentCategories] = useState({}); // Lưu thông tin category cha
   const [parentNames, setParentNames] = useState({}); // Lưu tên của category cha
   const [categoryFilter, setCategoryFilter] = useState("all"); // Filter cho categories
   const [editingId, setEditingId] = useState(null); // ID của category đang edit

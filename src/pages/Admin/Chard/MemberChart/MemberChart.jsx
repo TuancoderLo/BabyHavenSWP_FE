@@ -26,34 +26,30 @@ const MemberChart = () => {
   const [memberData, setMemberData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [dataFetched, setDataFetched] = useState(false);
 
   useEffect(() => {
-    if (!dataFetched) {
-      const fetchData = async () => {
-        try {
-          setLoading(true);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
 
-          // Lấy dữ liệu từ API thực tế
-          const response = await membershipApi.getAllMemberships();
-          const memberships = response.data?.data || [];
+        // Lấy dữ liệu từ API thực tế
+        const response = await membershipApi.getAllMemberships();
+        const memberships = response.data?.data || [];
 
-          // Xử lý dữ liệu để tính số thành viên mới theo tháng
-          const membersByMonth = processMembershipData(memberships);
-          setMemberData(membersByMonth);
+        // Xử lý dữ liệu để tính số thành viên mới theo tháng
+        const membersByMonth = processMembershipData(memberships);
+        setMemberData(membersByMonth);
 
-          setDataFetched(true);
-          setLoading(false);
-        } catch (err) {
-          console.error("Lỗi khi tải dữ liệu:", err);
-          setError("Lỗi khi tải dữ liệu: " + (err.message || "Không xác định"));
-          setLoading(false);
-        }
-      };
+        setLoading(false);
+      } catch (err) {
+        console.error("Lỗi khi tải dữ liệu:", err);
+        setError("Lỗi khi tải dữ liệu: " + (err.message || "Không xác định"));
+        setLoading(false);
+      }
+    };
 
-      fetchData();
-    }
-  }, [dataFetched]);
+    fetchData();
+  }, []);
 
   // Xử lý dữ liệu từ API để tính số thành viên mới theo tháng
   const processMembershipData = (memberships) => {

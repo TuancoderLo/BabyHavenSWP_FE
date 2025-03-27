@@ -71,10 +71,6 @@ const Members = () => {
   const [membershipPackages, setMembershipPackages] = useState([]);
   const [membershipSearchText, setMembershipSearchText] = useState("");
 
-  // Thêm state cho xử lý upload image
-  const [imageUrl, setImageUrl] = useState("");
-  const [imageLoading, setImageLoading] = useState(false);
-
   // Fetch data when component mounts and when tab changes
   useEffect(() => {
     if (activeTab === "1") {
@@ -176,12 +172,6 @@ const Members = () => {
         roleId: values.roleId || 2, // Default to Member role (2)
       };
 
-      // Nếu có URL ảnh, thêm vào dữ liệu
-      // Đã comment để không sử dụng Cloudinary
-      /* if (imageUrl) {
-        formattedData.profilePicture = imageUrl; // Chỉ gửi URL
-      } */
-
       if (editingUserAccount) {
         // Cập nhật tài khoản hiện có
         await userAccountsApi.update(editingUserAccount.userId, formattedData);
@@ -199,8 +189,6 @@ const Members = () => {
 
       setUserAccountModalVisible(false);
       fetchUserAccounts();
-      // Reset image state sau khi submit thành công
-      // setImageUrl("");
     } catch (error) {
       console.error("Error saving user account:", error);
       message.error(error.message || "Could not save user account");

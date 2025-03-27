@@ -33,7 +33,6 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [dataFetched, setDataFetched] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState(period);
   const [monthlyStats, setMonthlyStats] = useState({});
 
   useEffect(() => {
@@ -169,11 +168,6 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
     });
 
     return monthlyData;
-  };
-
-  // Xử lý thay đổi khoảng thời gian
-  const handlePeriodChange = (e) => {
-    setSelectedPeriod(e.target.value);
   };
 
   // Chuẩn bị dữ liệu cho biểu đồ tròn
