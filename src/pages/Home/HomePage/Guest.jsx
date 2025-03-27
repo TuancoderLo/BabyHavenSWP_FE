@@ -12,6 +12,10 @@ import Medical from "../../../assets/ic_med-advisers_dm_rejv.svg";
 import Alert from "../../../assets/Expert_articles_resized.svg";
 import GrowthTrack from "../../../assets/GrowthTracker-nov-2023.svg";
 import Milestone from "../../../assets/ChildHeightPredictor.svg";
+import {
+  checkAndClearSessionData,
+  clearAuthData,
+} from "../../../utils/authUtils";
 
 function Guest() {
   const navigate = useNavigate();
@@ -20,6 +24,21 @@ function Guest() {
   const [loading, setLoading] = useState(true);
   const [latestBlogs, setLatestBlogs] = useState([]);
   const [doctors, setDoctors] = useState([]);
+
+  // Thêm useEffect kiểm tra phiên mới
+  useEffect(() => {
+    // Kiểm tra xem đây có phải là phiên mới không
+    const isNewSession = !sessionStorage.getItem("session_started");
+
+    if (isNewSession) {
+      // Sử dụng clearAuthData từ authUtils
+      clearAuthData();
+
+      // Đánh dấu phiên đã bắt đầu
+      sessionStorage.setItem("session_started", "true");
+      console.log("Đã xóa dữ liệu đăng nhập cho phiên mới");
+    }
+  }, []);
 
   // Fetch tất cả category cha (parentCategoryId = null)
   useEffect(() => {
@@ -85,7 +104,13 @@ function Guest() {
 
   // Xử lý đăng xuất
   const handleLogout = () => {
-    localStorage.clear();
+    // Sử dụng clearAuthData từ authUtils
+    clearAuthData();
+
+    // Xóa dấu hiệu phiên làm việc
+    sessionStorage.removeItem("session_started");
+
+    console.log("Đã đăng xuất và xóa dữ liệu đăng nhập thành công");
     navigate("/login");
   };
 
