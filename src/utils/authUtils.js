@@ -73,3 +73,58 @@ export const checkAndClearSessionData = () => {
 
   return false; // Trả về false nếu không phải phiên mới
 };
+
+// Thêm hàm mới để xử lý việc hủy các thao tác
+export const clearTemporaryData = (
+  dataTypes = [],
+  navigate = null,
+  navigateTo = null
+) => {
+  // Xóa các dữ liệu tạm thời cụ thể
+  if (dataTypes.includes("registration")) {
+    localStorage.removeItem("registration_data");
+    localStorage.removeItem("pending_email");
+  }
+
+  if (dataTypes.includes("verification")) {
+    localStorage.removeItem("verification_step");
+    localStorage.removeItem("verification_token");
+  }
+
+  if (dataTypes.includes("payment")) {
+    localStorage.removeItem("payment_info");
+    localStorage.removeItem("order_data");
+  }
+
+  if (dataTypes.includes("draft")) {
+    localStorage.removeItem("draft_content");
+    localStorage.removeItem("temp_images");
+  }
+
+  // Xóa tất cả dữ liệu tạm thời nếu không chỉ định loại
+  if (dataTypes.length === 0) {
+    const tempKeys = [
+      "registration_data",
+      "pending_email",
+      "verification_step",
+      "verification_token",
+      "payment_info",
+      "order_data",
+      "draft_content",
+      "temp_images",
+    ];
+
+    tempKeys.forEach((key) => {
+      if (localStorage.getItem(key) !== null) {
+        localStorage.removeItem(key);
+      }
+    });
+  }
+
+  // Chuyển hướng nếu có yêu cầu
+  if (navigate && navigateTo) {
+    navigate(navigateTo);
+  }
+
+  console.log("Đã xóa dữ liệu tạm thời thành công");
+};

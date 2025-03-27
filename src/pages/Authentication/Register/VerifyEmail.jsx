@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./VerifyEmail.css"; // Using separate CSS file
 import api from "../../../config/axios";
+import { clearTemporaryData } from "../../../utils/authUtils";
 
 const VerifyEmail = () => {
   const [step, setStep] = useState(1); // 1: Enter OTP, 2: Completed
@@ -190,7 +191,7 @@ const VerifyEmail = () => {
 
   // Return to login page
   const handleReturnToLogin = () => {
-    navigate("/login");
+    clearTemporaryData(["registration", "verification"], navigate, "/register");
   };
 
   // Handle OTP input
