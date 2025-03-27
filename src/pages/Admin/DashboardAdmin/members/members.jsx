@@ -800,7 +800,7 @@ const Members = () => {
               <div className="MemberAdmin-user-accounts-actions">
                 <div className="MemberAdmin-search-input-container">
                   <Input
-                    placeholder="Tìm theo tên, username, email, SĐT"
+                    placeholder="Search by name, username, email, phone"
                     value={searchText}
                     onChange={handleSearchChange}
                     allowClear
@@ -873,7 +873,7 @@ const Members = () => {
               <div className="MemberAdmin-user-accounts-actions">
                 <div className="MemberAdmin-search-input-container">
                   <Input
-                    placeholder="Tìm theo tên thành viên hoặc thông tin liên hệ"
+                    placeholder="Search by member name or contact info"
                     value={memberSearchText}
                     onChange={handleMemberSearchChange}
                     allowClear
@@ -917,7 +917,7 @@ const Members = () => {
               <div className="MemberAdmin-user-accounts-actions">
                 <div className="MemberAdmin-search-input-container">
                   <Input
-                    placeholder="Tìm theo tên thành viên hoặc tên gói"
+                    placeholder="Search by member name or package name"
                     value={membershipSearchText}
                     onChange={handleMembershipSearchChange}
                     allowClear
