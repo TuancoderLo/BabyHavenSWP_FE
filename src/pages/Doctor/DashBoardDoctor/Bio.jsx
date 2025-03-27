@@ -356,7 +356,7 @@ const Bio = () => {
                       },
                     ]}
                   >
-                    <Input disabled={!editing} />
+                    <Input disabled={true} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
@@ -382,7 +382,7 @@ const Bio = () => {
                       { type: "email", message: "Invalid email format" },
                     ]}
                   >
-                    <Input disabled />
+                    <Input disabled={true} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
@@ -404,14 +404,21 @@ const Bio = () => {
                     <DatePicker
                       format="MM/DD/YYYY"
                       style={{ width: "100%" }}
-                      disabled={!editing}
+                      disabled={true}
                       locale={locale}
                     />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
                   <Form.Item name="status" label="Status">
-                    <Input disabled={!editing} />
+                    {editing ? (
+                      <Select disabled={!editing}>
+                        <Select.Option value="Active">Active</Select.Option>
+                        <Select.Option value="Inactive">Inactive</Select.Option>
+                      </Select>
+                    ) : (
+                      <Input disabled={true} />
+                    )}
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
