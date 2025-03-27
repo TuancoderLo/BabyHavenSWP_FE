@@ -38,6 +38,7 @@ const RevenueChart = () => {
   const [transactions, setTransactions] = useState([]); // State storing transactions
   const [transactionType, setTransactionType] = useState("all"); // Filter by package type: all, standard, premium
   const [statusFilter, setStatusFilter] = useState("all"); // Filter by status: all, completed, pending, failed, cancelled
+  const [nameFilter, setNameFilter] = useState(""); // Thêm state để lưu trữ giá trị tìm kiếm tên
 
   useEffect(() => {
     const fetchData = async () => {
@@ -397,6 +398,15 @@ const RevenueChart = () => {
       );
     }
 
+    // Lọc theo tên
+    if (nameFilter.trim() !== "") {
+      filtered = filtered.filter(
+        (t) =>
+          t.fullName &&
+          t.fullName.toLowerCase().includes(nameFilter.toLowerCase())
+      );
+    }
+
     return filtered;
   };
 
@@ -670,6 +680,18 @@ const RevenueChart = () => {
                     <option value="failed">Failed</option>
                     <option value="cancelled">Cancelled</option>
                   </select>
+                </div>
+
+                {/* Thêm filter tìm kiếm theo tên */}
+                <div className="filter-row">
+                  <label>Customer Name:</label>
+                  <input
+                    type="text"
+                    placeholder="Search by name..."
+                    value={nameFilter}
+                    onChange={(e) => setNameFilter(e.target.value)}
+                    className="name-filter-input"
+                  />
                 </div>
               </div>
 
