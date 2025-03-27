@@ -57,6 +57,22 @@ const doctorApi = {
     const response = await api.get(`/ConsultationRequests/odata${filter}`);
     return response.data;
   },
+  
+  getRatingFeedbackByResponseId: async (responseId) => {
+    try {
+      const query = `?$filter=responseId eq ${responseId}`;
+      const response = await api.get(`/RatingFeedback/odata${query}`);
+      console.log("Raw OData Feedback Response for responseId:", response); // Log để kiểm tra
+      return response;
+    } catch (error) {
+      console.error(
+        "Error fetching OData feedback by responseId:",
+        error.response || error.message
+      );
+      throw error;
+    }
+  },
+
 
   //Api doctorformember
   createConsultationRequest: async (data) => {
@@ -123,6 +139,7 @@ const doctorApi = {
       throw error;
     }
   },
+
 
   getDoctorsFromEndpoint: async () => {
     const response = await api.get("/Doctors");
