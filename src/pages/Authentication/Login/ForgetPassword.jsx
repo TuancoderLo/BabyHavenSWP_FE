@@ -147,14 +147,33 @@ const ForgetPassword = () => {
 
   // Quay lại bước trước đó
   const handleBack = () => {
-    if (step > 1) {
-      setStep(step - 1);
-      setError("");
+    // Xử lý logic quay lại khác nhau tùy theo bước hiện tại
+    if (step === 3) {
+      // Từ bước 3 (đặt mật khẩu) quay thẳng về bước 1 (nhập email)
+      setStep(1);
+      // Xóa tất cả dữ liệu từ localStorage
+      localStorage.removeItem("reset_password_email");
+      // Reset các state liên quan
+      setOtp("");
+      setResetToken("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } else if (step === 2) {
+      // Từ bước 2 (nhập OTP) quay về bước 1 (nhập email)
+      setStep(1);
+      // Xóa dữ liệu từ localStorage
+      localStorage.removeItem("reset_password_email");
+      setOtp("");
     }
+
+    // Reset thông báo lỗi
+    setError("");
   };
 
   // Quay về trang đăng nhập
   const handleReturnToLogin = () => {
+    // Xóa tất cả dữ liệu từ localStorage trước khi chuyển hướng
+    localStorage.removeItem("reset_password_email");
     navigate("/login");
   };
 
