@@ -61,18 +61,10 @@ const Consultations = () => {
       fetchConsultations();
     }
   }, [activeTab]);
-
+  
   useEffect(() => {
     applyFilters();
-  }, [
-    searchText,
-    activeTab,
-    consultations,
-    onGoingConsultations,
-    completedFilterType,
-    historyFilterStatus,
-    historyFilterRating,
-  ]);
+  }, [searchText, historyFilterStatus, historyFilterRating, consultations, onGoingConsultations]);
 
   const fetchConsultations = async () => {
     setLoading(true);
@@ -135,88 +127,102 @@ const Consultations = () => {
     }
   };
 
-  const fetchOnGoingConsultations = async () => {
-    setLoading(true);
-    try {
-      const doctorId = localStorage.getItem("doctorId");
-      if (!doctorId) {
-        message.error("Doctor ID not found in localStorage!");
-        return;
-      }
+ const fetchOnGoingConsultations = async () => {
+  setLoading(true);
+  try {
+    const doctorId = localStorage.getItem("doctorId");
+    if (!doctorId) {
+      message.error("Doctor ID not found in localStorage!");
+      return;
+    }
 
-      const requests = await doctorApi.getConsultationRequestsByDoctorAndStatus(doctorId, "Approved");
-      const consultationsData = await Promise.all(
-        requests.map(async (req) => {
-          try {
-            const detailedResponse = await doctorApi.getConsultationRequestsById(req.requestId);
-            const detailedData = detailedResponse.data;
-            const responses = await doctorApi.getConsultationResponsesOData(
-              `?$filter=requestId eq ${req.requestId}`
-            );
-            const latestResponse = responses.data[0] || {};
-            return {
-              id: req.requestId,
-              requestId: req.requestId,
-              parentName: detailedData.memberName || "N/A",
-              parentAvatar: "https://randomuser.me/api/portraits/women/32.jpg",
-              childName: detailedData.childName || "N/A",
-              childAge: detailedData.child?.age ? `${detailedData.child.age} tuổi` : "N/A",
-              requestDate: detailedData.requestDate || moment().format(),
-              topic: detailedData.category || "N/A",
-              description: detailedData.description || "N/A",
-              urgency: detailedData.urgency?.toLowerCase() || "normal",
-              status: detailedData.status || "Approved",
-              response: latestResponse.content || "",
-            };
-          } catch (error) {
-            console.error(`Error fetching details for request ${req.requestId}:`, error);
+    const requests = await doctorApi.getConsultationRequestsByDoctorAndStatus(doctorId, "Approved");
+    console.log("Requests from API for Ongoing:", requests);
+
+    const detailedRequests = await Promise.all(
+      requests.map(async (request) => {
+        try {
+          const detailedResponse = await doctorApi.getConsultationRequestsById(request.requestId);
+          const detailedData = detailedResponse.data;
+          console.log("Detailed data for request:", detailedData);
+
+          if (detailedData.status !== "Approved") {
+            console.warn(`Request ${request.requestId} has status ${detailedData.status}, skipping...`);
             return null;
           }
-        })
-      );
 
-      const validData = consultationsData.filter((item) => item !== null);
-      setOnGoingConsultations(validData);
-    } catch (error) {
-      message.error("Failed to fetch ongoing consultations!");
-      console.error("Error fetching ongoing consultations:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+          const responses = await doctorApi.getConsultationResponsesOData(
+            `?$filter=requestId eq ${request.requestId}`
+          );
+          const latestResponse = responses.data[0] || {};
+
+          // Lấy rating từ API RatingFeedback nếu có response
+          let rating = 0;
+          if (latestResponse.responseId) {
+            const feedbackResponse = await doctorApi.getRatingFeedbackByResponseId(latestResponse.responseId);
+            const feedbackData = feedbackResponse.data[0] || {};
+            rating = feedbackData.rating || 0;
+          }
+
+          return {
+            id: request.requestId,
+            requestId: request.requestId,
+            parentName: detailedData.memberName || "N/A",
+            parentAvatar: "https://randomuser.me/api/portraits/women/32.jpg",
+            childName: detailedData.childName || "N/A",
+            childAge: detailedData.child?.age ? `${detailedData.child.age} tuổi` : "N/A",
+            childGender: detailedData.child?.gender || "N/A",
+            childAllergies: detailedData.child?.allergies || "None",
+            childNotes: detailedData.child?.notes || "None",
+            childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
+            requestDate: detailedData.requestDate || moment().format(),
+            description: detailedData.description || "N/A",
+            status: detailedData.status,
+            response: latestResponse.content || "",
+            rating: rating, // Sử dụng rating từ API RatingFeedback
+            createdAt: detailedData.createdAt || moment().format(),
+            updatedAt: detailedData.updatedAt || moment().format(),
+            completedDate: detailedData.status === "Completed" ? detailedData.updatedAt : null,
+          };
+        } catch (error) {
+          console.error(`Error fetching details for request ${request.requestId}:`, error);
+          return null;
+        }
+      })
+    );
+
+    const mappedData = detailedRequests.filter((request) => request !== null);
+    console.log("Mapped Ongoing Consultations:", mappedData);
+    setOnGoingConsultations(mappedData);
+  } catch (error) {
+    message.error("Failed to fetch ongoing consultations!");
+    console.error("Error fetching ongoing consultations:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const applyFilters = () => {
     let data = [];
     if (activeTab === "ongoing") {
-      data = onGoingConsultations;
+      data = onGoingConsultations.filter((item) => item.status === "Approved"); // Đảm bảo chỉ lấy Approved
       if (searchText) {
         data = data.filter(
           (item) =>
             item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
             item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.topic.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.description.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.response.toLowerCase().includes(searchText.toLowerCase())
+            item.description.toLowerCase().includes(searchText.toLowerCase())
         );
       }
     } else if (activeTab === "completed") {
       data = consultations.filter((item) => item.status === "Completed");
-      if (completedFilterType === "request") {
-        data = data.filter((item) =>
-          item.description.toLowerCase().includes(searchText.toLowerCase())
-        );
-      } else if (completedFilterType === "response") {
-        data = data.filter((item) =>
-          item.response.toLowerCase().includes(searchText.toLowerCase())
-        );
-      } else {
+      if (searchText) {
         data = data.filter(
           (item) =>
             item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
             item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.topic.toLowerCase().includes(searchText.toLowerCase()) ||
             item.description.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.response.toLowerCase().includes(searchText.toLowerCase())
+            (item.response && item.response.toLowerCase().includes(searchText.toLowerCase()))
         );
       }
     } else if (activeTab === "history") {
@@ -232,19 +238,18 @@ const Consultations = () => {
           (item) =>
             item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
             item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.topic.toLowerCase().includes(searchText.toLowerCase()) ||
             item.description.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.response.toLowerCase().includes(searchText.toLowerCase())
+            (item.response && item.response.toLowerCase().includes(searchText.toLowerCase()))
         );
       }
     } else {
+      // Tab "new" chỉ hiển thị Pending
       data = consultations.filter((item) => item.status === "Pending");
       if (searchText) {
         data = data.filter(
           (item) =>
             item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
             item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.topic.toLowerCase().includes(searchText.toLowerCase()) ||
             item.description.toLowerCase().includes(searchText.toLowerCase())
         );
       }
@@ -280,12 +285,12 @@ const Consultations = () => {
 
       const numericStatus = statusMapForResponse[values.action];
       const stringStatus = statusMapForRequest[values.action];
-
+      
       const responsePayload = {
         requestId: selectedConsultation.requestId,
         content: values.response,
         attachments: [],
-        isHelpful: false,
+        isHelpful: true,
         status: numericStatus,
       };
 
@@ -338,16 +343,6 @@ const Consultations = () => {
     }
   };
 
-  const getUrgencyTag = (urgency) => {
-    const tags = {
-      high: <Tag color="red">Urgent</Tag>,
-      medium: <Tag color="orange">Medium</Tag>,
-      normal: <Tag color="blue">Normal</Tag>,
-      low: <Tag color="green">Low Priority</Tag>,
-    };
-    return tags[urgency] || <Tag>Undefined</Tag>;
-  };
-
   const newRequestColumns = [
     {
       title: "Parent",
@@ -372,18 +367,7 @@ const Consultations = () => {
       ),
     },
     {
-      title: "Topic",
-      dataIndex: "topic",
-      key: "topic",
-    },
-    {
-      title: "Priority",
-      dataIndex: "urgency",
-      key: "urgency",
-      render: getUrgencyTag,
-    },
-    {
-      title: "Request Date",
+      title: "Date",
       dataIndex: "requestDate",
       key: "requestDate",
       render: (date) => moment(date).format("DD/MM/YYYY HH:mm"),
@@ -409,7 +393,7 @@ const Consultations = () => {
       ),
     },
   ];
-
+  
   const columns = [
     {
       title: "Parent",
@@ -434,18 +418,7 @@ const Consultations = () => {
       ),
     },
     {
-      title: "Topic",
-      dataIndex: "topic",
-      key: "topic",
-    },
-    {
-      title: "Priority",
-      dataIndex: "urgency",
-      key: "urgency",
-      render: getUrgencyTag,
-    },
-    {
-      title: "Request Date",
+      title: "Date",
       dataIndex: "requestDate",
       key: "requestDate",
       render: (date) => moment(date).format("DD/MM/YYYY HH:mm"),
@@ -501,26 +474,15 @@ const Consultations = () => {
         <Title level={3} className="consult-title">
           Consultations
         </Title>
-
+  
         <div className="consult-header" style={{ display: "flex", alignItems: "center" }}>
           <Input
-            placeholder="Search by parent, child, topic, or response"
+            placeholder="Search by parent, child, or description"
             prefix={<SearchOutlined />}
             value={searchText}
             onChange={handleSearch}
             style={{ width: 300 }}
           />
-          {activeTab === "completed" && (
-            <Select
-              value={completedFilterType}
-              onChange={setCompletedFilterType}
-              style={{ width: 200, marginLeft: 10 }}
-            >
-              <Option value="all">All</Option>
-              <Option value="request">Filter by Request</Option>
-              <Option value="response">Filter by Response</Option>
-            </Select>
-          )}
           {activeTab === "history" && (
             <div style={{ display: "flex", gap: "10px", marginLeft: 10 }}>
               <Select
@@ -560,7 +522,7 @@ const Consultations = () => {
             Refresh
           </Button>
         </div>
-
+  
         <Tabs
           activeKey={activeTab}
           onChange={setActiveTab}
@@ -629,210 +591,184 @@ const Consultations = () => {
       </Card>
 
       <Modal
-        title="Respond to Consultation Request"
-        open={responseVisible}
-        onCancel={() => setResponseVisible(false)}
-        footer={null}
-        width={600}
+  title="Respond to Consultation Request"
+  open={responseVisible}
+  onCancel={() => setResponseVisible(false)}
+  footer={null}
+  width={600}
+>
+  {selectedConsultation && (
+    <Form
+      form={responseForm}
+      layout="vertical"
+      onFinish={handleResponseSubmit}
+      initialValues={{ action: "approved" }}
+    >
+      <Divider orientation="left">Consultation Information</Divider>
+      <Descriptions bordered size="small" column={1}>
+        <Descriptions.Item label="Parent">{selectedConsultation.parentName}</Descriptions.Item>
+        <Descriptions.Item label="Child">
+          {selectedConsultation.childName} ({selectedConsultation.childAge})
+        </Descriptions.Item>
+        <Descriptions.Item label="Request Date">
+          {moment(selectedConsultation.requestDate).format("DD/MM/YYYY HH:mm")}
+        </Descriptions.Item>
+        <Descriptions.Item label="Description">
+          {selectedConsultation.description}
+        </Descriptions.Item>
+      </Descriptions>
+
+      <Divider orientation="left">Child Information</Divider>
+      <Descriptions bordered size="small" column={1}>
+        <Descriptions.Item label="Date of Birth">
+          {moment(selectedConsultation.childDateOfBirth).format("DD/MM/YYYY")}
+        </Descriptions.Item>
+        <Descriptions.Item label="Gender">{selectedConsultation.childGender}</Descriptions.Item>
+        <Descriptions.Item label="Allergies">{selectedConsultation.childAllergies}</Descriptions.Item>
+        <Descriptions.Item label="Notes">{selectedConsultation.childNotes}</Descriptions.Item>
+      </Descriptions>
+
+      <Divider orientation="left">Response</Divider>
+      <Form.Item
+        name="action"
+        label="Action"
+        rules={[{ required: true, message: "Please select an action" }]}
       >
-        {selectedConsultation && (
-          <Form
-            form={responseForm}
-            layout="vertical"
-            onFinish={handleResponseSubmit}
-            initialValues={{ action: "approved" }}
-          >
-            <Divider orientation="left">Consultation Information</Divider>
-            <Descriptions bordered size="small" column={1}>
-              <Descriptions.Item label="Parent">{selectedConsultation.parentName}</Descriptions.Item>
-              <Descriptions.Item label="Child">
-                {selectedConsultation.childName} ({selectedConsultation.childAge})
-              </Descriptions.Item>
-              <Descriptions.Item label="Topic">{selectedConsultation.topic}</Descriptions.Item>
-              <Descriptions.Item label="Priority">
-                {getUrgencyTag(selectedConsultation.urgency)}
-              </Descriptions.Item>
-              <Descriptions.Item label="Request Date">
-                {moment(selectedConsultation.requestDate).format("DD/MM/YYYY HH:mm")}
-              </Descriptions.Item>
-              <Descriptions.Item label="Description">
-                {selectedConsultation.description}
-              </Descriptions.Item>
-            </Descriptions>
+        <Select>
+          <Option value="approved">Approve Request</Option>
+          <Option value="rejected">Reject Request</Option>
+        </Select>
+      </Form.Item>
 
-            <Divider orientation="left">Child Information</Divider>
-            <Descriptions bordered size="small" column={1}>
-              <Descriptions.Item label="Date of Birth">
-                {moment(selectedConsultation.childDateOfBirth).format("DD/MM/YYYY")}
-              </Descriptions.Item>
-              <Descriptions.Item label="Gender">{selectedConsultation.childGender}</Descriptions.Item>
-              <Descriptions.Item label="Allergies">{selectedConsultation.childAllergies}</Descriptions.Item>
-              <Descriptions.Item label="Notes">{selectedConsultation.childNotes}</Descriptions.Item>
-            </Descriptions>
-
-            <Divider orientation="left">Response</Divider>
+      <Form.Item noStyle shouldUpdate>
+        {({ getFieldValue }) =>
+          getFieldValue("action") === "rejected" ? (
             <Form.Item
-              name="action"
-              label="Action"
-              rules={[{ required: true, message: "Please select an action" }]}
+              name="rejectReason"
+              label="Reject Reason"
+              rules={[{ required: true, message: "Please enter reason" }]}
             >
-              <Select>
-                <Option value="approved">Approve Request</Option>
-                <Option value="rejected">Reject Request</Option>
-                <Option value="pending">Set to Pending</Option>
-                <Option value="completed">Set to Completed</Option>
-              </Select>
+              <TextArea rows={4} placeholder="Enter reject reason" />
             </Form.Item>
+          ) : null
+        }
+      </Form.Item>
 
-            <Form.Item noStyle shouldUpdate>
-              {({ getFieldValue }) =>
-                getFieldValue("action") === "approved" ? (
-                  <Form.Item
-                    name="appointmentDate"
-                    label="Appointment Date"
-                    rules={[{ required: true, message: "Please select date/time" }]}
-                  >
-                    <DatePicker showTime format="DD/MM/YYYY HH:mm" style={{ width: "100%" }} />
-                  </Form.Item>
-                ) : getFieldValue("action") === "rejected" ? (
-                  <Form.Item
-                    name="rejectReason"
-                    label="Reject Reason"
-                    rules={[{ required: true, message: "Please enter reason" }]}
-                  >
-                    <TextArea rows={4} placeholder="Enter reject reason" />
-                  </Form.Item>
-                ) : null
-              }
-            </Form.Item>
-
-            <Form.Item
-              name="response"
-              label="Response"
-              rules={[{ required: true, message: "Please enter response" }]}
-            >
-              <TextArea rows={4} placeholder="Enter response to parent" />
-            </Form.Item>
-
-            <Form.Item>
-              <div className="consult-modal-buttons">
-                <Button onClick={() => setResponseVisible(false)}>Cancel</Button>
-                <Button type="primary" htmlType="submit" loading={loading}>
-                  Send Response
-                </Button>
-              </div>
-            </Form.Item>
-          </Form>
-        )}
-      </Modal>
-
-      <Drawer
-        title="Consultation Details"
-        placement="right"
-        onClose={() => setDetailVisible(false)}
-        open={detailVisible}
-        width={500}
+      <Form.Item
+        name="response"
+        label="Response"
+        rules={[{ required: true, message: "Please enter response" }]}
       >
-        {selectedConsultation && (
-          <>
-            <Divider orientation="left">Consultation Information</Divider>
-            <Descriptions bordered column={1}>
-              <Descriptions.Item label="Status">
-                {getStatusTag(selectedConsultation.status)}
-              </Descriptions.Item>
-              <Descriptions.Item label="Parent">
-                <div className="consult-drawer-parent">
-                  <Avatar src={selectedConsultation.parentAvatar} size="small" />
-                  <span>{selectedConsultation.parentName}</span>
-                </div>
-              </Descriptions.Item>
-              <Descriptions.Item label="Child">
-                {selectedConsultation.childName} ({selectedConsultation.childAge})
-              </Descriptions.Item>
-              <Descriptions.Item label="Topic">{selectedConsultation.topic}</Descriptions.Item>
-              <Descriptions.Item label="Priority">
-                {getUrgencyTag(selectedConsultation.urgency)}
-              </Descriptions.Item>
-              <Descriptions.Item label="Request Date">
-                {moment(selectedConsultation.requestDate).format("DD/MM/YYYY HH:mm")}
-              </Descriptions.Item>
-              <Descriptions.Item label="Description">
-                {selectedConsultation.description}
-              </Descriptions.Item>
-            </Descriptions>
+        <TextArea rows={4} placeholder="Enter response to parent" />
+      </Form.Item>
 
-            <Divider orientation="left">Child Information</Divider>
-            <Descriptions bordered column={1}>
-              <Descriptions.Item label="Date of Birth">
-                {moment(selectedConsultation.childDateOfBirth).format("DD/MM/YYYY")}
-              </Descriptions.Item>
-              <Descriptions.Item label="Gender">{selectedConsultation.childGender}</Descriptions.Item>
-              <Descriptions.Item label="Allergies">{selectedConsultation.childAllergies}</Descriptions.Item>
-              <Descriptions.Item label="Notes">{selectedConsultation.childNotes}</Descriptions.Item>
-            </Descriptions>
+      <Form.Item>
+        <div className="consult-modal-buttons">
+          <Button onClick={() => setResponseVisible(false)}>Cancel</Button>
+          <Button type="primary" htmlType="submit" loading={loading}>
+            Send Response
+          </Button>
+        </div>
+      </Form.Item>
+    </Form>
+  )}
+</Modal>
 
-            <Divider orientation="left">System Information</Divider>
-            <Descriptions bordered column={1}>
-              <Descriptions.Item label="Created At">
-                {moment(selectedConsultation.createdAt).format("DD/MM/YYYY HH:mm")}
-              </Descriptions.Item>
-              <Descriptions.Item label="Updated At">
-                {moment(selectedConsultation.updatedAt).format("DD/MM/YYYY HH:mm")}
-              </Descriptions.Item>
-            </Descriptions>
+<Drawer
+  title="Consultation Details"
+  placement="right"
+  onClose={() => setDetailVisible(false)}
+  open={detailVisible}
+  width={500}
+>
+  {selectedConsultation && (
+    <>
+      <Divider orientation="left">Consultation Information</Divider>
+      <Descriptions bordered column={1}>
+        <Descriptions.Item label="Status">
+          {getStatusTag(selectedConsultation.status)}
+        </Descriptions.Item>
+        <Descriptions.Item label="Parent">
+          <div className="consult-drawer-parent">
+            <Avatar src={selectedConsultation.parentAvatar} size="small" />
+            <span>{selectedConsultation.parentName}</span>
+          </div>
+        </Descriptions.Item>
+        <Descriptions.Item label="Child">
+          {selectedConsultation.childName} ({selectedConsultation.childAge})
+        </Descriptions.Item>
+        <Descriptions.Item label="Request Date">
+          {moment(selectedConsultation.requestDate).format("DD/MM/YYYY HH:mm")}
+        </Descriptions.Item>
+        <Descriptions.Item label="Description">
+          {selectedConsultation.description}
+        </Descriptions.Item>
+      </Descriptions>
 
-            <Divider orientation="left">Progress</Divider>
-            <Timeline>
-              <Timeline.Item>
-                <p>
-                  <strong>Request</strong> -{" "}
-                  {moment(selectedConsultation.requestDate).format("DD/MM/YYYY HH:mm")}
-                </p>
-                <Card size="small">
-                  <p>{selectedConsultation.description}</p>
-                </Card>
-              </Timeline.Item>
-              {selectedConsultation.response && (
-                <Timeline.Item>
-                  <p>
-                    <strong>Response</strong> -{" "}
-                    {moment(selectedConsultation.updatedAt).format("DD/MM/YYYY HH:mm")}
-                  </p>
-                  <Card size="small">
-                    <p>{selectedConsultation.response}</p>
-                  </Card>
-                </Timeline.Item>
-              )}
-              {selectedConsultation.status === "Rejected" && (
-                <Timeline.Item color="red">
-                  <p>
-                    <strong>Rejected</strong>
-                  </p>
-                  <Card size="small">
-                    <p>{selectedConsultation.rejectReason}</p>
-                  </Card>
-                </Timeline.Item>
-              )}
-              {selectedConsultation.appointmentDate && (
-                <Timeline.Item color="blue">
-                  <p>
-                    <strong>Appointment</strong> -{" "}
-                    {moment(selectedConsultation.appointmentDate).format("DD/MM/YYYY HH:mm")}
-                  </p>
-                </Timeline.Item>
-              )}
-              {selectedConsultation.completedDate && (
-                <Timeline.Item color="green">
-                  <p>
-                    <strong>Completed</strong> -{" "}
-                    {moment(selectedConsultation.completedDate).format("DD/MM/YYYY HH:mm")}
-                  </p>
-                </Timeline.Item>
-              )}
-            </Timeline>
-          </>
+      <Divider orientation="left">Child Information</Divider>
+      <Descriptions bordered column={1}>
+        <Descriptions.Item label="Date of Birth">
+          {moment(selectedConsultation.childDateOfBirth).format("DD/MM/YYYY")}
+        </Descriptions.Item>
+        <Descriptions.Item label="Gender">{selectedConsultation.childGender}</Descriptions.Item>
+        <Descriptions.Item label="Allergies">{selectedConsultation.childAllergies}</Descriptions.Item>
+        <Descriptions.Item label="Notes">{selectedConsultation.childNotes}</Descriptions.Item>
+      </Descriptions>
+
+      <Divider orientation="left">System Information</Divider>
+      <Descriptions bordered column={1}>
+        <Descriptions.Item label="Created At">
+          {moment(selectedConsultation.createdAt).format("DD/MM/YYYY HH:mm")}
+        </Descriptions.Item>
+        <Descriptions.Item label="Updated At">
+          {moment(selectedConsultation.updatedAt).format("DD/MM/YYYY HH:mm")}
+        </Descriptions.Item>
+      </Descriptions>
+
+      <Divider orientation="left">Progress</Divider>
+      <Timeline>
+        <Timeline.Item>
+          <p>
+            <strong>Request</strong> -{" "}
+            {moment(selectedConsultation.requestDate).format("DD/MM/YYYY HH:mm")}
+          </p>
+          <Card size="small">
+            <p>{selectedConsultation.description}</p>
+          </Card>
+        </Timeline.Item>
+        {selectedConsultation.response && (
+          <Timeline.Item>
+            <p>
+              <strong>Response</strong> -{" "}
+              {moment(selectedConsultation.updatedAt).format("DD/MM/YYYY HH:mm")}
+            </p>
+            <Card size="small">
+              <p>{selectedConsultation.response}</p>
+            </Card>
+          </Timeline.Item>
         )}
-      </Drawer>
+        {selectedConsultation.status === "Rejected" && (
+          <Timeline.Item color="red">
+            <p>
+              <strong>Rejected</strong>
+            </p>
+            <Card size="small">
+              <p>{selectedConsultation.rejectReason}</p>
+            </Card>
+          </Timeline.Item>
+        )}
+        {selectedConsultation.completedDate && (
+          <Timeline.Item color="green">
+            <p>
+              <strong>Completed</strong> -{" "}
+              {moment(selectedConsultation.completedDate).format("DD/MM/YYYY HH:mm")}
+            </p>
+          </Timeline.Item>
+        )}
+      </Timeline>
+    </>
+  )}
+</Drawer>
     </div>
   );
 };

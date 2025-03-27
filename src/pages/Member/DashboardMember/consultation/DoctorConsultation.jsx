@@ -5,49 +5,77 @@ import doctorApi from "../../../../services/DoctorApi";
 import TextEditor from "../../../../pages/Admin/DashboardAdmin/blog/textEditor";
 import moment from "moment";
 
+// Card hiển thị mỗi response
+function ExpandableResponseCard({ response, request, onClick }) {
+  const combinedText = `Date: ${response.responseDate} | Doctor: ${
+    response.doctorName
+  } | Child: ${request?.childName || "N/A"} | Category: ${request?.category || "N/A"}`;
+  const truncatedText =
+    combinedText.length > 100 ? combinedText.slice(0, 100) + "..." : combinedText;
 
+  return (
+    <div className="consultation-response-card" onClick={() => onClick({ response, request })}>
+      <div className="response-header">
+        <span className="response-date">{response.responseDate}</span>
+        <span className="response-status">{response.status}</span>
+      </div>
+      <div className="response-summary">
+        <p>
+          <strong>Doctor:</strong> {response.doctorName}
+        </p>
+        <p>
+          <strong>Child:</strong> {request?.childName || "N/A"}
+        </p>
+      </div>
+      <div className="truncated-content">{truncatedText}</div>
+    </div>
+  );
+}
 // Thành phần cho thẻ yêu cầu đã gửi
 function ExpandableSentRequestCard({ request, onClick }) {
   const truncatedText =
   `ID: ${request.requestId} | Child: ${request.childName} | ` +
-  `Category: ${request.category} | Date: ${request.requestDate}`
-    .slice(0, 100) + "...";
-    return (
-      <div className="consultation-sent-card" onClick={() => onClick(request)}>
-        <div className="sent-header">
+  `Date: ${request.requestDate} | Description: ${request.description}`
+    .slice(0, 50) + "...";
+  return (
+    <div className="consultation-sent-card" onClick={() => onClick(request)}>
+      <div className="sent-header">
         <span className="sent-date">
   {moment(request.requestDate).format("DD/MM/YYYY HH:mm")}
-</span>
+        </span>
           <span className="sent-status">{request.status}</span>
-        </div>
-        <div className="sent-summary">
-          <p><strong>ID:</strong> {request.requestId}</p>
-          <p><strong>Child:</strong> {request.childName}</p>
-          <p><strong>Category:</strong> {request.category}</p>
-        </div>
-        <div className="truncated-content">{truncatedText}</div>
       </div>
-    );
+      <div className="sent-summary">
+          <p><strong>Child:</strong> {request.childName}</p>
+          <p><strong>Description:</strong> {request.description.slice(0, 50)}...</p>
+      </div>
+      <div className="truncated-content">{truncatedText}</div>
+    </div>
+  );
 }
 
 // Thành phần cho thẻ phản hồi đã cung cấp
-function ExpandableFeedbackEntry({ feedback, onClick }) {
-  const truncatedText =
-    `Child: ${feedback.childName} | Doctor: ${feedback.doctorName} | Rating: ${feedback.rating} stars`.slice(0, 100) +
-    "...";
+function ExpandableFeedbackEntry({ feedback, onClick, consultationResponses, consultationRequests }) {
+  const truncatedText = `Rating: ${feedback.rating} stars`.slice(0, 100) + "...";
+
+  // Tìm Response tương ứng với feedback.responseId
+  const relatedResponse = consultationResponses.find(
+    (resp) => resp.responseId === feedback.responseId // Loại bỏ resp.response
+  );
+
+  // Tìm Request tương ứng với response.requestId (nếu có relatedResponse)
+  const relatedRequest = relatedResponse ? consultationRequests[relatedResponse.requestId] : null;
+
   return (
-    <div className="consultation-feedback-card" onClick={() => onClick(feedback)}>
+    <div
+      className="consultation-feedback-card"
+      onClick={() => onClick({ feedback, relatedResponse, relatedRequest })}
+    >
       <div className="feedback-header">
         <span className="feedback-date">{feedback.feedbackDate}</span>
         <span className="feedback-rating">{feedback.rating} ★</span>
       </div>
       <div className="feedback-summary">
-        <p>
-          <strong>Child:</strong> {feedback.childName}
-        </p>
-        <p>
-          <strong>Doctor:</strong> {feedback.doctorName}
-        </p>
         <p>
           <strong>Comment:</strong> {feedback.comment.slice(0, 50)}...
         </p>
@@ -61,7 +89,6 @@ function ExpandableFeedbackEntry({ feedback, onClick }) {
 function DoctorConsultation() {
   const [selectedChild, setSelectedChild] = useState(null);
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState("");
   const [consultationContent, setConsultationContent] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [children, setChildren] = useState([]);
@@ -69,8 +96,6 @@ function DoctorConsultation() {
   const [error, setError] = useState(null);
   const [doctors, setDoctors] = useState([]);
   const [doctorSpecializations, setDoctorSpecializations] = useState({});
-  const [categories, setCategories] = useState([]);
-  const [loadingCategories, setLoadingCategories] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
 
@@ -85,7 +110,6 @@ function DoctorConsultation() {
   const [selectedResponse, setSelectedResponse] = useState(null);
   const [selectedSentRequest, setSelectedSentRequest] = useState(null);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
-  const [urgency, setUrgency] = useState("Low");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
@@ -100,7 +124,6 @@ function DoctorConsultation() {
   useEffect(() => {
     fetchChildren();
     fetchDoctors();
-    fetchCategories();
     fetchConsultationResponses();
     fetchSentRequests();
     fetchUserFeedback();
@@ -167,22 +190,6 @@ function DoctorConsultation() {
     }
   };
 
-  // Lấy danh sách Category
-  const fetchCategories = async () => {
-    try {
-      setLoadingCategories(true);
-      const response = await doctorApi.getConsultationRequests();
-      if (response?.data) {
-        const uniqueCategories = [...new Set(response.data.map((req) => req.category))];
-        setCategories(uniqueCategories);
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    } finally {
-      setLoadingCategories(false);
-    }
-  };
-
   // Giúp parse content JSON hoặc text
   const parseContentToObject = (content) => {
     try {
@@ -191,13 +198,10 @@ function DoctorConsultation() {
       if (typeof content === "string") {
         const lines = content.split("\r\n\r\n");
         return {
-          greeting: lines[0] || "",
-          approvalMessage: lines[1] || "",
-          advice: lines.slice(2, lines.length - 1).join("\n"),
           followUp: lines[lines.length - 1] || "",
         };
       }
-      return { greeting: "", approvalMessage: content || "", advice: "", followUp: "" };
+      return {followUp: "" };
     }
   };
 
@@ -208,7 +212,7 @@ function DoctorConsultation() {
       if (!memberId) throw new Error("Please login to fetch consultation responses");
       const res = await doctorApi.getConsultationResponses(memberId);
       let responses = Array.isArray(res?.data) ? res.data : [res.data];
-
+      console.log("Consultation Responses:", responses);
       // Parse nội dung JSON
       const parsedResponses = responses.map((item) => ({
         ...item,
@@ -300,9 +304,9 @@ function DoctorConsultation() {
         childBirth: selectedChild.childBirth,
         doctorId: selectedDoctor.doctorId,
         requestDate,
-        status: "Pending", // Dùng "Pending" để khớp enum
-        urgency,
-        ...(selectedCategory && { category: selectedCategory }),
+        status: "Pending", // Khớp với enum của API
+        category: "Health", // Giá trị mặc định
+        urgency: "Medium", // Giá trị mặc định
         description: plainDescription,
       };
 
@@ -313,7 +317,6 @@ function DoctorConsultation() {
 
       // Reset form
       setCurrentStep(0);
-      setSelectedCategory("");
       setConsultationContent("");
       setSelectedDoctor(null);
     } catch (error) {
@@ -365,9 +368,6 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
     // Cập nhật status của Response => "Completed"
     await doctorApi.updateConsultationResponseStatus(responseId, "Completed");
 
-    // (Tuỳ chọn) Nếu muốn Request cũng chuyển "Completed", gọi:
-    // const requestId = selectedResponse.response.requestId;
-    // await doctorApi.updateConsultationRequestStatus(requestId, "Completed");
 
     // Làm mới danh sách Responses & Feedback
     await fetchConsultationResponses();
@@ -425,41 +425,6 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
                     ))}
                   </select>
                 )}
-              </div>
-
-              {/* Category */}
-              <div className="input-group">
-                <label htmlFor="category-select">Category</label>
-                <select
-                  id="category-select"
-                  className="doctor-category-select"
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                >
-                  <option value="">Select category</option>
-                  <option value="Nutrition">Nutrition</option>
-                  <option value="Growth">Growth</option>
-                  <option value="Health">Health</option>
-                  <option value="Psychology">Psychology</option>
-                  <option value="Other">Other</option>
-                </select>
-                {loadingCategories && <span className="loading-spinner-small"></span>}
-              </div>
-
-              {/* Urgency */}
-              <div className="input-group">
-                <label htmlFor="urgency-select">Urgency</label>
-                <select
-                  id="urgency-select"
-                  className="doctor-urgency-select"
-                  value={urgency}
-                  onChange={(e) => setUrgency(e.target.value)}
-                >
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="High">High</option>
-                  <option value="Critical">Critical</option>
-                </select>
               </div>
             </div>
 
@@ -520,12 +485,6 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
             <div className="review-section">
               <div className="review-item">
                 <strong>Child:</strong> {selectedChild?.name || "Not selected"}
-              </div>
-              <div className="review-item">
-                <strong>Category:</strong> {selectedCategory || "N/A"}
-              </div>
-              <div className="review-item">
-                <strong>Urgency:</strong> {urgency}
               </div>
               <div className="review-item consultation-details">
                 <strong>Details:</strong>
@@ -615,14 +574,20 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
             <p>No sent requests available.</p>
           );
 
-      case "feedback":
-        return userFeedback.length > 0 ? (
-          userFeedback.map((fb, index) => (
-            <ExpandableFeedbackEntry key={index} feedback={fb} onClick={setSelectedFeedback} />
-          ))
-        ) : (
-          <p>No feedback provided yet.</p>
-        );
+          case "feedback":
+            return userFeedback.length > 0 ? (
+              userFeedback.map((fb, index) => (
+                <ExpandableFeedbackEntry
+                  key={index}
+                  feedback={fb}
+                  consultationResponses={consultationResponses || []}
+                  consultationRequests={consultationRequests || {}} // Truyền consultationRequests
+                  onClick={(data) => setSelectedFeedback(data)}
+                />
+              ))
+            ) : (
+              <p>No feedback provided yet.</p>
+            );
 
       default:
         return null;
@@ -720,12 +685,6 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
                       <strong>Child:</strong> {selectedResponse.request.childName}
                     </p>
                     <p>
-                      <strong>Category:</strong> {selectedResponse.request.category}
-                    </p>
-                    <p>
-                      <strong>Urgency:</strong> {selectedResponse.request.urgency}
-                    </p>
-                    <p>
                       <strong>Description:</strong> {selectedResponse.request.description}
                     </p>
                     <p>
@@ -748,24 +707,8 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
                   <strong>Status:</strong> {selectedResponse.response.status}
                 </p>
                 <p>
-                  <strong>Greeting:</strong>{" "}
-                  {selectedResponse.response.content.greeting || "N/A"}
-                </p>
-                <p>
-                  <strong>Approval Message:</strong>{" "}
-                  {selectedResponse.response.content.approvalMessage || "N/A"}
-                </p>
-                <p>
-                  <strong>Advice:</strong>{" "}
-                  {selectedResponse.response.content.advice || "N/A"}
-                </p>
-                <p>
                   <strong>Follow-Up:</strong>{" "}
                   {selectedResponse.response.content.followUp || "N/A"}
-                </p>
-                <p>
-                  <strong>Helpful:</strong>{" "}
-                  {selectedResponse.response.isHelpful ? "Yes" : "No"}
                 </p>
               </div>
 
@@ -850,39 +793,50 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
 
       {/* Modal: Xem chi tiết Feedback */}
       {selectedFeedback && (
-        <div className="modal-overlay" onClick={() => setSelectedFeedback(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedFeedback(null)}>
-              ×
-            </button>
-            <h3 className="modal-title">Feedback Details</h3>
-            <div className="response-details">
-              <div className="feedback-section">
-                <h4>Feedback Information</h4>
-                <p>
-                  <strong>Child:</strong> {selectedFeedback.childName}
-                </p>
-                <p>
-                  <strong>Doctor:</strong> {selectedFeedback.doctorName}
-                </p>
-                <p>
-                  <strong>Category:</strong> {selectedFeedback.categoryName}
-                </p>
-                <p>
-                  <strong>Rating:</strong> {selectedFeedback.rating} ★
-                </p>
-                <p>
-                  <strong>Comment:</strong> {selectedFeedback.comment}
-                </p>
-                <p>
-                  <strong>Date:</strong> {selectedFeedback.feedbackDate}
-                </p>
-              </div>
-            </div>
-          </div>
+  <div className="modal-overlay" onClick={() => setSelectedFeedback(null)}>
+    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <button className="modal-close" onClick={() => setSelectedFeedback(null)}>
+        ×
+      </button>
+      <h3 className="modal-title">Feedback Details</h3>
+      <div className="response-details">
+        {/* Thông tin Feedback */}
+        <div className="feedback-section">
+          <h4>Feedback Information</h4>
+          <p>
+            <strong>Rating:</strong> {selectedFeedback.feedback.rating} ★
+          </p>
+          <p>
+            <strong>Comment:</strong> {selectedFeedback.feedback.comment}
+          </p>
+          <p>
+            <strong>Date:</strong> {selectedFeedback.feedback.feedbackDate}
+          </p>
         </div>
-      )}
 
+        {/* Thông tin Response (nếu có) */}
+        {selectedFeedback.relatedResponse && (
+          <div className="response-section">
+            <h4>Response Information</h4>
+            <p>
+              <strong>Date:</strong> {selectedFeedback.relatedResponse.responseDate || "N/A"}
+            </p>
+            <p>
+              <strong>Doctor:</strong> {selectedFeedback.relatedResponse.doctorName || "N/A"}
+            </p>
+            <p>
+              <strong>Status:</strong> {selectedFeedback.relatedResponse.status || "N/A"}
+            </p>
+            <p>
+              <strong>Follow-Up:</strong>{" "}
+              {selectedFeedback.relatedResponse.content?.followUp || "N/A"}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+)}
       {/* Modal: Thông báo success */}
       {showSuccessModal && (
         <div className="modal-overlay" onClick={() => setShowSuccessModal(false)}>
@@ -907,35 +861,4 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
     </div>
   );
 }
-
-// Card hiển thị mỗi response
-function ExpandableResponseCard({ response, request, onClick }) {
-  const combinedText = `Date: ${response.responseDate} | Doctor: ${
-    response.doctorName
-  } | Child: ${request?.childName || "N/A"} | Category: ${request?.category || "N/A"}`;
-  const truncatedText =
-    combinedText.length > 100 ? combinedText.slice(0, 100) + "..." : combinedText;
-
-  return (
-    <div className="consultation-response-card" onClick={() => onClick({ response, request })}>
-      <div className="response-header">
-        <span className="response-date">{response.responseDate}</span>
-        <span className="response-status">{response.status}</span>
-      </div>
-      <div className="response-summary">
-        <p>
-          <strong>Doctor:</strong> {response.doctorName}
-        </p>
-        <p>
-          <strong>Child:</strong> {request?.childName || "N/A"}
-        </p>
-        <p>
-          <strong>Category:</strong> {request?.category || "N/A"}
-        </p>
-      </div>
-      <div className="truncated-content">{truncatedText}</div>
-    </div>
-  );
-}
-
 export default DoctorConsultation;
