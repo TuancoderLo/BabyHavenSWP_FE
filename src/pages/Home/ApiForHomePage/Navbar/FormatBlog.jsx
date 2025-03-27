@@ -440,8 +440,8 @@ function FormatBlog() {
     }
 
     return (
-      <div className="blog-author-card">
-        <div className="author-image">
+      <div className="FormatBlog-blog-author-card">
+        <div className="FormatBlog-author-image">
           <img
             src={authorImage}
             alt={authorName}
@@ -452,66 +452,70 @@ function FormatBlog() {
             }}
           />
         </div>
-        <h3 className="author-name">{authorName}</h3>
+        <h3 className="FormatBlog-author-name">{authorName}</h3>
 
         {/* Luôn hiển thị phần degree, nhưng có thể trống */}
-        <div className="author-degree">{authorDegree}</div>
+        <div className="FormatBlog-author-degree">{authorDegree}</div>
 
         {/* Luôn hiển thị phần biography, nhưng có thể trống */}
-        <p className="author-bio">{authorBio}</p>
+        <p className="FormatBlog-author-bio">{authorBio}</p>
       </div>
     );
   };
 
   return (
-    <div className="blog-page">
+    <div className="FormatBlog-blog-page">
       {isLoggedIn ? <Header /> : <HeaderGuest />}
 
-      <div className="blog-navigation">
-        <div className="blog-navigation-container">
-          <button onClick={handleGoBack} className="back-button">
+      <div className="FormatBlog-blog-navigation">
+        <div className="FormatBlog-blog-navigation-container">
+          <button onClick={handleGoBack} className="FormatBlog-back-button">
             &larr; Back
           </button>
-          <div className="breadcrumbs">
+          <div className="FormatBlog-breadcrumbs">
             <span>Home</span> &gt;
             <span>{blog?.categoryName || "Category"}</span> &gt;
-            <span className="current-page">{blog?.title || "Blog"}</span>
+            <span className="FormatBlog-current-page">
+              {blog?.title || "Blog"}
+            </span>
           </div>
         </div>
       </div>
 
       {loading ? (
-        <div className="loading-container">
-          <div className="loading">Loading blogs...</div>
+        <div className="FormatBlog-loading-container">
+          <div className="FormatBlog-loading">Loading blogs...</div>
         </div>
       ) : error ? (
-        <div className="error-container">
-          <div className="error">{error}</div>
+        <div className="FormatBlog-error-container">
+          <div className="FormatBlog-error">{error}</div>
         </div>
       ) : blog ? (
-        <main className="blog-content-container">
-          <div className="blog-grid-layout">
+        <main className="FormatBlog-blog-content-container">
+          <div className="FormatBlog-blog-grid-layout">
             {/* Nội dung bài viết chính */}
-            <div className="blog-main-content">
-              <h1 className="blog-title">{blog.title}</h1>
+            <div className="FormatBlog-blog-main-content">
+              <h1 className="FormatBlog-blog-title">{blog.title}</h1>
 
-              <div className="blog-metadata">
-                <span className="blog-date">
+              <div className="FormatBlog-blog-metadata">
+                <span className="FormatBlog-blog-date">
                   {formatDate(blog.createdAt || blog.createdDate)}
                 </span>
-                <span className="blog-category">{blog.categoryName}</span>
+                <span className="FormatBlog-blog-category">
+                  {blog.categoryName}
+                </span>
               </div>
 
-              <div className="blog-tags">
+              <div className="FormatBlog-blog-tags">
                 {renderTags(blog.tags)?.map((tag, index) => (
-                  <span key={index} className="tag">
+                  <span key={index} className="FormatBlog-tag">
                     #{tag}
                   </span>
                 ))}
               </div>
 
               {blog.imageBlog && (
-                <div className="blog-featured-image">
+                <div className="FormatBlog-blog-featured-image">
                   <img
                     src={blog.imageBlog}
                     alt={blog.title}
@@ -524,26 +528,30 @@ function FormatBlog() {
                 </div>
               )}
 
-              <div className="blog-content">
+              <div className="FormatBlog-blog-content">
                 <div dangerouslySetInnerHTML={{ __html: blog.content }} />
               </div>
             </div>
 
             {/* Thông tin tác giả - luôn hiển thị bên phải */}
-            <div className="blog-author-sidebar">{renderAuthorInfo()}</div>
+            <div className="FormatBlog-blog-author-sidebar">
+              {renderAuthorInfo()}
+            </div>
 
             {/* Các bài viết liên quan - chiếm toàn bộ chiều rộng */}
             {relatedBlogs.length > 0 ? (
-              <div className="related-blogs-section">
-                <h2 className="related-blogs-title">Related Articles</h2>
-                <div className="related-blogs-grid">
+              <div className="FormatBlog-related-blogs-section">
+                <h2 className="FormatBlog-related-blogs-title">
+                  Related Articles
+                </h2>
+                <div className="FormatBlog-related-blogs-grid">
                   {relatedBlogs.map((relatedBlog, index) => (
                     <div
                       key={relatedBlog.blogId || relatedBlog.id || index}
-                      className="related-blog-card"
+                      className="FormatBlog-related-blog-card"
                       onClick={() => handleReadMore(relatedBlog)}
                     >
-                      <div className="related-blog-image">
+                      <div className="FormatBlog-related-blog-image">
                         <img
                           src={relatedBlog.imageBlog || DEFAULT_IMAGE}
                           alt={relatedBlog.title}
@@ -554,49 +562,54 @@ function FormatBlog() {
                           }}
                         />
                       </div>
-                      <div className="related-blog-content">
-                        <h3 className="related-blog-title">
+                      <div className="FormatBlog-related-blog-content">
+                        <h3 className="FormatBlog-related-blog-title">
                           {relatedBlog.title}
                         </h3>
-                        <div className="related-blog-info">
-                          <p className="related-blog-author">
+                        <div className="FormatBlog-related-blog-info">
+                          <p className="FormatBlog-related-blog-author">
                             {relatedBlog.name ||
                               relatedBlog.authorName ||
                               "Unknown"}
                           </p>
-                          <p className="related-blog-date">
+                          <p className="FormatBlog-related-blog-date">
                             {formatDate(
                               relatedBlog.createdAt || relatedBlog.createdDate
                             )}
                           </p>
                         </div>
                         {relatedBlog.tags && (
-                          <div className="related-blog-tags">
+                          <div className="FormatBlog-related-blog-tags">
                             {renderTags(relatedBlog.tags)
                               .slice(0, 2)
                               .map((tag, idx) => (
-                                <span key={idx} className="related-tag">
+                                <span
+                                  key={idx}
+                                  className="FormatBlog-related-tag"
+                                >
                                   #{tag}
                                 </span>
                               ))}
                           </div>
                         )}
-                        <button className="read-more-btn">Read More</button>
+                        <button className="FormatBlog-read-more-btn">
+                          Read More
+                        </button>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
             ) : (
-              <div className="no-related-blogs">
+              <div className="FormatBlog-no-related-blogs">
                 <p>No related articles</p>
               </div>
             )}
           </div>
         </main>
       ) : (
-        <div className="error-container">
-          <div className="error">Blog not found</div>
+        <div className="FormatBlog-error-container">
+          <div className="FormatBlog-error">Blog not found</div>
         </div>
       )}
 
@@ -606,3 +619,5 @@ function FormatBlog() {
 }
 
 export default FormatBlog;
+
+<div className="FormatBlog-error">Blog not found</div>;
