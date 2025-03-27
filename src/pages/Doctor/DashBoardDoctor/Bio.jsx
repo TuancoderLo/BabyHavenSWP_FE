@@ -250,15 +250,15 @@ const Bio = () => {
 
   if (loading && !editing) {
     return (
-      <div className="bio-loading-container">
+      <div className="BioIdDoctor-bio-loading-container">
         <Spin size="large" />
       </div>
     );
   }
 
   return (
-    <div className="bio-container">
-      <Title level={3} className="bio-title">
+    <div className="BioIdDoctor-bio-container">
+      <Title level={3} className="BioIdDoctor-bio-title">
         Personal Information
       </Title>
 
@@ -267,16 +267,16 @@ const Bio = () => {
         layout="vertical"
         onFinish={handleSave}
         initialValues={doctorData}
-        className="bio-form"
+        className="BioIdDoctor-bio-form"
       >
         <Row gutter={24}>
           <Col xs={24} md={8}>
-            <Card className="bio-card">
-              <div className="bio-avatar-upload">
+            <Card className="BioIdDoctor-bio-card">
+              <div className="BioIdDoctor-bio-avatar-upload">
                 <Upload
                   name="avatar"
                   listType="picture-card"
-                  className="avatar-uploader"
+                  className="BioIdDoctor-avatar-uploader"
                   showUploadList={false}
                   action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
                   beforeUpload={beforeUpload}
@@ -297,10 +297,10 @@ const Bio = () => {
                     uploadButton
                   )}
                 </Upload>
-                <Text strong className="bio-doctor-name">
+                <Text strong className="BioIdDoctor-bio-doctor-name">
                   {doctorData.name}
                 </Text>
-                <Text className="bio-doctor-specialization">
+                <Text className="BioIdDoctor-bio-doctor-specialization">
                   {doctorData.specializationName}
                 </Text>
               </div>
@@ -311,7 +311,7 @@ const Bio = () => {
                   icon={<EditOutlined />}
                   onClick={handleEdit}
                   block
-                  className="bio-edit-btn"
+                  className="BioIdDoctor-bio-edit-btn"
                 >
                   Edit
                 </Button>
@@ -320,7 +320,7 @@ const Bio = () => {
                   <Button
                     onClick={handleCancel}
                     block
-                    className="bio-cancel-btn"
+                    className="BioIdDoctor-bio-cancel-btn"
                   >
                     Cancel
                   </Button>
@@ -330,7 +330,7 @@ const Bio = () => {
                     htmlType="submit"
                     loading={loading}
                     block
-                    className="bio-save-btn"
+                    className="BioIdDoctor-bio-save-btn"
                   >
                     Save
                   </Button>
@@ -340,8 +340,8 @@ const Bio = () => {
           </Col>
 
           <Col xs={24} md={16}>
-            <Card className="bio-card">
-              <Title level={5} className="bio-section-title">
+            <Card className="BioIdDoctor-bio-card">
+              <Title level={5} className="BioIdDoctor-bio-section-title">
                 Basic Information
               </Title>
               <Row gutter={[16, 16]}>
@@ -439,7 +439,7 @@ const Bio = () => {
 
               <Divider />
 
-              <Title level={5} className="bio-section-title">
+              <Title level={5} className="BioIdDoctor-bio-section-title">
                 Professional Information
               </Title>
               <Row gutter={[16, 16]}>
