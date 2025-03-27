@@ -82,7 +82,7 @@ const Bio = () => {
           hospitalAddress: doctor.hospitalAddress || "",
           biography: doctor.biography || "",
           status: doctor.status || "",
-          dateOfBirth: null,
+          dateOfBirth: doctor.dateOfBirth ? moment(doctor.dateOfBirth) : null,
           profilePicture: "",
           specializationName: "",
           description: "",
@@ -105,7 +105,7 @@ const Bio = () => {
         setImageUrl("");
         form.setFieldsValue({
           ...combinedData,
-          dateOfBirth: null,
+          dateOfBirth: combinedData.dateOfBirth,
         });
       } catch (error) {
         message.error("An error occurred while loading doctor information!");
@@ -156,6 +156,9 @@ const Bio = () => {
         hospitalAddress: values.hospitalAddress,
         biography: values.biography,
         status: statusValue,
+        dateOfBirth: values.dateOfBirth
+          ? values.dateOfBirth.format("YYYY-MM-DD")
+          : null,
       };
 
       const specializationData = {
