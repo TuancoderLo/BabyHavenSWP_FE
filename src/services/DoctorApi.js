@@ -43,6 +43,21 @@ const doctorApi = {
     return response.data;
   },
 
+  getConsultationRequestsByDoctorOData: async (doctorId) => {
+    const query = `?$filter=doctorId eq ${doctorId}`;
+    const response = await api.get(`/ConsultationRequests/odata${query}`);
+    return response.data;
+  },
+
+  getConsultationRequestsByDoctorAndStatus: async (doctorId, status) => {
+    let filter = `?$filter=doctorId eq ${doctorId}`;
+    if (status) {
+      filter += ` and status eq '${status}'`;
+    }
+    const response = await api.get(`/ConsultationRequests/odata${filter}`);
+    return response.data;
+  },
+
   //Api doctorformember
   createConsultationRequest: async (data) => {
     const response = await api.post("/ConsultationRequests", data);
