@@ -149,64 +149,6 @@ const Members = () => {
     }
   };
 
-  const uploadImageToCloudinary = async (file) => {
-    setImageLoading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", "ml_default");
-    formData.append("cloud_name", "dk1fulaii");
-
-    try {
-      // Ghi log để debug
-      console.log("File being uploaded:", file.name, file.type, file.size);
-
-      // KHÔNG thiết lập header Content-Type để axios tự xử lý
-      const response = await axios.post(
-        "https://api.cloudinary.com/v1_1/dk1fulaii/image/upload",
-        formData
-      );
-
-      console.log("Cloudinary response:", response.data);
-      const url = response.data.secure_url;
-      setImageUrl(url);
-
-      return {
-        url: url,
-        // Không cần thiết chuyển đổi thành byte array ở client
-        // Backend có thể tải ảnh từ URL
-      };
-    } catch (error) {
-      console.error("Error uploading image to Cloudinary:", error);
-      if (error.response) {
-        console.error("Error response data:", error.response.data);
-      }
-      message.error(
-        "Không thể tải ảnh lên: " +
-          (error.response?.data?.error?.message || error.message)
-      );
-      return null;
-    } finally {
-      setImageLoading(false);
-    }
-  };
-
-  const fetchImageAsByteArray = async (imageUrl) => {
-    try {
-      const response = await fetch(imageUrl);
-      const imageBlob = await response.blob();
-      const reader = new FileReader();
-
-      return new Promise((resolve, reject) => {
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsArrayBuffer(imageBlob);
-      });
-    } catch (error) {
-      console.error("Error converting image to byte array:", error);
-      return null;
-    }
-  };
-
   const handleUserAccountSubmit = async (values) => {
     try {
       setLoading(true);
@@ -235,9 +177,10 @@ const Members = () => {
       };
 
       // Nếu có URL ảnh, thêm vào dữ liệu
-      if (imageUrl) {
+      // Đã comment để không sử dụng Cloudinary
+      /* if (imageUrl) {
         formattedData.profilePicture = imageUrl; // Chỉ gửi URL
-      }
+      } */
 
       if (editingUserAccount) {
         // Cập nhật tài khoản hiện có
@@ -257,7 +200,7 @@ const Members = () => {
       setUserAccountModalVisible(false);
       fetchUserAccounts();
       // Reset image state sau khi submit thành công
-      setImageUrl("");
+      // setImageUrl("");
     } catch (error) {
       console.error("Error saving user account:", error);
       message.error(error.message || "Could not save user account");
@@ -1113,14 +1056,15 @@ const Members = () => {
                   }
 
                   // Upload lên Cloudinary
-                  const result = await uploadImageToCloudinary(file);
+                  // Đã comment để không sử dụng Cloudinary
+                  /* const result = await uploadImageToCloudinary(file);
                   if (result) {
                     setImageUrl(result.url);
                     // Form.setFieldsValue là để cập nhật giá trị của form
                     userAccountForm.setFieldsValue({
                       profilePicture: result.url,
                     });
-                  }
+                  } */
                   return false; // Chặn upload mặc định của antd
                 }}
               >
