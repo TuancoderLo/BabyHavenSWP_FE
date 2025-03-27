@@ -13,7 +13,39 @@ const ForgetPassword = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [resetToken, setResetToken] = useState(""); // Thêm state để lưu trữ resetToken
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
+
+  // Hiển thị chỉ báo tiến trình (bước)
+  const renderStepsIndicator = () => {
+    return (
+      <div className="steps-indicator">
+        <div
+          className={`step-dot ${step >= 1 ? "active" : ""} ${
+            step > 1 ? "completed" : ""
+          }`}
+          title="Nhập email"
+        ></div>
+        <div
+          className={`step-dot ${step >= 2 ? "active" : ""} ${
+            step > 2 ? "completed" : ""
+          }`}
+          title="Xác thực OTP"
+        ></div>
+        <div
+          className={`step-dot ${step >= 3 ? "active" : ""} ${
+            step > 3 ? "completed" : ""
+          }`}
+          title="Đặt mật khẩu mới"
+        ></div>
+        <div
+          className={`step-dot ${step >= 4 ? "active" : ""}`}
+          title="Hoàn tất"
+        ></div>
+      </div>
+    );
+  };
 
   // Xử lý khi submit form nhập email
   const handleEmailSubmit = async (e) => {
@@ -177,6 +209,16 @@ const ForgetPassword = () => {
     navigate("/login");
   };
 
+  // Hàm toggle hiển thị mật khẩu
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  // Hàm toggle hiển thị mật khẩu xác nhận
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   return (
     <div className="forget-password-container">
       <div className="forget-password-card">
@@ -187,15 +229,16 @@ const ForgetPassword = () => {
           {step === 4 && "Hoàn tất"}
         </h2>
 
-        {error && <div className="error-message">{error}</div>}
+        {step < 4 && renderStepsIndicator()}
 
-        <div style={{ display: "none" }}>
-          {console.log("Current Step:", step)}
-        </div>
+        {error && <div className="error-message">{error}</div>}
 
         {/* Bước 1: Nhập email */}
         {step === 1 && (
-          <form onSubmit={handleEmailSubmit}>
+          <form onSubmit={handleEmailSubmit} className="form-transition">
+            <p className="instruction-text">
+              Nhập email của bạn để nhận mã OTP đặt lại mật khẩu.
+            </p>
             <div className="form-group">
               <label htmlFor="email">Email</label>
               <input
@@ -221,7 +264,13 @@ const ForgetPassword = () => {
                 className="primary-button"
                 disabled={isLoading}
               >
-                {isLoading ? "Đang xử lý..." : "Tiếp tục"}
+                {isLoading ? (
+                  <span>
+                    Đang xử lý <span className="loading-dots">...</span>
+                  </span>
+                ) : (
+                  "Tiếp tục"
+                )}
               </button>
             </div>
           </form>
@@ -229,9 +278,10 @@ const ForgetPassword = () => {
 
         {/* Bước 2: Nhập OTP */}
         {step === 2 && (
-          <form onSubmit={handleOtpSubmit}>
+          <form onSubmit={handleOtpSubmit} className="form-transition">
             <p className="instruction-text">
-              Mã OTP đã được gửi đến email của bạn để đặt lại mật khẩu.
+              Mã OTP đã được gửi đến email <strong>{email}</strong>. <br />
+              Vui lòng kiểm tra hộp thư đến và nhập mã xác thực.
             </p>
             <div className="form-group">
               <label htmlFor="otp">Mã OTP</label>
@@ -239,10 +289,11 @@ const ForgetPassword = () => {
                 type="text"
                 id="otp"
                 value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                placeholder="Nhập mã OTP 6 chữ số"
+                onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ""))}
+                placeholder="Nhập mã 6 chữ số"
                 maxLength={6}
                 required
+                autoComplete="off"
               />
             </div>
             <div className="button-group">
@@ -259,7 +310,13 @@ const ForgetPassword = () => {
                 className="primary-button"
                 disabled={isLoading}
               >
-                {isLoading ? "Đang xử lý..." : "Xác nhận"}
+                {isLoading ? (
+                  <span>
+                    Đang xử lý <span className="loading-dots">...</span>
+                  </span>
+                ) : (
+                  "Xác nhận"
+                )}
               </button>
             </div>
           </form>
@@ -267,28 +324,51 @@ const ForgetPassword = () => {
 
         {/* Bước 3: Đặt mật khẩu mới */}
         {step === 3 && (
-          <form onSubmit={handlePasswordSubmit}>
+          <form onSubmit={handlePasswordSubmit} className="form-transition">
+            <p className="instruction-text">
+              Tạo mật khẩu mới cho tài khoản của bạn.
+            </p>
             <div className="form-group">
               <label htmlFor="newPassword">Mật khẩu mới</label>
-              <input
-                type="password"
-                id="newPassword"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Nhập mật khẩu mới"
-                required
-              />
+              <div className="password-input-container">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="newPassword"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Tối thiểu 8 ký tự"
+                  required
+                />
+                <span
+                  className="password-toggle-icon"
+                  onClick={togglePasswordVisibility}
+                  title={showPassword ? "Ẩn mật khẩu" : "Hiển thị mật khẩu"}
+                >
+                  {showPassword ? "👁️" : "👁️‍🗨️"}
+                </span>
+              </div>
             </div>
             <div className="form-group">
               <label htmlFor="confirmPassword">Xác nhận mật khẩu</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Nhập lại mật khẩu mới"
-                required
-              />
+              <div className="password-input-container">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  id="confirmPassword"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Nhập lại mật khẩu mới"
+                  required
+                />
+                <span
+                  className="password-toggle-icon"
+                  onClick={toggleConfirmPasswordVisibility}
+                  title={
+                    showConfirmPassword ? "Ẩn mật khẩu" : "Hiển thị mật khẩu"
+                  }
+                >
+                  {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
+                </span>
+              </div>
             </div>
             <div className="button-group">
               <button
@@ -304,7 +384,13 @@ const ForgetPassword = () => {
                 className="primary-button"
                 disabled={isLoading}
               >
-                {isLoading ? "Đang xử lý..." : "Xác nhận"}
+                {isLoading ? (
+                  <span>
+                    Đang xử lý <span className="loading-dots">...</span>
+                  </span>
+                ) : (
+                  "Xác nhận"
+                )}
               </button>
             </div>
           </form>
@@ -312,7 +398,7 @@ const ForgetPassword = () => {
 
         {/* Bước 4: Hoàn tất */}
         {step === 4 && (
-          <div className="success-container">
+          <div className="success-container form-transition">
             <div className="success-icon">✓</div>
             <p className="success-message">
               Đặt lại mật khẩu thành công! Bạn có thể đăng nhập bằng mật khẩu
