@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import PropTypes from "prop-types";
 import "react-datepicker/dist/react-datepicker.css";
 import childApi from "../../../../services/childApi";
+import alertApi from "../../../../services/alertApi"; // Thêm import alertApi
 import "./AddRecord.css";
 import calculateBMI from "../../../../services/bmiUtils";
 import BabyGrowth from "../../../../assets/baby_growth.png";
@@ -91,7 +92,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
   const [errors, setErrors] = useState({});
   const [currentStep, setCurrentStep] = useState(1);
 
-  // Thêm hàm validateForm để kiểm tra ngay khi người dùng nhập weight và height
   const validateForm = useCallback(
     (form = growthForm) => {
       let formErrors = {};
@@ -107,13 +107,12 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     [currentStep, growthForm, child.dateOfBirth]
   );
 
-  // Thêm hàm handleChange để áp dụng cho weight và height
   const handleChange = useCallback(
     (e) => {
       const { name, value } = e.target;
       setGrowthForm((prev) => {
         const updatedForm = { ...prev, [name]: value };
-        validateForm(updatedForm); // Gọi validation ngay khi nhập
+        validateForm(updatedForm);
         return updatedForm;
       });
     },
@@ -178,6 +177,15 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
       };
       const growthRes = await childApi.createGrowthRecord(growthPayload);
       console.log("Growth record created:", growthRes.data);
+
+      // Sau khi tạo record thành công, gọi alertApi.getAlert để tạo và lấy alert
+      try {
+        const alertRes = await alertApi.getAlert(child.name, child.dateOfBirth, memberId);
+        console.log("Alert created and fetched:", alertRes.data);
+      } catch (alertErr) {
+        console.error("Error creating/fetching alert:", alertErr);
+      }
+
       return true;
     } catch (err) {
       console.error("Error saving growth record:", err);
@@ -260,8 +268,8 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                   type="number"
                   name="weight"
                   value={growthForm.weight}
-                  onChange={handleChange} // Sử dụng handleChange để hiển thị cảnh báo ngay
-                  className={errors.weight ? "warning-input" : ""} // Sử dụng warning-input
+                  onChange={handleChange}
+                  className={errors.weight ? "warning-input" : ""}
                   min="0"
                   onKeyDown={(e) => {
                     if (e.key === "-" || e.key === "e") e.preventDefault();
@@ -275,8 +283,8 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                   type="number"
                   name="height"
                   value={growthForm.height}
-                  onChange={handleChange} // Sử dụng handleChange để hiển thị cảnh báo ngay
-                  className={errors.height ? "warning-input" : ""} // Sử dụng warning-input
+                  onChange={handleChange}
+                  className={errors.height ? "warning-input" : ""}
                   min="0"
                   onKeyDown={(e) => {
                     if (e.key === "-" || e.key === "e") e.preventDefault();
@@ -479,11 +487,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
             </div>
           </div>
           <div className="step-buttons">
-            <button
-              type="button"
-              className="previous-btn"
-              onClick={handlePrevious}
-            >
+            <button type="button" className="previous-btn" onClick={handlePrevious}>
               Previous
             </button>
             <button
@@ -757,11 +761,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
             </div>
           </div>
           <div className="step-buttons">
-            <button
-              type="button"
-              className="previous-btn"
-              onClick={handlePrevious}
-            >
+            <button type="button" className="previous-btn" onClick={handlePrevious}>
               Previous
             </button>
             <button
