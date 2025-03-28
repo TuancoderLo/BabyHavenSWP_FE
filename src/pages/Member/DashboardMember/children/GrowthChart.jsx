@@ -266,7 +266,7 @@ const GrowthChart = ({
         const allRecords = data.flatMap((monthData) => monthData.records);
 
         return (
-          <ResponsiveContainer width="100%" height={350}>
+          <ResponsiveContainer width="100%" height={320}>
             <LineChart
               data={data}
               margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
