@@ -553,7 +553,13 @@ function ChildrenPage() {
           </div>
 
           <div className="alert-item-section">
-            <Alert alert={latestAlert} alerts={alerts} />
+            <Alert
+              alert={latestAlert}
+              alerts={alerts}
+              member={{ memberId: memberId, name: localStorage.getItem("name"), email: localStorage.getItem("name") }}
+              child={selectedChild}
+              growthRecords={growthRecords}
+            />
           </div>
 
           <div className="growth-chart-section">

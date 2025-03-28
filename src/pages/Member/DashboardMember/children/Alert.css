@@ -168,6 +168,21 @@
 .alert-history-item.danger {
   color: #c62828;
 }
+
+.export-pdf-btn {
+  margin-top: 20px;
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.export-pdf-btn:hover {
+  background-color: #45a049;
+}
   
   /* Responsive Adjustments */
   @media (max-width: 768px) {
