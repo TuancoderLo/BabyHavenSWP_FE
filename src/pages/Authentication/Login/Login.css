@@ -65,6 +65,7 @@ html {
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 1;
 }
 
 .LoginHome-auth-image img {
@@ -72,6 +73,20 @@ html {
   height: 100%;
   object-fit: cover;
   object-position: center;
+  filter: none;
+}
+
+/* Chỉ sử dụng overlay với độ đậm 15% */
+.LoginHome-auth-left::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.15); /* Chỉ sử dụng overlay 15% */
+  z-index: 2;
+  pointer-events: none;
 }
 
 .LoginHome-home-link {
