@@ -20,8 +20,12 @@ function ExpandableResponseCard({ response, request, onClick }) {
         <span className="response-status">{response.status}</span>
       </div>
       <div className="response-summary">
-        <p><strong>Doctor:</strong> {response.doctorName}</p>
-        <p><strong>Child:</strong> {request?.childName || "N/A"}</p>
+        <p>
+          <strong>Doctor:</strong> {response.doctorName}
+        </p>
+        <p>
+          <strong>Child:</strong> {request?.childName || "N/A"}
+        </p>
       </div>
       <div className="truncated-content">{truncatedText}</div>
     </div>
@@ -32,7 +36,8 @@ function ExpandableResponseCard({ response, request, onClick }) {
 function ExpandableSentRequestCard({ request, onClick }) {
   const truncatedText =
     `ID: ${request.requestId} | Child: ${request.childName} | ` +
-    `Date: ${request.requestDate} | Description: ${request.description}`.slice(0, 50) + "...";
+    `Date: ${request.requestDate} | Description: ${request.description}`
+      .slice(0, 50) + "...";
   return (
     <div className="consultation-sent-card" onClick={() => onClick(request)}>
       <div className="sent-header">
@@ -54,9 +59,12 @@ function ExpandableSentRequestCard({ request, onClick }) {
 function ExpandableFeedbackEntry({ feedback, onClick, consultationResponses, consultationRequests }) {
   const truncatedText = `Rating: ${feedback.rating} stars`.slice(0, 100) + "...";
 
+  // Tìm Response tương ứng với feedback.responseId
   const relatedResponse = consultationResponses.find(
     (resp) => resp.responseId === feedback.responseId
   );
+
+  // Tìm Request tương ứng với response.requestId (nếu có relatedResponse)
   const relatedRequest = relatedResponse ? consultationRequests[relatedResponse.requestId] : null;
 
   return (
@@ -69,7 +77,9 @@ function ExpandableFeedbackEntry({ feedback, onClick, consultationResponses, con
         <span className="feedback-rating">{feedback.rating} ★</span>
       </div>
       <div className="feedback-summary">
-        <p><strong>Comment:</strong> {feedback.comment.slice(0, 50)}...</p>
+        <p>
+          <strong>Comment:</strong> {feedback.comment.slice(0, 50)}...
+        </p>
       </div>
       <div className="truncated-content">{truncatedText}</div>
     </div>
@@ -93,18 +103,23 @@ function DoctorConsultation() {
 
   const steps = ["Enter Information", "Select Doctor", "Confirm"];
 
+  // Dữ liệu phản hồi
   const [consultationResponses, setConsultationResponses] = useState([]);
   const [consultationRequests, setConsultationRequests] = useState({});
   const [sentRequests, setSentRequests] = useState([]);
+
+  // Quản lý modal / phản hồi / feedback
   const [selectedResponse, setSelectedResponse] = useState(null);
   const [selectedSentRequest, setSelectedSentRequest] = useState(null);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedbackSubmitError, setFeedbackSubmitError] = useState("");
+
   const [userFeedback, setUserFeedback] = useState([]);
   const [currentTab, setCurrentTab] = useState("responses");
 
@@ -117,6 +132,7 @@ function DoctorConsultation() {
   }, []);
 
   useEffect(() => {
+    // Mỗi lần chọn response khác => reset form feedback
     setShowFeedbackForm(false);
     setRating(0);
     setComment("");
@@ -124,6 +140,7 @@ function DoctorConsultation() {
     setFeedbackSubmitError("");
   }, [selectedResponse]);
 
+  // Lấy danh sách trẻ
   const fetchChildren = async () => {
     try {
       setLoading(true);
@@ -147,6 +164,7 @@ function DoctorConsultation() {
     }
   };
 
+  // Lấy danh sách bác sĩ
   const fetchDoctors = async () => {
     try {
       const response = await doctorApi.getAllDoctors();
@@ -159,6 +177,7 @@ function DoctorConsultation() {
     }
   };
 
+  // Lấy chuyên môn của bác sĩ
   const fetchDoctorSpecializations = async (doctorId) => {
     try {
       const response = await doctorApi.getDoctorSpecializations(doctorId);
@@ -173,6 +192,7 @@ function DoctorConsultation() {
     }
   };
 
+  // Giúp parse content JSON hoặc text
   const parseContentToObject = (content) => {
     try {
       return JSON.parse(content);
@@ -187,18 +207,22 @@ function DoctorConsultation() {
     }
   };
 
+  // Lấy danh sách phản hồi (ConsultationResponses) của Member
   const fetchConsultationResponses = async () => {
     try {
       const memberId = localStorage.getItem("memberId");
       if (!memberId) throw new Error("Please login to fetch consultation responses");
       const res = await doctorApi.getConsultationResponses(memberId);
       let responses = Array.isArray(res?.data) ? res.data : [res.data];
+      console.log("Consultation Responses:", responses);
+      // Parse nội dung JSON
       const parsedResponses = responses.map((item) => ({
         ...item,
         content: typeof item.content === "string" ? parseContentToObject(item.content) : item.content,
       }));
       setConsultationResponses(parsedResponses);
 
+      // Lấy chi tiết Request cho mỗi Response
       const requests = {};
       for (const response of parsedResponses) {
         if (response.requestId) {
@@ -212,15 +236,13 @@ function DoctorConsultation() {
     }
   };
 
+  // Lấy danh sách request đã gửi
   const fetchSentRequests = async () => {
     try {
       const memberId = localStorage.getItem("memberId");
       const res = await doctorApi.getConsultationRequestsByMemberId(memberId);
-      const requestsData = Array.isArray(res.value)
-        ? res.data.value
-        : Array.isArray(res.data)
-        ? res.data
-        : [];
+      const requestsData = Array.isArray(res.value) 
+        ? res.data.value : Array.isArray(res.data) ? res.data : [];
       setSentRequests(requestsData);
     } catch (error) {
       console.error("Error fetching sent requests:", error);
@@ -228,6 +250,7 @@ function DoctorConsultation() {
     }
   };
 
+  // Lấy feedback của người dùng
   const fetchUserFeedback = async () => {
     try {
       const userId = localStorage.getItem("userId");
@@ -245,10 +268,14 @@ function DoctorConsultation() {
     }
   };
 
+  // Chọn child
   const handleChildSelect = (child) => setSelectedChild(child);
+
+  // Chuyển step
   const handleNextStep = () => currentStep < steps.length - 1 && setCurrentStep(currentStep + 1);
   const handleBackStep = () => currentStep > 0 && setCurrentStep(currentStep - 1);
 
+  // Loại bỏ tag HTML
   const stripHtml = (html) => {
     const tmp = document.createElement("div");
     tmp.innerHTML = html;
@@ -264,7 +291,7 @@ function DoctorConsultation() {
   // Thêm từ branch Tu: Logic download file
   const downloadAttachment = (attachment) => {
     try {
-      const { FileName, Content, MimeType } = attachment; // Sửa đổi để khớp với cấu trúc dữ liệu thực tế
+      const { FileName, Content, MimeType } = attachment;
       const byteCharacters = atob(Content);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
@@ -285,6 +312,7 @@ function DoctorConsultation() {
     }
   };
 
+  // Gửi request mới => status = Pending
   const handleSubmit = async () => {
     try {
       setSubmitLoading(true);
@@ -328,7 +356,7 @@ function DoctorConsultation() {
         category: "Health",
         urgency: "Medium",
         description: plainDescription,
-        attachments, // Thêm attachments vào payload
+        attachments,
       };
 
       await doctorApi.createConsultationRequest(payload);
@@ -336,10 +364,11 @@ function DoctorConsultation() {
       await fetchSentRequests();
       setShowSuccessModal(true);
 
+      // Reset form
       setCurrentStep(0);
       setConsultationContent("");
       setSelectedDoctor(null);
-      setSelectedFiles([]); // Reset file
+      setSelectedFiles([]);
     } catch (error) {
       setSubmitError(
         error.response?.data?.title || error.message || "Unable to send consultation request"
@@ -349,6 +378,7 @@ function DoctorConsultation() {
     }
   };
 
+  // Thành viên đánh giá + cập nhật status response => Completed
   const handleSubmitFeedbackAndUpdateStatus = async () => {
     try {
       setIsSubmitting(true);
@@ -356,12 +386,21 @@ function DoctorConsultation() {
       const userId = localStorage.getItem("userId");
       if (!userId) throw new Error("Please login to submit feedback");
 
+      // Lấy sẵn responseId từ selectedResponse
       const responseId = selectedResponse?.response?.responseId;
-      if (!responseId) throw new Error("No response ID found in selectedResponse!");
+      if (!responseId) {
+        throw new Error("No response ID found in selectedResponse!");
+      }
 
-      if (rating < 1 || rating > 5) throw new Error("Please select a rating");
-      if (!comment.trim()) throw new Error("Comment cannot be empty");
+      // Kiểm tra rating & comment
+      if (rating < 1 || rating > 5) {
+        throw new Error("Please select a rating");
+      }
+      if (!comment.trim()) {
+        throw new Error("Comment cannot be empty");
+      }
 
+      // Tạo payload gửi lên API
       const feedbackDate = new Date().toISOString();
       const payload = {
         userId,
@@ -373,12 +412,17 @@ function DoctorConsultation() {
         status: 0,
       };
 
+      // Gửi feedback
       await doctorApi.createRatingFeedback(payload);
+
+      // Cập nhật status của Response => "Completed"
       await doctorApi.updateConsultationResponseStatus(responseId, "Completed");
 
+      // Làm mới danh sách Responses & Feedback
       await fetchConsultationResponses();
       await fetchUserFeedback();
 
+      // Đóng form feedback
       setShowFeedbackForm(false);
     } catch (error) {
       setFeedbackSubmitError(error.message || "Unable to submit feedback");
@@ -387,6 +431,7 @@ function DoctorConsultation() {
     }
   };
 
+  // Render nội dung form theo bước
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
@@ -394,6 +439,7 @@ function DoctorConsultation() {
           <div className="doctor-consultation-form">
             <h3 className="doctor-section-title">Enter Consultation Information</h3>
             <div className="form-container">
+              {/* Chọn child */}
               <div className="input-group">
                 <label htmlFor="child-select">Select Child</label>
                 {loading ? (
@@ -449,6 +495,7 @@ function DoctorConsultation() {
               </div>
             </div>
 
+            {/* Nội dung mô tả (TextEditor) */}
             <div className="editor-wrapper">
               <TextEditor value={consultationContent} onChange={setConsultationContent} />
             </div>
@@ -574,6 +621,7 @@ function DoctorConsultation() {
     }
   };
 
+  // Render nội dung của các tab (History)
   const renderTabContent = () => {
     switch (currentTab) {
       case "responses":
@@ -626,6 +674,7 @@ function DoctorConsultation() {
   return (
     <div className="doctor-consultation">
       <div className="doctor-grid-container">
+        {/* Cột gửi yêu cầu */}
         <main className="doctor-request-column">
           <div className="doctor-request">
             <div className="doctor-steps">
@@ -659,6 +708,7 @@ function DoctorConsultation() {
           </div>
         </main>
 
+        {/* Cột History */}
         <aside className="doctor-response-column">
           <h3 className="section-title">History</h3>
           <div className="tab-container">
@@ -685,6 +735,7 @@ function DoctorConsultation() {
         </aside>
       </div>
 
+      {/* Modal: Xem chi tiết Response */}
       {selectedResponse && (
         <div className="modal-overlay" onClick={() => setSelectedResponse(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -704,10 +755,18 @@ function DoctorConsultation() {
                 <h4>Request Information</h4>
                 {selectedResponse.request ? (
                   <>
-                    <p><strong>Member:</strong> {selectedResponse.request.memberName}</p>
-                    <p><strong>Child:</strong> {selectedResponse.request.childName}</p>
-                    <p><strong>Description:</strong> {selectedResponse.request.description}</p>
-                    <p><strong>Request Date:</strong> {selectedResponse.request.requestDate}</p>
+                    <p>
+                      <strong>Member:</strong> {selectedResponse.request.memberName}
+                    </p>
+                    <p>
+                      <strong>Child:</strong> {selectedResponse.request.childName}
+                    </p>
+                    <p>
+                      <strong>Description:</strong> {selectedResponse.request.description}
+                    </p>
+                    <p>
+                      <strong>Request Date:</strong> {selectedResponse.request.requestDate}
+                    </p>
                   </>
                 ) : (
                   <p>No request details available.</p>
@@ -715,9 +774,15 @@ function DoctorConsultation() {
               </div>
               <div className="response-section">
                 <h4>Response Information</h4>
-                <p><strong>Date:</strong> {selectedResponse.response.responseDate}</p>
-                <p><strong>Doctor:</strong> {selectedResponse.response.doctorName}</p>
-                <p><strong>Status:</strong> {selectedResponse.response.status}</p>
+                <p>
+                  <strong>Date:</strong> {selectedResponse.response.responseDate}
+                </p>
+                <p>
+                  <strong>Doctor:</strong> {selectedResponse.response.doctorName}
+                </p>
+                <p>
+                  <strong>Status:</strong> {selectedResponse.response.status}
+                </p>
                 <p>
                   <strong>Follow-Up:</strong>{" "}
                   {selectedResponse.response.content.followUp || "N/A"}
@@ -765,6 +830,7 @@ function DoctorConsultation() {
         </div>
       )}
 
+      {/* Modal: Xem chi tiết Sent Request */}
       {selectedSentRequest && (
         <div className="modal-overlay" onClick={() => setSelectedSentRequest(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -775,13 +841,27 @@ function DoctorConsultation() {
             <div className="response-details">
               <div className="request-section">
                 <h4>Request Information</h4>
-                <p><strong>ID:</strong> {selectedSentRequest.requestId}</p>
-                <p><strong>Child:</strong> {selectedSentRequest.childName}</p>
-                <p><strong>Category:</strong> {selectedSentRequest.category}</p>
-                <p><strong>Urgency:</strong> {selectedSentRequest.urgency}</p>
-                <p><strong>Description:</strong> {selectedSentRequest.description}</p>
-                <p><strong>Date:</strong> {selectedSentRequest.requestDate}</p>
-                <p><strong>Status:</strong> {selectedSentRequest.status}</p>
+                <p>
+                  <strong>ID:</strong> {selectedSentRequest.requestId}
+                </p>
+                <p>
+                  <strong>Child:</strong> {selectedSentRequest.childName}
+                </p>
+                <p>
+                  <strong>Category:</strong> {selectedSentRequest.category}
+                </p>
+                <p>
+                  <strong>Urgency:</strong> {selectedSentRequest.urgency}
+                </p>
+                <p>
+                  <strong>Description:</strong> {selectedSentRequest.description}
+                </p>
+                <p>
+                  <strong>Date:</strong> {selectedSentRequest.requestDate}
+                </p>
+                <p>
+                  <strong>Status:</strong> {selectedSentRequest.status}
+                </p>
                 {selectedSentRequest.attachments && (
                   <div>
                     <h4>Attachments</h4>
@@ -804,6 +884,7 @@ function DoctorConsultation() {
         </div>
       )}
 
+      {/* Modal: Xem chi tiết Feedback */}
       {selectedFeedback && (
         <div className="modal-overlay" onClick={() => setSelectedFeedback(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -812,12 +893,21 @@ function DoctorConsultation() {
             </button>
             <h3 className="modal-title">Feedback Details</h3>
             <div className="response-details">
+              {/* Thông tin Feedback */}
               <div className="feedback-section">
                 <h4>Feedback Information</h4>
-                <p><strong>Rating:</strong> {selectedFeedback.feedback.rating} ★</p>
-                <p><strong>Comment:</strong> {selectedFeedback.feedback.comment}</p>
-                <p><strong>Date:</strong> {selectedFeedback.feedback.feedbackDate}</p>
+                <p>
+                  <strong>Rating:</strong> {selectedFeedback.feedback.rating} ★
+                </p>
+                <p>
+                  <strong>Comment:</strong> {selectedFeedback.feedback.comment}
+                </p>
+                <p>
+                  <strong>Date:</strong> {selectedFeedback.feedback.feedbackDate}
+                </p>
               </div>
+
+              {/* Thông tin Response (nếu có) */}
               {selectedFeedback.relatedResponse && (
                 <div className="response-section">
                   <h4>Response Information</h4>
@@ -841,6 +931,7 @@ function DoctorConsultation() {
         </div>
       )}
 
+      {/* Modal: Thông báo success */}
       {showSuccessModal && (
         <div className="modal-overlay" onClick={() => setShowSuccessModal(false)}>
           <div className="success-modal-content" onClick={(e) => e.stopPropagation()}>
