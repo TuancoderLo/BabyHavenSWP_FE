@@ -61,10 +61,16 @@ const Consultations = () => {
       fetchConsultations();
     }
   }, [activeTab]);
-  
+
   useEffect(() => {
     applyFilters();
-  }, [searchText, historyFilterStatus, historyFilterRating, consultations, onGoingConsultations]);
+  }, [
+    searchText,
+    historyFilterStatus,
+    historyFilterRating,
+    consultations,
+    onGoingConsultations,
+  ]);
 
   const fetchConsultations = async () => {
     setLoading(true);
@@ -75,25 +81,42 @@ const Consultations = () => {
         return;
       }
 
-      const response = await doctorApi.getConsultationRequestsByDoctorOData(doctorId);
+      const response = await doctorApi.getConsultationRequestsByDoctorOData(
+        doctorId
+      );
       const requests = Array.isArray(response) ? response : response.data;
 
       const detailedRequests = await Promise.all(
         requests.map(async (request) => {
           try {
-            const detailedResponse = await doctorApi.getConsultationRequestsById(request.requestId);
+            const detailedResponse =
+              await doctorApi.getConsultationRequestsById(request.requestId);
             const detailedData = detailedResponse.data;
             const responses = await doctorApi.getConsultationResponsesOData(
               `?$filter=requestId eq ${request.requestId}`
             );
             const latestResponse = responses.data[0] || {};
+
+            // Lấy rating từ API RatingFeedback nếu có response
+            let rating = 0;
+            if (latestResponse.responseId) {
+              const feedbackResponse =
+                await doctorApi.getRatingFeedbackByResponseId(
+                  latestResponse.responseId
+                );
+              const feedbackData = feedbackResponse.data[0] || {};
+              rating = feedbackData.rating || 0;
+            }
+
             return {
               id: request.requestId,
               requestId: request.requestId,
               parentName: detailedData.memberName || "N/A",
               parentAvatar: "https://randomuser.me/api/portraits/women/32.jpg",
               childName: detailedData.childName || "N/A",
-              childAge: detailedData.child?.age ? `${detailedData.child.age} tuổi` : "N/A",
+              childAge: detailedData.child?.age
+                ? `${detailedData.child.age} tuổi`
+                : "N/A",
               childGender: detailedData.child?.gender || "N/A",
               childAllergies: detailedData.child?.allergies || "None",
               childNotes: detailedData.child?.notes || "None",
@@ -107,11 +130,17 @@ const Consultations = () => {
               createdAt: detailedData.createdAt || moment().format(),
               updatedAt: detailedData.updatedAt || moment().format(),
               response: latestResponse.content || "",
-              rating: latestResponse.rating || 0,
-              completedDate: detailedData.status === "Completed" ? detailedData.updatedAt : null,
+              rating: rating, // Sử dụng rating từ API RatingFeedback thay vì latestResponse.rating
+              completedDate:
+                detailedData.status === "Completed"
+                  ? detailedData.updatedAt
+                  : null,
             };
           } catch (error) {
-            console.error(`Error fetching details for request ${request.requestId}:`, error);
+            console.error(
+              `Error fetching details for request ${request.requestId}:`,
+              error
+            );
             return null;
           }
         })
@@ -127,80 +156,97 @@ const Consultations = () => {
     }
   };
 
- const fetchOnGoingConsultations = async () => {
-  setLoading(true);
-  try {
-    const doctorId = localStorage.getItem("doctorId");
-    if (!doctorId) {
-      message.error("Doctor ID not found in localStorage!");
-      return;
-    }
+  const fetchOnGoingConsultations = async () => {
+    setLoading(true);
+    try {
+      const doctorId = localStorage.getItem("doctorId");
+      if (!doctorId) {
+        message.error("Doctor ID not found in localStorage!");
+        return;
+      }
 
-    const requests = await doctorApi.getConsultationRequestsByDoctorAndStatus(doctorId, "Approved");
-    console.log("Requests from API for Ongoing:", requests);
+      const requests = await doctorApi.getConsultationRequestsByDoctorAndStatus(
+        doctorId,
+        "Approved"
+      );
+      console.log("Requests from API for Ongoing:", requests);
 
-    const detailedRequests = await Promise.all(
-      requests.map(async (request) => {
-        try {
-          const detailedResponse = await doctorApi.getConsultationRequestsById(request.requestId);
-          const detailedData = detailedResponse.data;
-          console.log("Detailed data for request:", detailedData);
+      const detailedRequests = await Promise.all(
+        requests.map(async (request) => {
+          try {
+            const detailedResponse =
+              await doctorApi.getConsultationRequestsById(request.requestId);
+            const detailedData = detailedResponse.data;
+            console.log("Detailed data for request:", detailedData);
 
-          if (detailedData.status !== "Approved") {
-            console.warn(`Request ${request.requestId} has status ${detailedData.status}, skipping...`);
+            if (detailedData.status !== "Approved") {
+              console.warn(
+                `Request ${request.requestId} has status ${detailedData.status}, skipping...`
+              );
+              return null;
+            }
+
+            const responses = await doctorApi.getConsultationResponsesOData(
+              `?$filter=requestId eq ${request.requestId}`
+            );
+            const latestResponse = responses.data[0] || {};
+
+            // Lấy rating từ API RatingFeedback nếu có response
+            let rating = 0;
+            if (latestResponse.responseId) {
+              const feedbackResponse =
+                await doctorApi.getRatingFeedbackByResponseId(
+                  latestResponse.responseId
+                );
+              const feedbackData = feedbackResponse.data[0] || {};
+              rating = feedbackData.rating || 0;
+            }
+
+            return {
+              id: request.requestId,
+              requestId: request.requestId,
+              parentName: detailedData.memberName || "N/A",
+              parentAvatar: "https://randomuser.me/api/portraits/women/32.jpg",
+              childName: detailedData.childName || "N/A",
+              childAge: detailedData.child?.age
+                ? `${detailedData.child.age} tuổi`
+                : "N/A",
+              childGender: detailedData.child?.gender || "N/A",
+              childAllergies: detailedData.child?.allergies || "None",
+              childNotes: detailedData.child?.notes || "None",
+              childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
+              requestDate: detailedData.requestDate || moment().format(),
+              description: detailedData.description || "N/A",
+              status: detailedData.status,
+              response: latestResponse.content || "",
+              rating: rating, // Sử dụng rating từ API RatingFeedback
+              createdAt: detailedData.createdAt || moment().format(),
+              updatedAt: detailedData.updatedAt || moment().format(),
+              completedDate:
+                detailedData.status === "Completed"
+                  ? detailedData.updatedAt
+                  : null,
+            };
+          } catch (error) {
+            console.error(
+              `Error fetching details for request ${request.requestId}:`,
+              error
+            );
             return null;
           }
+        })
+      );
 
-          const responses = await doctorApi.getConsultationResponsesOData(
-            `?$filter=requestId eq ${request.requestId}`
-          );
-          const latestResponse = responses.data[0] || {};
-
-          // Lấy rating từ API RatingFeedback nếu có response
-          let rating = 0;
-          if (latestResponse.responseId) {
-            const feedbackResponse = await doctorApi.getRatingFeedbackByResponseId(latestResponse.responseId);
-            const feedbackData = feedbackResponse.data[0] || {};
-            rating = feedbackData.rating || 0;
-          }
-
-          return {
-            id: request.requestId,
-            requestId: request.requestId,
-            parentName: detailedData.memberName || "N/A",
-            parentAvatar: "https://randomuser.me/api/portraits/women/32.jpg",
-            childName: detailedData.childName || "N/A",
-            childAge: detailedData.child?.age ? `${detailedData.child.age} tuổi` : "N/A",
-            childGender: detailedData.child?.gender || "N/A",
-            childAllergies: detailedData.child?.allergies || "None",
-            childNotes: detailedData.child?.notes || "None",
-            childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
-            requestDate: detailedData.requestDate || moment().format(),
-            description: detailedData.description || "N/A",
-            status: detailedData.status,
-            response: latestResponse.content || "",
-            rating: rating, // Sử dụng rating từ API RatingFeedback
-            createdAt: detailedData.createdAt || moment().format(),
-            updatedAt: detailedData.updatedAt || moment().format(),
-            completedDate: detailedData.status === "Completed" ? detailedData.updatedAt : null,
-          };
-        } catch (error) {
-          console.error(`Error fetching details for request ${request.requestId}:`, error);
-          return null;
-        }
-      })
-    );
-
-    const mappedData = detailedRequests.filter((request) => request !== null);
-    console.log("Mapped Ongoing Consultations:", mappedData);
-    setOnGoingConsultations(mappedData);
-  } catch (error) {
-    message.error("Failed to fetch ongoing consultations!");
-    console.error("Error fetching ongoing consultations:", error);
-  } finally {
-    setLoading(false);
-  }
-};
+      const mappedData = detailedRequests.filter((request) => request !== null);
+      console.log("Mapped Ongoing Consultations:", mappedData);
+      setOnGoingConsultations(mappedData);
+    } catch (error) {
+      message.error("Failed to fetch ongoing consultations!");
+      console.error("Error fetching ongoing consultations:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const applyFilters = () => {
     let data = [];
@@ -222,7 +268,8 @@ const Consultations = () => {
             item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
             item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
             item.description.toLowerCase().includes(searchText.toLowerCase()) ||
-            (item.response && item.response.toLowerCase().includes(searchText.toLowerCase()))
+            (item.response &&
+              item.response.toLowerCase().includes(searchText.toLowerCase()))
         );
       }
     } else if (activeTab === "history") {
@@ -231,7 +278,9 @@ const Consultations = () => {
         data = data.filter((item) => item.status === historyFilterStatus);
       }
       if (historyFilterRating) {
-        data = data.filter((item) => item.rating.toString() === historyFilterRating);
+        data = data.filter(
+          (item) => item.rating.toString() === historyFilterRating
+        );
       }
       if (searchText) {
         data = data.filter(
@@ -239,7 +288,8 @@ const Consultations = () => {
             item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
             item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
             item.description.toLowerCase().includes(searchText.toLowerCase()) ||
-            (item.response && item.response.toLowerCase().includes(searchText.toLowerCase()))
+            (item.response &&
+              item.response.toLowerCase().includes(searchText.toLowerCase()))
         );
       }
     } else {
@@ -275,7 +325,12 @@ const Consultations = () => {
   const handleResponseSubmit = async (values) => {
     setLoading(true);
     try {
-      const statusMapForResponse = { approved: 1, rejected: 2, pending: 0, completed: 3 };
+      const statusMapForResponse = {
+        approved: 1,
+        rejected: 2,
+        pending: 0,
+        completed: 3,
+      };
       const statusMapForRequest = {
         approved: "Approved",
         rejected: "Rejected",
@@ -285,7 +340,7 @@ const Consultations = () => {
 
       const numericStatus = statusMapForResponse[values.action];
       const stringStatus = statusMapForRequest[values.action];
-      
+
       const responsePayload = {
         requestId: selectedConsultation.requestId,
         content: values.response,
@@ -295,7 +350,10 @@ const Consultations = () => {
       };
 
       await doctorApi.createConsultationResponse(responsePayload);
-      await doctorApi.updateConsultationRequestsStatus(selectedConsultation.requestId, stringStatus);
+      await doctorApi.updateConsultationRequestsStatus(
+        selectedConsultation.requestId,
+        stringStatus
+      );
 
       await fetchConsultations();
       setResponseVisible(false);
@@ -317,7 +375,10 @@ const Consultations = () => {
   const handleComplete = async (record) => {
     setLoading(true);
     try {
-      await doctorApi.updateConsultationRequestsStatus(record.requestId, "Completed");
+      await doctorApi.updateConsultationRequestsStatus(
+        record.requestId,
+        "Completed"
+      );
       await fetchConsultations();
       message.success("Consultation completed");
     } catch (error) {
@@ -377,7 +438,10 @@ const Consultations = () => {
       key: "action",
       render: (_, record) => (
         <Space>
-          <Button icon={<EyeOutlined />} onClick={() => handleViewDetail(record)}>
+          <Button
+            icon={<EyeOutlined />}
+            onClick={() => handleViewDetail(record)}
+          >
             Details
           </Button>
           {record.status === "Pending" && (
@@ -393,7 +457,7 @@ const Consultations = () => {
       ),
     },
   ];
-  
+
   const columns = [
     {
       title: "Parent",
@@ -440,7 +504,10 @@ const Consultations = () => {
       key: "action",
       render: (_, record) => (
         <Space>
-          <Button icon={<EyeOutlined />} onClick={() => handleViewDetail(record)}>
+          <Button
+            icon={<EyeOutlined />}
+            onClick={() => handleViewDetail(record)}
+          >
             Details
           </Button>
           {record.status === "Pending" && (
@@ -466,7 +533,9 @@ const Consultations = () => {
     },
   ];
 
-  const newRequestsCount = consultations.filter((item) => item.status === "Pending").length;
+  const newRequestsCount = consultations.filter(
+    (item) => item.status === "Pending"
+  ).length;
 
   return (
     <div className="consult-container">
@@ -474,8 +543,11 @@ const Consultations = () => {
         <Title level={3} className="consult-title">
           Consultations
         </Title>
-  
-        <div className="consult-header" style={{ display: "flex", alignItems: "center" }}>
+
+        <div
+          className="consult-header"
+          style={{ display: "flex", alignItems: "center" }}
+        >
           <Input
             placeholder="Search by parent, child, or description"
             prefix={<SearchOutlined />}
@@ -507,14 +579,20 @@ const Consultations = () => {
               >
                 <Option value="">All</Option>
                 {[1, 2, 3, 4, 5].map((rate) => (
-                  <Option key={rate} value={rate.toString()}>{rate} Stars</Option>
+                  <Option key={rate} value={rate.toString()}>
+                    {rate} Stars
+                  </Option>
                 ))}
               </Select>
             </div>
           )}
           <Button
             type="primary"
-            onClick={activeTab === "ongoing" ? fetchOnGoingConsultations : fetchConsultations}
+            onClick={
+              activeTab === "ongoing"
+                ? fetchOnGoingConsultations
+                : fetchConsultations
+            }
             loading={loading}
             className="consult-refresh-btn"
             style={{ marginLeft: "auto" }}
@@ -522,7 +600,7 @@ const Consultations = () => {
             Refresh
           </Button>
         </div>
-  
+
         <Tabs
           activeKey={activeTab}
           onChange={setActiveTab}
@@ -533,7 +611,10 @@ const Consultations = () => {
                 <span>
                   New Requests{" "}
                   {newRequestsCount > 0 && (
-                    <Badge count={newRequestsCount} style={{ backgroundColor: "#e92121" }} />
+                    <Badge
+                      count={newRequestsCount}
+                      style={{ backgroundColor: "#e92121" }}
+                    />
                   )}
                 </span>
               ),
@@ -591,184 +672,223 @@ const Consultations = () => {
       </Card>
 
       <Modal
-  title="Respond to Consultation Request"
-  open={responseVisible}
-  onCancel={() => setResponseVisible(false)}
-  footer={null}
-  width={600}
->
-  {selectedConsultation && (
-    <Form
-      form={responseForm}
-      layout="vertical"
-      onFinish={handleResponseSubmit}
-      initialValues={{ action: "approved" }}
-    >
-      <Divider orientation="left">Consultation Information</Divider>
-      <Descriptions bordered size="small" column={1}>
-        <Descriptions.Item label="Parent">{selectedConsultation.parentName}</Descriptions.Item>
-        <Descriptions.Item label="Child">
-          {selectedConsultation.childName} ({selectedConsultation.childAge})
-        </Descriptions.Item>
-        <Descriptions.Item label="Request Date">
-          {moment(selectedConsultation.requestDate).format("DD/MM/YYYY HH:mm")}
-        </Descriptions.Item>
-        <Descriptions.Item label="Description">
-          {selectedConsultation.description}
-        </Descriptions.Item>
-      </Descriptions>
-
-      <Divider orientation="left">Child Information</Divider>
-      <Descriptions bordered size="small" column={1}>
-        <Descriptions.Item label="Date of Birth">
-          {moment(selectedConsultation.childDateOfBirth).format("DD/MM/YYYY")}
-        </Descriptions.Item>
-        <Descriptions.Item label="Gender">{selectedConsultation.childGender}</Descriptions.Item>
-        <Descriptions.Item label="Allergies">{selectedConsultation.childAllergies}</Descriptions.Item>
-        <Descriptions.Item label="Notes">{selectedConsultation.childNotes}</Descriptions.Item>
-      </Descriptions>
-
-      <Divider orientation="left">Response</Divider>
-      <Form.Item
-        name="action"
-        label="Action"
-        rules={[{ required: true, message: "Please select an action" }]}
+        title="Respond to Consultation Request"
+        open={responseVisible}
+        onCancel={() => setResponseVisible(false)}
+        footer={null}
+        width={600}
       >
-        <Select>
-          <Option value="approved">Approve Request</Option>
-          <Option value="rejected">Reject Request</Option>
-        </Select>
-      </Form.Item>
+        {selectedConsultation && (
+          <Form
+            form={responseForm}
+            layout="vertical"
+            onFinish={handleResponseSubmit}
+            initialValues={{ action: "approved" }}
+          >
+            <Divider orientation="left">Consultation Information</Divider>
+            <Descriptions bordered size="small" column={1}>
+              <Descriptions.Item label="Parent">
+                {selectedConsultation.parentName}
+              </Descriptions.Item>
+              <Descriptions.Item label="Child">
+                {selectedConsultation.childName} (
+                {selectedConsultation.childAge})
+              </Descriptions.Item>
+              <Descriptions.Item label="Request Date">
+                {moment(selectedConsultation.requestDate).format(
+                  "DD/MM/YYYY HH:mm"
+                )}
+              </Descriptions.Item>
+              <Descriptions.Item label="Description">
+                {selectedConsultation.description}
+              </Descriptions.Item>
+            </Descriptions>
 
-      <Form.Item noStyle shouldUpdate>
-        {({ getFieldValue }) =>
-          getFieldValue("action") === "rejected" ? (
+            <Divider orientation="left">Child Information</Divider>
+            <Descriptions bordered size="small" column={1}>
+              <Descriptions.Item label="Date of Birth">
+                {moment(selectedConsultation.childDateOfBirth).format(
+                  "DD/MM/YYYY"
+                )}
+              </Descriptions.Item>
+              <Descriptions.Item label="Gender">
+                {selectedConsultation.childGender}
+              </Descriptions.Item>
+              <Descriptions.Item label="Allergies">
+                {selectedConsultation.childAllergies}
+              </Descriptions.Item>
+              <Descriptions.Item label="Notes">
+                {selectedConsultation.childNotes}
+              </Descriptions.Item>
+            </Descriptions>
+
+            <Divider orientation="left">Response</Divider>
             <Form.Item
-              name="rejectReason"
-              label="Reject Reason"
-              rules={[{ required: true, message: "Please enter reason" }]}
+              name="action"
+              label="Action"
+              rules={[{ required: true, message: "Please select an action" }]}
             >
-              <TextArea rows={4} placeholder="Enter reject reason" />
+              <Select>
+                <Option value="approved">Approve Request</Option>
+                <Option value="rejected">Reject Request</Option>
+              </Select>
             </Form.Item>
-          ) : null
-        }
-      </Form.Item>
 
-      <Form.Item
-        name="response"
-        label="Response"
-        rules={[{ required: true, message: "Please enter response" }]}
+            <Form.Item noStyle shouldUpdate>
+              {({ getFieldValue }) =>
+                getFieldValue("action") === "rejected" ? (
+                  <Form.Item
+                    name="rejectReason"
+                    label="Reject Reason"
+                    rules={[{ required: true, message: "Please enter reason" }]}
+                  >
+                    <TextArea rows={4} placeholder="Enter reject reason" />
+                  </Form.Item>
+                ) : null
+              }
+            </Form.Item>
+
+            <Form.Item
+              name="response"
+              label="Response"
+              rules={[{ required: true, message: "Please enter response" }]}
+            >
+              <TextArea rows={4} placeholder="Enter response to parent" />
+            </Form.Item>
+
+            <Form.Item>
+              <div className="consult-modal-buttons">
+                <Button onClick={() => setResponseVisible(false)}>
+                  Cancel
+                </Button>
+                <Button type="primary" htmlType="submit" loading={loading}>
+                  Send Response
+                </Button>
+              </div>
+            </Form.Item>
+          </Form>
+        )}
+      </Modal>
+
+      <Drawer
+        title="Consultation Details"
+        placement="right"
+        onClose={() => setDetailVisible(false)}
+        open={detailVisible}
+        width={500}
       >
-        <TextArea rows={4} placeholder="Enter response to parent" />
-      </Form.Item>
+        {selectedConsultation && (
+          <>
+            <Divider orientation="left">Consultation Information</Divider>
+            <Descriptions bordered column={1}>
+              <Descriptions.Item label="Status">
+                {getStatusTag(selectedConsultation.status)}
+              </Descriptions.Item>
+              <Descriptions.Item label="Parent">
+                <div className="consult-drawer-parent">
+                  <Avatar
+                    src={selectedConsultation.parentAvatar}
+                    size="small"
+                  />
+                  <span>{selectedConsultation.parentName}</span>
+                </div>
+              </Descriptions.Item>
+              <Descriptions.Item label="Child">
+                {selectedConsultation.childName} (
+                {selectedConsultation.childAge})
+              </Descriptions.Item>
+              <Descriptions.Item label="Request Date">
+                {moment(selectedConsultation.requestDate).format(
+                  "DD/MM/YYYY HH:mm"
+                )}
+              </Descriptions.Item>
+              <Descriptions.Item label="Description">
+                {selectedConsultation.description}
+              </Descriptions.Item>
+            </Descriptions>
 
-      <Form.Item>
-        <div className="consult-modal-buttons">
-          <Button onClick={() => setResponseVisible(false)}>Cancel</Button>
-          <Button type="primary" htmlType="submit" loading={loading}>
-            Send Response
-          </Button>
-        </div>
-      </Form.Item>
-    </Form>
-  )}
-</Modal>
+            <Divider orientation="left">Child Information</Divider>
+            <Descriptions bordered column={1}>
+              <Descriptions.Item label="Date of Birth">
+                {moment(selectedConsultation.childDateOfBirth).format(
+                  "DD/MM/YYYY"
+                )}
+              </Descriptions.Item>
+              <Descriptions.Item label="Gender">
+                {selectedConsultation.childGender}
+              </Descriptions.Item>
+              <Descriptions.Item label="Allergies">
+                {selectedConsultation.childAllergies}
+              </Descriptions.Item>
+              <Descriptions.Item label="Notes">
+                {selectedConsultation.childNotes}
+              </Descriptions.Item>
+            </Descriptions>
 
-<Drawer
-  title="Consultation Details"
-  placement="right"
-  onClose={() => setDetailVisible(false)}
-  open={detailVisible}
-  width={500}
->
-  {selectedConsultation && (
-    <>
-      <Divider orientation="left">Consultation Information</Divider>
-      <Descriptions bordered column={1}>
-        <Descriptions.Item label="Status">
-          {getStatusTag(selectedConsultation.status)}
-        </Descriptions.Item>
-        <Descriptions.Item label="Parent">
-          <div className="consult-drawer-parent">
-            <Avatar src={selectedConsultation.parentAvatar} size="small" />
-            <span>{selectedConsultation.parentName}</span>
-          </div>
-        </Descriptions.Item>
-        <Descriptions.Item label="Child">
-          {selectedConsultation.childName} ({selectedConsultation.childAge})
-        </Descriptions.Item>
-        <Descriptions.Item label="Request Date">
-          {moment(selectedConsultation.requestDate).format("DD/MM/YYYY HH:mm")}
-        </Descriptions.Item>
-        <Descriptions.Item label="Description">
-          {selectedConsultation.description}
-        </Descriptions.Item>
-      </Descriptions>
+            <Divider orientation="left">System Information</Divider>
+            <Descriptions bordered column={1}>
+              <Descriptions.Item label="Created At">
+                {moment(selectedConsultation.createdAt).format(
+                  "DD/MM/YYYY HH:mm"
+                )}
+              </Descriptions.Item>
+              <Descriptions.Item label="Updated At">
+                {moment(selectedConsultation.updatedAt).format(
+                  "DD/MM/YYYY HH:mm"
+                )}
+              </Descriptions.Item>
+            </Descriptions>
 
-      <Divider orientation="left">Child Information</Divider>
-      <Descriptions bordered column={1}>
-        <Descriptions.Item label="Date of Birth">
-          {moment(selectedConsultation.childDateOfBirth).format("DD/MM/YYYY")}
-        </Descriptions.Item>
-        <Descriptions.Item label="Gender">{selectedConsultation.childGender}</Descriptions.Item>
-        <Descriptions.Item label="Allergies">{selectedConsultation.childAllergies}</Descriptions.Item>
-        <Descriptions.Item label="Notes">{selectedConsultation.childNotes}</Descriptions.Item>
-      </Descriptions>
-
-      <Divider orientation="left">System Information</Divider>
-      <Descriptions bordered column={1}>
-        <Descriptions.Item label="Created At">
-          {moment(selectedConsultation.createdAt).format("DD/MM/YYYY HH:mm")}
-        </Descriptions.Item>
-        <Descriptions.Item label="Updated At">
-          {moment(selectedConsultation.updatedAt).format("DD/MM/YYYY HH:mm")}
-        </Descriptions.Item>
-      </Descriptions>
-
-      <Divider orientation="left">Progress</Divider>
-      <Timeline>
-        <Timeline.Item>
-          <p>
-            <strong>Request</strong> -{" "}
-            {moment(selectedConsultation.requestDate).format("DD/MM/YYYY HH:mm")}
-          </p>
-          <Card size="small">
-            <p>{selectedConsultation.description}</p>
-          </Card>
-        </Timeline.Item>
-        {selectedConsultation.response && (
-          <Timeline.Item>
-            <p>
-              <strong>Response</strong> -{" "}
-              {moment(selectedConsultation.updatedAt).format("DD/MM/YYYY HH:mm")}
-            </p>
-            <Card size="small">
-              <p>{selectedConsultation.response}</p>
-            </Card>
-          </Timeline.Item>
+            <Divider orientation="left">Progress</Divider>
+            <Timeline>
+              <Timeline.Item>
+                <p>
+                  <strong>Request</strong> -{" "}
+                  {moment(selectedConsultation.requestDate).format(
+                    "DD/MM/YYYY HH:mm"
+                  )}
+                </p>
+                <Card size="small">
+                  <p>{selectedConsultation.description}</p>
+                </Card>
+              </Timeline.Item>
+              {selectedConsultation.response && (
+                <Timeline.Item>
+                  <p>
+                    <strong>Response</strong> -{" "}
+                    {moment(selectedConsultation.updatedAt).format(
+                      "DD/MM/YYYY HH:mm"
+                    )}
+                  </p>
+                  <Card size="small">
+                    <p>{selectedConsultation.response}</p>
+                  </Card>
+                </Timeline.Item>
+              )}
+              {selectedConsultation.status === "Rejected" && (
+                <Timeline.Item color="red">
+                  <p>
+                    <strong>Rejected</strong>
+                  </p>
+                  <Card size="small">
+                    <p>{selectedConsultation.rejectReason}</p>
+                  </Card>
+                </Timeline.Item>
+              )}
+              {selectedConsultation.completedDate && (
+                <Timeline.Item color="green">
+                  <p>
+                    <strong>Completed</strong> -{" "}
+                    {moment(selectedConsultation.completedDate).format(
+                      "DD/MM/YYYY HH:mm"
+                    )}
+                  </p>
+                </Timeline.Item>
+              )}
+            </Timeline>
+          </>
         )}
-        {selectedConsultation.status === "Rejected" && (
-          <Timeline.Item color="red">
-            <p>
-              <strong>Rejected</strong>
-            </p>
-            <Card size="small">
-              <p>{selectedConsultation.rejectReason}</p>
-            </Card>
-          </Timeline.Item>
-        )}
-        {selectedConsultation.completedDate && (
-          <Timeline.Item color="green">
-            <p>
-              <strong>Completed</strong> -{" "}
-              {moment(selectedConsultation.completedDate).format("DD/MM/YYYY HH:mm")}
-            </p>
-          </Timeline.Item>
-        )}
-      </Timeline>
-    </>
-  )}
-</Drawer>
+      </Drawer>
     </div>
   );
 };
