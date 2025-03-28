@@ -194,9 +194,9 @@ function Login({ onLoginSuccess }) {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-left">
-        <div className="auth-image">
+    <div className="LoginHome-auth-container">
+      <div className="LoginHome-auth-left">
+        <div className="LoginHome-auth-image">
           <img
             src={
               "https://www.vietjack.com/tai-lieu-mon-tieng-anh/images/tu-vung-tieng-anh-ve-cac-kieu-gia-dinh-trong-tieng-anh-3461.jpeg"
@@ -206,24 +206,28 @@ function Login({ onLoginSuccess }) {
         </div>
       </div>
 
-      <div className="auth-right">
-        <div className="home-link" onClick={() => navigate("/guest")}>
+      <div className="LoginHome-auth-right">
+        <div className="LoginHome-home-link" onClick={() => navigate("/guest")}>
           <i className="fas fa-home"></i>
         </div>
-        <div className="auth-box">
-          <div className="auth-header">
-            <h1>{"Welcome Back"}</h1>
-            <p className="header-subtitle">
-              {"Enter your email address to log in to your BabyHaven account"}
+        <div className="LoginHome-auth-box">
+          <div className="LoginHome-auth-header">
+            <h1>Welcome Back</h1>
+            <p className="LoginHome-header-subtitle">
+              Login to continue with your BabyHaven account
             </p>
           </div>
 
-          {error && <div className="error-message">{error}</div>}
+          {error && <div className="LoginHome-error-message">{error}</div>}
 
           <form onSubmit={handleSubmit}>
-            <div className="form-group-login">
+            <div className="LoginHome-form-group-login">
+              <label htmlFor="email" className="LoginHome-label-bold">
+                Email
+              </label>
               <input
                 type="text"
+                id="email"
                 name="email"
                 placeholder="Enter your email"
                 value={formData.email}
@@ -232,9 +236,11 @@ function Login({ onLoginSuccess }) {
               />
             </div>
 
-            <div className="form-group password-group">
+            <div className="LoginHome-form-group-login LoginHome-password-group">
+              <label htmlFor="password">Password</label>
               <input
                 type={showPassword ? "text" : "password"}
+                id="password"
                 name="password"
                 placeholder="Enter your password"
                 value={formData.password}
@@ -242,7 +248,7 @@ function Login({ onLoginSuccess }) {
                 required
               />
               <span
-                className="password-toggle"
+                className="LoginHome-password-toggle"
                 onClick={togglePasswordVisibility}
               >
                 <i
@@ -251,32 +257,34 @@ function Login({ onLoginSuccess }) {
               </span>
             </div>
 
-            <div className="forgot-password-link">
-              <Link to="/forget-password">Quên mật khẩu?</Link>
+            <div className="LoginHome-forgot-password-link">
+              <Link to="/forget-password">Forgot Password?</Link>
             </div>
 
-            <button type="submit" className="submit-btn" disabled={isLoading}>
-              {isLoading ? "Loading..." : "Sign in"}
+            <button
+              type="submit"
+              className="LoginHome-submit-btn"
+              disabled={isLoading}
+            >
+              {isLoading ? "Processing..." : "Sign In"}
             </button>
 
-            <div className="divider">
+            <div className="LoginHome-divider">
               <span>Or</span>
             </div>
 
             <button
-              className="social-btn google"
+              className="LoginHome-social-btn google"
               onClick={handleGoogleRedirect}
               disabled={isLoading}
             >
               <i className="fab fa-google"></i>
-              <span style={{ marginLeft: "8px" }}>
-                {isLoading ? "Loading..." : "Sign in with Google"}
-              </span>
+              <span>{isLoading ? "Processing..." : "Sign in with Google"}</span>
             </button>
 
-            <div className="toggle-form">
-              {"First time visit?"}
-              <span onClick={() => navigate("/register")}>{"Sign up"}</span>
+            <div className="LoginHome-toggle-form">
+              Don't have an account?
+              <span onClick={() => navigate("/register")}>Sign up</span>
             </div>
           </form>
         </div>
