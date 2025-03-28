@@ -876,7 +876,6 @@ function DoctorConsultation() {
           </div>
         </div>
       )}
-
       {/* Modal: Xem chi tiết Feedback */}
       {selectedFeedback && (
         <div className="modal-overlay" onClick={() => setSelectedFeedback(null)}>
