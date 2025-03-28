@@ -38,7 +38,6 @@ function Blog() {
      ========================================================================== */
   // Category States
   const [categories, setCategories] = useState([]); // Lưu danh sách categories
-  const [parentCategories, setParentCategories] = useState({}); // Lưu thông tin category cha
   const [parentNames, setParentNames] = useState({}); // Lưu tên của category cha
   const [categoryFilter, setCategoryFilter] = useState("all"); // Filter cho categories
   const [editingId, setEditingId] = useState(null); // ID của category đang edit
@@ -556,7 +555,7 @@ function Blog() {
       setLoading(true);
       const response = await blogCategoryApi.delete(id);
       if (response?.data?.status === 1) {
-        message.success("Xóa category thành công");
+        message.success("Category deleted successfully");
         fetchCategories();
       }
     } catch (error) {
@@ -618,10 +617,10 @@ function Blog() {
         // Mở modal chỉnh sửa
         setBlogModalVisible(true);
       } else {
-        message.error("Không thể tải thông tin bài viết");
+        message.error("Unable to load blog post details");
       }
     } catch (error) {
-      message.error("Lỗi khi tải thông tin bài viết: " + error.message);
+      message.error("Error loading blog post details: " + error.message);
       console.error("Error fetching blog details:", error);
     } finally {
       setLoading(false);
@@ -634,7 +633,7 @@ function Blog() {
       setLoading(true);
       const response = await blogApi.delete(id);
       if (response?.data?.status === 1) {
-        message.success("Xóa bài viết thành công");
+        message.success("Blog post deleted successfully");
         fetchBlogs();
       }
     } catch (error) {
@@ -677,7 +676,7 @@ function Blog() {
             <div className="blog-actions">
               {/* Thêm ô tìm kiếm */}
               <Input.Search
-                placeholder="Tìm kiếm theo tên danh mục..."
+                placeholder="Search by category name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onSearch={(value) => setSearchQuery(value)}
@@ -701,7 +700,7 @@ function Blog() {
           {searchQuery.trim() && (
             <div style={{ marginBottom: 16 }}>
               <span>
-                Kết quả tìm kiếm cho "{searchQuery}" trong
+                Search results for "{searchQuery}" in
                 {categoryFilter === "parent"
                   ? " Parent Categories"
                   : categoryFilter === "child"
@@ -713,7 +712,7 @@ function Blog() {
                 onClick={() => setSearchQuery("")}
                 style={{ marginLeft: 8 }}
               >
-                Xóa tìm kiếm
+                Clear search
               </Button>
             </div>
           )}
@@ -731,7 +730,7 @@ function Blog() {
           />
 
           <Modal
-            title={editingId ? "Sửa danh mục" : "Thêm danh mục mới"}
+            title={editingId ? "Edit Category" : "Add New Category"}
             open={isModalVisible}
             onCancel={() => {
               setIsModalVisible(false);
@@ -748,20 +747,20 @@ function Blog() {
             >
               <Form.Item
                 name="categoryName"
-                label="Tên danh mục"
+                label="Category Name"
                 rules={[
-                  { required: true, message: "Vui lòng nhập tên danh mục" },
+                  { required: true, message: "Please enter category name" },
                 ]}
               >
                 <Input />
               </Form.Item>
 
-              <Form.Item name="description" label="Mô tả">
+              <Form.Item name="description" label="Description">
                 <Input.TextArea rows={4} />
               </Form.Item>
 
-              <Form.Item name="parentCategoryId" label="Danh mục cha">
-                <Select allowClear placeholder="Chọn danh mục cha">
+              <Form.Item name="parentCategoryId" label="Parent Category">
+                <Select allowClear placeholder="Select parent category">
                   {categories
                     .filter((cat) => cat.parentCategoryId === null)
                     .map((cat) => (
@@ -775,18 +774,14 @@ function Blog() {
                 </Select>
               </Form.Item>
 
-              <Form.Item
-                name="isActive"
-                label="Trạng thái"
-                valuePropName="checked"
-              >
+              <Form.Item name="isActive" label="Status" valuePropName="checked">
                 <Switch checkedChildren="Active" unCheckedChildren="Inactive" />
               </Form.Item>
 
               <div className="blog-form-footer">
-                <Button onClick={() => setIsModalVisible(false)}>Hủy</Button>
+                <Button onClick={() => setIsModalVisible(false)}>Cancel</Button>
                 <Button type="primary" htmlType="submit" loading={loading}>
-                  {editingId ? "Cập nhật" : "Thêm mới"}
+                  {editingId ? "Update" : "Add New"}
                 </Button>
               </div>
             </Form>
@@ -818,17 +813,17 @@ function Blog() {
                   onChange={setBlogSearchType}
                   style={{ width: "30%" }}
                 >
-                  <Select.Option value="title">Tiêu đề</Select.Option>
-                  <Select.Option value="category">Danh mục</Select.Option>
-                  <Select.Option value="author">Tác giả</Select.Option>
+                  <Select.Option value="title">Title</Select.Option>
+                  <Select.Option value="category">Category</Select.Option>
+                  <Select.Option value="author">Author</Select.Option>
                 </Select>
                 <Input.Search
-                  placeholder={`Tìm kiếm theo ${
+                  placeholder={`Search by ${
                     blogSearchType === "title"
-                      ? "tiêu đề"
+                      ? "title"
                       : blogSearchType === "category"
-                      ? "danh mục"
-                      : "tác giả"
+                      ? "category"
+                      : "author"
                   }...`}
                   value={blogSearchQuery}
                   onChange={(e) => setBlogSearchQuery(e.target.value)}
@@ -854,13 +849,13 @@ function Blog() {
           {blogSearchQuery.trim() && (
             <div style={{ marginBottom: 16 }}>
               <span>
-                Kết quả tìm kiếm cho "{blogSearchQuery}" theo{" "}
+                Search results for "{blogSearchQuery}" by{" "}
                 {blogSearchType === "title"
-                  ? "tiêu đề"
+                  ? "title"
                   : blogSearchType === "category"
-                  ? "danh mục"
-                  : "tác giả"}{" "}
-                trong
+                  ? "category"
+                  : "author"}{" "}
+                in
                 {blogFilter === "approved"
                   ? " Approved"
                   : blogFilter === "rejected"
@@ -876,7 +871,7 @@ function Blog() {
                 onClick={() => setBlogSearchQuery("")}
                 style={{ marginLeft: 8 }}
               >
-                Xóa tìm kiếm
+                Clear search
               </Button>
             </div>
           )}

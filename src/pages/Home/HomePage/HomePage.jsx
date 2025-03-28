@@ -15,6 +15,16 @@ import GrowthTrack from "../../../assets/GrowthTracker-nov-2023.svg";
 import Milestone from "../../../assets/ChildHeightPredictor.svg";
 import doctorApi from "../../../services/DoctorApi"; // Thêm import này
 
+// Thêm import cho các icon
+import icon1 from "../../../assets/icon/1.png";
+import icon2 from "../../../assets/icon/2.png";
+import icon3 from "../../../assets/icon/3.png";
+import icon4 from "../../../assets/icon/4.png";
+import icon5 from "../../../assets/icon/5.png";
+import icon6 from "../../../assets/icon/6.png";
+import icon7 from "../../../assets/icon/7.png";
+import icon8 from "../../../assets/icon/8.png";
+
 function HomePage() {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -325,16 +335,36 @@ function HomePage() {
               <div className="tools-grid">
                 {[
                   {
-                    image: GrowthTrack,
-                    title: "Growth Tracker",
+                    image: icon1,
+                    title: "Update Growth Records",
                   },
                   {
-                    image: Medical,
-                    title: "Consultation with Experts",
+                    image: icon2,
+                    title: "Manage/Track Multiple Children",
                   },
                   {
-                    image: Milestone,
-                    title: "Milestone Records",
+                    image: icon3,
+                    title: "View Basic Growth Charts",
+                  },
+                  {
+                    image: icon4,
+                    title: "View Advanced Growth Charts",
+                  },
+                  {
+                    image: icon5,
+                    title: "Nutrition and Development Alerts",
+                  },
+                  {
+                    image: icon6,
+                    title: "Request Doctor Consultation",
+                  },
+                  {
+                    image: icon7,
+                    title: "Share Health Data with Doctor",
+                  },
+                  {
+                    image: icon8,
+                    title: "View Blogs",
                   },
                 ].map((tool, index) => (
                   <a key={index} href="#" className="tool-card">

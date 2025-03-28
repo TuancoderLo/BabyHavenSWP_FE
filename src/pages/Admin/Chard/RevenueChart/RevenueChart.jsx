@@ -34,10 +34,10 @@ const RevenueChart = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview"); // Default tab is overview
-  const [showDetailModal, setShowDetailModal] = useState(false); // State controlling detail modal
   const [transactions, setTransactions] = useState([]); // State storing transactions
   const [transactionType, setTransactionType] = useState("all"); // Filter by package type: all, standard, premium
   const [statusFilter, setStatusFilter] = useState("all"); // Filter by status: all, completed, pending, failed, cancelled
+  const [nameFilter, setNameFilter] = useState(""); // Thêm state để lưu trữ giá trị tìm kiếm tên
 
   useEffect(() => {
     const fetchData = async () => {
@@ -251,28 +251,6 @@ const RevenueChart = () => {
     };
   };
 
-  // Chuẩn bị dữ liệu cho biểu đồ cột (tổng doanh thu theo gói)
-  const preparePackageTotalChartData = () => {
-    if (!packageRevenueData || Object.keys(packageRevenueData).length === 0)
-      return null;
-
-    return {
-      labels: ["Standard", "Premium"],
-      datasets: [
-        {
-          label: "Revenue by Package",
-          data: [packageRevenueData.Standard, packageRevenueData.Premium],
-          backgroundColor: [
-            "rgba(75, 192, 192, 0.7)",
-            "rgba(153, 102, 255, 0.7)",
-          ],
-          borderColor: ["rgba(75, 192, 192, 1)", "rgba(153, 102, 255, 1)"],
-          borderWidth: 1,
-        },
-      ],
-    };
-  };
-
   // Tùy chọn chung cho biểu đồ
   const commonOptions = {
     responsive: true,
@@ -346,25 +324,9 @@ const RevenueChart = () => {
     },
   };
 
-  // Tùy chọn cho biểu đồ cột tổng doanh thu theo gói
-  const packageTotalChartOptions = {
-    ...commonOptions,
-    plugins: {
-      ...commonOptions.plugins,
-      title: {
-        display: true,
-        text: "Total Revenue by Package",
-        font: {
-          size: 16,
-        },
-      },
-    },
-  };
-
   // Chuẩn bị dữ liệu cho biểu đồ
   const revenueChartData = prepareRevenueChartData();
   const packageRevenueChartData = preparePackageRevenueChartData();
-  const packageTotalChartData = preparePackageTotalChartData();
 
   if (loading)
     return (
@@ -394,6 +356,15 @@ const RevenueChart = () => {
     if (statusFilter !== "all") {
       filtered = filtered.filter(
         (t) => t.paymentStatus.toLowerCase() === statusFilter
+      );
+    }
+
+    // Lọc theo tên
+    if (nameFilter.trim() !== "") {
+      filtered = filtered.filter(
+        (t) =>
+          t.fullName &&
+          t.fullName.toLowerCase().includes(nameFilter.toLowerCase())
       );
     }
 
@@ -670,6 +641,18 @@ const RevenueChart = () => {
                     <option value="failed">Failed</option>
                     <option value="cancelled">Cancelled</option>
                   </select>
+                </div>
+
+                {/* Thêm filter tìm kiếm theo tên */}
+                <div className="filter-row">
+                  <label>Customer Name:</label>
+                  <input
+                    type="text"
+                    placeholder="Search by name..."
+                    value={nameFilter}
+                    onChange={(e) => setNameFilter(e.target.value)}
+                    className="name-filter-input"
+                  />
                 </div>
               </div>
 

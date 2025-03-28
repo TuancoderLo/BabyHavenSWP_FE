@@ -213,47 +213,37 @@ function Register() {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-left">
-        <div className="auth-image">
-          <img
-            src={
-              "https://cafefcdn.com/203337114487263232/2022/1/22/shutterstock1486364633-small-1024x683-16428607564401603370314.jpg"
-            }
-            alt="Family enjoying time together"
-          />
-        </div>
+    <div className="Register-auth-container">
+      <div className="Register-home-link" onClick={() => navigate("/guest")}>
+        <i className="fas fa-home"></i>
       </div>
 
-      <div className="auth-right">
-        <div className="home-link" onClick={() => navigate("/guest")}>
-          <i className="fas fa-home"></i>
+      <div className="Register-auth-box">
+        <div className="Register-auth-header">
+          <h1>Create Account</h1>
+          <p className="Register-header-subtitle">
+            Join us to discover amazing experiences
+          </p>
         </div>
-        <div className="auth-box">
-          <div className="auth-header">
-            <h1>Create Account</h1>
-            <p className="header-subtitle">
-              Join us to discover amazing experiences
-            </p>
+
+        {error && <div className="Register-error-message">{error}</div>}
+
+        {/* Hiển thị nút khi đã nhận được OTP */}
+        {error && error.includes("OTP sent") && (
+          <div style={{ marginBottom: "15px", textAlign: "center" }}>
+            <button
+              type="button"
+              className="primary-button"
+              onClick={() => navigate("/verify-email")}
+            >
+              Tiếp tục xác thực email
+            </button>
           </div>
+        )}
 
-          {error && <div className="error-message">{error}</div>}
-
-          {/* Hiển thị nút khi đã nhận được OTP */}
-          {error && error.includes("OTP sent") && (
-            <div style={{ marginBottom: "15px", textAlign: "center" }}>
-              <button
-                type="button"
-                className="primary-button"
-                onClick={() => navigate("/verify-email")}
-              >
-                Tiếp tục xác thực email
-              </button>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
+        <form onSubmit={handleSubmit}>
+          <div className="Register-form-container">
+            <div className="Register-form-group half-width">
               <input
                 type="text"
                 name="username"
@@ -264,7 +254,7 @@ function Register() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="Register-form-group half-width">
               <input
                 type="text"
                 name="name"
@@ -275,7 +265,7 @@ function Register() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="Register-form-group half-width">
               <input
                 type="email"
                 name="email"
@@ -286,7 +276,7 @@ function Register() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="Register-form-group half-width">
               <input
                 type="tel"
                 name="phoneNumber"
@@ -297,7 +287,7 @@ function Register() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="Register-form-group half-width">
               <select
                 name="gender"
                 value={formData.gender}
@@ -311,7 +301,7 @@ function Register() {
               </select>
             </div>
 
-            <div className="form-group">
+            <div className="Register-form-group half-width">
               <input
                 type="date"
                 name="dateOfBirth"
@@ -321,7 +311,7 @@ function Register() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="Register-form-group">
               <input
                 type="text"
                 name="address"
@@ -332,69 +322,79 @@ function Register() {
               />
             </div>
 
-            <div className="form-group password-group">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-              <span
-                className="password-toggle"
-                onClick={togglePasswordVisibility}
-              >
-                <i
-                  className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}
-                ></i>
-              </span>
+            <div className="Register-form-group half-width">
+              <div className="Register-password-group">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+                <span
+                  className="Register-password-toggle"
+                  onClick={togglePasswordVisibility}
+                >
+                  <i
+                    className={`fas ${
+                      showPassword ? "fa-eye-slash" : "fa-eye"
+                    }`}
+                  ></i>
+                </span>
+              </div>
             </div>
 
-            <div className="form-group password-group">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                placeholder="Confirm Password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-              />
-              <span
-                className="password-toggle"
-                onClick={toggleConfirmPasswordVisibility}
-              >
-                <i
-                  className={`fas ${
-                    showConfirmPassword ? "fa-eye-slash" : "fa-eye"
-                  }`}
-                ></i>
-              </span>
+            <div className="Register-form-group half-width">
+              <div className="Register-password-group">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  placeholder="Confirm Password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                />
+                <span
+                  className="Register-password-toggle"
+                  onClick={toggleConfirmPasswordVisibility}
+                >
+                  <i
+                    className={`fas ${
+                      showConfirmPassword ? "fa-eye-slash" : "fa-eye"
+                    }`}
+                  ></i>
+                </span>
+              </div>
             </div>
+          </div>
 
-            <button type="submit" className="submit-btn" disabled={isLoading}>
-              {isLoading ? "Creating account..." : "Sign Up"}
-            </button>
+          <button
+            type="submit"
+            className="Register-submit-btn"
+            disabled={isLoading}
+          >
+            {isLoading ? "Creating account..." : "Sign Up"}
+          </button>
 
-            <div className="divider">
-              <span>or</span>
-            </div>
+          <div className="Register-divider">
+            <span>or</span>
+          </div>
 
-            <button
-              type="button"
-              className="social-btn"
-              onClick={handleGoogleRedirect}
-            >
-              <i className="fab fa-google"></i>
-              <span>Continue with Google</span>
-            </button>
+          <button
+            type="button"
+            className="Register-social-btn"
+            onClick={handleGoogleRedirect}
+          >
+            <i className="fab fa-google"></i>
+            <span>Continue with Google</span>
+          </button>
 
-            <div className="toggle-form">
-              Already have an account?
-              <span onClick={() => navigate("/login")}>Sign in</span>
-            </div>
-          </form>
-        </div>
+          <div className="Register-toggle-form">
+            Already have an account?
+            <span onClick={() => navigate("/login")}>Sign in</span>
+          </div>
+        </form>
       </div>
     </div>
   );

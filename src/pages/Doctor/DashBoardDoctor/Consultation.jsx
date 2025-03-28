@@ -19,7 +19,6 @@ import {
   Divider,
   Timeline,
   Rate,
-  Input as AntInput,
   Badge,
 } from "antd";
 import {
@@ -41,6 +40,7 @@ const { Option } = Select;
 const Consultations = () => {
   const [loading, setLoading] = useState(false);
   const [consultations, setConsultations] = useState([]);
+  const [onGoingConsultations, setOnGoingConsultations] = useState([]);
   const [filteredConsultations, setFilteredConsultations] = useState([]);
   const [selectedConsultation, setSelectedConsultation] = useState(null);
   const [responseForm] = Form.useForm();
@@ -49,9 +49,28 @@ const Consultations = () => {
   const [activeTab, setActiveTab] = useState("new");
   const [searchText, setSearchText] = useState("");
 
+  // Filters for Completed and History tabs
+  const [completedFilterType, setCompletedFilterType] = useState("all");
+  const [historyFilterStatus, setHistoryFilterStatus] = useState("");
+  const [historyFilterRating, setHistoryFilterRating] = useState("");
+
   useEffect(() => {
-    fetchConsultations();
+    if (activeTab === "ongoing") {
+      fetchOnGoingConsultations();
+    } else {
+      fetchConsultations();
+    }
   }, [activeTab]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [
+    searchText,
+    historyFilterStatus,
+    historyFilterRating,
+    consultations,
+    onGoingConsultations,
+  ]);
 
   const fetchConsultations = async () => {
     setLoading(true);
@@ -59,57 +78,63 @@ const Consultations = () => {
       const doctorId = localStorage.getItem("doctorId");
       if (!doctorId) {
         message.error("Doctor ID not found in localStorage!");
-        setLoading(false);
         return;
       }
 
-      // Gọi GET tất cả
-      const response = await doctorApi.getConsultationRequests();
-      let requests = response.data;
-
-      if (!Array.isArray(requests)) {
-        if (response && response.data) {
-          requests = response.data;
-        } else {
-          throw new Error("API response is not an array");
-        }
-      }
-
-      // Lọc theo doctorId
-      const filteredByDoctor = requests.filter(
-        (request) => request.doctorId === parseInt(doctorId)
+      const response = await doctorApi.getConsultationRequestsByDoctorOData(
+        doctorId
       );
+      const requests = Array.isArray(response) ? response : response.data;
 
-      // Lấy chi tiết từng request
       const detailedRequests = await Promise.all(
-        filteredByDoctor.map(async (request) => {
+        requests.map(async (request) => {
           try {
             const detailedResponse =
               await doctorApi.getConsultationRequestsById(request.requestId);
             const detailedData = detailedResponse.data;
+            const responses = await doctorApi.getConsultationResponsesOData(
+              `?$filter=requestId eq ${request.requestId}`
+            );
+            const latestResponse = responses.data[0] || {};
+
+            // Lấy rating từ API RatingFeedback nếu có response
+            let rating = 0;
+            if (latestResponse.responseId) {
+              const feedbackResponse =
+                await doctorApi.getRatingFeedbackByResponseId(
+                  latestResponse.responseId
+                );
+              const feedbackData = feedbackResponse.data[0] || {};
+              rating = feedbackData.rating || 0;
+            }
 
             return {
               id: request.requestId,
               requestId: request.requestId,
-              parentName: detailedData.memberName,
+              parentName: detailedData.memberName || "N/A",
               parentAvatar: "https://randomuser.me/api/portraits/women/32.jpg",
-              childName: detailedData.childName,
-              childAge: detailedData.child.age
+              childName: detailedData.childName || "N/A",
+              childAge: detailedData.child?.age
                 ? `${detailedData.child.age} tuổi`
                 : "N/A",
-              childGender: detailedData.child.gender || "N/A",
-              childAllergies: detailedData.child.allergies || "None",
-              childNotes: detailedData.child.notes || "None",
-              childDateOfBirth: detailedData.child.dateOfBirth || "N/A",
-              requestDate: detailedData.requestDate,
-              topic: detailedData.category,
+              childGender: detailedData.child?.gender || "N/A",
+              childAllergies: detailedData.child?.allergies || "None",
+              childNotes: detailedData.child?.notes || "None",
+              childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
+              requestDate: detailedData.requestDate || moment().format(),
+              topic: detailedData.category || "N/A",
               description: detailedData.description || "N/A",
-              urgency: detailedData.urgency.toLowerCase(),
-              // GIỮ NGUYÊN status thay vì .toLowerCase():
-              status: detailedData.status, // "Pending", "Approved", "Rejected", "Completed"
+              urgency: detailedData.urgency?.toLowerCase() || "normal",
+              status: detailedData.status || "Pending",
               attachments: detailedData.attachments || [],
-              createdAt: detailedData.createdAt,
-              updatedAt: detailedData.updatedAt,
+              createdAt: detailedData.createdAt || moment().format(),
+              updatedAt: detailedData.updatedAt || moment().format(),
+              response: latestResponse.content || "",
+              rating: rating, // Sử dụng rating từ API RatingFeedback thay vì latestResponse.rating
+              completedDate:
+                detailedData.status === "Completed"
+                  ? detailedData.updatedAt
+                  : null,
             };
           } catch (error) {
             console.error(
@@ -122,36 +147,7 @@ const Consultations = () => {
       );
 
       const mappedData = detailedRequests.filter((request) => request !== null);
-
-      // Lọc theo Tab
-      let filteredData = [];
-      switch (activeTab) {
-        case "new":
-          // "New Requests" -> hiển thị những request "Pending"
-          filteredData = mappedData.filter((item) => item.status === "Pending");
-          break;
-        case "ongoing":
-          // "Ongoing" -> hiển thị những request "Approved"
-          filteredData = mappedData.filter(
-            (item) => item.status === "Approved"
-          );
-          break;
-        case "completed":
-          // "Completed"
-          filteredData = mappedData.filter(
-            (item) => item.status === "Completed"
-          );
-          break;
-        case "history":
-          // History -> tất cả
-          filteredData = mappedData;
-          break;
-        default:
-          filteredData = mappedData;
-      }
-
       setConsultations(mappedData);
-      setFilteredConsultations(filteredData);
     } catch (error) {
       message.error("Failed to fetch consultation requests!");
       console.error("Error fetching consultations:", error);
@@ -160,25 +156,159 @@ const Consultations = () => {
     }
   };
 
-  // Tìm kiếm theo parent, child, topic
-  const handleSearch = (value) => {
-    setSearchText(value);
-    const filtered = consultations.filter(
-      (item) =>
-        item.parentName.toLowerCase().includes(value.toLowerCase()) ||
-        item.childName.toLowerCase().includes(value.toLowerCase()) ||
-        item.topic.toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredConsultations(
-      activeTab === "history"
-        ? filtered
-        : filtered.filter((item) => {
-            if (activeTab === "new") return item.status === "Pending";
-            if (activeTab === "ongoing") return item.status === "Approved";
-            if (activeTab === "completed") return item.status === "Completed";
-            return true;
-          })
-    );
+  const fetchOnGoingConsultations = async () => {
+    setLoading(true);
+    try {
+      const doctorId = localStorage.getItem("doctorId");
+      if (!doctorId) {
+        message.error("Doctor ID not found in localStorage!");
+        return;
+      }
+
+      const requests = await doctorApi.getConsultationRequestsByDoctorAndStatus(
+        doctorId,
+        "Approved"
+      );
+      console.log("Requests from API for Ongoing:", requests);
+
+      const detailedRequests = await Promise.all(
+        requests.map(async (request) => {
+          try {
+            const detailedResponse =
+              await doctorApi.getConsultationRequestsById(request.requestId);
+            const detailedData = detailedResponse.data;
+            console.log("Detailed data for request:", detailedData);
+
+            if (detailedData.status !== "Approved") {
+              console.warn(
+                `Request ${request.requestId} has status ${detailedData.status}, skipping...`
+              );
+              return null;
+            }
+
+            const responses = await doctorApi.getConsultationResponsesOData(
+              `?$filter=requestId eq ${request.requestId}`
+            );
+            const latestResponse = responses.data[0] || {};
+
+            // Lấy rating từ API RatingFeedback nếu có response
+            let rating = 0;
+            if (latestResponse.responseId) {
+              const feedbackResponse =
+                await doctorApi.getRatingFeedbackByResponseId(
+                  latestResponse.responseId
+                );
+              const feedbackData = feedbackResponse.data[0] || {};
+              rating = feedbackData.rating || 0;
+            }
+
+            return {
+              id: request.requestId,
+              requestId: request.requestId,
+              parentName: detailedData.memberName || "N/A",
+              parentAvatar: "https://randomuser.me/api/portraits/women/32.jpg",
+              childName: detailedData.childName || "N/A",
+              childAge: detailedData.child?.age
+                ? `${detailedData.child.age} tuổi`
+                : "N/A",
+              childGender: detailedData.child?.gender || "N/A",
+              childAllergies: detailedData.child?.allergies || "None",
+              childNotes: detailedData.child?.notes || "None",
+              childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
+              requestDate: detailedData.requestDate || moment().format(),
+              description: detailedData.description || "N/A",
+              status: detailedData.status,
+              response: latestResponse.content || "",
+              rating: rating, // Sử dụng rating từ API RatingFeedback
+              createdAt: detailedData.createdAt || moment().format(),
+              updatedAt: detailedData.updatedAt || moment().format(),
+              completedDate:
+                detailedData.status === "Completed"
+                  ? detailedData.updatedAt
+                  : null,
+            };
+          } catch (error) {
+            console.error(
+              `Error fetching details for request ${request.requestId}:`,
+              error
+            );
+            return null;
+          }
+        })
+      );
+
+      const mappedData = detailedRequests.filter((request) => request !== null);
+      console.log("Mapped Ongoing Consultations:", mappedData);
+      setOnGoingConsultations(mappedData);
+    } catch (error) {
+      message.error("Failed to fetch ongoing consultations!");
+      console.error("Error fetching ongoing consultations:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const applyFilters = () => {
+    let data = [];
+    if (activeTab === "ongoing") {
+      data = onGoingConsultations.filter((item) => item.status === "Approved"); // Đảm bảo chỉ lấy Approved
+      if (searchText) {
+        data = data.filter(
+          (item) =>
+            item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.description.toLowerCase().includes(searchText.toLowerCase())
+        );
+      }
+    } else if (activeTab === "completed") {
+      data = consultations.filter((item) => item.status === "Completed");
+      if (searchText) {
+        data = data.filter(
+          (item) =>
+            item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.description.toLowerCase().includes(searchText.toLowerCase()) ||
+            (item.response &&
+              item.response.toLowerCase().includes(searchText.toLowerCase()))
+        );
+      }
+    } else if (activeTab === "history") {
+      data = [...consultations];
+      if (historyFilterStatus) {
+        data = data.filter((item) => item.status === historyFilterStatus);
+      }
+      if (historyFilterRating) {
+        data = data.filter(
+          (item) => item.rating.toString() === historyFilterRating
+        );
+      }
+      if (searchText) {
+        data = data.filter(
+          (item) =>
+            item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.description.toLowerCase().includes(searchText.toLowerCase()) ||
+            (item.response &&
+              item.response.toLowerCase().includes(searchText.toLowerCase()))
+        );
+      }
+    } else {
+      // Tab "new" chỉ hiển thị Pending
+      data = consultations.filter((item) => item.status === "Pending");
+      if (searchText) {
+        data = data.filter(
+          (item) =>
+            item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.description.toLowerCase().includes(searchText.toLowerCase())
+        );
+      }
+    }
+    setFilteredConsultations(data);
+  };
+
+  const handleSearch = (e) => {
+    setSearchText(e.target.value);
   };
 
   const handleViewDetail = (record) => {
@@ -192,24 +322,15 @@ const Consultations = () => {
     setResponseVisible(true);
   };
 
-  /**
-   * Khi bác sĩ ấn "Respond", ta gửi 2 API:
-   * - POST /api/ConsultationResponses => status = numeric (0=Pending,1=Approved,2=Rejected,3=Completed)
-   * - PUT /api/ConsultationRequests/{requestId}/{statusString} => statusString = "Pending"/"Approved"/"Rejected"/"Completed"
-   */
   const handleResponseSubmit = async (values) => {
     setLoading(true);
     try {
-      // Map cho createConsultationResponse (số)
       const statusMapForResponse = {
         approved: 1,
         rejected: 2,
         pending: 0,
         completed: 3,
       };
-
-      // Map cho updateConsultationRequestStatus (chuỗi)
-      // PUT /{requestId}/{statusString}
       const statusMapForRequest = {
         approved: "Approved",
         rejected: "Rejected",
@@ -217,54 +338,31 @@ const Consultations = () => {
         completed: "Completed",
       };
 
-      // Lấy key "action" => "approved"/"rejected"
       const numericStatus = statusMapForResponse[values.action];
       const stringStatus = statusMapForRequest[values.action];
 
-      // POST /api/ConsultationResponses
       const responsePayload = {
         requestId: selectedConsultation.requestId,
         content: values.response,
         attachments: [],
-        isHelpful: false,
-        status: numericStatus, // 1 = Approved, 2 = Rejected, ...
+        isHelpful: true,
+        status: numericStatus,
       };
-      await doctorApi.createConsultationResponse(responsePayload);
 
-      // PUT /api/ConsultationRequests/{requestId}/{stringStatus}
-      await doctorApi.updateConsultationRequestStatus(
+      await doctorApi.createConsultationResponse(responsePayload);
+      await doctorApi.updateConsultationRequestsStatus(
         selectedConsultation.requestId,
         stringStatus
       );
 
-      // Cập nhật state local
-      const updated = consultations.map((req) =>
-        req.id === selectedConsultation.id
-          ? {
-              ...req,
-              status: stringStatus, // Lưu "Approved" hoặc "Rejected"
-              response: values.response,
-              responseDate: moment().format("YYYY-MM-DD HH:mm:ss"),
-              appointmentDate:
-                values.action === "approved"
-                  ? values.appointmentDate
-                  : undefined,
-              rejectReason:
-                values.action === "rejected" ? values.rejectReason : undefined,
-            }
-          : req
-      );
-      setConsultations(updated);
-
-      // Refresh
       await fetchConsultations();
-
-      // Đóng modal
       setResponseVisible(false);
       message.success(
         values.action === "approved"
           ? "Consultation request approved"
-          : "Consultation request rejected"
+          : values.action === "rejected"
+          ? "Consultation request rejected"
+          : "Response submitted successfully"
       );
     } catch (error) {
       message.error("Failed to submit response!");
@@ -274,27 +372,23 @@ const Consultations = () => {
     }
   };
 
-  // Bác sĩ ấn "Complete"
-  const handleComplete = (record) => {
+  const handleComplete = async (record) => {
     setLoading(true);
-    setTimeout(() => {
-      const updated = consultations.map((req) =>
-        req.id === record.id
-          ? {
-              ...req,
-              status: "Completed",
-              completedDate: moment().format("YYYY-MM-DD HH:mm:ss"),
-            }
-          : req
+    try {
+      await doctorApi.updateConsultationRequestsStatus(
+        record.requestId,
+        "Completed"
       );
-      setConsultations(updated);
-      fetchConsultations();
-      setLoading(false);
+      await fetchConsultations();
       message.success("Consultation completed");
-    }, 800);
+    } catch (error) {
+      message.error("Failed to complete consultation!");
+      console.error("Error completing consultation:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Tag hiển thị: Pending, Approved, Rejected, Completed
   const getStatusTag = (status) => {
     switch (status) {
       case "Pending":
@@ -310,18 +404,6 @@ const Consultations = () => {
     }
   };
 
-  // Tag ưu tiên
-  const getUrgencyTag = (urgency) => {
-    const tags = {
-      high: <Tag color="red">Urgent</Tag>,
-      medium: <Tag color="orange">Medium</Tag>,
-      normal: <Tag color="blue">Normal</Tag>,
-      low: <Tag color="green">Low Priority</Tag>,
-    };
-    return tags[urgency] || <Tag>Undefined</Tag>;
-  };
-
-  // Cột cho tab "new" -> hiển thị request "Pending"
   const newRequestColumns = [
     {
       title: "Parent",
@@ -346,18 +428,7 @@ const Consultations = () => {
       ),
     },
     {
-      title: "Topic",
-      dataIndex: "topic",
-      key: "topic",
-    },
-    {
-      title: "Priority",
-      dataIndex: "urgency",
-      key: "urgency",
-      render: getUrgencyTag,
-    },
-    {
-      title: "Request Date",
+      title: "Date",
       dataIndex: "requestDate",
       key: "requestDate",
       render: (date) => moment(date).format("DD/MM/YYYY HH:mm"),
@@ -387,7 +458,6 @@ const Consultations = () => {
     },
   ];
 
-  // Cột chung cho ongoing, completed, history
   const columns = [
     {
       title: "Parent",
@@ -412,18 +482,7 @@ const Consultations = () => {
       ),
     },
     {
-      title: "Topic",
-      dataIndex: "topic",
-      key: "topic",
-    },
-    {
-      title: "Priority",
-      dataIndex: "urgency",
-      key: "urgency",
-      render: getUrgencyTag,
-    },
-    {
-      title: "Request Date",
+      title: "Date",
       dataIndex: "requestDate",
       key: "requestDate",
       render: (date) => moment(date).format("DD/MM/YYYY HH:mm"),
@@ -451,7 +510,6 @@ const Consultations = () => {
           >
             Details
           </Button>
-          {/* Nếu đang "Pending" -> Respond */}
           {record.status === "Pending" && (
             <Button
               type="primary"
@@ -461,7 +519,6 @@ const Consultations = () => {
               Respond
             </Button>
           )}
-          {/* Nếu đang "Approved" -> Complete */}
           {record.status === "Approved" && (
             <Button
               type="primary"
@@ -487,19 +544,58 @@ const Consultations = () => {
           Consultations
         </Title>
 
-        <div className="consult-header">
-          <AntInput
-            placeholder="Search by parent, child, or topic"
+        <div
+          className="consult-header"
+          style={{ display: "flex", alignItems: "center" }}
+        >
+          <Input
+            placeholder="Search by parent, child, or description"
             prefix={<SearchOutlined />}
             value={searchText}
-            onChange={(e) => handleSearch(e.target.value)}
+            onChange={handleSearch}
             style={{ width: 300 }}
           />
+          {activeTab === "history" && (
+            <div style={{ display: "flex", gap: "10px", marginLeft: 10 }}>
+              <Select
+                placeholder="Filter by Status"
+                value={historyFilterStatus}
+                onChange={setHistoryFilterStatus}
+                style={{ width: 150 }}
+                allowClear
+              >
+                <Option value="">All</Option>
+                <Option value="Pending">Pending</Option>
+                <Option value="Approved">Approved</Option>
+                <Option value="Rejected">Rejected</Option>
+                <Option value="Completed">Completed</Option>
+              </Select>
+              <Select
+                placeholder="Filter by Rating"
+                value={historyFilterRating}
+                onChange={setHistoryFilterRating}
+                style={{ width: 150 }}
+                allowClear
+              >
+                <Option value="">All</Option>
+                {[1, 2, 3, 4, 5].map((rate) => (
+                  <Option key={rate} value={rate.toString()}>
+                    {rate} Stars
+                  </Option>
+                ))}
+              </Select>
+            </div>
+          )}
           <Button
             type="primary"
-            onClick={fetchConsultations}
+            onClick={
+              activeTab === "ongoing"
+                ? fetchOnGoingConsultations
+                : fetchConsultations
+            }
             loading={loading}
             className="consult-refresh-btn"
+            style={{ marginLeft: "auto" }}
           >
             Refresh
           </Button>
@@ -575,7 +671,6 @@ const Consultations = () => {
         />
       </Card>
 
-      {/* Modal for responding */}
       <Modal
         title="Respond to Consultation Request"
         open={responseVisible}
@@ -588,7 +683,6 @@ const Consultations = () => {
             form={responseForm}
             layout="vertical"
             onFinish={handleResponseSubmit}
-            // Mặc định action="approved"
             initialValues={{ action: "approved" }}
           >
             <Divider orientation="left">Consultation Information</Divider>
@@ -599,12 +693,6 @@ const Consultations = () => {
               <Descriptions.Item label="Child">
                 {selectedConsultation.childName} (
                 {selectedConsultation.childAge})
-              </Descriptions.Item>
-              <Descriptions.Item label="Topic">
-                {selectedConsultation.topic}
-              </Descriptions.Item>
-              <Descriptions.Item label="Priority">
-                {getUrgencyTag(selectedConsultation.urgency)}
               </Descriptions.Item>
               <Descriptions.Item label="Request Date">
                 {moment(selectedConsultation.requestDate).format(
@@ -643,29 +731,12 @@ const Consultations = () => {
               <Select>
                 <Option value="approved">Approve Request</Option>
                 <Option value="rejected">Reject Request</Option>
-                <Option value="pending">Set to Pending</Option>
-                <Option value="completed">Set to Completed</Option>
               </Select>
             </Form.Item>
 
-            {/* Hiển thị Appointment Date nếu action=approved, hoặc Reject Reason nếu action=rejected */}
             <Form.Item noStyle shouldUpdate>
               {({ getFieldValue }) =>
-                getFieldValue("action") === "approved" ? (
-                  <Form.Item
-                    name="appointmentDate"
-                    label="Appointment Date"
-                    rules={[
-                      { required: true, message: "Please select date/time" },
-                    ]}
-                  >
-                    <DatePicker
-                      showTime
-                      format="DD/MM/YYYY HH:mm"
-                      style={{ width: "100%" }}
-                    />
-                  </Form.Item>
-                ) : getFieldValue("action") === "rejected" ? (
+                getFieldValue("action") === "rejected" ? (
                   <Form.Item
                     name="rejectReason"
                     label="Reject Reason"
@@ -699,7 +770,6 @@ const Consultations = () => {
         )}
       </Modal>
 
-      {/* Drawer for details */}
       <Drawer
         title="Consultation Details"
         placement="right"
@@ -726,12 +796,6 @@ const Consultations = () => {
               <Descriptions.Item label="Child">
                 {selectedConsultation.childName} (
                 {selectedConsultation.childAge})
-              </Descriptions.Item>
-              <Descriptions.Item label="Topic">
-                {selectedConsultation.topic}
-              </Descriptions.Item>
-              <Descriptions.Item label="Priority">
-                {getUrgencyTag(selectedConsultation.urgency)}
               </Descriptions.Item>
               <Descriptions.Item label="Request Date">
                 {moment(selectedConsultation.requestDate).format(
@@ -788,12 +852,11 @@ const Consultations = () => {
                   <p>{selectedConsultation.description}</p>
                 </Card>
               </Timeline.Item>
-
-              {selectedConsultation.responseDate && (
+              {selectedConsultation.response && (
                 <Timeline.Item>
                   <p>
                     <strong>Response</strong> -{" "}
-                    {moment(selectedConsultation.responseDate).format(
+                    {moment(selectedConsultation.updatedAt).format(
                       "DD/MM/YYYY HH:mm"
                     )}
                   </p>
@@ -802,7 +865,6 @@ const Consultations = () => {
                   </Card>
                 </Timeline.Item>
               )}
-
               {selectedConsultation.status === "Rejected" && (
                 <Timeline.Item color="red">
                   <p>
@@ -813,18 +875,6 @@ const Consultations = () => {
                   </Card>
                 </Timeline.Item>
               )}
-
-              {selectedConsultation.appointmentDate && (
-                <Timeline.Item color="blue">
-                  <p>
-                    <strong>Appointment</strong> -{" "}
-                    {moment(selectedConsultation.appointmentDate).format(
-                      "DD/MM/YYYY HH:mm"
-                    )}
-                  </p>
-                </Timeline.Item>
-              )}
-
               {selectedConsultation.completedDate && (
                 <Timeline.Item color="green">
                   <p>
@@ -833,25 +883,6 @@ const Consultations = () => {
                       "DD/MM/YYYY HH:mm"
                     )}
                   </p>
-                  {selectedConsultation.notes && (
-                    <Card size="small" title="Notes">
-                      <p>{selectedConsultation.notes}</p>
-                    </Card>
-                  )}
-                </Timeline.Item>
-              )}
-
-              {selectedConsultation.feedback && (
-                <Timeline.Item dot={<CommentOutlined />}>
-                  <p>
-                    <strong>Feedback</strong>
-                  </p>
-                  <Card size="small">
-                    <Rate disabled value={selectedConsultation.rating} />
-                    <p style={{ marginTop: 8 }}>
-                      {selectedConsultation.feedback}
-                    </p>
-                  </Card>
                 </Timeline.Item>
               )}
             </Timeline>

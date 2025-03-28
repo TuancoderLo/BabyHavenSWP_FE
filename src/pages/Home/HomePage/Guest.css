@@ -692,12 +692,12 @@ nav {
 }
 
 /* Support Section */
-.support-section {
+.homeGuest-support-section {
   padding: 4rem 2rem;
   background: #fff;
 }
 
-.support-content {
+.homeGuest-support-content {
   max-width: 1400px;
   margin: 0 auto;
   display: flex;
@@ -705,7 +705,7 @@ nav {
 }
 
 /* Left Side */
-.support-left {
+.homeGuest-support-left {
   flex: 0.4;
   padding: 2rem;
   border: 3px solid #c4abff;
@@ -715,7 +715,7 @@ nav {
   box-shadow: 0 8px 30px rgba(196, 171, 255, 0.2);
 }
 
-.support-left h2 {
+.homeGuest-support-left h2 {
   margin-top: 0;
   font-size: 2.2rem;
   color: #333;
@@ -723,30 +723,30 @@ nav {
   line-height: 1.3;
 }
 
-.highlight {
+.homeGuest-highlight {
   color: #00bfa6;
 }
 
-.support-left p {
+.homeGuest-support-left p {
   font-size: 1rem;
   color: #666;
   margin-bottom: 2.5rem;
   line-height: 1.6;
 }
 
-.support-buttons h3 {
+.homeGuest-support-buttons h3 {
   font-size: 1.2rem;
   color: #333;
   margin-bottom: 1.5rem;
 }
 
-.button-grid {
+.homeGuest-button-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
 }
 
-.support-btn {
+.homeGuest-support-btn {
   padding: 0.8rem 1rem;
   background: #e7fbf9;
   border: none;
@@ -757,13 +757,13 @@ nav {
   transition: all 0.3s ease;
 }
 
-.support-btn:hover {
+.homeGuest-support-btn:hover {
   background: #d0f7f3;
   transform: translateY(-2px);
 }
 
 /* Right Side */
-.support-right {
+.homeGuest-support-right {
   flex: 0.6;
   padding: 2rem;
   border: 3px solid #00d0bc;
@@ -773,93 +773,97 @@ nav {
   box-shadow: 0 8px 30px rgba(0, 208, 188, 0.2);
 }
 
-.support-right h2 {
-  margin-top: 0;
-  font-size: 1.8rem;
+.homeGuest-support-right h2 {
+  font-size: 32px;
+  margin-bottom: 25px;
+  font-weight: 700;
   color: #333;
-  margin-bottom: 2rem;
 }
 
-.tools-grid {
-  margin-top: 1.5rem;
+.homeGuest-tools-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 0.8rem;
-  max-width: 900px;
-  margin: 0 auto;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 25px;
+  margin-top: 30px;
 }
 
-.tool-card {
-  text-decoration: none;
+.homeGuest-tool-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-decoration: none;
+  color: inherit;
 }
 
-.tool-image {
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #eee;
+.homeGuest-tool-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-.tool-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
+.homeGuest-tool-image {
+  width: 90px;
+  height: 90px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 15px;
 }
 
-.tool-card:hover .tool-image img {
-  transform: scale(1.05);
+.homeGuest-tool-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
-.tool-title {
-  font-size: 0.7rem;
-  color: #666;
+.homeGuest-tool-title {
+  font-weight: 600;
   text-align: center;
-  line-height: 1.2;
+  font-size: 16px;
+  margin-top: 10px;
+  color: #444;
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .tools-grid {
-    grid-template-columns: repeat(5, 1fr);
-  }
+.homeGuest-tool-card:hover .homeGuest-tool-title {
+  color: #0078d7;
+  font-weight: 700;
 }
 
-@media (max-width: 992px) {
-  .tools-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .tools-grid {
+/* Responsive cho phần homeGuest */
+@media (max-width: 1024px) {
+  .homeGuest-tools-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (max-width: 576px) {
-  .tools-grid {
+@media (max-width: 768px) {
+  .homeGuest-tools-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
+@media (max-width: 480px) {
+  .homeGuest-tools-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Hover effect */
-.support-left:hover,
-.support-right:hover {
+.homeGuest-support-left:hover,
+.homeGuest-support-right:hover {
   transform: translateY(-5px);
   transition: all 0.3s ease;
 }
 
-.support-left:hover {
+.homeGuest-support-left:hover {
   box-shadow: 0 12px 40px rgba(196, 171, 255, 0.25);
 }
 
-.support-right:hover {
+.homeGuest-support-right:hover {
   box-shadow: 0 12px 40px rgba(0, 208, 188, 0.25);
 }
 

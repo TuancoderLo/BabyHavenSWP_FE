@@ -12,6 +12,20 @@ import Medical from "../../../assets/ic_med-advisers_dm_rejv.svg";
 import Alert from "../../../assets/Expert_articles_resized.svg";
 import GrowthTrack from "../../../assets/GrowthTracker-nov-2023.svg";
 import Milestone from "../../../assets/ChildHeightPredictor.svg";
+import {
+  checkAndClearSessionData,
+  clearAuthData,
+  clearTemporaryData,
+  cleanupExpiredTemporaryData,
+} from "../../../utils/authUtils";
+import icon1 from "../../../assets/icon/1.png";
+import icon2 from "../../../assets/icon/2.png";
+import icon3 from "../../../assets/icon/3.png";
+import icon4 from "../../../assets/icon/4.png";
+import icon5 from "../../../assets/icon/5.png";
+import icon6 from "../../../assets/icon/6.png";
+import icon7 from "../../../assets/icon/7.png";
+import icon8 from "../../../assets/icon/8.png";
 
 function Guest() {
   const navigate = useNavigate();
@@ -20,6 +34,33 @@ function Guest() {
   const [loading, setLoading] = useState(true);
   const [latestBlogs, setLatestBlogs] = useState([]);
   const [doctors, setDoctors] = useState([]);
+
+  // Thêm useEffect để xóa dữ liệu đăng ký tạm thời
+  useEffect(() => {
+    // Kiểm tra phiên mới và xóa dữ liệu đăng nhập
+    checkAndClearSessionData();
+
+    // Xóa dữ liệu đăng ký tạm thời bất kể là phiên mới hay cũ
+    clearTemporaryData(["registration", "verification"]);
+
+    // Dọn dẹp bất kỳ dữ liệu tạm thời nào đã hết hạn
+    cleanupExpiredTemporaryData();
+
+    // Xóa dữ liệu đăng ký tạm thời khi tải trang Guest
+    const registrationKeys = [
+      "registration_data",
+      "pending_email",
+      "verification_step",
+      "verification_token",
+    ];
+
+    registrationKeys.forEach((key) => {
+      if (localStorage.getItem(key)) {
+        console.log(`Đã phát hiện và xóa dữ liệu đăng ký tạm thời: ${key}`);
+        localStorage.removeItem(key);
+      }
+    });
+  }, []);
 
   // Fetch tất cả category cha (parentCategoryId = null)
   useEffect(() => {
@@ -85,7 +126,13 @@ function Guest() {
 
   // Xử lý đăng xuất
   const handleLogout = () => {
-    localStorage.clear();
+    // Sử dụng clearAuthData từ authUtils
+    clearAuthData();
+
+    // Xóa dấu hiệu phiên làm việc
+    sessionStorage.removeItem("session_started");
+
+    console.log("Đã đăng xuất và xóa dữ liệu đăng nhập thành công");
     navigate("/login");
   };
 
@@ -276,12 +323,12 @@ function Guest() {
         </section>
 
         {/* Support Section */}
-        <section className="support-section">
-          <div className="support-content">
-            <div className="support-left">
+        <section className="support-section homeGuest-support-section">
+          <div className="support-content homeGuest-support-content">
+            <div className="support-left homeGuest-support-left">
               <h2>
-                <span className="highlight">BabyHaven</span> helps you and your
-                little one
+                <span className="highlight homeGuest-highlight">BabyHaven</span>{" "}
+                helps you and your little one
               </h2>
               <p>
                 Parenthood is a journey full of joys and challenges. Our mission
@@ -289,39 +336,73 @@ function Guest() {
                 you need at every stage.
               </p>
 
-              <div className="support-buttons">
+              <div className="support-buttons homeGuest-support-buttons">
                 <h3>How can we support you?</h3>
-                <div className="button-grid">
-                  <button className="support-btn">I'm expecting</button>
-                  <button className="support-btn">I have a baby</button>
-                  <button className="support-btn">I have a toddler</button>
-                  <button className="support-btn">I have a child</button>
+                <div className="button-grid homeGuest-button-grid">
+                  <button className="support-btn homeGuest-support-btn">
+                    I'm expecting
+                  </button>
+                  <button className="support-btn homeGuest-support-btn">
+                    I have a baby
+                  </button>
+                  <button className="support-btn homeGuest-support-btn">
+                    I have a toddler
+                  </button>
+                  <button className="support-btn homeGuest-support-btn">
+                    I have a child
+                  </button>
                 </div>
               </div>
             </div>
 
-            <div className="support-right">
+            <div className="support-right homeGuest-support-right">
               <h2 id="tools-features">Services</h2>
-              <div className="tools-grid">
+              <div className="tools-grid homeGuest-tools-grid">
                 {[
                   {
-                    image: GrowthTrack,
-                    title: "Growth Tracker",
+                    image: icon1,
+                    title: "Update Growth Records",
                   },
                   {
-                    image: Medical,
-                    title: "Consultation with Experts",
+                    image: icon2,
+                    title: "Manage/Track Multiple Children",
                   },
                   {
-                    image: Milestone,
-                    title: "Milestone Records",
+                    image: icon3,
+                    title: "View Basic Growth Charts",
+                  },
+                  {
+                    image: icon4,
+                    title: "View Advanced Growth Charts",
+                  },
+                  {
+                    image: icon5,
+                    title: "Nutrition and Development Alerts",
+                  },
+                  {
+                    image: icon6,
+                    title: "Request Doctor Consultation",
+                  },
+                  {
+                    image: icon7,
+                    title: "Share Health Data with Doctor",
+                  },
+                  {
+                    image: icon8,
+                    title: "View Blogs",
                   },
                 ].map((tool, index) => (
-                  <a key={index} href="#" className="tool-card">
-                    <div className="tool-image-homepage">
+                  <a
+                    key={index}
+                    href="#"
+                    className="tool-card homeGuest-tool-card"
+                  >
+                    <div className="tool-image-homepage homeGuest-tool-image">
                       <img src={tool.image} alt={tool.title} />
                     </div>
-                    <span className="tool-title">{tool.title}</span>
+                    <span className="tool-title homeGuest-tool-title">
+                      {tool.title}
+                    </span>
                   </a>
                 ))}
               </div>

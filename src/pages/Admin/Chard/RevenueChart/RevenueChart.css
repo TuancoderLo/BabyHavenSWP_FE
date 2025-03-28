@@ -875,3 +875,34 @@
     min-width: 800px; /* Đảm bảo bảng có thể scroll trên thiết bị nhỏ */
   }
 }
+
+/* Thêm style cho input tìm kiếm theo tên */
+.name-filter-input {
+  padding: 8px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 14px;
+  color: #2d3748;
+  transition: all 0.2s;
+  min-width: 200px; /* Rộng hơn select để dễ nhập tên */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.name-filter-input:hover {
+  border-color: #cbd5e0;
+}
+
+.name-filter-input:focus {
+  border-color: #4361ee;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+}
+
+@media (max-width: 768px) {
+  /* ... existing responsive code ... */
+
+  .name-filter-input {
+    width: 100%;
+  }
+}

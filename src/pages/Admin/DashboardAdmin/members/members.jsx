@@ -71,10 +71,6 @@ const Members = () => {
   const [membershipPackages, setMembershipPackages] = useState([]);
   const [membershipSearchText, setMembershipSearchText] = useState("");
 
-  // Thêm state cho xử lý upload image
-  const [imageUrl, setImageUrl] = useState("");
-  const [imageLoading, setImageLoading] = useState(false);
-
   // Fetch data when component mounts and when tab changes
   useEffect(() => {
     if (activeTab === "1") {
@@ -149,64 +145,6 @@ const Members = () => {
     }
   };
 
-  const uploadImageToCloudinary = async (file) => {
-    setImageLoading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", "ml_default");
-    formData.append("cloud_name", "dk1fulaii");
-
-    try {
-      // Ghi log để debug
-      console.log("File being uploaded:", file.name, file.type, file.size);
-
-      // KHÔNG thiết lập header Content-Type để axios tự xử lý
-      const response = await axios.post(
-        "https://api.cloudinary.com/v1_1/dk1fulaii/image/upload",
-        formData
-      );
-
-      console.log("Cloudinary response:", response.data);
-      const url = response.data.secure_url;
-      setImageUrl(url);
-
-      return {
-        url: url,
-        // Không cần thiết chuyển đổi thành byte array ở client
-        // Backend có thể tải ảnh từ URL
-      };
-    } catch (error) {
-      console.error("Error uploading image to Cloudinary:", error);
-      if (error.response) {
-        console.error("Error response data:", error.response.data);
-      }
-      message.error(
-        "Không thể tải ảnh lên: " +
-          (error.response?.data?.error?.message || error.message)
-      );
-      return null;
-    } finally {
-      setImageLoading(false);
-    }
-  };
-
-  const fetchImageAsByteArray = async (imageUrl) => {
-    try {
-      const response = await fetch(imageUrl);
-      const imageBlob = await response.blob();
-      const reader = new FileReader();
-
-      return new Promise((resolve, reject) => {
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsArrayBuffer(imageBlob);
-      });
-    } catch (error) {
-      console.error("Error converting image to byte array:", error);
-      return null;
-    }
-  };
-
   const handleUserAccountSubmit = async (values) => {
     try {
       setLoading(true);
@@ -234,11 +172,6 @@ const Members = () => {
         roleId: values.roleId || 2, // Default to Member role (2)
       };
 
-      // Nếu có URL ảnh, thêm vào dữ liệu
-      if (imageUrl) {
-        formattedData.profilePicture = imageUrl; // Chỉ gửi URL
-      }
-
       if (editingUserAccount) {
         // Cập nhật tài khoản hiện có
         await userAccountsApi.update(editingUserAccount.userId, formattedData);
@@ -256,8 +189,6 @@ const Members = () => {
 
       setUserAccountModalVisible(false);
       fetchUserAccounts();
-      // Reset image state sau khi submit thành công
-      setImageUrl("");
     } catch (error) {
       console.error("Error saving user account:", error);
       message.error(error.message || "Could not save user account");
@@ -857,7 +788,7 @@ const Members = () => {
               <div className="MemberAdmin-user-accounts-actions">
                 <div className="MemberAdmin-search-input-container">
                   <Input
-                    placeholder="Tìm theo tên, username, email, SĐT"
+                    placeholder="Search by name, username, email, phone"
                     value={searchText}
                     onChange={handleSearchChange}
                     allowClear
@@ -930,7 +861,7 @@ const Members = () => {
               <div className="MemberAdmin-user-accounts-actions">
                 <div className="MemberAdmin-search-input-container">
                   <Input
-                    placeholder="Tìm theo tên thành viên hoặc thông tin liên hệ"
+                    placeholder="Search by member name or contact info"
                     value={memberSearchText}
                     onChange={handleMemberSearchChange}
                     allowClear
@@ -974,7 +905,7 @@ const Members = () => {
               <div className="MemberAdmin-user-accounts-actions">
                 <div className="MemberAdmin-search-input-container">
                   <Input
-                    placeholder="Tìm theo tên thành viên hoặc tên gói"
+                    placeholder="Search by member name or package name"
                     value={membershipSearchText}
                     onChange={handleMembershipSearchChange}
                     allowClear
@@ -1113,14 +1044,15 @@ const Members = () => {
                   }
 
                   // Upload lên Cloudinary
-                  const result = await uploadImageToCloudinary(file);
+                  // Đã comment để không sử dụng Cloudinary
+                  /* const result = await uploadImageToCloudinary(file);
                   if (result) {
                     setImageUrl(result.url);
                     // Form.setFieldsValue là để cập nhật giá trị của form
                     userAccountForm.setFieldsValue({
                       profilePicture: result.url,
                     });
-                  }
+                  } */
                   return false; // Chặn upload mặc định của antd
                 }}
               >

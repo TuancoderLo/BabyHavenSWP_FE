@@ -1,11 +1,9 @@
-
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css");
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Inter', sans-serif; 
 }
 
 body,
@@ -17,241 +15,341 @@ html {
   overflow: hidden;
 }
 
-.auth-container {
+.Register-auth-container {
   width: 100vw;
   height: 100vh;
   display: flex;
-  background: #ffffff;
+  justify-content: center;
+  align-items: center;
+  background-image: url("https://cafefcdn.com/203337114487263232/2022/1/22/shutterstock1486364633-small-1024x683-16428607564401603370314.jpg");
+  background-size: cover;
+  background-position: center;
+  position: relative;
   overflow: hidden;
-  position: fixed;
+}
+
+/* Lớp overlay để làm tối ảnh nền để form nổi bật hơn */
+.Register-auth-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 1;
+}
+
+.Register-auth-box {
+  width: 100%;
+  max-width: 500px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 0 0 15px rgba(0, 191, 166, 0.15);
+  position: relative;
+  z-index: 2;
+  backdrop-filter: blur(5px);
+}
+
+/* Thêm viền gradient ở đầu form */
+.Register-auth-box::before {
+  content: "";
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #00bfa6, #00d0bc, #5ce1e6);
+  z-index: 3;
+  border-radius: 16px 16px 0 0;
 }
 
-.auth-left {
-  width: 70%;
-  height: 100vh;
-  position: relative;
-  overflow: hidden;
-  padding: 0;
-  display: block;
+/* Ẩn thanh cuộn nhưng vẫn cho phép cuộn */
+.Register-auth-box::-webkit-scrollbar {
+  width: 5px;
 }
 
-.auth-right {
-  width: 30%;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 30px;
-  background: #f8fafc;
-  position: relative;
+.Register-auth-box::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 10px;
 }
 
-.auth-box {
-  width: 100%;
-  max-width: 380px;
-  padding: 60px;
-  background: white;
-  border-radius: 24px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.auth-image {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.auth-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-}
-
-.home-link {
+.Register-home-link {
   position: absolute;
   top: 16px;
   right: 16px;
-  font-size: 20px;
-  color: #1e293b;
+  font-size: 18px;
+  color: #ffffff;
   cursor: pointer;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.15);
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.auth-header {
-  margin-bottom: 30px;
+.Register-auth-header {
+  margin-bottom: 25px;
+  text-align: center;
+  position: relative;
 }
 
-.auth-header h1 {
-  color: #00d0bc;
+.Register-auth-header h1 {
+  color: #00bfa6;
   font-size: 28px;
   font-weight: 600;
   margin-bottom: 10px;
+  letter-spacing: 0.5px;
+  position: relative;
+  display: inline-block;
 }
 
-.header-subtitle {
+.Register-auth-header h1::after {
+  content: "";
+  position: absolute;
+  width: 50%;
+  height: 3px;
+  background: linear-gradient(90deg, #00bfa6, transparent);
+  bottom: -6px;
+  left: 25%;
+  border-radius: 2px;
+}
+
+.Register-header-subtitle {
   color: #64748b;
   font-size: 14px;
   line-height: 1.5;
+  font-weight: 300;
 }
 
-.form-group {
-  margin-bottom: 16px;
+/* Bố cục form 2 cột */
+.Register-form-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -8px;
+}
+
+.Register-form-group {
   position: relative;
+  padding: 0 8px;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+/* Thiết lập các form-group có chiều rộng 50% */
+.Register-form-group.half-width {
+  width: 50%;
 }
 
 /* Thêm CSS cho password-group */
-.password-group {
+.Register-password-group {
   position: relative;
 }
 
-.password-toggle {
+.Register-password-toggle {
   position: absolute;
-  right: 14px;
+  right: 22px;
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
   color: #94a3b8;
   font-size: 16px;
   z-index: 10;
-  transition: color 0.3s ease;
 }
 
-.password-toggle:hover {
+.Register-password-toggle:hover {
   color: #00bfa6;
 }
 
-.form-group input {
+.Register-form-group input,
+.Register-form-group select {
   width: 100%;
-  padding: 10px 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  padding: 12px 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
   font-size: 13px;
   color: #1e293b;
-  transition: all 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
 }
 
 /* Điều chỉnh padding cho input password để tránh chồng lên icon */
-.password-group input {
-  padding-right: 40px;
+.Register-password-group input {
+  padding-right: 45px;
 }
 
-input:focus {
+.Register-form-group input:focus,
+.Register-form-group select:focus {
   outline: none;
   border-color: #00bfa6;
-  box-shadow: 0 0 0 3px rgba(0, 191, 166, 0.1);
+  box-shadow: 0 0 0 4px rgba(0, 191, 166, 0.15);
 }
 
-input::placeholder {
+.Register-form-group input::placeholder {
   color: #94a3b8;
 }
 
-.submit-btn {
+.Register-submit-btn {
   width: 100%;
-  padding: 10px;
-  background: #00bfa6;
+  padding: 12px;
+  background: linear-gradient(135deg, #00bfa6, #00d0bc);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 10px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin-bottom: 16px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 10px rgba(0, 191, 166, 0.25);
+  position: relative;
+  overflow: hidden;
 }
 
-.submit-btn:hover {
-  background: #00a892;
+.Register-submit-btn:hover {
+  background: linear-gradient(135deg, #00a892, #00c0ae);
 }
 
-.toggle-form {
+.Register-toggle-form {
   text-align: center;
   color: #64748b;
   font-size: 13px;
+  margin-top: 5px;
 }
 
-.toggle-form span {
+.Register-toggle-form span {
   color: #00bfa6;
   cursor: pointer;
   font-weight: 500;
   margin-left: 4px;
+  position: relative;
 }
 
-.toggle-form span:hover {
+.Register-toggle-form span:hover {
+  color: #00a892;
   text-decoration: underline;
 }
 
-.error-message {
+.Register-error-message {
   color: #dc2626;
   font-size: 14px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   text-align: center;
-  padding: 8px;
-  background-color: #fef2f2;
-  border-radius: 6px;
+  padding: 10px;
+  background-color: rgba(254, 242, 242, 0.9);
+  border-radius: 8px;
   border: 1px solid #fee2e2;
+  box-shadow: 0 2px 5px rgba(220, 38, 38, 0.1);
 }
 
 /* Style cho select */
-select {
+.Register-form-group select {
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg fill='none' stroke='%2364748b' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 8px center;
+  background-position: right 12px center;
   background-size: 16px;
-  padding-right: 32px;
+  padding-right: 35px;
+  cursor: pointer;
 }
 
 /* Style cho date input */
-input[type="date"] {
-  padding-right: 8px;
+.Register-form-group input[type="date"] {
+  cursor: pointer;
+}
+
+.Register-form-group input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.7;
 }
 
 /* Style cho nút Google */
-.social-btn {
+.Register-social-btn {
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
+  padding: 10px 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
   background: white;
   color: #1e293b;
-  font-size: 13px;
+  font-size: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
-.social-btn:hover {
+.Register-social-btn:hover {
   background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
-.social-btn i {
-  font-size: 16px;
+.Register-social-btn i {
+  font-size: 18px;
   color: #4285f4;
+}
+
+.Register-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 15px 0;
+}
+
+.Register-divider::before,
+.Register-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.Register-divider span {
+  padding: 0 12px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .auth-left {
-    display: none;
+  .Register-auth-box {
+    max-width: 90%;
+    padding: 25px 20px;
   }
 
-  .auth-right {
+  .Register-form-group.half-width {
     width: 100%;
-    padding: 16px;
   }
 
-  .auth-box {
-    max-width: 320px;
+  .Register-auth-header h1 {
+    font-size: 24px;
   }
 }
 
+@media (max-height: 700px) {
+  .Register-auth-box {
+    padding: 20px 15px;
+  }
+
+  .Register-form-group {
+    margin-bottom: 10px;
+  }
+
+  .Register-auth-header {
+    margin-bottom: 15px;
+  }
+
+  .Register-auth-header h1 {
+    font-size: 22px;
+  }
+}
