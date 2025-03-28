@@ -5,36 +5,35 @@ import doctorApi from "../../../../services/DoctorApi";
 import TextEditor from "../../../../pages/Admin/DashboardAdmin/blog/textEditor";
 import moment from "moment";
 
-
 // Thành phần cho thẻ yêu cầu đã gửi
 function ExpandableSentRequestCard({ request, onClick }) {
   const truncatedText =
-  `ID: ${request.requestId} | Child: ${request.childName} | ` +
-  `Category: ${request.category} | Date: ${request.requestDate}`
-    .slice(0, 100) + "...";
-    return (
-      <div className="consultation-sent-card" onClick={() => onClick(request)}>
-        <div className="sent-header">
+    `ID: ${request.requestId} | Child: ${request.childName} | ` +
+    `Category: ${request.category} | Date: ${request.requestDate}`
+      .slice(0, 100) + "...";
+  return (
+    <div className="consultation-sent-card" onClick={() => onClick(request)}>
+      <div className="sent-header">
         <span className="sent-date">
-  {moment(request.requestDate).format("DD/MM/YYYY HH:mm")}
-</span>
-          <span className="sent-status">{request.status}</span>
-        </div>
-        <div className="sent-summary">
-          <p><strong>ID:</strong> {request.requestId}</p>
-          <p><strong>Child:</strong> {request.childName}</p>
-          <p><strong>Category:</strong> {request.category}</p>
-        </div>
-        <div className="truncated-content">{truncatedText}</div>
+          {moment(request.requestDate).format("DD/MM/YYYY HH:mm")}
+        </span>
+        <span className="sent-status">{request.status}</span>
       </div>
-    );
+      <div className="sent-summary">
+        <p><strong>ID:</strong> {request.requestId}</p>
+        <p><strong>Child:</strong> {request.childName}</p>
+        <p><strong>Category:</strong> {request.category}</p>
+      </div>
+      <div className="truncated-content">{truncatedText}</div>
+    </div>
+  );
 }
 
 // Thành phần cho thẻ phản hồi đã cung cấp
 function ExpandableFeedbackEntry({ feedback, onClick }) {
   const truncatedText =
-    `Child: ${feedback.childName} | Doctor: ${feedback.doctorName} | Rating: ${feedback.rating} stars`.slice(0, 100) +
-    "...";
+    `Child: ${feedback.childName} | Doctor: ${feedback.doctorName} | Rating: ${feedback.rating} stars`
+      .slice(0, 100) + "...";
   return (
     <div className="consultation-feedback-card" onClick={() => onClick(feedback)}>
       <div className="feedback-header">
@@ -42,15 +41,9 @@ function ExpandableFeedbackEntry({ feedback, onClick }) {
         <span className="feedback-rating">{feedback.rating} ★</span>
       </div>
       <div className="feedback-summary">
-        <p>
-          <strong>Child:</strong> {feedback.childName}
-        </p>
-        <p>
-          <strong>Doctor:</strong> {feedback.doctorName}
-        </p>
-        <p>
-          <strong>Comment:</strong> {feedback.comment.slice(0, 50)}...
-        </p>
+        <p><strong>Child:</strong> {feedback.childName}</p>
+        <p><strong>Doctor:</strong> {feedback.doctorName}</p>
+        <p><strong>Comment:</strong> {feedback.comment.slice(0, 50)}...</p>
       </div>
       <div className="truncated-content">{truncatedText}</div>
     </div>
@@ -73,6 +66,8 @@ function DoctorConsultation() {
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [attachment, setAttachment] = useState(null); // Thêm state cho attachment (Base64 string)
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   const steps = ["Enter Information", "Select Doctor", "Confirm"];
 
@@ -107,7 +102,7 @@ function DoctorConsultation() {
   }, []);
 
   useEffect(() => {
-    // Mỗi lần chọn response khác => reset form feedback
+    // Reset form feedback khi chọn response khác
     setShowFeedbackForm(false);
     setRating(0);
     setComment("");
@@ -200,6 +195,7 @@ function DoctorConsultation() {
       return { greeting: "", approvalMessage: content || "", advice: "", followUp: "" };
     }
   };
+  
 
   // Lấy danh sách phản hồi (ConsultationResponses) của Member
   const fetchConsultationResponses = async () => {
@@ -209,14 +205,12 @@ function DoctorConsultation() {
       const res = await doctorApi.getConsultationResponses(memberId);
       let responses = Array.isArray(res?.data) ? res.data : [res.data];
 
-      // Parse nội dung JSON
       const parsedResponses = responses.map((item) => ({
         ...item,
         content: typeof item.content === "string" ? parseContentToObject(item.content) : item.content,
       }));
       setConsultationResponses(parsedResponses);
 
-      // Lấy chi tiết Request cho mỗi Response
       const requests = {};
       for (const response of parsedResponses) {
         if (response.requestId) {
@@ -236,7 +230,10 @@ function DoctorConsultation() {
       const memberId = localStorage.getItem("memberId");
       const res = await doctorApi.getConsultationRequestsByMemberId(memberId);
       const requestsData = Array.isArray(res.value) 
-      ? res.data.value : Array.isArray(res.data) ? res.data : [];
+        ? res.data.value 
+        : Array.isArray(res.data) 
+        ? res.data 
+        : [];
       setSentRequests(requestsData);
     } catch (error) {
       console.error("Error fetching sent requests:", error);
@@ -276,7 +273,13 @@ function DoctorConsultation() {
     return tmp.textContent || tmp.innerText || "";
   };
 
-  // Gửi request mới => status = Pending
+  // Xử lý khi chọn file attachment
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    setSelectedFiles(files);
+  };
+
+  // Gửi request mới
   const handleSubmit = async () => {
     try {
       setSubmitLoading(true);
@@ -294,16 +297,33 @@ function DoctorConsultation() {
 
       const plainDescription = stripHtml(consultationContent);
 
+      // Chuyển file thành Base64
+      const attachments = await Promise.all(
+        selectedFiles.map(async (file) => {
+          const base64Content = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result.split(",")[1]); // Lấy phần Base64 sau "data:..."
+            reader.readAsDataURL(file);
+          });
+          return {
+            fileName: file.name,
+            content: base64Content,
+            mimeType: file.type,
+          };
+        })
+      );
+
       const payload = {
         memberId,
         childName: selectedChild.name,
         childBirth: selectedChild.childBirth,
         doctorId: selectedDoctor.doctorId,
         requestDate,
-        status: "Pending", // Dùng "Pending" để khớp enum
+        status: "Pending",
         urgency,
         ...(selectedCategory && { category: selectedCategory }),
         description: plainDescription,
+        attachments, // Gửi danh sách attachments
       };
 
       await doctorApi.createConsultationRequest(payload);
@@ -316,6 +336,7 @@ function DoctorConsultation() {
       setSelectedCategory("");
       setConsultationContent("");
       setSelectedDoctor(null);
+      setSelectedFiles([]); // Reset file
     } catch (error) {
       setSubmitError(
         error.response?.data?.title || error.message || "Unable to send consultation request"
@@ -325,63 +346,67 @@ function DoctorConsultation() {
     }
   };
 
-  // Thành viên đánh giá + cập nhật status response => Completed
-const handleSubmitFeedbackAndUpdateStatus = async () => {
-  try {
-    setIsSubmitting(true);
-
-    const userId = localStorage.getItem("userId");
-    if (!userId) throw new Error("Please login to submit feedback");
-
-    // Lấy sẵn responseId từ selectedResponse
-    const responseId = selectedResponse?.response?.responseId;
-    if (!responseId) {
-      throw new Error("No response ID found in selectedResponse!");
+  const downloadAttachment = (attachment) => {
+    try {
+      const { FileName, Content, MimeType } = attachment;
+      const byteCharacters = atob(Content);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: MimeType });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = FileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading file:", error);
     }
+  };
 
-    // Kiểm tra rating & comment
-    if (rating < 1 || rating > 5) {
-      throw new Error("Please select a rating");
+  // Thành viên đánh giá + cập nhật status response
+  const handleSubmitFeedbackAndUpdateStatus = async () => {
+    try {
+      setIsSubmitting(true);
+
+      const userId = localStorage.getItem("userId");
+      if (!userId) throw new Error("Please login to submit feedback");
+
+      const responseId = selectedResponse?.response?.responseId;
+      if (!responseId) throw new Error("No response ID found in selectedResponse!");
+
+      if (rating < 1 || rating > 5) throw new Error("Please select a rating");
+      if (!comment.trim()) throw new Error("Comment cannot be empty");
+
+      const feedbackDate = new Date().toISOString();
+      const payload = {
+        userId,
+        responseId,
+        rating,
+        comment,
+        feedbackDate,
+        feedbackType: 0,
+        status: 0,
+      };
+
+      await doctorApi.createRatingFeedback(payload);
+      await doctorApi.updateConsultationResponseStatus(responseId, "Completed");
+
+      await fetchConsultationResponses();
+      await fetchUserFeedback();
+
+      setShowFeedbackForm(false);
+    } catch (error) {
+      setFeedbackSubmitError(error.message || "Unable to submit feedback");
+    } finally {
+      setIsSubmitting(false);
     }
-    if (!comment.trim()) {
-      throw new Error("Comment cannot be empty");
-    }
-
-    // Tạo payload gửi lên API
-    const feedbackDate = new Date().toISOString();
-    const payload = {
-      userId,
-      responseId,
-      rating,
-      comment,
-      feedbackDate,
-      feedbackType: 0,
-      status: 0,  // tuỳ ý bạn sử dụng
-    };
-
-    // Gửi feedback
-    await doctorApi.createRatingFeedback(payload);
-
-    // Cập nhật status của Response => "Completed"
-    await doctorApi.updateConsultationResponseStatus(responseId, "Completed");
-
-    // (Tuỳ chọn) Nếu muốn Request cũng chuyển "Completed", gọi:
-    // const requestId = selectedResponse.response.requestId;
-    // await doctorApi.updateConsultationRequestStatus(requestId, "Completed");
-
-    // Làm mới danh sách Responses & Feedback
-    await fetchConsultationResponses();
-    await fetchUserFeedback();
-
-    // Đóng form feedback
-    setShowFeedbackForm(false);
-
-  } catch (error) {
-    setFeedbackSubmitError(error.message || "Unable to submit feedback");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
   // Render nội dung form theo bước
   const renderStepContent = () => {
@@ -461,9 +486,28 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
                   <option value="Critical">Critical</option>
                 </select>
               </div>
+
+              {/* Attachment */}
+              <div className="input-group">
+                <label htmlFor="file-upload">Attachments</label>
+                <input
+                  type="file"
+                  id="file-upload"
+                  multiple
+                  onChange={handleFileChange}
+                  className="doctor-file-upload"
+                />
+                {selectedFiles.length > 0 && (
+                  <ul>
+                    {selectedFiles.map((file, index) => (
+                      <li key={index}>{file.name}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </div>
 
-            {/* Nội dung mô tả (TextEditor) */}
+            {/* Nội dung mô tả */}
             <div className="editor-wrapper">
               <TextEditor value={consultationContent} onChange={setConsultationContent} />
             </div>
@@ -534,6 +578,11 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
                   dangerouslySetInnerHTML={{ __html: consultationContent }}
                 />
               </div>
+              {attachment && (
+                <div className="review-item">
+                  <strong>Attachment:</strong> File attached
+                </div>
+              )}
             </div>
 
             {selectedDoctor && (
@@ -602,18 +651,18 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
           <p>No consultation responses available.</p>
         );
 
-        case "sentRequests":
-          return sentRequests.length > 0 ? (
-            sentRequests.map((req, index) => (
-              <ExpandableSentRequestCard
-                key={index}
-                request={req}
-                onClick={setSelectedSentRequest}
-              />
-            ))
-          ) : (
-            <p>No sent requests available.</p>
-          );
+      case "sentRequests":
+        return sentRequests.length > 0 ? (
+          sentRequests.map((req, index) => (
+            <ExpandableSentRequestCard
+              key={index}
+              request={req}
+              onClick={setSelectedSentRequest}
+            />
+          ))
+        ) : (
+          <p>No sent requests available.</p>
+        );
 
       case "feedback":
         return userFeedback.length > 0 ? (
@@ -713,24 +762,23 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
                 <h4>Request Information</h4>
                 {selectedResponse.request ? (
                   <>
-                    <p>
-                      <strong>Member:</strong> {selectedResponse.request.memberName}
-                    </p>
-                    <p>
-                      <strong>Child:</strong> {selectedResponse.request.childName}
-                    </p>
-                    <p>
-                      <strong>Category:</strong> {selectedResponse.request.category}
-                    </p>
-                    <p>
-                      <strong>Urgency:</strong> {selectedResponse.request.urgency}
-                    </p>
-                    <p>
-                      <strong>Description:</strong> {selectedResponse.request.description}
-                    </p>
-                    <p>
-                      <strong>Request Date:</strong> {selectedResponse.request.requestDate}
-                    </p>
+                    <p><strong>Member:</strong> {selectedResponse.request.memberName}</p>
+                    <p><strong>Child:</strong> {selectedResponse.request.childName}</p>
+                    <p><strong>Category:</strong> {selectedResponse.request.category}</p>
+                    <p><strong>Urgency:</strong> {selectedResponse.request.urgency}</p>
+                    <p><strong>Description:</strong> {selectedResponse.request.description}</p>
+                    <p><strong>Request Date:</strong> {selectedResponse.request.requestDate}</p>
+                    {selectedResponse.request.attachments && (
+                      <p>
+                        <strong>Attachment:</strong>{" "}
+                        <a
+                          href={`data:application/octet-stream;base64,${selectedResponse.request.attachments}`}
+                          download={`attachment-${selectedResponse.request.requestId}`}
+                        >
+                          Download Attachment
+                        </a>
+                      </p>
+                    )}
                   </>
                 ) : (
                   <p>No request details available.</p>
@@ -738,35 +786,14 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
               </div>
               <div className="response-section">
                 <h4>Response Information</h4>
-                <p>
-                  <strong>Date:</strong> {selectedResponse.response.responseDate}
-                </p>
-                <p>
-                  <strong>Doctor:</strong> {selectedResponse.response.doctorName}
-                </p>
-                <p>
-                  <strong>Status:</strong> {selectedResponse.response.status}
-                </p>
-                <p>
-                  <strong>Greeting:</strong>{" "}
-                  {selectedResponse.response.content.greeting || "N/A"}
-                </p>
-                <p>
-                  <strong>Approval Message:</strong>{" "}
-                  {selectedResponse.response.content.approvalMessage || "N/A"}
-                </p>
-                <p>
-                  <strong>Advice:</strong>{" "}
-                  {selectedResponse.response.content.advice || "N/A"}
-                </p>
-                <p>
-                  <strong>Follow-Up:</strong>{" "}
-                  {selectedResponse.response.content.followUp || "N/A"}
-                </p>
-                <p>
-                  <strong>Helpful:</strong>{" "}
-                  {selectedResponse.response.isHelpful ? "Yes" : "No"}
-                </p>
+                <p><strong>Date:</strong> {selectedResponse.response.responseDate}</p>
+                <p><strong>Doctor:</strong> {selectedResponse.response.doctorName}</p>
+                <p><strong>Status:</strong> {selectedResponse.response.status}</p>
+                <p><strong>Greeting:</strong> {selectedResponse.response.content.greeting || "N/A"}</p>
+                <p><strong>Approval Message:</strong> {selectedResponse.response.content.approvalMessage || "N/A"}</p>
+                <p><strong>Advice:</strong> {selectedResponse.response.content.advice || "N/A"}</p>
+                <p><strong>Follow-Up:</strong> {selectedResponse.response.content.followUp || "N/A"}</p>
+                <p><strong>Helpful:</strong> {selectedResponse.response.isHelpful ? "Yes" : "No"}</p>
               </div>
 
               {showFeedbackForm && (
@@ -821,27 +848,29 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
             <div className="response-details">
               <div className="request-section">
                 <h4>Request Information</h4>
-                <p>
-                  <strong>ID:</strong> {selectedSentRequest.requestId}
-                </p>
-                <p>
-                  <strong>Child:</strong> {selectedSentRequest.childName}
-                </p>
-                <p>
-                  <strong>Category:</strong> {selectedSentRequest.category}
-                </p>
-                <p>
-                  <strong>Urgency:</strong> {selectedSentRequest.urgency}
-                </p>
-                <p>
-                  <strong>Description:</strong> {selectedSentRequest.description}
-                </p>
-                <p>
-                  <strong>Date:</strong> {selectedSentRequest.requestDate}
-                </p>
-                <p>
-                  <strong>Status:</strong> {selectedSentRequest.status}
-                </p>
+                <p><strong>ID:</strong> {selectedSentRequest.requestId}</p>
+                <p><strong>Child:</strong> {selectedSentRequest.childName}</p>
+                <p><strong>Category:</strong> {selectedSentRequest.category}</p>
+                <p><strong>Urgency:</strong> {selectedSentRequest.urgency}</p>
+                <p><strong>Description:</strong> {selectedSentRequest.description}</p>
+                <p><strong>Date:</strong> {selectedSentRequest.requestDate}</p>
+                <p><strong>Status:</strong> {selectedSentRequest.status}</p>
+                {selectedSentRequest.attachments && (
+                  <div>
+                    <h4>Attachments</h4>
+                    {JSON.parse(selectedSentRequest.attachments).map((attachment, index) => (
+                      <div key={index} style={{ marginBottom: "10px" }}>
+                        <p>{attachment.fileName}</p>
+                        <button
+                          className="download-button"
+                          onClick={() => downloadAttachment(attachment)}
+                        >
+                          Download
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -859,24 +888,12 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
             <div className="response-details">
               <div className="feedback-section">
                 <h4>Feedback Information</h4>
-                <p>
-                  <strong>Child:</strong> {selectedFeedback.childName}
-                </p>
-                <p>
-                  <strong>Doctor:</strong> {selectedFeedback.doctorName}
-                </p>
-                <p>
-                  <strong>Category:</strong> {selectedFeedback.categoryName}
-                </p>
-                <p>
-                  <strong>Rating:</strong> {selectedFeedback.rating} ★
-                </p>
-                <p>
-                  <strong>Comment:</strong> {selectedFeedback.comment}
-                </p>
-                <p>
-                  <strong>Date:</strong> {selectedFeedback.feedbackDate}
-                </p>
+                <p><strong>Child:</strong> {selectedFeedback.childName}</p>
+                <p><strong>Doctor:</strong> {selectedFeedback.doctorName}</p>
+                <p><strong>Category:</strong> {selectedFeedback.categoryName}</p>
+                <p><strong>Rating:</strong> {selectedFeedback.rating} ★</p>
+                <p><strong>Comment:</strong> {selectedFeedback.comment}</p>
+                <p><strong>Date:</strong> {selectedFeedback.feedbackDate}</p>
               </div>
             </div>
           </div>
@@ -923,15 +940,9 @@ function ExpandableResponseCard({ response, request, onClick }) {
         <span className="response-status">{response.status}</span>
       </div>
       <div className="response-summary">
-        <p>
-          <strong>Doctor:</strong> {response.doctorName}
-        </p>
-        <p>
-          <strong>Child:</strong> {request?.childName || "N/A"}
-        </p>
-        <p>
-          <strong>Category:</strong> {request?.category || "N/A"}
-        </p>
+        <p><strong>Doctor:</strong> {response.doctorName}</p>
+        <p><strong>Child:</strong> {request?.childName || "N/A"}</p>
+        <p><strong>Category:</strong> {request?.category || "N/A"}</p>
       </div>
       <div className="truncated-content">{truncatedText}</div>
     </div>
