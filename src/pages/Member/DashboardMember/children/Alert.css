@@ -1,221 +1,267 @@
 /* Alert Item */
 .alert-item {
-    padding: 8px 12px; /* Giảm padding để giao diện nhẹ nhàng hơn */
-    align-items: center;
-    min-height: 75px; /* Giảm chiều cao tối thiểu */
-    border-radius: 10px; /* Góc bo tròn mềm mại */
-    display: flex;
-    flex-direction: row;
-    background: #ffffff; /* Background trắng cho tất cả trạng thái */
-    border: 2px solid transparent; /* Chuẩn bị viền tùy biến */
-  }
-  
-  /* Alert Icon */
-  .alert-icon {
-    padding: 4px;
-    font-size: 24px; /* Giảm kích thước icon */
-    margin-right: 10px;
-    min-height: 24px;
-    text-shadow: none; /* Loại bỏ text-shadow để đơn giản */
-  }
-  
-  /* Alert Message */
-  .alert-message {
-    flex: 1;
-  }
-  
-  .alert-message p {
-    margin: 0;
-    font-size: 14px; /* Giảm kích thước font để nhẹ nhàng */
-    font-weight: 500; /* Giảm độ đậm để thân thiện hơn */
-    line-height: 1.4;
-  }
-  
-  /* Severity Classes */
-  .alert-item.healthy {
-    border-color: #00d0bc; /* Viền xanh lam nhạt cho trạng thái tốt */
-    color: #006064;
-  }
-  
-  .alert-item.warning {
-    border-color: #f4e800; /* Viền vàng nhạt cho trạng thái cảnh báo */
-    color: #ef6c00;
-  }
-  
-  .alert-item.warning.fadeable {
-    border-bottom: 3px solid #f4e800; /* Giữ viền dưới để nhấn mạnh */
-  }
-  
-  .alert-item.danger {
-    border-color: #ff6262; /* Viền hồng đậm cho trạng thái nguy hiểm */
-    color: #c62828;
-  }
-  
-  .alert-item.danger.fadeable {
-    border-bottom: 3px solid #ff6262; /* Giữ viền dưới để nhấn mạnh */
-  }
-  
-  .alert-item.fadeable {
-    animation: fade 1s infinite; /* Giữ hiệu ứng fade cho warning và danger */
-  }
-  
-  /* Alert Buttons */
-  .alert-close-btn {
-    background: none;
-    border: none;
-    font-size: 14px; /* Giảm kích thước nút đóng */
-    cursor: pointer;
-    color: #999; /* Màu xám nhạt để nhẹ nhàng */
-  }
-  
-  .alert-see-more {
-    margin-right: 8px;
-    background: none;
-    font-size: 12px;
-    color: #00d0bc; /* Màu xanh lam nhạt để phù hợp với chủ đề */
-    cursor: pointer;
-    font-weight: 500;
-  }
-  
-  /* Modal Overlay */
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5); /* Giảm độ tối của overlay */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-  }
-  
-  /* Modal Content */
-  .modal-content {
-    background: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    max-width: 450px; /* Giảm kích thước modal */
-    max-height: 80vh;
-    overflow-y: auto;
-    position: relative;
-    border: 2px solid #00d0bc; /* Viền xanh lam nhạt cho modal */
-  }
-  
-  /* Modal Title */
-  .modal-content h2 {
-    color: #00d0bc; /* Màu xanh lam nhạt để phù hợp với chủ đề */
-    font-size: 18px; /* Giảm kích thước tiêu đề */
-    font-weight: 600;
-    margin: 0 0 10px 0;
-  }
-  
-  /* Modal Text */
-  .modal-content p {
-    color: #333;
-    font-size: 13px; /* Giảm kích thước chữ */
-    line-height: 1.5;
-    margin: 0;
-  }
-  
-  /* Modal Close */
-  .modal-close {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: #ff9999; /* Màu hồng nhạt để nhẹ nhàng */
-    border: none;
-    border-radius: 50%;
-    width: 24px; /* Giảm kích thước nút đóng */
-    height: 24px;
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.3s ease;
-  }
-  
-  .modal-close:hover {
-    background: #ff6262; /* Màu hồng đậm khi hover */
-  }
-
-  /* Alert History List */
-.alert-history-list {
-  list-style: none;
-  padding: 0;
-  margin: 10px 0 0 0;
-  max-height: 300px;
-  overflow-y: auto;
+  padding: 8px 12px;
+  align-items: center;
+  min-height: 75px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: row;
+  background: #ffffff;
+  border: 2px solid transparent;
 }
 
-.alert-history-item {
-  padding: 8px;
-  border-bottom: 1px solid #eee;
-  font-size: 13px;
+/* Alert Icon */
+.alert-icon {
+  padding: 4px;
+  font-size: 24px;
+  margin-right: 10px;
+  min-height: 24px;
+  text-shadow: none;
 }
 
-.alert-history-item.healthy {
+/* Alert Message */
+.alert-message {
+  flex: 1;
+}
+
+.alert-message p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Severity Classes */
+.alert-item.healthy {
+  border-color: #00d0bc;
   color: #006064;
 }
 
-.alert-history-item.warning {
+.alert-item.warning {
+  border-color: #f4e800;
   color: #ef6c00;
 }
 
-.alert-history-item.danger {
+.alert-item.warning.fadeable {
+  border-bottom: 3px solid #f4e800;
+}
+
+.alert-item.danger {
+  border-color: #ff6262;
   color: #c62828;
 }
 
+.alert-item.danger.fadeable {
+  border-bottom: 3px solid #ff6262;
+}
+
+.alert-item.fadeable {
+  animation: fade 1s infinite;
+}
+
+/* Alert Buttons */
+.alert-close-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  color: #999;
+}
+
+.alert-see-more {
+  margin-right: 8px;
+  background: none;
+  font-size: 12px;
+  color: #00d0bc;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* Modal Content */
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 600px; /* Tăng chiều rộng để chứa bảng */
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  border: 2px solid #00d0bc;
+}
+
+/* Modal Title */
+.modal-content h2 {
+  color: #00d0bc;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+}
+
+/* Modal Text */
+.modal-content p {
+  color: #333;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Modal Close */
+.modal-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #ff9999;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
+}
+
+.modal-close:hover {
+  background: #ff6262;
+}
+
+/* Alert History Table */
+.alert-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+}
+
+.alert-history-table thead {
+  background-color: #f5f5f5;
+}
+
+.alert-history-table th,
+.alert-history-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  font-size: 13px;
+}
+
+.alert-history-table th {
+  font-weight: 600;
+  color: #333;
+}
+
+.alert-history-table tr {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.alert-history-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+.alert-history-table .alert-history-item.healthy {
+  color: #006064;
+}
+
+.alert-history-table .alert-history-item.warning {
+  color: #ef6c00;
+}
+
+.alert-history-table .alert-history-item.danger {
+  color: #c62828;
+}
+
+/* Alert Details (Dropdown) */
+.alert-details {
+  background-color: #f9f9f9;
+}
+
+.alert-details-content {
+  padding: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.alert-details-content p {
+  margin: 5px 0;
+  font-size: 12px;
+  color: #555;
+}
+
+.alert-details-content p strong {
+  color: #333;
+}
+
+/* Export PDF Button */
 .export-pdf-btn {
   margin-top: 20px;
   padding: 8px 16px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
+  background-color: #ffffff;
+  border: 2px solid #3e34ff;
+  color: #3e34ff;
+  font-weight: 600;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
 }
 
 .export-pdf-btn:hover {
-  background-color: #45a049;
+  background-color: #e6e6e6;
 }
-  
-  /* Responsive Adjustments */
-  @media (max-width: 768px) {
-    .alert-item {
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .alert-item {
       padding: 8px 10px;
-    }
-  
-    .alert-icon {
+  }
+
+  .alert-icon {
       font-size: 20px;
-    }
-  
-    .alert-message p {
+  }
+
+  .alert-message p {
       font-size: 13px;
-    }
-  
-    .alert-see-more {
+  }
+
+  .alert-see-more {
       font-size: 11px;
-    }
-  
-    .alert-close-btn {
+  }
+
+  .alert-close-btn {
       font-size: 13px;
-    }
-  
-    .modal-content {
+  }
+
+  .modal-content {
       padding: 16px;
       max-width: 90%;
-    }
-  
-    .modal-content h2 {
-      font-size: 16px;
-    }
-  
-    .modal-content p {
-      font-size: 12px;
-    }
   }
+
+  .modal-content h2 {
+      font-size: 16px;
+  }
+
+  .modal-content p {
+      font-size: 12px;
+  }
+
+  .alert-history-table th,
+  .alert-history-table td {
+      font-size: 12px;
+      padding: 6px;
+  }
+}

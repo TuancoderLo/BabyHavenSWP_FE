@@ -5,6 +5,7 @@ import HealthReportGenerator from "../../../../services/HealthReportGenerator";
 const Alert = ({ alert, alerts, member, child, growthRecords }) => {
   const [expanded, setExpanded] = useState(false);
   const [visible, setVisible] = useState(true);
+  const [expandedAlertIndex, setExpandedAlertIndex] = useState(null); // State để theo dõi alert nào đang mở dropdown
 
   const openOverlay = () => setExpanded(true);
   const closeOverlay = () => setExpanded(false);
@@ -55,9 +56,26 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
     });
   };
 
+  // Hàm phân tách chuỗi alert.message thành các trường
+  const parseAlertMessage = (message) => {
+    if (!message) return {};
+
+    const fields = {
+      alert: message.match(/^Alert: (.*?)(?=\. Date:|$)/)?.[1] || "N/A",
+      diseaseType: message.match(/Disease Type: (.*?)(?=\. Symptoms:|$)/)?.[1] || "N/A",
+      symptoms: message.match(/Symptoms: (.*?)(?=\. Recommended Treatment:|$)/)?.[1] || "N/A",
+      recommendedTreatment: message.match(/Recommended Treatment: (.*?)(?=\. Prevention Tips:|$)/)?.[1] || "N/A",
+      preventionTips: message.match(/Prevention Tips: (.*?)(?=\. Description:|$)/)?.[1] || "N/A",
+      description: message.match(/Description: (.*?)(?=\. Notes:|$)/)?.[1] || "N/A",
+      notes: message.match(/Notes: (.*?)(?=\. Trend Analysis:|$)/)?.[1] || "N/A",
+      trendAnalysis: message.match(/Trend Analysis: (.*)/)?.[1] || "N/A",
+    };
+
+    return fields;
+  };
+
   // Hàm export PDF với alert và record mới nhất
   const exportToPDF = () => {
-    // Lấy growth record mới nhất
     const latestGrowthRecord = growthRecords && growthRecords.length > 0
       ? growthRecords.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0]
       : null;
@@ -65,6 +83,16 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
     const report = new HealthReportGenerator(member, child, alert, latestGrowthRecord);
     report.generatePDF();
   };
+
+  // Hàm toggle dropdown cho alert
+  const toggleAlertDetails = (index) => {
+    setExpandedAlertIndex(expandedAlertIndex === index ? null : index);
+  };
+
+  // Sắp xếp alerts theo ngày giảm dần
+  const sortedAlerts = alerts && alerts.length > 0
+    ? [...alerts].sort((a, b) => new Date(b.alertDate) - new Date(a.alertDate))
+    : [];
 
   return (
     <>
@@ -111,27 +139,97 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
                 <p><strong>Message:</strong> {alert?.message || "No additional details available."}</p>
                 <p><strong>Date:</strong> {alert?.alertDate ? formatDate(alert.alertDate) : "N/A"}</p>
                 <h3>All Alerts</h3>
-                {alerts && alerts.length > 0 ? (
-                  <ul className="alert-history-list">
-                    {alerts.map((item, index) => (
-                      <li key={index} className={`alert-history-item ${getSeverityClass(item.severityLevel)}`}>
-                        <span>{formatDate(item.alertDate)} - {item.severityLevel} - {item.message}</span>
-                      </li>
-                    ))}
-                  </ul>
+                {sortedAlerts.length > 0 ? (
+                  <table className="alert-history-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Severity</th>
+                        <th>Message</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedAlerts.map((item, index) => {
+                        const parsedMessage = parseAlertMessage(item.message);
+                        return (
+                          <React.Fragment key={index}>
+                            <tr
+                              className={`alert-history-item ${getSeverityClass(item.severityLevel)}`}
+                              onClick={() => toggleAlertDetails(index)}
+                            >
+                              <td>{formatDate(item.alertDate)}</td>
+                              <td>{item.severityLevel}</td>
+                              <td>{parsedMessage.alert}</td>
+                            </tr>
+                            {expandedAlertIndex === index && (
+                              <tr className="alert-details">
+                                <td colSpan="3">
+                                  <div className="alert-details-content">
+                                    <p><strong>Date:</strong> {formatDate(item.alertDate)}</p>
+                                    <p><strong>Disease Type:</strong> {parsedMessage.diseaseType}</p>
+                                    <p><strong>Symptoms:</strong> {parsedMessage.symptoms}</p>
+                                    <p><strong>Recommended Treatment:</strong> {parsedMessage.recommendedTreatment}</p>
+                                    <p><strong>Prevention Tips:</strong> {parsedMessage.preventionTips}</p>
+                                    <p><strong>Description:</strong> {parsedMessage.description}</p>
+                                    <p><strong>Notes:</strong> {parsedMessage.notes}</p>
+                                    <p><strong>Trend Analysis:</strong> {parsedMessage.trendAnalysis}</p>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 ) : (
                   <p>No alert history available.</p>
                 )}
               </>
             ) : (
-              alerts && alerts.length > 0 ? (
-                <ul className="alert-history-list">
-                  {alerts.map((item, index) => (
-                    <li key={index} className={`alert-history-item ${getSeverityClass(item.severityLevel)}`}>
-                      <span>{formatDate(item.alertDate)} - {item.severityLevel} - {item.message}</span>
-                    </li>
-                  ))}
-                </ul>
+              sortedAlerts.length > 0 ? (
+                <table className="alert-history-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Severity</th>
+                      <th>Message</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sortedAlerts.map((item, index) => {
+                      const parsedMessage = parseAlertMessage(item.message);
+                      return (
+                        <React.Fragment key={index}>
+                          <tr
+                            className={`alert-history-item ${getSeverityClass(item.severityLevel)}`}
+                            onClick={() => toggleAlertDetails(index)}
+                          >
+                            <td>{formatDate(item.alertDate)}</td>
+                            <td>{item.severityLevel}</td>
+                            <td>{parsedMessage.alert}</td>
+                          </tr>
+                          {expandedAlertIndex === index && (
+                            <tr className="alert-details">
+                              <td colSpan="3">
+                                <div className="alert-details-content">
+                                  <p><strong>Date:</strong> {formatDate(item.alertDate)}</p>
+                                  <p><strong>Disease Type:</strong> {parsedMessage.diseaseType}</p>
+                                  <p><strong>Symptoms:</strong> {parsedMessage.symptoms}</p>
+                                  <p><strong>Recommended Treatment:</strong> {parsedMessage.recommendedTreatment}</p>
+                                  <p><strong>Prevention Tips:</strong> {parsedMessage.preventionTips}</p>
+                                  <p><strong>Description:</strong> {parsedMessage.description}</p>
+                                  <p><strong>Notes:</strong> {parsedMessage.notes}</p>
+                                  <p><strong>Trend Analysis:</strong> {parsedMessage.trendAnalysis}</p>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </tbody>
+                </table>
               ) : (
                 <p>No alert history available.</p>
               )
