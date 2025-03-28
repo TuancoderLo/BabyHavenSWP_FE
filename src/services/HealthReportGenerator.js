@@ -1,5 +1,5 @@
 import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable"; // Import autoTable
+import logo from "../assets/full_logo.png";
 
 class HealthReportGenerator {
   constructor(member, child, alert, growthRecord) {
@@ -8,6 +8,34 @@ class HealthReportGenerator {
     this.alert = alert || null;
     this.growthRecord = growthRecord || null;
     this.doc = new jsPDF();
+    this.logoBase64 = null;
+  }
+
+  // Hàm chuyển URL hình ảnh thành base64
+  async loadImageToBase64(url) {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error("Error converting image to base64:", error);
+      return null;
+    }
+  }
+
+  // Hàm loại bỏ dấu tiếng Việt
+  removeDiacritics(str) {
+    if (!str) return "N/A";
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D");
   }
 
   // Định dạng ngày
@@ -21,8 +49,18 @@ class HealthReportGenerator {
       : "N/A";
   }
 
-  // Thêm tiêu đề
-  addHeader() {
+  // Thêm tiêu đề và logo
+  async addHeader() {
+    // Chuyển logo thành base64
+    this.logoBase64 = await this.loadImageToBase64(logo);
+    if (this.logoBase64) {
+      // Thêm logo vào góc trên cùng bên trái
+      this.doc.addImage(this.logoBase64, "PNG", 5, 5, 35, 10); // Kích thước logo: 35x10mm
+    } else {
+      console.warn("Could not load logo for PDF.");
+    }
+
+    // Tiêu đề (giữ nguyên vị trí ban đầu)
     this.doc.setFont("helvetica", "bold");
     this.doc.setFontSize(20);
     this.doc.setTextColor(0, 102, 204); // Màu xanh đậm
@@ -36,165 +74,104 @@ class HealthReportGenerator {
     // Thêm đường kẻ ngang
     this.doc.setLineWidth(0.5);
     this.doc.setDrawColor(0, 102, 204);
-    this.doc.line(20, 35, 190, 35);
+    this.doc.line(20, 35, 190, 35); // Giữ nguyên vị trí ban đầu
   }
 
-  // Thêm thông tin Member dưới dạng bảng
+  // Thêm thông tin Member dưới dạng văn bản
   addMemberInfo() {
-    autoTable(this.doc, {
-      startY: 40,
-      head: [["Member Information"]],
-      body: [
-        ["Name", this.member.name || "N/A"],
-        ["Email", this.member.email || "N/A"],
-      ],
-      theme: "striped",
-      headStyles: {
-        fillColor: [0, 102, 204], // Màu xanh đậm
-        textColor: [255, 255, 255], // Màu trắng
-        fontSize: 14,
-        font: "helvetica",
-        fontStyle: "bold",
-      },
-      bodyStyles: {
-        font: "helvetica",
-        fontStyle: "normal",
-        fontSize: 12,
-        textColor: [0, 0, 0],
-      },
-      columnStyles: {
-        0: { cellWidth: 50, fontStyle: "bold" }, // Cột nhãn (Name, Email) in đậm
-        1: { cellWidth: 120 },
-      },
-      margin: { left: 20, right: 20 },
-    });
+    const memberNameWithoutDiacritics = this.removeDiacritics(this.member.name);
+
+    this.doc.setFont("helvetica", "bold");
+    this.doc.setFontSize(14);
+    this.doc.setTextColor(0, 102, 204);
+    this.doc.text("Member Information", 20, 40); // Giữ nguyên vị trí ban đầu
+
+    this.doc.setFont("helvetica", "normal");
+    this.doc.setFontSize(12);
+    this.doc.setTextColor(0, 0, 0);
+    this.doc.text(`Name: ${memberNameWithoutDiacritics}`, 20, 50);
   }
 
-  // Thêm thông tin Child dưới dạng bảng
+  // Thêm thông tin Child dưới dạng văn bản
   addChildInfo() {
-    const lastY = this.doc.lastAutoTable ? this.doc.lastAutoTable.finalY + 5 : 40;
-    autoTable(this.doc, {
-      startY: lastY,
-      head: [["Child Information"]],
-      body: [
-        ["Name", this.child.name || "N/A"],
-        ["Date of Birth", this.formatDate(this.child.dateOfBirth)],
-        ["Gender", this.child.gender || "N/A"],
-      ],
-      theme: "striped",
-      headStyles: {
-        fillColor: [0, 102, 204],
-        textColor: [255, 255, 255],
-        fontSize: 14,
-        font: "helvetica",
-        fontStyle: "bold",
-      },
-      bodyStyles: {
-        font: "helvetica",
-        fontStyle: "normal",
-        fontSize: 12,
-        textColor: [0, 0, 0],
-      },
-      columnStyles: {
-        0: { cellWidth: 50, fontStyle: "bold" },
-        1: { cellWidth: 120 },
-      },
-      margin: { left: 20, right: 20 },
-    });
+    const childNameWithoutDiacritics = this.removeDiacritics(this.child.name);
+
+    this.doc.setFont("helvetica", "bold");
+    this.doc.setFontSize(14);
+    this.doc.setTextColor(0, 102, 204);
+    this.doc.text("Child Information", 20, 70); // Giữ nguyên vị trí ban đầu
+
+    this.doc.setFont("helvetica", "normal");
+    this.doc.setFontSize(12);
+    this.doc.setTextColor(0, 0, 0);
+    this.doc.text(`Name: ${childNameWithoutDiacritics}`, 20, 80);
+    this.doc.text(`Date of Birth: ${this.formatDate(this.child.dateOfBirth)}`, 20, 90);
+    this.doc.text(`Gender: ${this.child.gender || "N/A"}`, 20, 100);
   }
 
-  // Thêm thông tin Alert mới nhất dưới dạng bảng
+  // Thêm thông tin Alert mới nhất dưới dạng văn bản
   addAlertInfo() {
-    const lastY = this.doc.lastAutoTable ? this.doc.lastAutoTable.finalY + 5 : 40;
     const message = this.alert ? this.alert.message || "No message" : "No recent alert available.";
 
-    autoTable(this.doc, {
-      startY: lastY,
-      head: [["Latest Alert"]],
-      body: this.alert
-        ? [
-            ["Date", this.formatDate(this.alert.alertDate)],
-            ["Severity", this.alert.severityLevel || "N/A"],
-            ["Message", message],
-          ]
-        : [["Message", "No recent alert available."]],
-      theme: "striped",
-      headStyles: {
-        fillColor: [0, 102, 204],
-        textColor: [255, 255, 255],
-        fontSize: 14,
-        font: "helvetica",
-        fontStyle: "bold",
-      },
-      bodyStyles: {
-        font: "helvetica",
-        fontStyle: "normal",
-        fontSize: 12,
-        textColor: [0, 0, 0],
-      },
-      columnStyles: {
-        0: { cellWidth: 50, fontStyle: "bold" },
-        1: { cellWidth: 120 },
-      },
-      margin: { left: 20, right: 20 },
-      didDrawCell: (data) => {
-        if (data.column.index === 1 && data.cell.section === "body" && data.row.index === 2) {
-          // Chia nhỏ message nếu quá dài
-          const textLines = this.doc.splitTextToSize(data.cell.raw, 120);
-          data.cell.text = textLines;
-        }
-      },
-    });
+    this.doc.setFont("helvetica", "bold");
+    this.doc.setFontSize(14);
+    this.doc.setTextColor(0, 102, 204);
+    this.doc.text("Latest Alert", 20, 110); // Giữ nguyên vị trí ban đầu
 
-    return this.doc.lastAutoTable ? this.doc.lastAutoTable.finalY : lastY;
+    this.doc.setFont("helvetica", "normal");
+    this.doc.setFontSize(12);
+    this.doc.setTextColor(0, 0, 0);
+
+    if (this.alert) {
+      this.doc.text(`Date: ${this.formatDate(this.alert.alertDate)}`, 20, 120);
+      this.doc.text(`Severity: ${this.alert.severityLevel || "N/A"}`, 20, 130);
+
+      // Chia nhỏ message nếu quá dài
+      const textLines = this.doc.splitTextToSize(`Message: ${message}`, 170); // 170mm là chiều rộng khả dụng
+      this.doc.text(textLines, 20, 140);
+
+      // Trả về vị trí Y cuối cùng của message
+      return 140 + textLines.length * 10; // Ước lượng chiều cao của message
+    } else {
+      this.doc.text("Message: No recent alert available.", 20, 120);
+      return 120;
+    }
   }
 
-  // Thêm thông tin Growth Record mới nhất dưới dạng bảng
+  // Thêm thông tin Growth Record mới nhất dưới dạng văn bản
   addGrowthRecordInfo(lastY) {
-    const startY = lastY + 5;
-    autoTable(this.doc, {
-      startY: startY,
-      head: [["Latest Growth Record"]],
-      body: this.growthRecord
-        ? [
-            ["Date", this.formatDate(this.growthRecord.createdAt)],
-            ["Weight", this.growthRecord.weight ? `${this.growthRecord.weight} kg` : "N/A"],
-            ["Height", this.growthRecord.height ? `${this.growthRecord.height} cm` : "N/A"],
-            ["Head Circumference", this.growthRecord.headCircumference ? `${this.growthRecord.headCircumference} cm` : "N/A"],
-            ["Notes", this.growthRecord.notes || "N/A"],
-          ]
-        : [["Message", "No recent growth record available."]],
-      theme: "striped",
-      headStyles: {
-        fillColor: [0, 102, 204],
-        textColor: [255, 255, 255],
-        fontSize: 14,
-        font: "helvetica",
-        fontStyle: "bold",
-      },
-      bodyStyles: {
-        font: "helvetica",
-        fontStyle: "normal",
-        fontSize: 12,
-        textColor: [0, 0, 0],
-      },
-      columnStyles: {
-        0: { cellWidth: 50, fontStyle: "bold" },
-        1: { cellWidth: 120 },
-      },
-      margin: { left: 20, right: 20 },
-    });
+    const startY = lastY + 10;
+
+    this.doc.setFont("helvetica", "bold");
+    this.doc.setFontSize(14);
+    this.doc.setTextColor(0, 102, 204);
+    this.doc.text("Latest Growth Record", 20, startY);
+
+    this.doc.setFont("helvetica", "normal");
+    this.doc.setFontSize(12);
+    this.doc.setTextColor(0, 0, 0);
+
+    if (this.growthRecord) {
+      this.doc.text(`Date: ${this.formatDate(this.growthRecord.createdAt)}`, 20, startY + 10);
+      this.doc.text(`Weight: ${this.growthRecord.weight ? `${this.growthRecord.weight} kg` : "N/A"}`, 20, startY + 20);
+      this.doc.text(`Height: ${this.growthRecord.height ? `${this.growthRecord.height} cm` : "N/A"}`, 20, startY + 30);
+      this.doc.text(`Head Circumference: ${this.growthRecord.headCircumference ? `${this.growthRecord.headCircumference} cm` : "N/A"}`, 20, startY + 40);
+      this.doc.text(`Notes: ${this.growthRecord.notes || "N/A"}`, 20, startY + 50);
+    } else {
+      this.doc.text("Message: No recent growth record available.", 20, startY + 10);
+    }
   }
 
   // Tạo và lưu file PDF
-  generatePDF() {
-    this.addHeader();
+  async generatePDF() {
+    await this.addHeader(); // Đợi logo được thêm
     this.addMemberInfo();
     this.addChildInfo();
     const lastY = this.addAlertInfo();
     this.addGrowthRecordInfo(lastY);
 
-    const childName = this.child.name ? this.child.name.replace(/\s+/g, "_") : "Child";
+    // Loại bỏ dấu cho childName trước khi lưu file
+    const childName = this.child.name ? this.removeDiacritics(this.child.name).replace(/\s+/g, "_") : "Child";
     this.doc.save(`Health_Report_${childName}_${this.formatDate(new Date())}.pdf`);
   }
 }
