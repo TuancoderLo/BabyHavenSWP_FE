@@ -31,23 +31,24 @@ function ExpandableResponseCard({ response, request, onClick }) {
     </div>
   );
 }
+
 // Thành phần cho thẻ yêu cầu đã gửi
 function ExpandableSentRequestCard({ request, onClick }) {
   const truncatedText =
-  `ID: ${request.requestId} | Child: ${request.childName} | ` +
-  `Date: ${request.requestDate} | Description: ${request.description}`
-    .slice(0, 50) + "...";
+    `ID: ${request.requestId} | Child: ${request.childName} | ` +
+    `Date: ${request.requestDate} | Description: ${request.description}`
+      .slice(0, 50) + "...";
   return (
     <div className="consultation-sent-card" onClick={() => onClick(request)}>
       <div className="sent-header">
         <span className="sent-date">
-  {moment(request.requestDate).format("DD/MM/YYYY HH:mm")}
+          {moment(request.requestDate).format("DD/MM/YYYY HH:mm")}
         </span>
-          <span className="sent-status">{request.status}</span>
+        <span className="sent-status">{request.status}</span>
       </div>
       <div className="sent-summary">
-          <p><strong>Child:</strong> {request.childName}</p>
-          <p><strong>Description:</strong> {request.description.slice(0, 50)}...</p>
+        <p><strong>Child:</strong> {request.childName}</p>
+        <p><strong>Description:</strong> {request.description.slice(0, 50)}...</p>
       </div>
       <div className="truncated-content">{truncatedText}</div>
     </div>
@@ -60,7 +61,7 @@ function ExpandableFeedbackEntry({ feedback, onClick, consultationResponses, con
 
   // Tìm Response tương ứng với feedback.responseId
   const relatedResponse = consultationResponses.find(
-    (resp) => resp.responseId === feedback.responseId // Loại bỏ resp.response
+    (resp) => resp.responseId === feedback.responseId
   );
 
   // Tìm Request tương ứng với response.requestId (nếu có relatedResponse)
@@ -98,6 +99,7 @@ function DoctorConsultation() {
   const [doctorSpecializations, setDoctorSpecializations] = useState({});
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   const steps = ["Enter Information", "Select Doctor", "Confirm"];
 
@@ -201,7 +203,7 @@ function DoctorConsultation() {
           followUp: lines[lines.length - 1] || "",
         };
       }
-      return {followUp: "" };
+      return { followUp: "" };
     }
   };
 
@@ -240,7 +242,7 @@ function DoctorConsultation() {
       const memberId = localStorage.getItem("memberId");
       const res = await doctorApi.getConsultationRequestsByMemberId(memberId);
       const requestsData = Array.isArray(res.value) 
-      ? res.data.value : Array.isArray(res.data) ? res.data : [];
+        ? res.data.value : Array.isArray(res.data) ? res.data : [];
       setSentRequests(requestsData);
     } catch (error) {
       console.error("Error fetching sent requests:", error);
@@ -280,6 +282,36 @@ function DoctorConsultation() {
     return tmp.textContent || tmp.innerText || "";
   };
 
+  // Thêm từ branch Tu: Xử lý khi chọn file
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    setSelectedFiles(files);
+  };
+
+  // Thêm từ branch Tu: Logic download file
+  const downloadAttachment = (attachment) => {
+    try {
+      const { FileName, Content, MimeType } = attachment;
+      const byteCharacters = atob(Content);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: MimeType });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = FileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    }
+  };
+
   // Gửi request mới => status = Pending
   const handleSubmit = async () => {
     try {
@@ -298,16 +330,33 @@ function DoctorConsultation() {
 
       const plainDescription = stripHtml(consultationContent);
 
+      // Thêm từ branch Tu: Chuyển file thành Base64
+      const attachments = await Promise.all(
+        selectedFiles.map(async (file) => {
+          const base64Content = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result.split(",")[1]);
+            reader.readAsDataURL(file);
+          });
+          return {
+            fileName: file.name,
+            content: base64Content,
+            mimeType: file.type,
+          };
+        })
+      );
+
       const payload = {
         memberId,
         childName: selectedChild.name,
         childBirth: selectedChild.childBirth,
         doctorId: selectedDoctor.doctorId,
         requestDate,
-        status: "Pending", // Khớp với enum của API
-        category: "Health", // Giá trị mặc định
-        urgency: "Medium", // Giá trị mặc định
+        status: "Pending",
+        category: "Health",
+        urgency: "Medium",
         description: plainDescription,
+        attachments,
       };
 
       await doctorApi.createConsultationRequest(payload);
@@ -319,6 +368,7 @@ function DoctorConsultation() {
       setCurrentStep(0);
       setConsultationContent("");
       setSelectedDoctor(null);
+      setSelectedFiles([]);
     } catch (error) {
       setSubmitError(
         error.response?.data?.title || error.message || "Unable to send consultation request"
@@ -329,59 +379,57 @@ function DoctorConsultation() {
   };
 
   // Thành viên đánh giá + cập nhật status response => Completed
-const handleSubmitFeedbackAndUpdateStatus = async () => {
-  try {
-    setIsSubmitting(true);
+  const handleSubmitFeedbackAndUpdateStatus = async () => {
+    try {
+      setIsSubmitting(true);
 
-    const userId = localStorage.getItem("userId");
-    if (!userId) throw new Error("Please login to submit feedback");
+      const userId = localStorage.getItem("userId");
+      if (!userId) throw new Error("Please login to submit feedback");
 
-    // Lấy sẵn responseId từ selectedResponse
-    const responseId = selectedResponse?.response?.responseId;
-    if (!responseId) {
-      throw new Error("No response ID found in selectedResponse!");
+      // Lấy sẵn responseId từ selectedResponse
+      const responseId = selectedResponse?.response?.responseId;
+      if (!responseId) {
+        throw new Error("No response ID found in selectedResponse!");
+      }
+
+      // Kiểm tra rating & comment
+      if (rating < 1 || rating > 5) {
+        throw new Error("Please select a rating");
+      }
+      if (!comment.trim()) {
+        throw new Error("Comment cannot be empty");
+      }
+
+      // Tạo payload gửi lên API
+      const feedbackDate = new Date().toISOString();
+      const payload = {
+        userId,
+        responseId,
+        rating,
+        comment,
+        feedbackDate,
+        feedbackType: 0,
+        status: 0,
+      };
+
+      // Gửi feedback
+      await doctorApi.createRatingFeedback(payload);
+
+      // Cập nhật status của Response => "Completed"
+      await doctorApi.updateConsultationResponseStatus(responseId, "Completed");
+
+      // Làm mới danh sách Responses & Feedback
+      await fetchConsultationResponses();
+      await fetchUserFeedback();
+
+      // Đóng form feedback
+      setShowFeedbackForm(false);
+    } catch (error) {
+      setFeedbackSubmitError(error.message || "Unable to submit feedback");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    // Kiểm tra rating & comment
-    if (rating < 1 || rating > 5) {
-      throw new Error("Please select a rating");
-    }
-    if (!comment.trim()) {
-      throw new Error("Comment cannot be empty");
-    }
-
-    // Tạo payload gửi lên API
-    const feedbackDate = new Date().toISOString();
-    const payload = {
-      userId,
-      responseId,
-      rating,
-      comment,
-      feedbackDate,
-      feedbackType: 0,
-      status: 0,  // tuỳ ý bạn sử dụng
-    };
-
-    // Gửi feedback
-    await doctorApi.createRatingFeedback(payload);
-
-    // Cập nhật status của Response => "Completed"
-    await doctorApi.updateConsultationResponseStatus(responseId, "Completed");
-
-
-    // Làm mới danh sách Responses & Feedback
-    await fetchConsultationResponses();
-    await fetchUserFeedback();
-
-    // Đóng form feedback
-    setShowFeedbackForm(false);
-
-  } catch (error) {
-    setFeedbackSubmitError(error.message || "Unable to submit feedback");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
   // Render nội dung form theo bước
   const renderStepContent = () => {
@@ -424,6 +472,25 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
                       </option>
                     ))}
                   </select>
+                )}
+              </div>
+
+              {/* Thêm từ branch Tu: Input file */}
+              <div className="input-group">
+                <label htmlFor="file-upload">Attachments</label>
+                <input
+                  type="file"
+                  id="file-upload"
+                  multiple
+                  onChange={handleFileChange}
+                  className="doctor-file-upload"
+                />
+                {selectedFiles.length > 0 && (
+                  <ul>
+                    {selectedFiles.map((file, index) => (
+                      <li key={index}>{file.name}</li>
+                    ))}
+                  </ul>
                 )}
               </div>
             </div>
@@ -493,6 +560,16 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
                   dangerouslySetInnerHTML={{ __html: consultationContent }}
                 />
               </div>
+              {selectedFiles.length > 0 && (
+                <div className="review-item">
+                  <strong>Attachments:</strong>
+                  <ul>
+                    {selectedFiles.map((file, index) => (
+                      <li key={index}>{file.name}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
             {selectedDoctor && (
@@ -561,33 +638,33 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
           <p>No consultation responses available.</p>
         );
 
-        case "sentRequests":
-          return sentRequests.length > 0 ? (
-            sentRequests.map((req, index) => (
-              <ExpandableSentRequestCard
-                key={index}
-                request={req}
-                onClick={setSelectedSentRequest}
-              />
-            ))
-          ) : (
-            <p>No sent requests available.</p>
-          );
+      case "sentRequests":
+        return sentRequests.length > 0 ? (
+          sentRequests.map((req, index) => (
+            <ExpandableSentRequestCard
+              key={index}
+              request={req}
+              onClick={setSelectedSentRequest}
+            />
+          ))
+        ) : (
+          <p>No sent requests available.</p>
+        );
 
-          case "feedback":
-            return userFeedback.length > 0 ? (
-              userFeedback.map((fb, index) => (
-                <ExpandableFeedbackEntry
-                  key={index}
-                  feedback={fb}
-                  consultationResponses={consultationResponses || []}
-                  consultationRequests={consultationRequests || {}} // Truyền consultationRequests
-                  onClick={(data) => setSelectedFeedback(data)}
-                />
-              ))
-            ) : (
-              <p>No feedback provided yet.</p>
-            );
+      case "feedback":
+        return userFeedback.length > 0 ? (
+          userFeedback.map((fb, index) => (
+            <ExpandableFeedbackEntry
+              key={index}
+              feedback={fb}
+              consultationResponses={consultationResponses || []}
+              consultationRequests={consultationRequests || {}}
+              onClick={(data) => setSelectedFeedback(data)}
+            />
+          ))
+        ) : (
+          <p>No feedback provided yet.</p>
+        );
 
       default:
         return null;
@@ -785,6 +862,22 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
                 <p>
                   <strong>Status:</strong> {selectedSentRequest.status}
                 </p>
+                {selectedSentRequest.attachments && (
+                  <div>
+                    <h4>Attachments</h4>
+                    {JSON.parse(selectedSentRequest.attachments).map((attachment, index) => (
+                      <div key={index} style={{ marginBottom: "10px" }}>
+                        <p>{attachment.fileName}</p>
+                        <button
+                          className="download-button"
+                          onClick={() => downloadAttachment(attachment)}
+                        >
+                          Download
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -793,50 +886,51 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
 
       {/* Modal: Xem chi tiết Feedback */}
       {selectedFeedback && (
-  <div className="modal-overlay" onClick={() => setSelectedFeedback(null)}>
-    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-      <button className="modal-close" onClick={() => setSelectedFeedback(null)}>
-        ×
-      </button>
-      <h3 className="modal-title">Feedback Details</h3>
-      <div className="response-details">
-        {/* Thông tin Feedback */}
-        <div className="feedback-section">
-          <h4>Feedback Information</h4>
-          <p>
-            <strong>Rating:</strong> {selectedFeedback.feedback.rating} ★
-          </p>
-          <p>
-            <strong>Comment:</strong> {selectedFeedback.feedback.comment}
-          </p>
-          <p>
-            <strong>Date:</strong> {selectedFeedback.feedback.feedbackDate}
-          </p>
-        </div>
+        <div className="modal-overlay" onClick={() => setSelectedFeedback(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setSelectedFeedback(null)}>
+              ×
+            </button>
+            <h3 className="modal-title">Feedback Details</h3>
+            <div className="response-details">
+              {/* Thông tin Feedback */}
+              <div className="feedback-section">
+                <h4>Feedback Information</h4>
+                <p>
+                  <strong>Rating:</strong> {selectedFeedback.feedback.rating} ★
+                </p>
+                <p>
+                  <strong>Comment:</strong> {selectedFeedback.feedback.comment}
+                </p>
+                <p>
+                  <strong>Date:</strong> {selectedFeedback.feedback.feedbackDate}
+                </p>
+              </div>
 
-        {/* Thông tin Response (nếu có) */}
-        {selectedFeedback.relatedResponse && (
-          <div className="response-section">
-            <h4>Response Information</h4>
-            <p>
-              <strong>Date:</strong> {selectedFeedback.relatedResponse.responseDate || "N/A"}
-            </p>
-            <p>
-              <strong>Doctor:</strong> {selectedFeedback.relatedResponse.doctorName || "N/A"}
-            </p>
-            <p>
-              <strong>Status:</strong> {selectedFeedback.relatedResponse.status || "N/A"}
-            </p>
-            <p>
-              <strong>Follow-Up:</strong>{" "}
-              {selectedFeedback.relatedResponse.content?.followUp || "N/A"}
-            </p>
+              {/* Thông tin Response (nếu có) */}
+              {selectedFeedback.relatedResponse && (
+                <div className="response-section">
+                  <h4>Response Information</h4>
+                  <p>
+                    <strong>Date:</strong> {selectedFeedback.relatedResponse.responseDate || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Doctor:</strong> {selectedFeedback.relatedResponse.doctorName || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Status:</strong> {selectedFeedback.relatedResponse.status || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Follow-Up:</strong>{" "}
+                    {selectedFeedback.relatedResponse.content?.followUp || "N/A"}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-        )}
-      </div>
-    </div>
-  </div>
-)}
+        </div>
+      )}
+
       {/* Modal: Thông báo success */}
       {showSuccessModal && (
         <div className="modal-overlay" onClick={() => setShowSuccessModal(false)}>
@@ -861,4 +955,5 @@ const handleSubmitFeedbackAndUpdateStatus = async () => {
     </div>
   );
 }
+
 export default DoctorConsultation;
