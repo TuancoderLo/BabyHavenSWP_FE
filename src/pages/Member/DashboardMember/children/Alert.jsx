@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./Alert.css";
 
-const Alert = ({ alert }) => {
+const Alert = ({ alert, alerts }) => {
   const [expanded, setExpanded] = useState(false);
   const [visible, setVisible] = useState(true);
 
@@ -45,41 +45,85 @@ const Alert = ({ alert }) => {
     ? `Your child's health has a ${alert.severityLevel} level alert`
     : goodConditionMessage;
 
+  // Hàm định dạng ngày
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
   return (
     <>
-      <div
-        className={`alert-item ${getSeverityClass(alert?.severityLevel)} ${additionalClass}`}
-      >
-        <span className="alert-icon">{alertIcon}</span>
-        <div className="alert-message">
-          <p>{alertMessage}</p>
-        </div>
-        {hasAlert && (
-          <>
+      {visible && (
+        <div
+          className={`alert-item ${getSeverityClass(alert?.severityLevel)} ${additionalClass}`}
+        >
+          <span className="alert-icon">{alertIcon}</span>
+          <div className="alert-message">
+            <p>{alertMessage}</p>
+          </div>
+          {hasAlert ? (
+            <>
+              <button className="alert-see-more" onClick={openOverlay}>
+                See More
+              </button>
+              <button
+                className="alert-close-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  closeAlert();
+                }}
+              >
+                ×
+              </button>
+            </>
+          ) : (
             <button className="alert-see-more" onClick={openOverlay}>
-              See More
+              View Alert History
             </button>
-            <button
-              className="alert-close-btn"
-              onClick={(e) => {
-                e.stopPropagation();
-                closeAlert();
-              }}
-            >
-              ×
-            </button>
-          </>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
-      {expanded && hasAlert && (
+      {expanded && (
         <div className="modal-overlay" onClick={closeOverlay}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={closeOverlay}>
               ×
             </button>
-            <h2>Alert Details</h2>
-            <p>{alert?.message || "No additional details available."}</p>
+            <h2>{hasAlert ? "Alert Details" : "Alert History"}</h2>
+            {hasAlert ? (
+              <>
+                <p><strong>Message:</strong> {alert?.message || "No additional details available."}</p>
+                <p><strong>Date:</strong> {alert?.alertDate ? formatDate(alert.alertDate) : "N/A"}</p>
+                <h3>All Alerts</h3>
+                {alerts && alerts.length > 0 ? (
+                  <ul className="alert-history-list">
+                    {alerts.map((item, index) => (
+                      <li key={index} className={`alert-history-item ${getSeverityClass(item.severityLevel)}`}>
+                        <span>{formatDate(item.alertDate)} - {item.severityLevel} - {item.message}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No alert history available.</p>
+                )}
+              </>
+            ) : (
+              alerts && alerts.length > 0 ? (
+                <ul className="alert-history-list">
+                  {alerts.map((item, index) => (
+                    <li key={index} className={`alert-history-item ${getSeverityClass(item.severityLevel)}`}>
+                      <span>{formatDate(item.alertDate)} - {item.severityLevel} - {item.message}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No alert history available.</p>
+              )
+            )}
           </div>
         </div>
       )}

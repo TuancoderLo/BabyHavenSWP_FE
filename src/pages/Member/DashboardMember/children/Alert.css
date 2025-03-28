@@ -141,6 +141,33 @@
   .modal-close:hover {
     background: #ff6262; /* Màu hồng đậm khi hover */
   }
+
+  /* Alert History List */
+.alert-history-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.alert-history-item {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+}
+
+.alert-history-item.healthy {
+  color: #006064;
+}
+
+.alert-history-item.warning {
+  color: #ef6c00;
+}
+
+.alert-history-item.danger {
+  color: #c62828;
+}
   
   /* Responsive Adjustments */
   @media (max-width: 768px) {

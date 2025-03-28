@@ -11,6 +11,17 @@ const alertApi = {
       throw new Error(error.response?.data?.message || "Failed to fetch alerts");
     }
   },
+
+  getAlertsByChild: async (name, dob, id) => {
+    try {
+      const response = await api.get(`Alert/alerts/${name}/${dob}/${id}`, {
+        validateStatus: (status) => status === 1 || (status >= 200 && status < 300),
+      });
+      return response;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || "Failed to fetch alerts");
+    }
+  }
 };
 
 export default alertApi;
