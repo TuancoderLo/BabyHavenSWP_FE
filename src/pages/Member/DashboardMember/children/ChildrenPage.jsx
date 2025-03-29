@@ -573,20 +573,6 @@ function ChildrenPage() {
                   BMI
                 </span>
                 <span
-                  className={`filter-item ${
-                    selectedTool === "Head measure" ? "active" : ""
-                  }`}
-                  onClick={() => setSelectedTool("Head measure")}
-                >
-                  Head measure
-                </span>
-                <span
-                  className={`filter-item ${selectedTool === "Global std" ? "active" : ""}`}
-                  onClick={() => setSelectedTool("Global std")}
-                >
-                  Global std
-                </span>
-                <span
                   className={`filter-item ${selectedTool === "Milestone" ? "active" : ""}`}
                   onClick={() => setSelectedTool("Milestone")}
                 >

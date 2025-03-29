@@ -59,3 +59,16 @@
 .recharts-xAxis .recharts-cartesian-axis-tick {
   font-size: 10px !important;
 } 
+
+/* Milestone */
+.milestones-container {
+  padding: 10px;
+}
+
+.milestones-timeline {
+  position: relative;
+}
+
+.milestone-item {
+  position: relative;
+}
