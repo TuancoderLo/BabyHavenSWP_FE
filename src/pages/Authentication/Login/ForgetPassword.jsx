@@ -216,106 +216,152 @@ const ForgetPassword = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
 
-  // Add 3D tilt effect based on mouse movement
+  // Loại bỏ hiệu ứng tilt 3D, thay bằng hiệu ứng đơn giản hơn
   useEffect(() => {
     const card = document.querySelector(".forget-password-card");
 
-    // Add tilt-effect class to card
     if (card) {
-      card.classList.add("tilt-effect");
+      // Loại bỏ class tilt-effect nếu có
+      card.classList.remove("tilt-effect");
 
-      const handleMouseMove = (e) => {
-        const cardRect = card.getBoundingClientRect();
-        const cardCenterX = cardRect.left + cardRect.width / 2;
-        const cardCenterY = cardRect.top + cardRect.height / 2;
+      // Đảm bảo các transform được reset
+      card.style.transform = "none";
 
-        // Calculate mouse position relative to card center
-        const mouseX = e.clientX - cardCenterX;
-        const mouseY = e.clientY - cardCenterY;
+      // Thêm hiệu ứng hover đơn giản thông qua CSS
+      card.style.transition = "box-shadow 0.3s ease";
 
-        // Limit tilt angle (reduced for gentler effect)
-        const rotateY = mouseX * 0.01;
-        const rotateX = -mouseY * 0.01;
-
-        // Apply transform
-        card.style.transform = `translateZ(20px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      const handleMouseEnter = () => {
+        card.style.boxShadow = "0 15px 30px rgba(0, 0, 0, 0.35)";
       };
 
       const handleMouseLeave = () => {
-        // Return to original position when mouse leaves card
-        card.style.transform = "translateZ(0) rotateX(0) rotateY(0)";
+        card.style.boxShadow = "0 10px 25px rgba(0, 0, 0, 0.3)";
       };
 
-      // Add event listeners
-      card.addEventListener("mousemove", handleMouseMove);
+      // Thêm event listeners
+      card.addEventListener("mouseenter", handleMouseEnter);
       card.addEventListener("mouseleave", handleMouseLeave);
 
       return () => {
-        // Cleanup event listeners when component unmounts
-        card.removeEventListener("mousemove", handleMouseMove);
+        // Cleanup event listeners
+        card.removeEventListener("mouseenter", handleMouseEnter);
         card.removeEventListener("mouseleave", handleMouseLeave);
       };
     }
-  }, [step]); // Re-run when step changes to ensure effect applies to each step
+  }, [step]);
 
-  // Add particles effect
+  // Thay thế hiệu ứng particles bằng hiệu ứng du hành vũ trụ đơn giản hơn
   useEffect(() => {
-    const createParticles = () => {
-      const particlesContainer = document.querySelector(
-        ".particles-background"
-      );
-      if (!particlesContainer) return;
+    // Xóa particles cũ
+    const particlesContainer = document.querySelector(".particles-background");
+    if (!particlesContainer) return;
+    particlesContainer.innerHTML = "";
 
-      particlesContainer.innerHTML = "";
+    // Thêm hiệu ứng tinh vân
+    const nebula = document.createElement("div");
+    nebula.classList.add("nebula");
+    particlesContainer.appendChild(nebula);
 
-      const particleCount = 30; // Reduced count for a lighter effect
+    // Tạo sao tĩnh - giữ lại phần này vì không phải sao băng
+    const starsCount = 150; // Tăng số lượng sao để bù đắp việc không có sao băng
+    for (let i = 0; i < starsCount; i++) {
+      const star = document.createElement("div");
 
-      for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement("div");
-        particle.classList.add("particle");
+      // Kích thước ngẫu nhiên
+      const size = Math.random() * 2 + 1;
 
-        // Random position
-        const posX = Math.random() * 100;
-        const posY = Math.random() * 100 + 100; // Start from below the screen
+      // Vị trí ngẫu nhiên
+      const left = Math.random() * 100;
+      const top = Math.random() * 100;
 
-        // Random size (smaller for lighter effect)
-        const size = Math.random() * 15 + 3;
+      // Độ sáng ngẫu nhiên
+      const opacity = Math.random() * 0.8 + 0.2;
 
-        // Random opacity
-        const opacity = Math.random() * 0.4 + 0.1; // Reduced opacity
+      // Animation delay
+      const delay = Math.random() * 5;
 
-        // Random movement speed
-        const speed = Math.random() * 50 + 30; // Increased speed for smoother movement
+      star.style.position = "absolute";
+      star.style.width = `${size}px`;
+      star.style.height = `${size}px`;
+      star.style.borderRadius = "50%";
+      star.style.left = `${left}%`;
+      star.style.top = `${top}%`;
+      star.style.backgroundColor = "white";
+      star.style.opacity = opacity;
+      star.style.animation = `twinkle 5s ease-in-out ${delay}s infinite alternate`;
 
-        // Set particle style
-        particle.style.left = `${posX}%`;
-        particle.style.top = `${posY}%`;
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-        particle.style.opacity = opacity;
-        particle.style.animationDuration = `${speed}s`;
+      particlesContainer.appendChild(star);
+    }
 
-        particlesContainer.appendChild(particle);
-      }
-    };
-
-    createParticles();
-
-    // Recreate particles every 30 seconds for continuous effect
-    const interval = setInterval(createParticles, 30000);
-
-    // Recreate particles on window resize
-    window.addEventListener("resize", createParticles);
+    // Bỏ phần tạo sao băng
+    // createShootingStars();
+    // const interval = setInterval(createShootingStars, 10000);
 
     return () => {
-      window.removeEventListener("resize", createParticles);
-      clearInterval(interval);
+      // clearInterval(interval); // Không cần nữa vì đã bỏ interval
     };
   }, []);
 
+  // Thêm hiệu ứng ripple cho các nút
+  useEffect(() => {
+    const buttons = document.querySelectorAll(
+      ".primary-button, .secondary-button"
+    );
+
+    const handleClick = (e) => {
+      const button = e.currentTarget;
+
+      // Tạo hiệu ứng sóng nước khi nhấn
+      const ripple = document.createElement("span");
+      ripple.style.position = "absolute";
+      ripple.style.top = `${e.clientY - button.getBoundingClientRect().top}px`;
+      ripple.style.left = `${
+        e.clientX - button.getBoundingClientRect().left
+      }px`;
+      ripple.style.width = "0";
+      ripple.style.height = "0";
+      ripple.style.backgroundColor = "rgba(255, 255, 255, 0.3)";
+      ripple.style.borderRadius = "50%";
+      ripple.style.transform = "translate(-50%, -50%)";
+      ripple.style.animation = "ripple 0.8s linear";
+
+      // Thêm animation
+      const keyframes = `
+        @keyframes ripple {
+          to {
+            width: 300px;
+            height: 300px;
+            opacity: 0;
+          }
+        }
+      `;
+
+      const style = document.createElement("style");
+      style.innerHTML = keyframes;
+      document.head.appendChild(style);
+
+      button.appendChild(ripple);
+
+      setTimeout(() => {
+        ripple.remove();
+        style.remove();
+      }, 800);
+    };
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", handleClick);
+    });
+
+    return () => {
+      buttons.forEach((button) => {
+        button.removeEventListener("click", handleClick);
+      });
+    };
+  }, [step]);
+
   return (
     <div className="forget-password-container">
-      {/* Add particles background */}
+      {/* Nền với điểm sáng tĩnh */}
       <div className="particles-background"></div>
 
       <div className="forget-password-card">

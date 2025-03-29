@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css");
 
 * {
@@ -16,7 +15,7 @@ html {
   overflow: hidden;
 }
 
-.auth-container {
+.LoginHome-auth-container {
   width: 100vw;
   height: 100vh;
   display: flex;
@@ -29,7 +28,7 @@ html {
   bottom: 0;
 }
 
-.auth-left {
+.LoginHome-auth-left {
   width: 70%;
   height: 100vh;
   position: relative;
@@ -38,7 +37,7 @@ html {
   display: block;
 }
 
-.auth-right {
+.LoginHome-auth-right {
   width: 30%;
   height: 100vh;
   display: flex;
@@ -49,134 +48,158 @@ html {
   position: relative;
 }
 
-.auth-box {
+.LoginHome-auth-box {
   width: 100%;
-  max-width: 380px;
-  padding: 60px;
+  max-width: 400px;
+  padding: 40px;
   background: white;
-  border-radius: 24px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-.auth-image {
+.LoginHome-auth-image {
   width: 100%;
   height: 100%;
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 1;
 }
 
-.auth-image img {
+.LoginHome-auth-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
+  filter: none;
 }
 
-.home-link {
+/* Chỉ sử dụng overlay với độ đậm 15% */
+.LoginHome-auth-left::before {
+  content: "";
   position: absolute;
-  top: 16px;
-  right: 16px;
-  font-size: 20px;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.15); /* Chỉ sử dụng overlay 15% */
+  z-index: 2;
+  pointer-events: none;
+}
+
+.LoginHome-home-link {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
   color: #1e293b;
   cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.auth-header {
+.LoginHome-auth-header {
   margin-bottom: 30px;
 }
 
-.auth-header h1 {
+.LoginHome-auth-header h1 {
   color: #00d0bc;
   font-size: 28px;
   font-weight: 600;
   margin-bottom: 10px;
 }
 
-.header-subtitle {
+.LoginHome-header-subtitle {
   color: #64748b;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.5;
 }
 
-.form-group-login {
-  margin-bottom: 16px;
+.LoginHome-form-group-login {
+  margin-bottom: 20px;
   position: relative;
+}
+
+.LoginHome-form-group-login label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
 }
 
 /* Thêm CSS cho password-group */
-.password-group {
+.LoginHome-password-group {
   position: relative;
+  margin-bottom: 20px;
 }
 
-.password-toggle {
+.LoginHome-password-toggle {
   position: absolute;
   right: 14px;
-  top: 50%;
+  top: 65%;
   transform: translateY(-50%);
   cursor: pointer;
   color: #94a3b8;
   font-size: 16px;
   z-index: 10;
-  transition: color 0.3s ease;
 }
 
-.password-toggle:hover {
-  color: #00bfa6;
-}
-
-.form-group-login input {
+.LoginHome-form-group-login input {
   width: 100%;
-  padding: 10px 14px;
+  padding: 12px 16px;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 13px;
+  border-radius: 10px;
+  font-size: 14px;
   color: #1e293b;
-  transition: all 0.3s ease;
+  background-color: #f8fafc;
 }
 
 /* Điều chỉnh padding cho input password để tránh chồng lên icon */
-.password-group input {
+.LoginHome-password-group input {
   padding-right: 40px;
 }
 
-input:focus {
+.LoginHome-form-group-login input:focus,
+.LoginHome-password-group input:focus {
   outline: none;
   border-color: #00bfa6;
   box-shadow: 0 0 0 3px rgba(0, 191, 166, 0.1);
 }
 
-input::placeholder {
+.LoginHome-form-group-login input::placeholder,
+.LoginHome-password-group input::placeholder {
   color: #94a3b8;
 }
 
-.submit-btn {
+.LoginHome-submit-btn {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   background: #00bfa6;
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 10px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0, 191, 166, 0.25);
 }
 
-.submit-btn:hover {
-  background: #00a892;
-}
-
-.divider {
+.LoginHome-divider {
   position: relative;
   text-align: center;
-  margin: 20px 0;
+  margin: 24px 0;
 }
 
-.divider::before,
-.divider::after {
+.LoginHome-divider::before,
+.LoginHome-divider::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -185,83 +208,102 @@ input::placeholder {
   background: #e2e8f0;
 }
 
-.divider::before {
+.LoginHome-divider::before {
   left: 0;
 }
 
-.divider::after {
+.LoginHome-divider::after {
   right: 0;
 }
 
-.divider span {
+.LoginHome-divider span {
   background: white;
   padding: 0 15px;
   color: #94a3b8;
   font-size: 14px;
 }
 
-.social-btn {
+.LoginHome-social-btn {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border-radius: 10px;
   background: white;
   color: #1e293b;
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.social-btn:hover {
-  background: #f8fafc;
-}
-
-.social-btn.google i {
+.LoginHome-social-btn.google i {
   color: #ea4335;
+  font-size: 18px;
+  margin-right: 10px;
 }
 
-.toggle-form {
+.LoginHome-social-btn.google span {
+  margin-left: 0 !important;
+}
+
+.LoginHome-toggle-form {
   text-align: center;
   color: #64748b;
-  font-size: 13px;
+  font-size: 14px;
 }
 
-.toggle-form span {
+.LoginHome-toggle-form span {
   color: #00bfa6;
   cursor: pointer;
   font-weight: 500;
   margin-left: 4px;
 }
 
-.toggle-form span:hover {
-  text-decoration: underline;
-}
-
-.error-message {
+.LoginHome-error-message {
   color: #dc2626;
   font-size: 14px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   text-align: center;
-  padding: 8px;
+  padding: 10px;
   background-color: #fef2f2;
-  border-radius: 6px;
-  border: 1px solid #fee2e2;
+  border-radius: 8px;
+  border-left: 4px solid #dc2626;
 }
 
-.forgot-password-link {
+.LoginHome-forgot-password-link {
   text-align: right;
-  margin-bottom: 16px;
-  font-size: 13px;
+  margin-bottom: 20px;
+  font-size: 14px;
 }
 
-.forgot-password-link a {
+.LoginHome-forgot-password-link a {
   color: #00bfa6;
   text-decoration: none;
-  transition: color 0.3s ease;
 }
 
-.forgot-password-link a:hover {
-  text-decoration: underline;
-  color: #00a892;
+@media (max-width: 1024px) {
+  .LoginHome-auth-left {
+    width: 60%;
+  }
+  .LoginHome-auth-right {
+    width: 40%;
+  }
+}
+
+@media (max-width: 768px) {
+  .LoginHome-auth-left {
+    display: none;
+  }
+  .LoginHome-auth-right {
+    width: 100%;
+  }
+  .LoginHome-auth-box {
+    max-width: 450px;
+  }
+}
+
+.LoginHome-label-bold {
+  font-weight: 700 !important;
 }

@@ -13,16 +13,6 @@ import "./GrowthChart.css";
 import childApi from "../../../../services/childApi";
 import bmiPercentitleApi from "../../../../services/bmiPercentitleApi";
 
-// Hàm tính BMI từ z-score
-const calculateBMIFromZScore = (lms, zScore) => {
-  const { L, M, S } = lms;
-
-  if (L === 0) {
-    return M * Math.exp(S * zScore);
-  }
-  return M * Math.pow(1 + L * S * zScore, 1 / L);
-};
-
 // Hàm lấy dữ liệu WHO BMI-for-age từ API hoặc localStorage
 const getWHOBMIData = async (ageInYears, gender) => {
   try {
@@ -36,18 +26,11 @@ const getWHOBMIData = async (ageInYears, gender) => {
       console.log(`Using cached BMI data for ${dataKey} from localStorage`);
       const lms = bmiData[dataKey];
 
-      const median = calculateBMIFromZScore(lms, 0);
-      const plus1SD = calculateBMIFromZScore(lms, 1);
-      const minus1SD = calculateBMIFromZScore(lms, -1);
-      const plus2SD = calculateBMIFromZScore(lms, 2);
-      const minus2SD = calculateBMIFromZScore(lms, -2);
-
       const whoData = {
-        median: Number(median.toFixed(1)),
-        plus1SD: Number(plus1SD.toFixed(1)),
-        minus1SD: Number(minus1SD.toFixed(1)),
-        plus2SD: Number(plus2SD.toFixed(1)),
-        minus2SD: Number(minus2SD.toFixed(1)),
+        p01: Number(lms.P01.toFixed(1)),
+        p50: Number(lms.P50.toFixed(1)),
+        p75: Number(lms.P75.toFixed(1)),
+        p99: Number(lms.P99.toFixed(1)),
       };
 
       console.log("WHO BMI Data from localStorage:", whoData);
@@ -72,26 +55,25 @@ const getWHOBMIData = async (ageInYears, gender) => {
       P99: lms.P99 || lms.p99,
     };
 
-    if (!normalizedLms || !normalizedLms.L || !normalizedLms.M || !normalizedLms.S) {
-      throw new Error("Invalid LMS data from API");
+    if (
+      !normalizedLms ||
+      !normalizedLms.P01 ||
+      !normalizedLms.P50 ||
+      !normalizedLms.P75 ||
+      !normalizedLms.P99
+    ) {
+      throw new Error("Invalid percentile data from API");
     }
 
     bmiData[dataKey] = normalizedLms;
     localStorage.setItem(storageKey, JSON.stringify(bmiData));
     console.log(`Saved BMI data for ${dataKey} to localStorage`);
 
-    const median = calculateBMIFromZScore(normalizedLms, 0);
-    const plus1SD = calculateBMIFromZScore(normalizedLms, 1);
-    const minus1SD = calculateBMIFromZScore(normalizedLms, -1);
-    const plus2SD = calculateBMIFromZScore(normalizedLms, 2);
-    const minus2SD = calculateBMIFromZScore(normalizedLms, -2);
-
     const whoData = {
-      median: Number(median.toFixed(1)),
-      plus1SD: Number(plus1SD.toFixed(1)),
-      minus1SD: Number(minus1SD.toFixed(1)),
-      plus2SD: Number(plus2SD.toFixed(1)),
-      minus2SD: Number(minus2SD.toFixed(1)),
+      p01: Number(normalizedLms.P01.toFixed(1)),
+      p50: Number(normalizedLms.P50.toFixed(1)),
+      p75: Number(normalizedLms.P75.toFixed(1)),
+      p99: Number(normalizedLms.P99.toFixed(1)),
     };
 
     console.log("WHO BMI Data from API:", whoData);
@@ -99,11 +81,10 @@ const getWHOBMIData = async (ageInYears, gender) => {
   } catch (error) {
     console.error("Error fetching WHO BMI data:", error);
     return {
-      median: 16.8,
-      plus1SD: 18.5,
-      minus1SD: 15.2,
-      plus2SD: 20.5,
-      minus2SD: 13.8,
+      p01: 12.0,
+      p50: 15.3,
+      p75: 16.2,
+      p99: 20.8,
     };
   }
 };
@@ -114,8 +95,8 @@ const GrowthChart = ({
   onRecordSelect,
   refreshTrigger = 0,
   gender,
-  ageInMonths, // Thêm prop ageInMonths
-  ageInYears, // Thêm prop ageInYears
+  ageInMonths,
+  ageInYears,
 }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -207,7 +188,7 @@ const GrowthChart = ({
 
             const month = recordDate.getMonth();
             const day = recordDate.getDate();
-            const x = month + (day - 1) / 31;
+            const x = month + (day - 1) / 31; // Tính vị trí x dựa trên tháng và ngày
 
             return {
               x,
@@ -228,6 +209,7 @@ const GrowthChart = ({
 
         console.log("Processed Records:", processedRecords);
 
+        // Tạo dữ liệu biểu đồ cho 12 tháng
         const chartData = Array.from({ length: 12 }, (_, i) => {
           const recordsInMonth = processedRecords.filter(
             (r) => Math.floor(r.x) === i
@@ -238,11 +220,10 @@ const GrowthChart = ({
               month: "short",
             }),
             records: recordsInMonth,
-            median: whoData.median,
-            plus1SD: whoData.plus1SD,
-            minus1SD: whoData.minus1SD,
-            plus2SD: whoData.plus2SD,
-            minus2SD: whoData.minus2SD,
+            p01: whoData.p01,
+            p50: whoData.p50,
+            p75: whoData.p75,
+            p99: whoData.p99,
           };
         });
 
@@ -285,7 +266,7 @@ const GrowthChart = ({
         const allRecords = data.flatMap((monthData) => monthData.records);
 
         return (
-          <ResponsiveContainer width="100%" height={350}>
+          <ResponsiveContainer width="100%" height={320}>
             <LineChart
               data={data}
               margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
@@ -294,7 +275,7 @@ const GrowthChart = ({
               <XAxis
                 dataKey="x"
                 type="number"
-                domain={[0, 11]}
+                domain={[0, 11]} // 12 tháng (0 đến 11)
                 ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
                 tickFormatter={(value) => {
                   const months = [
@@ -315,21 +296,16 @@ const GrowthChart = ({
                 }}
                 stroke="#666"
                 tick={{ fill: "#666", fontSize: 10 }}
+                label={{ value: "Month", position: "insideBottom", offset: -5 }}
               />
               <YAxis
                 yAxisId="bmi"
                 orientation="left"
                 stroke="#FF9AA2"
                 tick={{ fill: "#666", fontSize: 11 }}
-                domain={[0, 50]}
+                domain={[0, 50]} // BMI từ 0 đến 50
                 ticks={[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]}
-              />
-              <YAxis
-                yAxisId="right"
-                orientation="right"
-                stroke="#B5EAD7"
-                tick={{ fill: "#666", fontSize: 11 }}
-                hide={true}
+                label={{ value: "BMI (kg/m²)", angle: -90, position: "insideLeft" }}
               />
               <Tooltip
                 contentStyle={{
@@ -342,7 +318,7 @@ const GrowthChart = ({
                   if (name === "bmi") {
                     return [`${value}`, "BMI (kg/m²)"];
                   }
-                  if (name.includes("WHO")) {
+                  if (name.includes("Percentile")) {
                     return [`${value}`, name];
                   }
                   return [value, name];
@@ -387,51 +363,41 @@ const GrowthChart = ({
               <Line
                 yAxisId="bmi"
                 type="monotone"
-                dataKey="median"
-                stroke="#8884d8"
-                strokeWidth={1}
-                dot={false}
-                name="WHO Median"
-                connectNulls={true}
-              />
-              <Line
-                yAxisId="bmi"
-                type="monotone"
-                dataKey="plus1SD"
-                stroke="#82ca9d"
-                strokeWidth={1}
-                dot={false}
-                name="WHO +1SD"
-                connectNulls={true}
-              />
-              <Line
-                yAxisId="bmi"
-                type="monotone"
-                dataKey="minus1SD"
-                stroke="#ff7300"
-                strokeWidth={1}
-                dot={false}
-                name="WHO -1SD"
-                connectNulls={true}
-              />
-              <Line
-                yAxisId="bmi"
-                type="monotone"
-                dataKey="plus2SD"
+                dataKey="p01"
                 stroke="#ff4040"
                 strokeWidth={1}
                 dot={false}
-                name="WHO +2SD (Obesity)"
+                name="1st Percentile"
                 connectNulls={true}
               />
               <Line
                 yAxisId="bmi"
                 type="monotone"
-                dataKey="minus2SD"
+                dataKey="p50"
+                stroke="#82ca9d"
+                strokeWidth={1}
+                dot={false}
+                name="50th Percentile"
+                connectNulls={true}
+              />
+              <Line
+                yAxisId="bmi"
+                type="monotone"
+                dataKey="p75"
                 stroke="#ffa500"
                 strokeWidth={1}
                 dot={false}
-                name="WHO -2SD (Thinness)"
+                name="75th Percentile"
+                connectNulls={true}
+              />
+              <Line
+                yAxisId="bmi"
+                type="monotone"
+                dataKey="p99"
+                stroke="#ff7300"
+                strokeWidth={1}
+                dot={false}
+                name="99th Percentile"
                 connectNulls={true}
               />
             </LineChart>
