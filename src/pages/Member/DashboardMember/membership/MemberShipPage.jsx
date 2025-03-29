@@ -169,42 +169,40 @@ function MemberShipPage() {
               {availablePackages.map((pkg) => (
                 <div
                   key={pkg.packageName}
-                  className={`package-card-member ${
-                    pkg.packageName === "Premium" ? "premium" : ""
-                  }`}
+                  className={`package-card-member ${pkg.packageName === "Premium" ? "premium" : ""}`}
                 >
                   <h4>{pkg.packageName}</h4>
                   <p className="package-description">{pkg.description}</p>
-                  <div className="package-price">
-                    <span className="price-amount">
-                      {pkg.price.toLocaleString()} {pkg.currency}
-                    </span>
-                    <span className="price-duration">
-                      / {pkg.durationMonths} months
-                    </span>
-                  </div>
-                  <p className="max-children-info">
-                    Max children: {pkg.maxChildrenAllowed}
-                  </p>
-                  {pkg.packageName === "Free" ? (
-                    <button
-                      className="package-btn"
-                      disabled={currentPlan?.packageName === "Free"}
-                    >
-                      {currentPlan?.packageName === "Free"
-                        ? "YOUR CURRENT PLAN"
-                        : "Try Now"}
-                    </button>
+                  {pkg.packageName !== "Free" ? (
+                    <>
+                      <div className="package-price">
+                        <span className="price-amount">
+                          {pkg.price.toLocaleString()} {pkg.currency}
+                        </span>
+                        <span className="price-duration">
+                          / {pkg.durationMonths} months
+                        </span>
+                      </div>
+                      <p className="max-children-info">
+                        Max children: {pkg.maxChildrenAllowed}
+                      </p>
+                      <button
+                        className="package-btn"
+                        onClick={() => handleChoosePackage(pkg)}
+                      >
+                        Choose Plan
+                      </button>
+                    </>
                   ) : (
-                    <button
-                      className="package-btn"
-                      onClick={() => handleChoosePackage(pkg)}
-                    >
-                      Choose Plan
-                    </button>
+                    <>
+                      <p className="max-children-info">
+                        Max children: {pkg.maxChildrenAllowed}
+                      </p>
+                    </>
                   )}
                 </div>
               ))}
+
               {availablePackages.length === 0 && (
                 <p className="no-packages">No other packages available</p>
               )}
@@ -222,28 +220,24 @@ function MemberShipPage() {
                   <p>
                     <strong>Package Name:</strong> {currentPlan.packageName}
                   </p>
-                  <p>
-                    <strong>Start Date:</strong>{" "}
-                    {currentPlan.startDate
-                      ? currentPlan.startDate.slice(0, 10)
-                      : "--"}
-                  </p>
-                  <p>
-                    <strong>End Date:</strong>{" "}
-                    {currentPlan.endDate
-                      ? currentPlan.endDate.slice(0, 10)
-                      : "--"}
-                  </p>
-                  <button className="membership-button standard" disabled>
-                    {currentPlan.packageName === "Free"
-                      ? "YOUR CURRENT PLAN"
-                      : currentPlan.packageName}
-                  </button>
+                  {currentPlan.packageName !== "Free" && (
+                    <>
+                      <p>
+                        <strong>Start Date:</strong>{" "}
+                        {currentPlan.startDate ? currentPlan.startDate.slice(0, 10) : "--"}
+                      </p>
+                      <p>
+                        <strong>End Date:</strong>{" "}
+                        {currentPlan.endDate ? currentPlan.endDate.slice(0, 10) : "--"}
+                      </p>
+                    </>
+                  )}
                 </>
               ) : (
                 <p>No active membership found.</p>
               )}
             </div>
+
           </div>
         </div>
       </div>
@@ -267,9 +261,8 @@ function MemberShipPage() {
                 </p>
                 <div className="payment-method-options">
                   <button
-                    className={`payment-button ${
-                      paymentMethod === "CreditCard" ? "active" : ""
-                    }`}
+                    className={`payment-button ${paymentMethod === "CreditCard" ? "active" : ""
+                      }`}
                     onClick={() => handleSelectPayment("CreditCard")}
                   >
                     <span>Credit or Debit Card</span>
@@ -279,9 +272,8 @@ function MemberShipPage() {
                     </div>
                   </button>
                   <button
-                    className={`payment-button ${
-                      paymentMethod === "Momo" ? "active" : ""
-                    }`}
+                    className={`payment-button ${paymentMethod === "Momo" ? "active" : ""
+                      }`}
                     onClick={() => handleSelectPayment("Momo")}
                   >
                     <span>Momo E-Wallet</span>
@@ -313,9 +305,8 @@ function MemberShipPage() {
                         </div>
                         <div className="package-price">
                           {selectedPackage
-                            ? `${selectedPackage.price.toLocaleString()} ${
-                                selectedPackage.currency
-                              } / ${selectedPackage.durationMonths} months`
+                            ? `${selectedPackage.price.toLocaleString()} ${selectedPackage.currency
+                            } / ${selectedPackage.durationMonths} months`
                             : ""}
                         </div>
                       </div>
@@ -374,7 +365,7 @@ function MemberShipPage() {
                         {new Date(
                           new Date().setMonth(
                             new Date().getMonth() +
-                              selectedPackage?.durationMonths
+                            selectedPackage?.durationMonths
                           )
                         ).toLocaleDateString()}
                       </div>
@@ -384,9 +375,8 @@ function MemberShipPage() {
                         <span>Amount</span>
                         <span className="amount">
                           {selectedPackage
-                            ? `${selectedPackage.price.toLocaleString()} ${
-                                selectedPackage.currency
-                              }`
+                            ? `${selectedPackage.price.toLocaleString()} ${selectedPackage.currency
+                            }`
                             : ""}
                         </span>
                       </div>
@@ -394,9 +384,8 @@ function MemberShipPage() {
                         <span>Promotion</span>
                         <span className="promotion">
                           {selectedPackage
-                            ? `${discount.toLocaleString()} ${
-                                selectedPackage.currency
-                              }`
+                            ? `${discount.toLocaleString()} ${selectedPackage.currency
+                            }`
                             : ""}
                         </span>
                       </div>
@@ -405,8 +394,8 @@ function MemberShipPage() {
                         <span className="total">
                           {selectedPackage
                             ? `${(
-                                selectedPackage.price - discount
-                              ).toLocaleString()} ${selectedPackage.currency}`
+                              selectedPackage.price - discount
+                            ).toLocaleString()} ${selectedPackage.currency}`
                             : ""}
                         </span>
                       </div>
