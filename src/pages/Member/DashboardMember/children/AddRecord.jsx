@@ -1,64 +1,33 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useCallback } from "react";
 import PropTypes from "prop-types";
+import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import childApi from "../../../../services/childApi";
-import alertApi from "../../../../services/alertApi"; // Thêm import alertApi
-import "./AddRecord.css";
 import calculateBMI from "../../../../services/bmiUtils";
 import BabyGrowth from "../../../../assets/baby_growth.png";
 import {
-  validateStep2Page1 as validateStep2Page1Rules,
-  validateStep2Page2 as validateStep2Page2Rules,
-  validateStep2Page3 as validateStep2Page3Rules,
+  addChildForm,
+  growthRecordForm,
+  calculateAgeInMonths,
+  WHO_GROWTH_REFERENCE,
 } from "../../../../data/childValidations";
+import baby from "../../../../assets/baby.jpg";
+import "./AddChild.css";
 
-const AddRecord = ({ child, memberId, closeOverlay }) => {
-  if (!child) {
-    return (
-      <div className="add-record-overlay" onClick={(e) => handleOverlayClick(e)}>
-        <div className="add-record-wizard" onClick={(e) => e.stopPropagation()}>
-          <div className="notification-board">
-            <h2>No Child Selected</h2>
-            <p>Please select a child or add a new child to continue.</p>
-            <button type="button" onClick={closeOverlay}>
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+const AddChild = ({ closeOverlay }) => {
+  const [submitted, setSubmitted] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [warnings, setWarnings] = useState({});
 
-  const [childDetails, setChildDetails] = useState(null);
-
-  useEffect(() => {
-    const fetchChildDetails = async () => {
-      try {
-        const response = await childApi.getChildByName(child, memberId);
-        setChildDetails(response.data.data);
-      } catch (err) {
-        console.error("Error fetching child details:", err);
-      }
-    };
-    fetchChildDetails();
-  }, [child, memberId]);
-
-  const calculateAge = (dateOfBirth) => {
-    if (!dateOfBirth) return "0 days";
-    const birthDate = new Date(dateOfBirth);
-    const today = new Date();
-    let years = today.getFullYear() - birthDate.getFullYear();
-    let months = today.getMonth() - birthDate.getMonth();
-    const diffTime = Math.abs(today - birthDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (months < 0) {
-      years--;
-      months += 12;
-    }
-    if (years === 0 && months === 0) return `${diffDays} days`;
-    if (years < 1) return `${months} months`;
-    return `${years} years old`;
-  };
+  const [childForm, setChildForm] = useState({
+    name: "",
+    memberId: localStorage.getItem("memberId"),
+    dateOfBirth: "",
+    gender: "",
+    birthWeight: "",
+    birthHeight: "",
+    notes: "",
+  });
 
   const [growthForm, setGrowthForm] = useState({
     createdAt: "",
@@ -89,761 +58,840 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     developmentalMilestones: "",
   });
 
-  const [errors, setErrors] = useState({});
-  const [currentStep, setCurrentStep] = useState(1);
+  const handleChildChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setChildForm((prev) => ({ ...prev, [name]: value }));
+  }, []);
 
-  const validateForm = useCallback(
-    (form = growthForm) => {
-      let formErrors = {};
-      if (currentStep === 1) {
-        formErrors = validateStep2Page1Rules(form, child.dateOfBirth);
-      } else if (currentStep === 2) {
-        formErrors = validateStep2Page2Rules(form);
-      } else if (currentStep === 3) {
-        formErrors = validateStep2Page3Rules(form);
+  const calculateWarnings = (growthForm, childDateOfBirth) => {
+    const tempWarnings = {};
+    const ageInMonths = calculateAgeInMonths(childDateOfBirth);
+    const ageGroup =
+      WHO_GROWTH_REFERENCE.find((entry) => ageInMonths <= entry.age) ||
+      WHO_GROWTH_REFERENCE[WHO_GROWTH_REFERENCE.length - 1];
+
+    if (ageGroup) {
+      const [minWeight, maxWeight] = ageGroup.weight;
+      const [minHeight, maxHeight] = ageGroup.height;
+      if (
+        growthForm.weight &&
+        (growthForm.weight < minWeight || growthForm.weight > maxWeight)
+      ) {
+        tempWarnings.weight = `Warning: Weight should be between ${minWeight}kg and ${maxWeight}kg for age ${ageGroup.age} months`;
       }
-      setErrors(formErrors);
-    },
-    [currentStep, growthForm, child.dateOfBirth]
-  );
-
-  const handleChange = useCallback(
-    (e) => {
-      const { name, value } = e.target;
-      setGrowthForm((prev) => {
-        const updatedForm = { ...prev, [name]: value };
-        validateForm(updatedForm);
-        return updatedForm;
-      });
-    },
-    [validateForm]
-  );
-
-  const validateStep = useCallback(() => {
-    let stepErr = {};
-    if (currentStep === 1) {
-      stepErr = validateStep2Page1Rules(growthForm, child.dateOfBirth);
-    } else if (currentStep === 2) {
-      stepErr = validateStep2Page2Rules(growthForm);
-    } else if (currentStep === 3) {
-      stepErr = validateStep2Page3Rules(growthForm);
+      if (
+        growthForm.height &&
+        (growthForm.height < minHeight || growthForm.height > maxHeight)
+      ) {
+        tempWarnings.height = `Warning: Height should be between ${minHeight}cm and ${maxHeight}cm for age ${ageGroup.age} months`;
+      }
     }
-    const merged = { ...errors, ...stepErr };
-    setErrors(merged);
-    const hasError = Object.values(stepErr).some((val) => val);
-    return !hasError;
-  }, [currentStep, growthForm, errors, child.dateOfBirth]);
 
-  const handleOverlayClick = useCallback(
-    (e) => {
-      if (e.target === e.currentTarget) {
-        closeOverlay();
+    if (growthForm.bodyTemperature !== "" && growthForm.bodyTemperature != null) {
+      const bt = parseFloat(growthForm.bodyTemperature);
+      if (bt >= 45) {
+        tempWarnings.bodyTemperature =
+          "Warning: Body temperature is unusually high (should be below 45°C)";
+      } else if (bt < 35 || bt > 38) {
+        tempWarnings.bodyTemperature =
+          "Warning: Normal body temperature is typically between 35°C and 38°C";
       }
-    },
-    [closeOverlay]
-  );
+    }
+    if (
+      growthForm.oxygenSaturation !== "" &&
+      growthForm.oxygenSaturation != null
+    ) {
+      const ox = parseFloat(growthForm.oxygenSaturation);
+      if (ox > 100) {
+        tempWarnings.oxygenSaturation =
+          "Warning: Oxygen saturation cannot exceed 100%";
+      } else if (ox < 95) {
+        tempWarnings.oxygenSaturation =
+          "Warning: Oxygen saturation is typically 95-100%";
+      }
+    }
+    if (growthForm.sleepDuration !== "" && growthForm.sleepDuration != null) {
+      const sd = parseFloat(growthForm.sleepDuration);
+      if (sd >= 24) {
+        tempWarnings.sleepDuration =
+          "Warning: Sleep duration cannot exceed 24 hours";
+      } else if (sd < 10) {
+        tempWarnings.sleepDuration =
+          "Warning: Typical sleep duration for infants is 10-18 hours";
+      }
+    }
+    if (
+      growthForm.heartRate !== "" &&
+      growthForm.heartRate != null &&
+      !isNaN(parseFloat(growthForm.heartRate))
+    ) {
+      const hr = parseFloat(growthForm.heartRate);
+      if (hr < 60 || hr > 180) {
+        tempWarnings.heartRate =
+          "Warning: Typical heart rate for infants is 60-180 bpm";
+      }
+    }
+    if (
+      growthForm.bloodSugarLevel !== "" &&
+      growthForm.bloodSugarLevel != null &&
+      !isNaN(parseFloat(growthForm.bloodSugarLevel))
+    ) {
+      const bs = parseFloat(growthForm.bloodSugarLevel);
+      if (bs < 40 || bs > 180) {
+        tempWarnings.bloodSugarLevel =
+          "Warning: Typical blood sugar level is 40-180 mg/dL";
+      }
+    }
+    if (
+      growthForm.headCircumference !== "" &&
+      growthForm.headCircumference != null
+    ) {
+      const hc = parseFloat(growthForm.headCircumference);
+      if (hc < 30 || hc > 60) {
+        tempWarnings.headCircumference =
+          "Warning: Typical head circumference for infants is 30-60 cm";
+      }
+    }
+    if (
+      growthForm.chestCircumference !== "" &&
+      growthForm.chestCircumference != null
+    ) {
+      const cc = parseFloat(growthForm.chestCircumference);
+      if (cc < 30 || cc > 70) {
+        tempWarnings.chestCircumference =
+          "Warning: Typical chest circumference for infants is 30-70 cm";
+      }
+    }
+    if (
+      growthForm.bloodPressure !== "" &&
+      growthForm.bloodPressure != null &&
+      !isNaN(parseFloat(growthForm.bloodPressure))
+    ) {
+      const bp = parseFloat(growthForm.bloodPressure);
+      if (bp < 50 || bp > 120) {
+        tempWarnings.bloodPressure =
+          "Warning: Typical blood pressure for infants is 50-120 mmHg";
+      }
+    }
+    if (
+      growthForm.ferritinLevel !== "" &&
+      growthForm.ferritinLevel != null &&
+      !isNaN(parseFloat(growthForm.ferritinLevel))
+    ) {
+      const fl = parseFloat(growthForm.ferritinLevel);
+      if (fl < 15 || fl > 150) {
+        tempWarnings.ferritinLevel =
+          "Warning: Typical ferritin level is 15-150 ng/mL";
+      }
+    }
+    if (
+      growthForm.triglycerides !== "" &&
+      growthForm.triglycerides != null &&
+      !isNaN(parseFloat(growthForm.triglycerides))
+    ) {
+      const tg = parseFloat(growthForm.triglycerides);
+      if (tg < 40 || tg > 150) {
+        tempWarnings.triglycerides =
+          "Warning: Typical triglycerides level is 40-150 mg/dL";
+      }
+    }
+    if (
+      growthForm.muscleMass !== "" &&
+      growthForm.muscleMass != null &&
+      !isNaN(parseFloat(growthForm.muscleMass))
+    ) {
+      const mm = parseFloat(growthForm.muscleMass);
+      if (mm < 0 || mm > 50) {
+        tempWarnings.muscleMass =
+          "Warning: Muscle mass should be between 0-50 kg";
+      }
+    }
+    if (
+      growthForm.growthHormoneLevel !== "" &&
+      growthForm.growthHormoneLevel != null &&
+      !isNaN(parseFloat(growthForm.growthHormoneLevel))
+    ) {
+      const gh = parseFloat(growthForm.growthHormoneLevel);
+      if (gh < 0 || gh > 20) {
+        tempWarnings.growthHormoneLevel =
+          "Warning: Typical growth hormone level is 0-20 ng/mL";
+      }
+    }
 
-  const submitGrowthRecord = useCallback(async () => {
-    try {
+    return tempWarnings;
+  };
+
+  const handleGrowthChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setGrowthForm((prev) => {
+      const updated = { ...prev, [name]: value };
+      if (name === "weight" || name === "height") {
+        updated.bmi = calculateBMI(
+          name === "weight" ? value : prev.weight,
+          name === "height" ? value : prev.height
+        );
+      }
+      return updated;
+    });
+
+    setErrors((prev) => {
+      const newErrors = growthRecordForm(
+        { ...growthForm, [name]: value },
+        childForm.dateOfBirth
+      );
+      return { ...prev, ...newErrors };
+    });
+
+    setWarnings((prev) => {
+      const newWarnings = calculateWarnings(
+        { ...growthForm, [name]: value },
+        childForm.dateOfBirth
+      );
+      return { ...prev, ...newWarnings };
+    });
+  }, [growthForm, childForm.dateOfBirth]);
+
+  const formatDateToYYYYMMDD = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleSubmit = async () => {
+    // Validate dữ liệu của bé
+    const childErrors = addChildForm(childForm);
+    setErrors((prev) => ({ ...prev, ...childErrors }));
+    if (Object.values(childErrors).some((msg) => msg)) return;
+  
+    // Kiểm tra xem có dữ liệu growth nào được nhập không
+    let hasGrowthData = false;
+    ["createdAt", "weight", "height"].forEach((field) => {
+      if (growthForm[field] && growthForm[field].toString().trim() !== "") {
+        hasGrowthData = true;
+      }
+    });
+
+   // Nếu có dữ liệu growth, validate nó
+  if (hasGrowthData) {
+    const growthErrors = growthRecordForm(growthForm, childForm.dateOfBirth);
+    setErrors((prev) => ({ ...prev, ...growthErrors }));
+    if (Object.values(growthErrors).some((msg) => msg)) return;
+  }
+
+  try {
+    // Chuẩn bị payload cho việc tạo trẻ
+    const childPayload = {
+      ...childForm,
+      name: childForm.name.trim(),
+      dateOfBirth: formatDateToYYYYMMDD(childForm.dateOfBirth),
+      birthWeight: Number(childForm.birthWeight) || 0,
+      birthHeight: Number(childForm.birthHeight) || 0,
+    };
+
+    // Tạo trẻ mới
+    await childApi.createChild(childPayload);
+
+    // Nếu có dữ liệu growth, tạo growth record
+    if (hasGrowthData) {
       const growthPayload = {
-        name: child.name,
-        dateOfBirth: child.dateOfBirth,
-        recordedBy: memberId,
-        createdAt: growthForm.createdAt || new Date().toISOString().split("T")[0],
-        weight: growthForm.weight || 0,
-        height: growthForm.height || 0,
-        headCircumference: growthForm.headCircumference || 0,
-        notes: growthForm.notes,
-        muscleMass: growthForm.muscleMass || 0,
-        chestCircumference: growthForm.chestCircumference || 0,
-        nutritionalStatus: growthForm.nutritionalStatus,
-        ferritinLevel: growthForm.ferritinLevel || 0,
-        triglycerides: growthForm.triglycerides || 0,
-        bloodSugarLevel: growthForm.bloodSugarLevel || 0,
-        physicalActivityLevel: growthForm.physicalActivityLevel,
-        heartRate: growthForm.heartRate || 0,
-        bloodPressure: growthForm.bloodPressure || 0,
-        bodyTemperature: growthForm.bodyTemperature || 0,
-        oxygenSaturation: growthForm.oxygenSaturation || 0,
-        sleepDuration: growthForm.sleepDuration || 0,
-        vision: growthForm.vision,
-        hearing: growthForm.hearing,
-        immunizationStatus: growthForm.immunizationStatus,
-        mentalHealthStatus: growthForm.mentalHealthStatus,
-        growthHormoneLevel: growthForm.growthHormoneLevel || 0,
-        attentionSpan: growthForm.attentionSpan,
-        neurologicalReflexes: growthForm.neurologicalReflexes,
-        developmentalMilestones: growthForm.developmentalMilestones,
+        name: childForm.name,
+        dateOfBirth: new Date(childForm.dateOfBirth).toISOString().split("T")[0],
+        recordedBy: childForm.memberId,
+        createdAt: formatDateToYYYYMMDD(growthForm.createdAt || new Date()),
+        weight: Number(growthForm.weight) || 0,
+        height: Number(growthForm.height) || 0,
+        headCircumference: Number(growthForm.headCircumference) || 0,
+        notes: growthForm.notes || "",
+        muscleMass: Number(growthForm.muscleMass) || 0,
+        chestCircumference: Number(growthForm.chestCircumference) || 0,
+        nutritionalStatus: growthForm.nutritionalStatus || "",
+        ferritinLevel: Number(growthForm.ferritinLevel) || 0,
+        triglycerides: Number(growthForm.triglycerides) || 0,
+        bloodSugarLevel: Number(growthForm.bloodSugarLevel) || 0,
+        physicalActivityLevel: growthForm.physicalActivityLevel || "",
+        heartRate: Number(growthForm.heartRate) || 0,
+        bloodPressure: Number(growthForm.bloodPressure) || 0,
+        bodyTemperature: Number(growthForm.bodyTemperature) || 0,
+        oxygenSaturation: Number(growthForm.oxygenSaturation) || 0,
+        sleepDuration: Number(growthForm.sleepDuration) || 0,
+        vision: growthForm.vision || "",
+        hearing: growthForm.hearing || "",
+        immunizationStatus: growthForm.immunizationStatus || "",
+        mentalHealthStatus: growthForm.mentalHealthStatus || "",
+        growthHormoneLevel: Number(growthForm.growthHormoneLevel) || 0,
+        attentionSpan: growthForm.attentionSpan || "",
+        neurologicalReflexes: growthForm.neurologicalReflexes || "",
+        developmentalMilestones: growthForm.developmentalMilestones || "",
       };
+
+      // Gửi yêu cầu tạo growth record
       const growthRes = await childApi.createGrowthRecord(growthPayload);
       console.log("Growth record created:", growthRes.data);
-
-      // Sau khi tạo record thành công, gọi alertApi.getAlert để tạo và lấy alert
-      try {
-        const alertRes = await alertApi.getAlert(child.name, child.dateOfBirth, memberId);
-        console.log("Alert created and fetched:", alertRes.data);
-      } catch (alertErr) {
-        console.error("Error creating/fetching alert:", alertErr);
-      }
-
-      return true;
-    } catch (err) {
-      console.error("Error saving growth record:", err);
-      return false;
     }
-  }, [child, memberId, growthForm]);
 
-  const handleConfirmStep1 = useCallback(async () => {
-    if (!validateStep()) return;
-    const success = await submitGrowthRecord();
-    if (success) closeOverlay();
-  }, [validateStep, submitGrowthRecord, closeOverlay]);
+    // Cập nhật trạng thái submitted để hiển thị thông báo thành công
+    setSubmitted(true);
+  } catch (err) {
+    console.error("Error submitting data:", err);
+    setErrors((prev) => ({
+      ...prev,
+      submit: "Failed to submit data. Please try again.",
+    }));
+  }
+};
 
-  const handleContinueToNextStep = useCallback(() => {
-    if (!validateStep()) return;
-    if (currentStep < 3) setCurrentStep((prev) => prev + 1);
-  }, [currentStep, validateStep]);
-
-  const handleSubmitStep3 = useCallback(async () => {
-    if (!validateStep()) return;
-    const success = await submitGrowthRecord();
-    if (success) closeOverlay();
-  }, [validateStep, submitGrowthRecord, closeOverlay]);
-
-  const handlePrevious = useCallback(() => {
-    if (currentStep > 1) setCurrentStep((prev) => prev - 1);
-  }, [currentStep]);
-
-  const handleClose = useCallback(() => {
-    closeOverlay();
-  }, [closeOverlay]);
-
-  const renderStepContent = useMemo(() => {
-    if (currentStep === 1) {
-      return (
-        <div className="step-form">
-          <div className="child-info-card">
-            <h3>Child Information</h3>
-            <div className="child-info-details">
-              <p>
-                <strong>Name:</strong> {child.name}
-              </p>
-              <div className="info-row">
-                <p>
-                  <strong>Date of Birth:</strong>{" "}
-                  {new Date(child.dateOfBirth).toLocaleDateString()}
-                </p>
-                <p>
-                  <strong>Age:</strong> {calculateAge(child.dateOfBirth)}
-                </p>
-                {child.gender && (
-                  <p className={`gender-tag ${child.gender.toLowerCase()}`}>
-                    {child.gender}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="form-section date-section">
-            <h4>Record Date</h4>
-            <input
-              type="date"
-              value={growthForm.createdAt || ""}
-              onChange={(e) =>
-                setGrowthForm((prev) => ({ ...prev, createdAt: e.target.value }))
-              }
-              max={new Date().toISOString().split("T")[0]}
-              className={errors.createdAt ? "error-input" : ""}
-            />
-            {errors.createdAt && (
-              <p className="error-text">{errors.createdAt}</p>
-            )}
-          </div>
-          <div className="form-section">
-            <h4>Basic Measurements</h4>
-            <div className="measurements-section">
-              <div>
-                <label>Baby's weight (kg)</label>
-                <input
-                  type="number"
-                  name="weight"
-                  value={growthForm.weight}
-                  onChange={handleChange}
-                  className={errors.weight ? "warning-input" : ""}
-                  min="0"
-                  onKeyDown={(e) => {
-                    if (e.key === "-" || e.key === "e") e.preventDefault();
-                  }}
-                />
-                {errors.weight && <p className="warning-text-record">{errors.weight}</p>}
-              </div>
-              <div>
-                <label>Baby's height (cm)</label>
-                <input
-                  type="number"
-                  name="height"
-                  value={growthForm.height}
-                  onChange={handleChange}
-                  className={errors.height ? "warning-input" : ""}
-                  min="0"
-                  onKeyDown={(e) => {
-                    if (e.key === "-" || e.key === "e") e.preventDefault();
-                  }}
-                />
-                {errors.height && <p className="warning-text-record">{errors.height}</p>}
-              </div>
-              <div>
-                <label>Head circumference (cm)</label>
-                <input
-                  type="number"
-                  name="headCircumference"
-                  value={growthForm.headCircumference}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      headCircumference: e.target.value,
-                    }))
-                  }
-                  min="0"
-                  onKeyDown={(e) => {
-                    if (e.key === "-" || e.key === "e") e.preventDefault();
-                  }}
-                />
-              </div>
-              <div>
-                <label>BMI (kg/m2)</label>
-                <input
-                  type="number"
-                  readOnly
-                  value={calculateBMI(growthForm.weight, growthForm.height)}
-                />
-              </div>
-            </div>
-            <div className="notes-section">
-              <label>Notes</label>
-              <input
-                type="text"
-                name="notes"
-                value={growthForm.notes}
-                onChange={(e) =>
-                  setGrowthForm((prev) => ({ ...prev, notes: e.target.value }))
-                }
-              />
-            </div>
-          </div>
-          <div className="step-buttons">
-            <button
-              type="button"
-              className="confirm-button-step1"
-              onClick={handleConfirmStep1}
-            >
-              Submit
-            </button>
-            <button
-              type="button"
-              className="next-button-record"
-              onClick={handleContinueToNextStep}
-            >
-              Continue
-            </button>
-          </div>
+  if (submitted) {
+    return (
+      <div className="add-child-overlay">
+        <div className="add-child-wizard congrats-container">
+          <h2 className="congrats-text">
+            Congratulation!<br />
+            Welcome <span className="highlight-pink">{childForm.name}</span> to{" "}
+            <span className="highlight-teal">BabyHaven</span>
+          </h2>
+          <img src={baby} alt="Baby" className="baby-image" />
+          <button type="button" onClick={closeOverlay} className="close-button">
+            Close
+          </button>
         </div>
-      );
-    }
-    if (currentStep === 2) {
-      return (
-        <div className="step-form">
-          <div className="child-info-card">
-            <h3>Child Information</h3>
-            <div className="child-info-details">
-              <p>
-                <strong>Name:</strong> {child.name}
-              </p>
-              <div className="info-row">
-                <p>
-                  <strong>Date of Birth:</strong>{" "}
-                  {new Date(child.dateOfBirth).toLocaleDateString()}
-                </p>
-                <p>
-                  <strong>Age:</strong> {calculateAge(child.dateOfBirth)}
-                </p>
-                {child.gender && (
-                  <p className={`gender-tag ${child.gender.toLowerCase()}`}>
-                    {child.gender}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-          <h2>Recommendations for Your Baby</h2>
-          <div className="form-section">
-            <h4>Nutritional Information</h4>
-            <div className="measurements-section">
-              <div>
-                <label>Nutritional status</label>
-                <input
-                  type="text"
-                  name="nutritionalStatus"
-                  value={growthForm.nutritionalStatus}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      nutritionalStatus: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div>
-                <label>Physical activity level</label>
-                <input
-                  type="text"
-                  name="physicalActivityLevel"
-                  value={growthForm.physicalActivityLevel}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      physicalActivityLevel: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-            </div>
-          </div>
-          <div className="form-section">
-            <h4>Blood Metrics</h4>
-            <div className="measurements-section">
-              <div>
-                <label>Ferritin level</label>
-                <input
-                  type="number"
-                  name="ferritinLevel"
-                  value={growthForm.ferritinLevel}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      ferritinLevel: e.target.value,
-                    }))
-                  }
-                  min="0"
-                  onKeyDown={(e) => {
-                    if (e.key === "-" || e.key === "e") e.preventDefault();
-                  }}
-                />
-              </div>
-              <div>
-                <label>Triglycerides</label>
-                <input
-                  type="number"
-                  name="triglycerides"
-                  value={growthForm.triglycerides}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      triglycerides: e.target.value,
-                    }))
-                  }
-                  min="0"
-                  onKeyDown={(e) => {
-                    if (e.key === "-" || e.key === "e") e.preventDefault();
-                  }}
-                />
-              </div>
-              <div>
-                <label>Blood sugar level</label>
-                <input
-                  type="number"
-                  name="bloodSugarLevel"
-                  value={growthForm.bloodSugarLevel}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      bloodSugarLevel: e.target.value,
-                    }))
-                  }
-                  min="0"
-                  onKeyDown={(e) => {
-                    if (e.key === "-" || e.key === "e") e.preventDefault();
-                  }}
-                />
-              </div>
-              <div>
-                <label>Chest circumference (cm)</label>
-                <input
-                  type="number"
-                  name="chestCircumference"
-                  value={growthForm.chestCircumference}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      chestCircumference: e.target.value,
-                    }))
-                  }
-                  min="0"
-                  onKeyDown={(e) => {
-                    if (e.key === "-" || e.key === "e") e.preventDefault();
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="step-buttons">
-            <button type="button" className="previous-btn" onClick={handlePrevious}>
-              Previous
-            </button>
-            <button
-              type="button"
-              className="next-button-record"
-              onClick={handleContinueToNextStep}
-            >
-              Continue
-            </button>
-          </div>
-        </div>
-      );
-    }
-    if (currentStep === 3) {
-      return (
-        <div className="step-form">
-          <div className="child-info-card">
-            <h3>Child Information</h3>
-            <div className="child-info-details">
-              <p>
-                <strong>Name:</strong> {child.name}
-              </p>
-              <div className="info-row">
-                <p>
-                  <strong>Date of Birth:</strong>{" "}
-                  {new Date(child.dateOfBirth).toLocaleDateString()}
-                </p>
-                <p>
-                  <strong>Age:</strong> {calculateAge(child.dateOfBirth)}
-                </p>
-                {child.gender && (
-                  <p className={`gender-tag ${child.gender.toLowerCase()}`}>
-                    {child.gender}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-          <h2>Additional Health Measurements</h2>
-          <div className="form-section">
-            <h4>Vital Signs</h4>
-            <div className="measurements-section">
-              <div>
-                <label>Heart rate</label>
-                <input
-                  type="number"
-                  name="heartRate"
-                  value={growthForm.heartRate}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({ ...prev, heartRate: e.target.value }))
-                  }
-                  min="0"
-                  onKeyDown={(e) => {
-                    if (e.key === "-" || e.key === "e") e.preventDefault();
-                  }}
-                />
-              </div>
-              <div>
-                <label>Blood pressure</label>
-                <input
-                  type="number"
-                  name="bloodPressure"
-                  value={growthForm.bloodPressure}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      bloodPressure: e.target.value,
-                    }))
-                  }
-                  min="0"
-                  onKeyDown={(e) => {
-                    if (e.key === "-" || e.key === "e") e.preventDefault();
-                  }}
-                />
-              </div>
-              <div>
-                <label>Body temperature (°C)</label>
-                <input
-                  type="number"
-                  name="bodyTemperature"
-                  value={growthForm.bodyTemperature}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      bodyTemperature: e.target.value,
-                    }))
-                  }
-                  className={errors.bodyTemperature ? "error-input" : ""}
-                  min="0"
-                  onKeyDown={(e) => {
-                    if (e.key === "-" || e.key === "e") e.preventDefault();
-                  }}
-                />
-                {errors.bodyTemperature && (
-                  <p className="error-text">{errors.bodyTemperature}</p>
-                )}
-              </div>
-              <div>
-                <label>Oxygen saturation (%)</label>
-                <input
-                  type="number"
-                  name="oxygenSaturation"
-                  value={growthForm.oxygenSaturation}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      oxygenSaturation: e.target.value,
-                    }))
-                  }
-                  className={errors.oxygenSaturation ? "error-input" : ""}
-                  min="0"
-                  onKeyDown={(e) => {
-                    if (e.key === "-" || e.key === "e") e.preventDefault();
-                  }}
-                />
-                {errors.oxygenSaturation && (
-                  <p className="error-text">{errors.oxygenSaturation}</p>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="form-section">
-            <h4>Development Metrics</h4>
-            <div className="measurements-section">
-              <div>
-                <label>Sleep duration (hrs)</label>
-                <input
-                  type="number"
-                  name="sleepDuration"
-                  value={growthForm.sleepDuration}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      sleepDuration: e.target.value,
-                    }))
-                  }
-                  className={errors.sleepDuration ? "error-input" : ""}
-                  min="0"
-                  onKeyDown={(e) => {
-                    if (e.key === "-" || e.key === "e") e.preventDefault();
-                  }}
-                />
-                {errors.sleepDuration && (
-                  <p className="error-text">{errors.sleepDuration}</p>
-                )}
-              </div>
-              <div>
-                <label>Growth hormone level</label>
-                <input
-                  type="number"
-                  name="growthHormoneLevel"
-                  value={growthForm.growthHormoneLevel}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      growthHormoneLevel: e.target.value,
-                    }))
-                  }
-                  className={errors.growthHormoneLevel ? "error-input" : ""}
-                  min="0"
-                  onKeyDown={(e) => {
-                    if (e.key === "-" || e.key === "e") e.preventDefault();
-                  }}
-                />
-                {errors.growthHormoneLevel && (
-                  <p className="error-text">{errors.growthHormoneLevel}</p>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="form-section">
-            <h4>Sensory and Health Status</h4>
-            <div className="measurements-section">
-              <div>
-                <label>Hearing</label>
-                <input
-                  type="text"
-                  name="hearing"
-                  value={growthForm.hearing}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({ ...prev, hearing: e.target.value }))
-                  }
-                />
-              </div>
-              <div>
-                <label>Vision</label>
-                <input
-                  type="text"
-                  name="vision"
-                  value={growthForm.vision}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({ ...prev, vision: e.target.value }))
-                  }
-                />
-              </div>
-              <div>
-                <label>Mental health status</label>
-                <input
-                  type="text"
-                  name="mentalHealthStatus"
-                  value={growthForm.mentalHealthStatus}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      mentalHealthStatus: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div>
-                <label>Immunization status</label>
-                <input
-                  type="text"
-                  name="immunizationStatus"
-                  value={growthForm.immunizationStatus}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      immunizationStatus: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-            </div>
-          </div>
-          <div className="form-section">
-            <h4>Cognitive Development</h4>
-            <div className="measurements-section">
-              <div>
-                <label>Attention span</label>
-                <input
-                  type="text"
-                  name="attentionSpan"
-                  value={growthForm.attentionSpan}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      attentionSpan: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div>
-                <label>Neurological reflexes</label>
-                <input
-                  type="text"
-                  name="neurologicalReflexes"
-                  value={growthForm.neurologicalReflexes}
-                  onChange={(e) =>
-                    setGrowthForm((prev) => ({
-                      ...prev,
-                      neurologicalReflexes: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-            </div>
-            <div className="notes-section">
-              <label>Developmental milestones</label>
-              <input
-                type="text"
-                name="developmentalMilestones"
-                value={growthForm.developmentalMilestones}
-                onChange={(e) =>
-                  setGrowthForm((prev) => ({
-                    ...prev,
-                    developmentalMilestones: e.target.value,
-                  }))
-                }
-              />
-            </div>
-          </div>
-          <div className="step-buttons">
-            <button type="button" className="previous-btn" onClick={handlePrevious}>
-              Previous
-            </button>
-            <button
-              type="button"
-              className="confirm-button-step1"
-              onClick={handleSubmitStep3}
-            >
-              Submit Record
-            </button>
-          </div>
-        </div>
-      );
-    }
-    return null;
-  }, [
-    currentStep,
-    child,
-    growthForm,
-    errors,
-    handleConfirmStep1,
-    handleContinueToNextStep,
-    handlePrevious,
-    handleSubmitStep3,
-  ]);
+      </div>
+    );
+  }
 
   return (
-    <div className="add-record-overlay" onClick={handleOverlayClick}>
-      <div className="add-record-wizard" onClick={(e) => e.stopPropagation()}>
-        <button className="close-button-record" onClick={handleClose}>
+    <div
+      className="add-child-overlay"
+      onClick={(e) => e.target === e.currentTarget && closeOverlay()}
+    >
+      <div className="add-child-wizard" onClick={(e) => e.stopPropagation()}>
+        <button className="close-button-record" onClick={closeOverlay}>
           ×
         </button>
+
         <div className="wizard-left">
-          <div className="blue-bar"></div>
+          <div className="blue-bar" />
           <div className="wizard-left-content">
-            <h1 className="main-title">
-              Enter a new growth record to track your baby's health automatically
-            </h1>
-            <div className="babygrowth-img">
-              <img src={BabyGrowth} alt="Baby Growth" />
+            <h1 className="main-title">Enter your baby’s information</h1>
+          </div>
+          <div className="babygrowth-img">
+            <img src={BabyGrowth} alt="Baby Growth" />
+          </div>
+        </div>
+
+        <div className="wizard-right">
+          <div className="step-form">
+            {/* Baby's Name Section */}
+            <div className="form-section baby-name-card">
+              <h3>Baby’s Name</h3>
+              <div>
+                <label>
+                  Baby’s name <span className="required-star">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter baby's name"
+                  name="name"
+                  value={childForm.name}
+                  onChange={handleChildChange}
+                  className={errors.name ? "error-input" : ""}
+                />
+                {errors.name && <p className="error-text">{errors.name}</p>}
+              </div>
             </div>
-            <div className="step-progress">
-              <div className="step-item">
-                <div
-                  className={`step-circle ${
-                    currentStep > 1 ? "completed" : currentStep === 1 ? "active" : ""
-                  }`}
-                >
-                  {currentStep > 1 ? <span className="checkmark">✓</span> : "1"}
+
+            {/* Gender Section */}
+            <div className="form-section gender-card">
+              <h3>Baby’s Gender</h3>
+              <div>
+                <label>
+                  Gender of baby <span className="required-star">*</span>
+                </label>
+                <div className="gender-buttons">
+                  <button
+                    className={`btn-gender male-btn ${
+                      childForm.gender === "Male" ? "active-gender" : ""
+                    } ${errors.gender ? "error-input" : ""}`}
+                    onClick={() =>
+                      setChildForm((prev) => ({ ...prev, gender: "Male" }))
+                    }
+                  >
+                    Male
+                  </button>
+                  <button
+                    className={`btn-gender female-btn ${
+                      childForm.gender === "Female" ? "active-gender" : ""
+                    } ${errors.gender ? "error-input" : ""}`}
+                    onClick={() =>
+                      setChildForm((prev) => ({ ...prev, gender: "Female" }))
+                    }
+                  >
+                    Female
+                  </button>
                 </div>
-                <div className="step-label">Add Record</div>
+                {errors.gender && <p className="error-text">{errors.gender}</p>}
               </div>
-              <div className="step-connector"></div>
-              <div className="step-item">
-                <div
-                  className={`step-circle ${
-                    currentStep > 2 ? "completed" : currentStep === 2 ? "active" : ""
-                  }`}
-                >
-                  {currentStep > 2 ? <span className="checkmark">✓</span> : "2"}
+            </div>
+
+            {/* Date of Birth Section */}
+            <div className="form-section date-section">
+              <h3>Baby’s Date of Birth</h3>
+              <label>
+                Baby’s date of birth <span className="required-star">*</span>
+              </label>
+              <ReactDatePicker
+                selected={childForm.dateOfBirth ? new Date(childForm.dateOfBirth) : null}
+                onChange={(date) =>
+                  setChildForm((prev) => ({
+                    ...prev,
+                    dateOfBirth: date ? date.toISOString() : "",
+                  }))
+                }
+                dateFormat="dd/MM/yyyy"
+                showMonthDropdown
+                showYearDropdown
+                dropdownMode="select"
+                className={errors.dateOfBirth ? "error-input" : ""}
+                placeholderText="Select date of birth"
+                maxDate={new Date()}
+              />
+              {errors.dateOfBirth && (
+                <p className="error-text">{errors.dateOfBirth}</p>
+              )}
+            </div>
+
+            {/* Basic Measurements Section */}
+            <div className="form-section measurements-card">
+              <h3>Basic Measurements</h3>
+              <div className="measurements-section">
+                <div>
+                  <label>Birth weight (kg)</label>
+                  <input
+                    type="number"
+                    placeholder="kg"
+                    name="birthWeight"
+                    value={childForm.birthWeight}
+                    onChange={handleChildChange}
+                    min="0"
+                    className={errors.birthWeight ? "error-input" : ""}
+                  />
+                  {errors.birthWeight && (
+                    <p className="error-text">{errors.birthWeight}</p>
+                  )}
                 </div>
-                <div className="step-label">Recommendations for your baby</div>
-              </div>
-              <div className="step-connector"></div>
-              <div className="step-item">
-                <div className={`step-circle ${currentStep === 3 ? "active" : ""}`}>
-                  3
+                <div>
+                  <label>Birth height (cm)</label>
+                  <input
+                    type="number"
+                    placeholder="cm"
+                    name="birthHeight"
+                    value={childForm.birthHeight}
+                    onChange={handleChildChange}
+                    min="0"
+                    className={errors.birthHeight ? "error-input" : ""}
+                  />
+                  {errors.birthHeight && (
+                    <p className="error-text">{errors.birthHeight}</p>
+                  )}
                 </div>
-                <div className="step-label">Other measurements</div>
               </div>
+              <div className="notes-section">
+                <label>Notes</label>
+                <input
+                  type="text"
+                  placeholder="Any note..."
+                  name="notes"
+                  value={childForm.notes}
+                  onChange={handleChildChange}
+                />
+              </div>
+            </div>
+
+            {/* Growth Record */}
+            <details>
+              <summary>Growth Record (click to expand)</summary>
+              <div className="form-section">
+                <h3>Growth Record</h3>
+                <div className="measurements-section">
+                  <div>
+                    <label>Record Date</label>
+                    <input
+                      type="date"
+                      value={growthForm.createdAt}
+                      onChange={handleGrowthChange}
+                      name="createdAt"
+                      max={new Date().toISOString().split("T")[0]}
+                      className={errors.createdAt ? "error-input" : ""}
+                    />
+                    {errors.createdAt && (
+                      <p className="error-text">{errors.createdAt}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label>Baby's weight (kg)</label>
+                    <input
+                      type="number"
+                      name="weight"
+                      value={growthForm.weight}
+                      onChange={handleGrowthChange}
+                      min="0"
+                      className={errors.weight ? "error-input" : ""}
+                    />
+                    {errors.weight && (
+                      <p className="error-text">{errors.weight}</p>
+                    )}
+                    {warnings.weight && (
+                      <p className="warning-text">{warnings.weight}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label>Baby's height (cm)</label>
+                    <input
+                      type="number"
+                      name="height"
+                      value={growthForm.height}
+                      onChange={handleGrowthChange}
+                      min="0"
+                      className={errors.height ? "error-input" : ""}
+                    />
+                    {errors.height && (
+                      <p className="error-text">{errors.height}</p>
+                    )}
+                    {warnings.height && (
+                      <p className="warning-text">{warnings.height}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label>Head circumference (cm)</label>
+                    <input
+                      type="number"
+                      name="headCircumference"
+                      value={growthForm.headCircumference}
+                      onChange={handleGrowthChange}
+                      min="0"
+                    />
+                    {warnings.headCircumference && (
+                      <p className="warning-text">{warnings.headCircumference}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label>BMI (kg/m²)</label>
+                    <input
+                      type="number"
+                      value={calculateBMI(growthForm.weight, growthForm.height)}
+                      readOnly
+                    />
+                  </div>
+                </div>
+                <div className="notes-section">
+                  <label>Notes</label>
+                  <input
+                    type="text"
+                    name="notes"
+                    value={growthForm.notes}
+                    onChange={handleGrowthChange}
+                  />
+                </div>
+              </div>
+            </details>
+
+            {/* Recommendations for Your Baby */}
+            <details>
+              <summary>Recommendations for Your Baby (click to expand)</summary>
+              <div className="form-section">
+                <h4>Nutritional Information</h4>
+                <div className="measurements-section">
+                  <div>
+                    <label>Nutritional status</label>
+                    <input
+                      type="text"
+                      name="nutritionalStatus"
+                      value={growthForm.nutritionalStatus}
+                      onChange={handleGrowthChange}
+                    />
+                  </div>
+                  <div>
+                    <label>Physical activity level</label>
+                    <input
+                      type="text"
+                      name="physicalActivityLevel"
+                      value={growthForm.physicalActivityLevel}
+                      onChange={handleGrowthChange}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="form-section">
+                <h4>Blood Metrics</h4>
+                <div className="measurements-section">
+                  <div>
+                    <label>Ferritin level (ng/mL)</label>
+                    <input
+                      type="number"
+                      name="ferritinLevel"
+                      value={growthForm.ferritinLevel}
+                      onChange={handleGrowthChange}
+                      min="0"
+                    />
+                    {warnings.ferritinLevel && (
+                      <p className="warning-text">{warnings.ferritinLevel}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label>Triglycerides (mg/dL)</label>
+                    <input
+                      type="number"
+                      name="triglycerides"
+                      value={growthForm.triglycerides}
+                      onChange={handleGrowthChange}
+                      min="0"
+                    />
+                    {warnings.triglycerides && (
+                      <p className="warning-text">{warnings.triglycerides}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label>Blood sugar level (mg/dL)</label>
+                    <input
+                      type="number"
+                      name="bloodSugarLevel"
+                      value={growthForm.bloodSugarLevel}
+                      onChange={handleGrowthChange}
+                      min="0"
+                    />
+                    {warnings.bloodSugarLevel && (
+                      <p className="warning-text">{warnings.bloodSugarLevel}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label>Chest circumference (cm)</label>
+                    <input
+                      type="number"
+                      name="chestCircumference"
+                      value={growthForm.chestCircumference}
+                      onChange={handleGrowthChange}
+                      min="0"
+                    />
+                    {warnings.chestCircumference && (
+                      <p className="warning-text">{warnings.chestCircumference}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            {/* Additional Health Measurements */}
+            <details>
+              <summary>Additional Health Measurements (click to expand)</summary>
+              <div className="form-section">
+                <h4>Vital Signs</h4>
+                <div className="measurements-section">
+                  <div>
+                    <label>Heart rate (bpm)</label>
+                    <input
+                      type="number"
+                      name="heartRate"
+                      value={growthForm.heartRate}
+                      onChange={handleGrowthChange}
+                      min="0"
+                    />
+                    {warnings.heartRate && (
+                      <p className="warning-text">{warnings.heartRate}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label>Blood pressure (mmHg)</label>
+                    <input
+                      type="number"
+                      name="bloodPressure"
+                      value={growthForm.bloodPressure}
+                      onChange={handleGrowthChange}
+                      min="0"
+                    />
+                    {warnings.bloodPressure && (
+                      <p className="warning-text">{warnings.bloodPressure}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label>Body temperature (°C)</label>
+                    <input
+                      type="number"
+                      name="bodyTemperature"
+                      value={growthForm.bodyTemperature}
+                      onChange={handleGrowthChange}
+                      min="0"
+                      className={errors.bodyTemperature ? "error-input" : ""}
+                    />
+                    {errors.bodyTemperature && (
+                      <p className="error-text">{errors.bodyTemperature}</p>
+                    )}
+                    {warnings.bodyTemperature && (
+                      <p className="warning-text">{warnings.bodyTemperature}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label>Oxygen saturation (%)</label>
+                    <input
+                      type="number"
+                      name="oxygenSaturation"
+                      value={growthForm.oxygenSaturation}
+                      onChange={handleGrowthChange}
+                      min="0"
+                      className={errors.oxygenSaturation ? "error-input" : ""}
+                    />
+                    {errors.oxygenSaturation && (
+                      <p className="error-text">{errors.oxygenSaturation}</p>
+                    )}
+                    {warnings.oxygenSaturation && (
+                      <p className="warning-text">{warnings.oxygenSaturation}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="form-section">
+                <h4>Development Metrics</h4>
+                <div className="measurements-section">
+                  <div>
+                    <label>Sleep duration (hrs)</label>
+                    <input
+                      type="number"
+                      name="sleepDuration"
+                      value={growthForm.sleepDuration}
+                      onChange={handleGrowthChange}
+                      min="0"
+                      className={errors.sleepDuration ? "error-input" : ""}
+                    />
+                    {errors.sleepDuration && (
+                      <p className="error-text">{errors.sleepDuration}</p>
+                    )}
+                    {warnings.sleepDuration && (
+                      <p className="warning-text">{warnings.sleepDuration}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label>Growth hormone level (ng/mL)</label>
+                    <input
+                      type="number"
+                      name="growthHormoneLevel"
+                      value={growthForm.growthHormoneLevel}
+                      onChange={handleGrowthChange}
+                      min="0"
+                      className={errors.growthHormoneLevel ? "error-input" : ""}
+                    />
+                    {errors.growthHormoneLevel && (
+                      <p className="error-text">{errors.growthHormoneLevel}</p>
+                    )}
+                    {warnings.growthHormoneLevel && (
+                      <p className="warning-text">{warnings.growthHormoneLevel}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label>Muscle mass (kg)</label>
+                    <input
+                      type="number"
+                      name="muscleMass"
+                      value={growthForm.muscleMass}
+                      onChange={handleGrowthChange}
+                      min="0"
+                    />
+                    {warnings.muscleMass && (
+                      <p className="warning-text">{warnings.muscleMass}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="form-section">
+                <h4>Sensory and Health Status</h4>
+                <div className="measurements-section">
+                  <div>
+                    <label>Hearing</label>
+                    <input
+                      type="text"
+                      name="hearing"
+                      value={growthForm.hearing}
+                      onChange={handleGrowthChange}
+                    />
+                  </div>
+                  <div>
+                    <label>Vision</label>
+                    <input
+                      type="text"
+                      name="vision"
+                      value={growthForm.vision}
+                      onChange={handleGrowthChange}
+                    />
+                  </div>
+                  <div>
+                    <label>Mental health status</label>
+                    <input
+                      type="text"
+                      name="mentalHealthStatus"
+                      value={growthForm.mentalHealthStatus}
+                      onChange={handleGrowthChange}
+                    />
+                  </div>
+                  <div>
+                    <label>Immunization status</label>
+                    <input
+                      type="text"
+                      name="immunizationStatus"
+                      value={growthForm.immunizationStatus}
+                      onChange={handleGrowthChange}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="form-section">
+                <h4>Cognitive Development</h4>
+                <div className="measurements-section">
+                  <div>
+                    <label>Attention span</label>
+                    <input
+                      type="text"
+                      name="attentionSpan"
+                      value={growthForm.attentionSpan}
+                      onChange={handleGrowthChange}
+                    />
+                  </div>
+                  <div>
+                    <label>Neurological reflexes</label>
+                    <input
+                      type="text"
+                      name="neurologicalReflexes"
+                      value={growthForm.neurologicalReflexes}
+                      onChange={handleGrowthChange}
+                    />
+                  </div>
+                </div>
+                <div className="notes-section">
+                  <label>Developmental milestones</label>
+                  <input
+                    type="text"
+                    name="developmentalMilestones"
+                    value={growthForm.developmentalMilestones}
+                    onChange={handleGrowthChange}
+                  />
+                </div>
+              </div>
+            </details>
+
+            <div className="step-buttons">
+              <button type="button" onClick={handleSubmit}>
+                Submit
+              </button>
+              {errors.submit && <p className="error-text">{errors.submit}</p>}
             </div>
           </div>
         </div>
-        <div className="wizard-content">{renderStepContent}</div>
       </div>
     </div>
   );
 };
 
-AddRecord.propTypes = {
-  child: PropTypes.object,
-  memberId: PropTypes.string,
+AddChild.propTypes = {
   closeOverlay: PropTypes.func.isRequired,
 };
 
-export default AddRecord;
+export default AddChild;

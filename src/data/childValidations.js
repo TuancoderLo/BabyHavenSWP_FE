@@ -1,6 +1,5 @@
-// src/validations/childValidations.js
 
-const WHO_GROWTH_REFERENCE = [
+export const WHO_GROWTH_REFERENCE = [
   { age: 0, weight: [3.3, 5.0], height: [49, 55] },
   { age: 3, weight: [5.0, 7.9], height: [58, 67] },
   { age: 6, weight: [6.4, 9.7], height: [64, 72] },
@@ -25,7 +24,7 @@ const WHO_GROWTH_REFERENCE = [
   { age: 216, weight: [58.0, 85.0], height: [164, 182] },
 ];
 
-function calculateAgeInMonths(dateOfBirth) {
+export function calculateAgeInMonths(dateOfBirth) {
   if (!dateOfBirth) return 0;
   const birthDate = new Date(dateOfBirth);
   const today = new Date();
@@ -76,7 +75,7 @@ export function validateNonNegative(value, fieldName) {
   return "";
 }
 
-export function validateStep1(childForm) {
+export function addChildForm(childForm) {
   const newErrors = {};
   newErrors.name = validateName(childForm.name);
   newErrors.gender = validateGender(childForm.gender);
@@ -92,8 +91,9 @@ export function validateStep1(childForm) {
   return newErrors;
 }
 
-export function validateStep2Page1(growthForm, childDateOfBirth) {
+export function growthRecordForm(growthForm, childDateOfBirth) {
   const newErrors = {};
+  const warnings = {};
   if (!growthForm.createdAt) {
     newErrors.createdAt = "Please select date";
   } else {
@@ -124,25 +124,21 @@ export function validateStep2Page1(growthForm, childDateOfBirth) {
       const [minWeight, maxWeight] = ageGroup.weight;
       const [minHeight, maxHeight] = ageGroup.height;
       if (growthForm.weight && (growthForm.weight < minWeight || growthForm.weight > maxWeight)) {
-        newErrors.weight = `Warning: Weight should be between ${minWeight}kg and ${maxWeight}kg for age ${ageGroup.age} months`;
+        warnings.weight = `Warning: Weight should be between ${minWeight}kg and ${maxWeight}kg for age ${ageGroup.age} months`;
       }
       if (growthForm.height && (growthForm.height < minHeight || growthForm.height > maxHeight)) {
-        newErrors.height = `Warning: Height should be between ${minHeight}cm and ${maxHeight}cm for age ${ageGroup.age} months`;
+        warnings.height = `Warning: Height should be between ${minHeight}cm and ${maxHeight}cm for age ${ageGroup.age} months`;
       }
     }
   }
-
-  return newErrors;
-}
-
-export function validateStep2Page2(growthForm) {
-  const newErrors = {};
   if (growthForm.bodyTemperature !== "" && growthForm.bodyTemperature != null) {
     const bt = parseFloat(growthForm.bodyTemperature);
     if (bt < 0) {
       newErrors.bodyTemperature = "Body temperature must not be less than 0";
     } else if (bt >= 45) {
-      newErrors.bodyTemperature = "Body temperature must be below 45°C";
+      warnings.bodyTemperature = "Warning: Body temperature is unusually high (should be below 45°C)";
+    } else if (bt < 35 || bt > 38) {
+      warnings.bodyTemperature = "Warning: Normal body temperature is typically between 35°C and 38°C";
     }
   }
   if (growthForm.oxygenSaturation !== "" && growthForm.oxygenSaturation != null) {
@@ -150,20 +146,19 @@ export function validateStep2Page2(growthForm) {
     if (ox < 0) {
       newErrors.oxygenSaturation = "Oxygen saturation must not be less than 0";
     } else if (ox > 100) {
-      newErrors.oxygenSaturation = "Oxygen saturation must be at most 100";
+      warnings.oxygenSaturation = "Warning: Oxygen saturation cannot exceed 100%";
+    } else if (ox < 95) {
+      warnings.oxygenSaturation = "Warning: Oxygen saturation is typically 95-100%";
     }
   }
-  return newErrors;
-}
-
-export function validateStep2Page3(growthForm) {
-  const newErrors = {};
   if (growthForm.sleepDuration !== "" && growthForm.sleepDuration != null) {
     const sd = parseFloat(growthForm.sleepDuration);
     if (sd < 0) {
       newErrors.sleepDuration = "Sleep duration must not be less than 0";
     } else if (sd >= 24) {
-      newErrors.sleepDuration = "Sleep duration must be less than 24 hours";
+      warnings.sleepDuration = "Warning: Sleep duration cannot exceed 24 hours";
+    } else if (sd < 10) {
+      warnings.sleepDuration = "Warning: Typical sleep duration for infants is 10-18 hours";
     }
   }
   if (growthForm.growthHormoneLevel !== "" && growthForm.growthHormoneLevel != null) {
