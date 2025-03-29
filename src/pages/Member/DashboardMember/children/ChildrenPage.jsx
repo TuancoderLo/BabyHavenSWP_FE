@@ -39,11 +39,17 @@ function ChildrenPage() {
   useEffect(() => {
     if (selectedChild && memberId) {
       alertApi
-        .getAlertsByChild(selectedChild.name, selectedChild.dateOfBirth, memberId)
+        .getAlertsByChild(
+          selectedChild.name,
+          selectedChild.dateOfBirth,
+          memberId
+        )
         .then((res) => {
           if (res.data && Array.isArray(res.data.data)) {
             const alertsData = res.data.data;
-            alertsData.sort((a, b) => new Date(b.alertDate) - new Date(a.alertDate));
+            alertsData.sort(
+              (a, b) => new Date(b.alertDate) - new Date(a.alertDate)
+            );
             setAlerts(alertsData || null);
             const newestUnread = alertsData.find((alert) => !alert.isRead);
             setLatestAlert(newestUnread || alertsData[0] || null); // Lấy alert chưa đọc hoặc mới nhất
@@ -156,7 +162,8 @@ function ChildrenPage() {
             (membership) =>
               membership.status === "Active" && membership.isActive === true
           )
-        : membershipData?.status === "Active" && membershipData?.isActive === true
+        : membershipData?.status === "Active" &&
+          membershipData?.isActive === true
         ? membershipData
         : null;
 
@@ -328,7 +335,10 @@ function ChildrenPage() {
         trend: latest.height > previous.height ? "increase" : "decrease",
       },
       bmi: {
-        change: latestBMI && previousBMI ? (latestBMI - previousBMI).toFixed(1) : "N/A",
+        change:
+          latestBMI && previousBMI
+            ? (latestBMI - previousBMI).toFixed(1)
+            : "N/A",
         trend: latestBMI > previousBMI ? "increase" : "decrease",
       },
     };
@@ -349,24 +359,42 @@ function ChildrenPage() {
       <div className="growth-analysis-section">
         <h3>Growth Analysis</h3>
         <div className="analysis-content">
-          <div className={`analysis-item ${changes.weight.trend !== null ? changes.weight.trend : "--"}`}>
+          <div
+            className={`analysis-item ${
+              changes.weight.trend !== null ? changes.weight.trend : "--"
+            }`}
+          >
             <span className="analysis-label">Weight Change:</span>
             <span className="analysis-value">
-              {changes.weight.change !== "N/A" && changes.weight.change > 0 ? "+" : ""}
+              {changes.weight.change !== "N/A" && changes.weight.change > 0
+                ? "+"
+                : ""}
               {changes.weight.change} kg
             </span>
           </div>
-          <div className={`analysis-item ${changes.height.trend !== null ? changes.height.trend : "--"}`}>
+          <div
+            className={`analysis-item ${
+              changes.height.trend !== null ? changes.height.trend : "--"
+            }`}
+          >
             <span className="analysis-label">Height Change:</span>
             <span className="analysis-value">
-              {changes.height.change !== "N/A" && changes.height.change > 0 ? "+" : ""}
+              {changes.height.change !== "N/A" && changes.height.change > 0
+                ? "+"
+                : ""}
               {changes.height.change} cm
             </span>
           </div>
-          <div className={`analysis-item ${changes.bmi.trend !== null ? changes.bmi.trend : "--"}`}>
+          <div
+            className={`analysis-item ${
+              changes.bmi.trend !== null ? changes.bmi.trend : "--"
+            }`}
+          >
             <span className="analysis-label">BMI Change:</span>
             <span className="analysis-value">
-              {changes.bmi.change !== "N/A" ? (changes.bmi.change > 0 ? "+" : "") + changes.bmi.change : "N/A"}
+              {changes.bmi.change !== "N/A"
+                ? (changes.bmi.change > 0 ? "+" : "") + changes.bmi.change
+                : "N/A"}
             </span>
           </div>
         </div>
@@ -386,7 +414,8 @@ function ChildrenPage() {
     return (
       <div className="analyze-ai-section">
         <div className="analyze-ai-title">
-          Discover <span className="highlight">BabyHaven AI</span>: Your Partner in Parenting!
+          Discover <span className="highlight">BabyHaven AI</span>: Your Partner
+          in Parenting!
         </div>
         <button
           className="analyze-ai-btn"
@@ -416,7 +445,8 @@ function ChildrenPage() {
         <div className="no-children-container">
           <div className="welcome-message">
             <h2>
-              Welcome to <span className="highlight">BabyHaven</span>, let's start
+              Welcome to <span className="highlight">BabyHaven</span>, let's
+              start
             </h2>
             <h2>your journey here with your baby.</h2>
           </div>
@@ -430,7 +460,9 @@ function ChildrenPage() {
             {[1, 2, 3, 4, 5, 6].map((slotNumber) => {
               const child = childrenList[slotNumber - 1];
               const showAddChild =
-                !child && childrenList.length < 6 && slotNumber === childrenList.length + 1;
+                !child &&
+                childrenList.length < 6 &&
+                slotNumber === childrenList.length + 1;
 
               if (!child && !showAddChild) return null;
 
@@ -441,16 +473,23 @@ function ChildrenPage() {
                     !child ? "empty" : ""
                   } 
                   ${
-                    selectedChild && selectedChild.name === child?.name ? "selected" : ""
+                    selectedChild && selectedChild.name === child?.name
+                      ? "selected"
+                      : ""
                   } 
                   ${child?.gender?.toLowerCase() || ""}`}
-                  onClick={() => (child ? handleSelectChild(child) : handleAddChild())}
+                  onClick={() =>
+                    child ? handleSelectChild(child) : handleAddChild()
+                  }
                 >
                   {child ? (
                     <div className="child-info">
                       <span className="child-name">{child.name}</span>
                       <span className="child-age">
-                        <i className="fas fa-calendar-alt" style={{ marginRight: "4px" }}></i>
+                        <i
+                          className="fas fa-calendar-alt"
+                          style={{ marginRight: "4px" }}
+                        ></i>
                         {calculateAge(child.dateOfBirth)}
                       </span>
                       <i
@@ -491,7 +530,9 @@ function ChildrenPage() {
                     <span className="detail-label">Date of Birth:</span>
                     <span className="detail-value">
                       {selectedChild.dateOfBirth
-                        ? new Date(selectedChild.dateOfBirth).toLocaleDateString("en-GB", {
+                        ? new Date(
+                            selectedChild.dateOfBirth
+                          ).toLocaleDateString("en-GB", {
                             day: "2-digit",
                             month: "2-digit",
                             year: "numeric",
@@ -501,7 +542,9 @@ function ChildrenPage() {
                   </div>
                   <div className="detail-row">
                     <span className="detail-label">Gender:</span>
-                    <span className="detail-value">{selectedChild.gender || "Not set"}</span>
+                    <span className="detail-value">
+                      {selectedChild.gender || "Not set"}
+                    </span>
                   </div>
                 </div>
               </>
@@ -527,19 +570,25 @@ function ChildrenPage() {
                 <div className="record-row">
                   <span className="record-label">Height:</span>
                   <span className="record-value">
-                    {selectedRecord ? `${selectedRecord.height || "--"} cm` : "-- cm"}
+                    {selectedRecord
+                      ? `${selectedRecord.height || "--"} cm`
+                      : "-- cm"}
                   </span>
                 </div>
                 <div className="record-row">
                   <span className="record-label">Weight:</span>
                   <span className="record-value">
-                    {selectedRecord ? `${selectedRecord.weight || "--"} kg` : "-- kg"}
+                    {selectedRecord
+                      ? `${selectedRecord.weight || "--"} kg`
+                      : "-- kg"}
                   </span>
                 </div>
                 <div className="record-row">
                   <span className="record-label">BMI:</span>
                   <span className="record-value">
-                    {selectedRecord && selectedRecord.height && selectedRecord.weight
+                    {selectedRecord &&
+                    selectedRecord.height &&
+                    selectedRecord.weight
                       ? (
                           selectedRecord.weight /
                           Math.pow(selectedRecord.height / 100, 2)
@@ -548,7 +597,10 @@ function ChildrenPage() {
                   </span>
                 </div>
               </div>
-              <AddRecordButton onClick={handleAddRecord} disabled={!selectedChild} />
+              <AddRecordButton
+                onClick={handleAddRecord}
+                disabled={!selectedChild}
+              />
             </div>
           </div>
 
@@ -556,7 +608,11 @@ function ChildrenPage() {
             <Alert
               alert={latestAlert}
               alerts={alerts}
-              member={{ memberId: memberId, name: localStorage.getItem("name"), email: localStorage.getItem("name") }}
+              member={{
+                memberId: memberId,
+                name: localStorage.getItem("name"),
+                email: localStorage.getItem("name"),
+              }}
               child={selectedChild}
               growthRecords={growthRecords}
             />
@@ -567,16 +623,12 @@ function ChildrenPage() {
               Growth chart
               <div className="chart-filters">
                 <span
-                  className={`filter-item ${selectedTool === "BMI" ? "active" : ""}`}
+                  className={`filter-item ${
+                    selectedTool === "BMI" ? "active" : ""
+                  }`}
                   onClick={() => setSelectedTool("BMI")}
                 >
                   BMI
-                </span>
-                <span
-                  className={`filter-item ${selectedTool === "Milestone" ? "active" : ""}`}
-                  onClick={() => setSelectedTool("Milestone")}
-                >
-                  Milestone
                 </span>
               </div>
             </h2>
@@ -584,7 +636,9 @@ function ChildrenPage() {
               {selectedChild ? (
                 <>
                   {(() => {
-                    const ageInMonths = getAgeInMonths(selectedChild.dateOfBirth);
+                    const ageInMonths = getAgeInMonths(
+                      selectedChild.dateOfBirth
+                    );
                     const ageInYears = getAgeInYears(ageInMonths);
                     return (
                       <GrowthChart

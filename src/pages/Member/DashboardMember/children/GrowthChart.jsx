@@ -38,7 +38,10 @@ const getWHOBMIData = async (ageInYears, gender) => {
     }
 
     console.log(`Fetching BMI data for ${dataKey} from API`);
-    const response = await bmiPercentitleApi.getByAgeAndGender(ageInYears, gender);
+    const response = await bmiPercentitleApi.getByAgeAndGender(
+      ageInYears,
+      gender
+    );
     console.log("API Response:", response);
 
     const lms = response.data?.data || response.data;
@@ -101,7 +104,6 @@ const GrowthChart = ({
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [whoBMIData, setWhoBMIData] = useState(null);
-  const [milestones, setMilestones] = useState([]); // Thêm state để lưu danh sách milestones
 
   const calculateBMI = (weight, height) => {
     console.log("calculateBMI input:", { weight, height });
@@ -131,25 +133,6 @@ const GrowthChart = ({
 
     console.log("Calculated BMI:", bmi);
     return bmi;
-  };
-
-  const fetchMilestones = async () => {
-    try {
-      setLoading(true);
-      const response = await childApi.getMilestones(childName); // Thay bằng API thực tế của bạn
-      const milestonesData = response.data.map((milestone) => ({
-        month: new Date(milestone.date).toLocaleDateString("en-US", { month: "short" }),
-        description: milestone.description,
-        achieved: milestone.achieved,
-      }));
-      setMilestones(milestonesData);
-      console.log("Fetched Milestones:", milestonesData);
-    } catch (error) {
-      console.error("Error fetching milestones:", error);
-      setMilestones([]);
-    } finally {
-      setLoading(false);
-    }
   };
 
   useEffect(() => {
@@ -257,13 +240,17 @@ const GrowthChart = ({
       }
     };
 
-    // Gọi fetchGrowthData cho BMI và fetchMilestones cho Milestones
     if (selectedTool === "BMI") {
       fetchGrowthData();
-    } else if (selectedTool === "Milestones") {
-      fetchMilestones();
     }
-  }, [childName, refreshTrigger, gender, ageInMonths, ageInYears, selectedTool]);
+  }, [
+    childName,
+    refreshTrigger,
+    gender,
+    ageInMonths,
+    ageInYears,
+    selectedTool,
+  ]);
 
   if (loading) {
     return <div className="loading">Loading chart...</div>;
@@ -330,7 +317,11 @@ const GrowthChart = ({
                 tick={{ fill: "#666", fontSize: 11 }}
                 domain={[0, 50]} // BMI từ 0 đến 50
                 ticks={[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]}
-                label={{ value: "BMI (kg/m²)", angle: -90, position: "insideLeft" }}
+                label={{
+                  value: "BMI (kg/m²)",
+                  angle: -90,
+                  position: "insideLeft",
+                }}
               />
               <Tooltip
                 contentStyle={{
@@ -427,86 +418,6 @@ const GrowthChart = ({
               />
             </LineChart>
           </ResponsiveContainer>
-        );
-
-      case "Milestone":
-        if (!milestones || milestones.length === 0) {
-          return (
-            <div
-              style={{
-                height: "350px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#666",
-              }}
-            >
-              No milestones data available
-            </div>
-          );
-        }
-
-        // Hiển thị danh sách milestones theo dạng timeline đơn giản
-        return (
-          <div className="milestones-container" style={{ height: "320px", overflowY: "auto" }}>
-            <h4 style={{ textAlign: "center", marginBottom: "20px" }}>Milestones Timeline</h4>
-            <div className="milestones-timeline">
-              {milestones.map((milestone, index) => (
-                <div
-                  key={index}
-                  className="milestone-item"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    marginBottom: "20px",
-                    paddingLeft: "20px",
-                    position: "relative",
-                  }}
-                >
-                  {/* Điểm trên timeline */}
-                  <div
-                    style={{
-                      width: "12px",
-                      height: "12px",
-                      borderRadius: "50%",
-                      backgroundColor: milestone.achieved ? "#82ca9d" : "#ff4040",
-                      position: "absolute",
-                      left: "0",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                    }}
-                  />
-                  {/* Đường nối các điểm */}
-                  {index < milestones.length - 1 && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        left: "5px",
-                        top: "50%",
-                        height: "calc(100% + 20px)",
-                        width: "2px",
-                        backgroundColor: "#ccc",
-                      }}
-                    />
-                  )}
-                  {/* Nội dung milestone */}
-                  <div style={{ marginLeft: "30px" }}>
-                    <p style={{ margin: "0", fontWeight: "bold" }}>{milestone.month}</p>
-                    <p style={{ margin: "0", color: "#666" }}>{milestone.description}</p>
-                    <p
-                      style={{
-                        margin: "0",
-                        color: milestone.achieved ? "#82ca9d" : "#ff4040",
-                        fontSize: "12px",
-                      }}
-                    >
-                      {milestone.achieved ? "Achieved" : "Not Achieved"}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         );
 
       default:

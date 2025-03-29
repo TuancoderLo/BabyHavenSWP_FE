@@ -15,7 +15,10 @@ import {
 const AddRecord = ({ child, memberId, closeOverlay }) => {
   if (!child) {
     return (
-      <div className="add-record-overlay" onClick={(e) => handleOverlayClick(e)}>
+      <div
+        className="add-record-overlay"
+        onClick={(e) => handleOverlayClick(e)}
+      >
         <div className="add-record-wizard" onClick={(e) => e.stopPropagation()}>
           <div className="notification-board">
             <h2>No Child Selected</h2>
@@ -149,7 +152,8 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
         name: child.name,
         dateOfBirth: child.dateOfBirth,
         recordedBy: memberId,
-        createdAt: growthForm.createdAt || new Date().toISOString().split("T")[0],
+        createdAt:
+          growthForm.createdAt || new Date().toISOString().split("T")[0],
         weight: growthForm.weight || 0,
         height: growthForm.height || 0,
         headCircumference: growthForm.headCircumference || 0,
@@ -180,7 +184,11 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
 
       // Sau khi tạo record thành công, gọi alertApi.getAlert để tạo và lấy alert
       try {
-        const alertRes = await alertApi.getAlert(child.name, child.dateOfBirth, memberId);
+        const alertRes = await alertApi.getAlert(
+          child.name,
+          child.dateOfBirth,
+          memberId
+        );
         console.log("Alert created and fetched:", alertRes.data);
       } catch (alertErr) {
         console.error("Error creating/fetching alert:", alertErr);
@@ -250,7 +258,10 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               type="date"
               value={growthForm.createdAt || ""}
               onChange={(e) =>
-                setGrowthForm((prev) => ({ ...prev, createdAt: e.target.value }))
+                setGrowthForm((prev) => ({
+                  ...prev,
+                  createdAt: e.target.value,
+                }))
               }
               max={new Date().toISOString().split("T")[0]}
               className={errors.createdAt ? "error-input" : ""}
@@ -275,7 +286,9 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                     if (e.key === "-" || e.key === "e") e.preventDefault();
                   }}
                 />
-                {errors.weight && <p className="warning-text-record">{errors.weight}</p>}
+                {errors.weight && (
+                  <p className="warning-text-record">{errors.weight}</p>
+                )}
               </div>
               <div>
                 <label>Baby's height (cm)</label>
@@ -290,7 +303,9 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                     if (e.key === "-" || e.key === "e") e.preventDefault();
                   }}
                 />
-                {errors.height && <p className="warning-text-record">{errors.height}</p>}
+                {errors.height && (
+                  <p className="warning-text-record">{errors.height}</p>
+                )}
               </div>
               <div>
                 <label>Head circumference (cm)</label>
@@ -487,7 +502,11 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
             </div>
           </div>
           <div className="step-buttons">
-            <button type="button" className="previous-btn" onClick={handlePrevious}>
+            <button
+              type="button"
+              className="previous-btn"
+              onClick={handlePrevious}
+            >
               Previous
             </button>
             <button
@@ -537,7 +556,10 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                   name="heartRate"
                   value={growthForm.heartRate}
                   onChange={(e) =>
-                    setGrowthForm((prev) => ({ ...prev, heartRate: e.target.value }))
+                    setGrowthForm((prev) => ({
+                      ...prev,
+                      heartRate: e.target.value,
+                    }))
                   }
                   min="0"
                   onKeyDown={(e) => {
@@ -668,7 +690,10 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                   name="hearing"
                   value={growthForm.hearing}
                   onChange={(e) =>
-                    setGrowthForm((prev) => ({ ...prev, hearing: e.target.value }))
+                    setGrowthForm((prev) => ({
+                      ...prev,
+                      hearing: e.target.value,
+                    }))
                   }
                 />
               </div>
@@ -679,7 +704,10 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                   name="vision"
                   value={growthForm.vision}
                   onChange={(e) =>
-                    setGrowthForm((prev) => ({ ...prev, vision: e.target.value }))
+                    setGrowthForm((prev) => ({
+                      ...prev,
+                      vision: e.target.value,
+                    }))
                   }
                 />
               </div>
@@ -761,7 +789,11 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
             </div>
           </div>
           <div className="step-buttons">
-            <button type="button" className="previous-btn" onClick={handlePrevious}>
+            <button
+              type="button"
+              className="previous-btn"
+              onClick={handlePrevious}
+            >
               Previous
             </button>
             <button
@@ -797,7 +829,8 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
           <div className="blue-bar"></div>
           <div className="wizard-left-content">
             <h1 className="main-title">
-              Enter a new growth record to track your baby's health automatically
+              Enter a new growth record to track your baby's health
+              automatically
             </h1>
             <div className="babygrowth-img">
               <img src={BabyGrowth} alt="Baby Growth" />
@@ -806,7 +839,11 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               <div className="step-item">
                 <div
                   className={`step-circle ${
-                    currentStep > 1 ? "completed" : currentStep === 1 ? "active" : ""
+                    currentStep > 1
+                      ? "completed"
+                      : currentStep === 1
+                      ? "active"
+                      : ""
                   }`}
                 >
                   {currentStep > 1 ? <span className="checkmark">✓</span> : "1"}
@@ -817,7 +854,11 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               <div className="step-item">
                 <div
                   className={`step-circle ${
-                    currentStep > 2 ? "completed" : currentStep === 2 ? "active" : ""
+                    currentStep > 2
+                      ? "completed"
+                      : currentStep === 2
+                      ? "active"
+                      : ""
                   }`}
                 >
                   {currentStep > 2 ? <span className="checkmark">✓</span> : "2"}
@@ -826,7 +867,9 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               </div>
               <div className="step-connector"></div>
               <div className="step-item">
-                <div className={`step-circle ${currentStep === 3 ? "active" : ""}`}>
+                <div
+                  className={`step-circle ${currentStep === 3 ? "active" : ""}`}
+                >
                   3
                 </div>
                 <div className="step-label">Other measurements</div>

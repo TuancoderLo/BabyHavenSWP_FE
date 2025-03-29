@@ -9,12 +9,19 @@ import moment from "moment";
 function ExpandableResponseCard({ response, request, onClick }) {
   const combinedText = `Date: ${response.responseDate} | Doctor: ${
     response.doctorName
-  } | Child: ${request?.childName || "N/A"} | Category: ${request?.category || "N/A"}`;
+  } | Child: ${request?.childName || "N/A"} | Category: ${
+    request?.category || "N/A"
+  }`;
   const truncatedText =
-    combinedText.length > 100 ? combinedText.slice(0, 100) + "..." : combinedText;
+    combinedText.length > 100
+      ? combinedText.slice(0, 100) + "..."
+      : combinedText;
 
   return (
-    <div className="consultation-response-card" onClick={() => onClick({ response, request })}>
+    <div
+      className="consultation-response-card"
+      onClick={() => onClick({ response, request })}
+    >
       <div className="response-header">
         <span className="response-date">{response.responseDate}</span>
         <span className="response-status">{response.status}</span>
@@ -36,8 +43,11 @@ function ExpandableResponseCard({ response, request, onClick }) {
 function ExpandableSentRequestCard({ request, onClick }) {
   const truncatedText =
     `ID: ${request.requestId} | Child: ${request.childName} | ` +
-    `Date: ${request.requestDate} | Description: ${request.description}`
-      .slice(0, 50) + "...";
+    `Date: ${request.requestDate} | Description: ${request.description}`.slice(
+      0,
+      50
+    ) +
+    "...";
   return (
     <div className="consultation-sent-card" onClick={() => onClick(request)}>
       <div className="sent-header">
@@ -47,8 +57,12 @@ function ExpandableSentRequestCard({ request, onClick }) {
         <span className="sent-status">{request.status}</span>
       </div>
       <div className="sent-summary">
-        <p><strong>Child:</strong> {request.childName}</p>
-        <p><strong>Description:</strong> {request.description.slice(0, 50)}...</p>
+        <p>
+          <strong>Child:</strong> {request.childName}
+        </p>
+        <p>
+          <strong>Description:</strong> {request.description.slice(0, 50)}...
+        </p>
       </div>
       <div className="truncated-content">{truncatedText}</div>
     </div>
@@ -56,8 +70,14 @@ function ExpandableSentRequestCard({ request, onClick }) {
 }
 
 // Thành phần cho thẻ phản hồi đã cung cấp
-function ExpandableFeedbackEntry({ feedback, onClick, consultationResponses, consultationRequests }) {
-  const truncatedText = `Rating: ${feedback.rating} stars`.slice(0, 100) + "...";
+function ExpandableFeedbackEntry({
+  feedback,
+  onClick,
+  consultationResponses,
+  consultationRequests,
+}) {
+  const truncatedText =
+    `Rating: ${feedback.rating} stars`.slice(0, 100) + "...";
 
   // Tìm Response tương ứng với feedback.responseId
   const relatedResponse = consultationResponses.find(
@@ -65,7 +85,9 @@ function ExpandableFeedbackEntry({ feedback, onClick, consultationResponses, con
   );
 
   // Tìm Request tương ứng với response.requestId (nếu có relatedResponse)
-  const relatedRequest = relatedResponse ? consultationRequests[relatedResponse.requestId] : null;
+  const relatedRequest = relatedResponse
+    ? consultationRequests[relatedResponse.requestId]
+    : null;
 
   return (
     <div
@@ -146,7 +168,8 @@ function DoctorConsultation() {
       setLoading(true);
       setError(null);
       const memberId = localStorage.getItem("memberId");
-      if (!memberId) throw new Error("Please login to view the list of children");
+      if (!memberId)
+        throw new Error("Please login to view the list of children");
       const response = await childApi.getByMember(memberId);
       if (response?.data?.data && Array.isArray(response.data.data)) {
         const childrenData = response.data.data.map((child) => ({
@@ -170,7 +193,9 @@ function DoctorConsultation() {
       const response = await doctorApi.getAllDoctors();
       if (response?.data) {
         setDoctors(response.data);
-        response.data.forEach((doctor) => fetchDoctorSpecializations(doctor.doctorId));
+        response.data.forEach((doctor) =>
+          fetchDoctorSpecializations(doctor.doctorId)
+        );
       }
     } catch (error) {
       console.error("Error fetching doctors:", error);
@@ -211,14 +236,18 @@ function DoctorConsultation() {
   const fetchConsultationResponses = async () => {
     try {
       const memberId = localStorage.getItem("memberId");
-      if (!memberId) throw new Error("Please login to fetch consultation responses");
+      if (!memberId)
+        throw new Error("Please login to fetch consultation responses");
       const res = await doctorApi.getConsultationResponses(memberId);
       let responses = Array.isArray(res?.data) ? res.data : [res.data];
       console.log("Consultation Responses:", responses);
       // Parse nội dung JSON
       const parsedResponses = responses.map((item) => ({
         ...item,
-        content: typeof item.content === "string" ? parseContentToObject(item.content) : item.content,
+        content:
+          typeof item.content === "string"
+            ? parseContentToObject(item.content)
+            : item.content,
       }));
       setConsultationResponses(parsedResponses);
 
@@ -226,7 +255,9 @@ function DoctorConsultation() {
       const requests = {};
       for (const response of parsedResponses) {
         if (response.requestId) {
-          const requestRes = await doctorApi.getConsultationRequestsById(response.requestId);
+          const requestRes = await doctorApi.getConsultationRequestsById(
+            response.requestId
+          );
           if (requestRes?.data) requests[response.requestId] = requestRes.data;
         }
       }
@@ -241,8 +272,11 @@ function DoctorConsultation() {
     try {
       const memberId = localStorage.getItem("memberId");
       const res = await doctorApi.getConsultationRequestsByMemberId(memberId);
-      const requestsData = Array.isArray(res.value) 
-        ? res.data.value : Array.isArray(res.data) ? res.data : [];
+      const requestsData = Array.isArray(res.value)
+        ? res.data.value
+        : Array.isArray(res.data)
+        ? res.data
+        : [];
       setSentRequests(requestsData);
     } catch (error) {
       console.error("Error fetching sent requests:", error);
@@ -272,8 +306,10 @@ function DoctorConsultation() {
   const handleChildSelect = (child) => setSelectedChild(child);
 
   // Chuyển step
-  const handleNextStep = () => currentStep < steps.length - 1 && setCurrentStep(currentStep + 1);
-  const handleBackStep = () => currentStep > 0 && setCurrentStep(currentStep - 1);
+  const handleNextStep = () =>
+    currentStep < steps.length - 1 && setCurrentStep(currentStep + 1);
+  const handleBackStep = () =>
+    currentStep > 0 && setCurrentStep(currentStep - 1);
 
   // Loại bỏ tag HTML
   const stripHtml = (html) => {
@@ -292,6 +328,7 @@ function DoctorConsultation() {
   const downloadAttachment = (attachment) => {
     try {
       const { FileName, Content, MimeType } = attachment;
+      console.log("Attachment:", attachment);
       const byteCharacters = atob(Content);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
@@ -324,9 +361,12 @@ function DoctorConsultation() {
       if (!selectedDoctor) throw new Error("Please select a doctor");
 
       const currentDate = new Date();
-      const requestDate = `${currentDate.toISOString().slice(0, 10)} ${currentDate
-        .toTimeString()
-        .slice(0, 8)}.${currentDate.getMilliseconds().toString().padEnd(3, "0")}`;
+      const requestDate = `${currentDate
+        .toISOString()
+        .slice(0, 10)} ${currentDate.toTimeString().slice(0, 8)}.${currentDate
+        .getMilliseconds()
+        .toString()
+        .padEnd(3, "0")}`;
 
       const plainDescription = stripHtml(consultationContent);
 
@@ -371,7 +411,9 @@ function DoctorConsultation() {
       setSelectedFiles([]);
     } catch (error) {
       setSubmitError(
-        error.response?.data?.title || error.message || "Unable to send consultation request"
+        error.response?.data?.title ||
+          error.message ||
+          "Unable to send consultation request"
       );
     } finally {
       setSubmitLoading(false);
@@ -437,7 +479,9 @@ function DoctorConsultation() {
       case 0:
         return (
           <div className="doctor-consultation-form">
-            <h3 className="doctor-section-title">Enter Consultation Information</h3>
+            <h3 className="doctor-section-title">
+              Enter Consultation Information
+            </h3>
             <div className="form-container">
               {/* Chọn child */}
               <div className="input-group">
@@ -462,7 +506,9 @@ function DoctorConsultation() {
                     className="doctor-child-select"
                     value={selectedChild?.name || ""}
                     onChange={(e) =>
-                      handleChildSelect(children.find((child) => child.name === e.target.value))
+                      handleChildSelect(
+                        children.find((child) => child.name === e.target.value)
+                      )
                     }
                   >
                     <option value="">Select a child</option>
@@ -497,7 +543,10 @@ function DoctorConsultation() {
 
             {/* Nội dung mô tả (TextEditor) */}
             <div className="editor-wrapper">
-              <TextEditor value={consultationContent} onChange={setConsultationContent} />
+              <TextEditor
+                value={consultationContent}
+                onChange={setConsultationContent}
+              />
             </div>
           </div>
         );
@@ -511,7 +560,9 @@ function DoctorConsultation() {
                 <div
                   key={doctor.doctorId}
                   className={`doctor-card ${
-                    selectedDoctor?.doctorId === doctor.doctorId ? "selected" : ""
+                    selectedDoctor?.doctorId === doctor.doctorId
+                      ? "selected"
+                      : ""
                   }`}
                   onClick={() => setSelectedDoctor(doctor)}
                 >
@@ -531,11 +582,13 @@ function DoctorConsultation() {
                     <p className="doctor-hospital">{doctor.hospitalName}</p>
                     {Array.isArray(doctorSpecializations[doctor.doctorId]) && (
                       <div className="doctor-specializations">
-                        {doctorSpecializations[doctor.doctorId].map((spec, index) => (
-                          <p key={index} className="doctor-specialization">
-                            {spec.name}
-                          </p>
-                        ))}
+                        {doctorSpecializations[doctor.doctorId].map(
+                          (spec, index) => (
+                            <p key={index} className="doctor-specialization">
+                              {spec.name}
+                            </p>
+                          )
+                        )}
                       </div>
                     )}
                   </div>
@@ -548,7 +601,9 @@ function DoctorConsultation() {
       case 2:
         return (
           <div className="doctor-review-container">
-            <h3 className="doctor-section-title">Review Consultation Information</h3>
+            <h3 className="doctor-section-title">
+              Review Consultation Information
+            </h3>
             <div className="review-section">
               <div className="review-item">
                 <strong>Child:</strong> {selectedChild?.name || "Not selected"}
@@ -586,20 +641,35 @@ function DoctorConsultation() {
                       className="doctor-profile-avatar"
                     />
                     <div className="doctor-profile-info">
-                      <h4 className="doctor-profile-name">{selectedDoctor.name}</h4>
-                      <span className="doctor-profile-status">{selectedDoctor.status}</span>
+                      <h4 className="doctor-profile-name">
+                        {selectedDoctor.name}
+                      </h4>
+                      <span className="doctor-profile-status">
+                        {selectedDoctor.status}
+                      </span>
                     </div>
                   </div>
                   <div className="doctor-profile-details">
-                    <p className="doctor-profile-degree">{selectedDoctor.degree}</p>
-                    <p className="doctor-profile-hospital">{selectedDoctor.hospitalName}</p>
-                    {Array.isArray(doctorSpecializations[selectedDoctor.doctorId]) && (
+                    <p className="doctor-profile-degree">
+                      {selectedDoctor.degree}
+                    </p>
+                    <p className="doctor-profile-hospital">
+                      {selectedDoctor.hospitalName}
+                    </p>
+                    {Array.isArray(
+                      doctorSpecializations[selectedDoctor.doctorId]
+                    ) && (
                       <div className="doctor-specializations">
-                        {doctorSpecializations[selectedDoctor.doctorId].map((spec, index) => (
-                          <p key={index} className="doctor-profile-specialization">
-                            {spec.name}
-                          </p>
-                        ))}
+                        {doctorSpecializations[selectedDoctor.doctorId].map(
+                          (spec, index) => (
+                            <p
+                              key={index}
+                              className="doctor-profile-specialization"
+                            >
+                              {spec.name}
+                            </p>
+                          )
+                        )}
                       </div>
                     )}
                   </div>
@@ -609,7 +679,11 @@ function DoctorConsultation() {
 
             <div className="submit-section">
               {submitError && <div className="submit-error">{submitError}</div>}
-              <button className="doctor-action-button" onClick={handleSubmit} disabled={submitLoading}>
+              <button
+                className="doctor-action-button"
+                onClick={handleSubmit}
+                disabled={submitLoading}
+              >
                 {submitLoading ? "Sending..." : "Complete"}
               </button>
             </div>
@@ -694,12 +768,18 @@ function DoctorConsultation() {
               {renderStepContent()}
               <div className="doctor-navigation-buttons">
                 {currentStep > 0 && (
-                  <button className="doctor-back-button" onClick={handleBackStep}>
+                  <button
+                    className="doctor-back-button"
+                    onClick={handleBackStep}
+                  >
                     Back
                   </button>
                 )}
                 {currentStep < steps.length - 1 && (
-                  <button className="doctor-next-button" onClick={handleNextStep}>
+                  <button
+                    className="doctor-next-button"
+                    onClick={handleNextStep}
+                  >
                     Next
                   </button>
                 )}
@@ -713,19 +793,25 @@ function DoctorConsultation() {
           <h3 className="section-title">History</h3>
           <div className="tab-container">
             <button
-              className={`tab-button ${currentTab === "responses" ? "active" : ""}`}
+              className={`tab-button ${
+                currentTab === "responses" ? "active" : ""
+              }`}
               onClick={() => setCurrentTab("responses")}
             >
               Responses
             </button>
             <button
-              className={`tab-button ${currentTab === "sentRequests" ? "active" : ""}`}
+              className={`tab-button ${
+                currentTab === "sentRequests" ? "active" : ""
+              }`}
               onClick={() => setCurrentTab("sentRequests")}
             >
               Sent Requests
             </button>
             <button
-              className={`tab-button ${currentTab === "feedback" ? "active" : ""}`}
+              className={`tab-button ${
+                currentTab === "feedback" ? "active" : ""
+              }`}
               onClick={() => setCurrentTab("feedback")}
             >
               Provided Feedback
@@ -737,9 +823,15 @@ function DoctorConsultation() {
 
       {/* Modal: Xem chi tiết Response */}
       {selectedResponse && (
-        <div className="modal-overlay" onClick={() => setSelectedResponse(null)}>
+        <div
+          className="modal-overlay"
+          onClick={() => setSelectedResponse(null)}
+        >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedResponse(null)}>
+            <button
+              className="modal-close"
+              onClick={() => setSelectedResponse(null)}
+            >
               ×
             </button>
             <h3 className="modal-title">Consultation Response Details</h3>
@@ -756,16 +848,20 @@ function DoctorConsultation() {
                 {selectedResponse.request ? (
                   <>
                     <p>
-                      <strong>Member:</strong> {selectedResponse.request.memberName}
+                      <strong>Member:</strong>{" "}
+                      {selectedResponse.request.memberName}
                     </p>
                     <p>
-                      <strong>Child:</strong> {selectedResponse.request.childName}
+                      <strong>Child:</strong>{" "}
+                      {selectedResponse.request.childName}
                     </p>
                     <p>
-                      <strong>Description:</strong> {selectedResponse.request.description}
+                      <strong>Description:</strong>{" "}
+                      {selectedResponse.request.description}
                     </p>
                     <p>
-                      <strong>Request Date:</strong> {selectedResponse.request.requestDate}
+                      <strong>Request Date:</strong>{" "}
+                      {selectedResponse.request.requestDate}
                     </p>
                   </>
                 ) : (
@@ -775,10 +871,12 @@ function DoctorConsultation() {
               <div className="response-section">
                 <h4>Response Information</h4>
                 <p>
-                  <strong>Date:</strong> {selectedResponse.response.responseDate}
+                  <strong>Date:</strong>{" "}
+                  {selectedResponse.response.responseDate}
                 </p>
                 <p>
-                  <strong>Doctor:</strong> {selectedResponse.response.doctorName}
+                  <strong>Doctor:</strong>{" "}
+                  {selectedResponse.response.doctorName}
                 </p>
                 <p>
                   <strong>Status:</strong> {selectedResponse.response.status}
@@ -832,9 +930,15 @@ function DoctorConsultation() {
 
       {/* Modal: Xem chi tiết Sent Request */}
       {selectedSentRequest && (
-        <div className="modal-overlay" onClick={() => setSelectedSentRequest(null)}>
+        <div
+          className="modal-overlay"
+          onClick={() => setSelectedSentRequest(null)}
+        >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedSentRequest(null)}>
+            <button
+              className="modal-close"
+              onClick={() => setSelectedSentRequest(null)}
+            >
               ×
             </button>
             <h3 className="modal-title">Sent Request Details</h3>
@@ -854,7 +958,8 @@ function DoctorConsultation() {
                   <strong>Urgency:</strong> {selectedSentRequest.urgency}
                 </p>
                 <p>
-                  <strong>Description:</strong> {selectedSentRequest.description}
+                  <strong>Description:</strong>{" "}
+                  {selectedSentRequest.description}
                 </p>
                 <p>
                   <strong>Date:</strong> {selectedSentRequest.requestDate}
@@ -865,17 +970,19 @@ function DoctorConsultation() {
                 {selectedSentRequest.attachments && (
                   <div>
                     <h4>Attachments</h4>
-                    {JSON.parse(selectedSentRequest.attachments).map((attachment, index) => (
-                      <div key={index} style={{ marginBottom: "10px" }}>
-                        <p>{attachment.fileName}</p>
-                        <button
-                          className="download-button"
-                          onClick={() => downloadAttachment(attachment)}
-                        >
-                          Download
-                        </button>
-                      </div>
-                    ))}
+                    {JSON.parse(selectedSentRequest.attachments).map(
+                      (attachment, index) => (
+                        <div key={index} style={{ marginBottom: "10px" }}>
+                          <p>{attachment.fileName}</p>
+                          <button
+                            className="download-button"
+                            onClick={() => downloadAttachment(attachment)}
+                          >
+                            Download
+                          </button>
+                        </div>
+                      )
+                    )}
                   </div>
                 )}
               </div>
@@ -886,9 +993,15 @@ function DoctorConsultation() {
 
       {/* Modal: Xem chi tiết Feedback */}
       {selectedFeedback && (
-        <div className="modal-overlay" onClick={() => setSelectedFeedback(null)}>
+        <div
+          className="modal-overlay"
+          onClick={() => setSelectedFeedback(null)}
+        >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedFeedback(null)}>
+            <button
+              className="modal-close"
+              onClick={() => setSelectedFeedback(null)}
+            >
               ×
             </button>
             <h3 className="modal-title">Feedback Details</h3>
@@ -903,7 +1016,8 @@ function DoctorConsultation() {
                   <strong>Comment:</strong> {selectedFeedback.feedback.comment}
                 </p>
                 <p>
-                  <strong>Date:</strong> {selectedFeedback.feedback.feedbackDate}
+                  <strong>Date:</strong>{" "}
+                  {selectedFeedback.feedback.feedbackDate}
                 </p>
               </div>
 
@@ -912,17 +1026,21 @@ function DoctorConsultation() {
                 <div className="response-section">
                   <h4>Response Information</h4>
                   <p>
-                    <strong>Date:</strong> {selectedFeedback.relatedResponse.responseDate || "N/A"}
+                    <strong>Date:</strong>{" "}
+                    {selectedFeedback.relatedResponse.responseDate || "N/A"}
                   </p>
                   <p>
-                    <strong>Doctor:</strong> {selectedFeedback.relatedResponse.doctorName || "N/A"}
+                    <strong>Doctor:</strong>{" "}
+                    {selectedFeedback.relatedResponse.doctorName || "N/A"}
                   </p>
                   <p>
-                    <strong>Status:</strong> {selectedFeedback.relatedResponse.status || "N/A"}
+                    <strong>Status:</strong>{" "}
+                    {selectedFeedback.relatedResponse.status || "N/A"}
                   </p>
                   <p>
                     <strong>Follow-Up:</strong>{" "}
-                    {selectedFeedback.relatedResponse.content?.followUp || "N/A"}
+                    {selectedFeedback.relatedResponse.content?.followUp ||
+                      "N/A"}
                   </p>
                 </div>
               )}
@@ -933,11 +1051,20 @@ function DoctorConsultation() {
 
       {/* Modal: Thông báo success */}
       {showSuccessModal && (
-        <div className="modal-overlay" onClick={() => setShowSuccessModal(false)}>
-          <div className="success-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="modal-overlay"
+          onClick={() => setShowSuccessModal(false)}
+        >
+          <div
+            className="success-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="success-modal-header">
               <h3>Success!</h3>
-              <button className="modal-close" onClick={() => setShowSuccessModal(false)}>
+              <button
+                className="modal-close"
+                onClick={() => setShowSuccessModal(false)}
+              >
                 ×
               </button>
             </div>
@@ -945,7 +1072,10 @@ function DoctorConsultation() {
               <p>Consultation request sent successfully!</p>
             </div>
             <div className="success-modal-footer">
-              <button className="success-modal-button" onClick={() => setShowSuccessModal(false)}>
+              <button
+                className="success-modal-button"
+                onClick={() => setShowSuccessModal(false)}
+              >
                 OK
               </button>
             </div>
