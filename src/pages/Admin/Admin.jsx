@@ -56,10 +56,7 @@ function Admin() {
           {/* Hiển thị dashboard khi ở trang admin chính */}
           {location.pathname === "/admin" && (
             <div className="admin-dashboard">
-              {/* Hiển thị Top 3 bác sĩ được yêu cầu nhiều nhất */}
-              <TopSystem />
-
-              {/* Nút chuyển đổi biểu đồ */}
+              {/* Nút chuyển đổi biểu đồ - đặt lên đầu */}
               <div className="chart-tabs">
                 <button
                   className={`chart-tab ${
@@ -76,14 +73,6 @@ function Admin() {
                   onClick={() => setActiveChart("package")}
                 >
                   <i className="fas fa-box"></i> Service Package Distribution
-                </button>
-                <button
-                  className={`chart-tab ${
-                    activeChart === "member" ? "active" : ""
-                  }`}
-                  onClick={() => setActiveChart("member")}
-                >
-                  <i className="fas fa-users"></i> New Member Statistics
                 </button>
               </div>
 
@@ -102,14 +91,10 @@ function Admin() {
                     <PackageChart onDataLoaded={handlePackageDataLoaded} />
                   </div>
                 )}
-
-                {activeChart === "member" && (
-                  <div className="chart-item active">
-                    <h3>New Member Statistics</h3>
-                    <MemberChart />
-                  </div>
-                )}
               </div>
+
+              {/* Hiển thị Top 3 bác sĩ được yêu cầu nhiều nhất */}
+              <TopSystem />
             </div>
           )}
 
