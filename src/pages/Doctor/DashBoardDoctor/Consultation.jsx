@@ -7,7 +7,6 @@ import {
   Form,
   Input,
   Select,
-  DatePicker,
   message,
   Card,
   Typography,
@@ -25,7 +24,6 @@ import {
   EyeOutlined,
   MessageOutlined,
   CheckCircleOutlined,
-  CommentOutlined,
   SearchOutlined,
   UserOutlined,
   DownloadOutlined,
@@ -56,7 +54,6 @@ const Consultations = () => {
   const [searchText, setSearchText] = useState("");
 
   // Filters for Completed and History tabs
-  const [completedFilterType, setCompletedFilterType] = useState("all");
   const [historyFilterStatus, setHistoryFilterStatus] = useState("");
   const [historyFilterRating, setHistoryFilterRating] = useState("");
 
@@ -77,48 +74,6 @@ const Consultations = () => {
     consultations,
     onGoingConsultations,
   ]);
-
-  const handleApiError = (error, action) => {
-    let errorMessage = "Lỗi không xác định";
-    let errorDetails = "";
-
-    if (error.response) {
-      // Lỗi từ phản hồi của server
-      errorMessage = `Lỗi ${error.response.status}: ${error.response.statusText}`;
-      if (error.response.data?.title) {
-        errorDetails = error.response.data.title;
-      }
-    } else if (error.request) {
-      // Không nhận được phản hồi từ server
-      errorMessage = "Không thể kết nối đến máy chủ";
-    } else if (error.message) {
-      // Lỗi trong quá trình thiết lập request
-      errorMessage = error.message;
-    }
-
-    // Log lỗi chi tiết để dễ gỡ lỗi
-    console.error(`Lỗi khi ${action}:`, error);
-    console.log(`Chi tiết lỗi: ${errorDetails}`);
-
-    // Hiển thị lỗi ngắn gọn cho người dùng
-    message.error(`${errorMessage}. ${errorDetails}`);
-
-    return { errorMessage, errorDetails };
-  };
-
-  const parseContentToObject = (content) => {
-    try {
-      return JSON.parse(content);
-    } catch (e) {
-      if (typeof content === "string") {
-        const lines = content.split("\r\n\r\n");
-        return {
-          followUp: lines[lines.length - 1] || "",
-        };
-      }
-      return { followUp: "" };
-    }
-  };
 
   const fetchConsultationRequestsById = async (requestId) => {
     try {
