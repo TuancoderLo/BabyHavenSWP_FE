@@ -730,13 +730,11 @@ const AddChild = ({ closeOverlay }) => {
                 </div>
               </div>
             </details>
-
-            <div className="step-buttons">
-              <button type="button" onClick={handleSubmit}>
+              <button type="button" className="confirm-button-step1" 
+              onClick={handleSubmit}>
                 Submit
               </button>
               {errors.submit && <p className="error-text">{errors.submit}</p>}
-            </div>
           </div>
         </div>
       </div>

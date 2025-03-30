@@ -4,7 +4,6 @@ import childApi from "../../../../services/childApi";
 import calculateBMI from "../../../../services/bmiUtils";
 import BabyGrowth from "../../../../assets/baby_growth.png";
 import alertApi from "../../../../services/alertApi";
-// Cập nhật import các hàm validation mới
 import {
   validateGrowthRecordErrors,
   validateGrowthRecordWarnings
@@ -32,7 +31,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
   }
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-
   const [childDetails, setChildDetails] = useState(null);
   const [growthForm, setGrowthForm] = useState({
     createdAt: "",
@@ -109,7 +107,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
         }
         return updated;
       });
-      // Cập nhật cảnh báo ngay khi dữ liệu thay đổi
       const newWarnings = validateGrowthRecordWarnings(
         { ...growthForm, [name]: value },
         child.dateOfBirth
@@ -124,7 +121,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     const warningResults = validateGrowthRecordWarnings(growthForm, child.dateOfBirth);
     setErrors(errorResults);
     setWarnings(warningResults);
-    // Chỉ block submit nếu có lỗi (warnings chỉ mang tính gợi ý)
     return Object.keys(errorResults).length === 0;
   }, [growthForm, child.dateOfBirth]);
 
@@ -163,7 +159,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
       };
 
       await childApi.createGrowthRecord(growthPayload);
-      // Hiển thị modal thành công, thay vì gọi closeOverlay() ngay
       setShowSuccessModal(true);
       try {
         const alertRes = await alertApi.getAlert(
@@ -199,11 +194,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               <div className="babygrowth-img">
                 <img src={BabyGrowth} alt="Baby Growth" />
               </div>
-            </div>
-          </div>
-
-          <div className="wizard-content">
-            <div className="step-form">
+              {/* Di chuyển Child Information xuống ngay sau babygrowth-img */}
               <div className="child-info-card">
                 <h3>Child Information</h3>
                 <div className="child-info-details">
@@ -226,8 +217,12 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
 
-              {/* Step 1: Basic Measurements */}
+          <div className="wizard-content">
+            <div className="step-form">
+              {/* Các phần form khác được giữ nguyên */}
               <div className="form-section date-section">
                 <h4>Record Date</h4>
                 <input
@@ -321,7 +316,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 </div>
               </div>
 
-              {/* Dropdown 1: Recommendations for Your Baby (Step 2) */}
               <details>
                 <summary>Recommendations for Your Baby (click to expand)</summary>
                 <div className="form-section">
@@ -406,7 +400,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 </div>
               </details>
 
-              {/* Dropdown 2: Additional Health Measurements (Step 3) */}
               <details>
                 <summary>Additional Health Measurements (click to expand)</summary>
                 <div className="form-section">
@@ -602,17 +595,15 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                   </div>
                 </div>
               </details>
-
-              <div className="step-buttons">
-                <button
-                  type="button"
-                  className="confirm-button-step1"
-                  onClick={handleSubmit}
-                >
-                  Submit Record
-                </button>
-              </div>
             </div>
+            {/* Nút submit được di chuyển ra ngoài form, đặt trong container mới */}
+              <button
+                type="button"
+                className="confirm-button-step1"
+                onClick={handleSubmit}
+              >
+                Submit Record
+              </button>
           </div>
         </div>
       </div>
