@@ -47,12 +47,11 @@ const GoogleCallback = () => {
             localStorage.setItem("name", user.name);
 
             console.log("User authenticated:", tokenPayload);
-
-            navigate("/homepage");
         } catch (error) {
             setError(error.message);
             console.error("Error during Google authentication:", error);
         }
+        navigate("/homepage");
     };
 
     handleGoogleAuth(); // Gọi hàm xử lý ngay khi component render

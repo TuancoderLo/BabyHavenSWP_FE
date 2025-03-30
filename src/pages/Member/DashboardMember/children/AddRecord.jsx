@@ -160,24 +160,46 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
         neurologicalReflexes: growthForm.neurologicalReflexes,
         developmentalMilestones: growthForm.developmentalMilestones,
       };
-      await childApi.createGrowthRecord(growthPayload);
-      // Hiển thị modal thành công, thay vì gọi closeOverlay() ngay
-      setShowSuccessModal(true);
-    } catch (err) {
-      console.error("Error submitting growth record:", err);
-    }
-  }, [child, memberId, growthForm, validateForm]);
+      
+    await childApi.createGrowthRecord(growthPayload);
+    // Hiển thị modal thành công, thay vì gọi closeOverlay() ngay
+    setShowSuccessModal(true);
+      try {
+       const alertRes = await alertApi.getAlert(
+          child.name,
+          child.dateOfBirth,
+          memberId
+        );
+        console.log("Alert created and fetched:", alertRes.data);
+      } catch (alertErr) {
+        console.error("Error creating/fetching alert:", alertErr);
+      }
+  } catch (err) {
+    console.error("Error submitting growth record:", err);
+  }
+}, [child, memberId, growthForm, validateForm]);
 
   return (
     <>
-      <div
-        className="add-record-overlay"
-        onClick={(e) => e.target === e.currentTarget && closeOverlay()}
-      >
-        <div className="add-record-wizard" onClick={(e) => e.stopPropagation()}>
-          <button className="close-button-record" onClick={closeOverlay}>
-            ×
-          </button>
+    <div
+      className="add-record-overlay"
+      onClick={(e) => e.target === e.currentTarget && closeOverlay()}
+    >
+      <div className="add-record-wizard" onClick={(e) => e.stopPropagation()}>
+        <button className="close-button-record" onClick={closeOverlay}>
+          ×
+        </button>
+        <div className="wizard-left">
+          <div className="blue-bar" />
+          <div className="wizard-left-content">
+            <h1 className="main-title">
+              Enter a new growth record to track your baby's health
+            </h1>
+            <div className="babygrowth-img">
+              <img src={BabyGrowth} alt="Baby Growth" />
+            </div>
+          </div>
+        </div>
 
           <div className="wizard-left">
             <div className="blue-bar" />
@@ -212,12 +234,91 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               </div>
             </div>
           </div>
-
-          <div className="wizard-content">
-            <div className="step-form">
-              {/* Step 1: Basic Measurements */}
-              <div className="form-section date-section">
-                <h4>Record Date</h4>
+            {/* Step 1: Basic Measurements */}
+            <div className="form-section date-section">
+              <h4>Record Date</h4>
+              <input
+                type="date"
+                value={growthForm.createdAt}
+                onChange={handleChange}
+                name="createdAt"
+                max={new Date().toISOString().split("T")[0]}
+                className={errors.createdAt ? "error-input" : ""}
+              />
+              {errors.createdAt && (
+                <p className="error-text">{errors.createdAt}</p>
+              )}
+              {warnings.createdAt && (
+                <p className="warning-text-record">{warnings.createdAt}</p>
+              )}
+            </div>
+            <div className="form-section">
+              <h4>Basic Measurements</h4>
+              <div className="measurements-section">
+                <div>
+                  <label>Baby's weight (kg)</label>
+                  <input
+                    type="number"
+                    name="weight"
+                    value={growthForm.weight}
+                    onChange={handleChange}
+                    min="0"
+                    className={errors.weight ? "error-input" : ""}
+                    onKeyDown={(e) =>
+                      ["-", "e"].includes(e.key) && e.preventDefault()
+                    }
+                  />
+                  {errors.weight && (
+                    <p className="error-text">{errors.weight}</p>
+                  )}
+                  {warnings.weight && (
+                    <p className="warning-text-record">{warnings.weight}</p>
+                  )}
+                </div>
+                <div>
+                  <label>Baby's height (cm)</label>
+                  <input
+                    type="number"
+                    name="height"
+                    value={growthForm.height}
+                    onChange={handleChange}
+                    min="0"
+                    className={errors.height ? "error-input" : ""}
+                    onKeyDown={(e) =>
+                      ["-", "e"].includes(e.key) && e.preventDefault()
+                    }
+                  />
+                  {errors.height && (
+                    <p className="error-text">{errors.height}</p>
+                  )}
+                  {warnings.height && (
+                    <p className="warning-text-record">{warnings.height}</p>
+                  )}
+                </div>
+                <div>
+                  <label>Head circumference (cm)</label>
+                  <input
+                    type="number"
+                    name="headCircumference"
+                    value={growthForm.headCircumference}
+                    onChange={handleChange}
+                    min="0"
+                    onKeyDown={(e) =>
+                      ["-", "e"].includes(e.key) && e.preventDefault()
+                    }
+                  />
+                </div>
+                <div>
+                  <label>BMI (kg/m²)</label>
+                  <input
+                    type="number"
+                    value={calculateBMI(growthForm.weight, growthForm.height)}
+                    readOnly
+                  />
+                </div>
+              </div>
+              <div className="notes-section">
+                <label>Notes</label>
                 <input
                   type="date"
                   value={growthForm.createdAt}

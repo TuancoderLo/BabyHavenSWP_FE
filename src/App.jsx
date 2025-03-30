@@ -28,7 +28,7 @@ import Settings from "./pages/Admin/DashboardAdmin/settings/settings";
 import Doctor from "./pages/Doctor/Doctor";
 
 //Member
-import MemberPackages from "./components/packages/PackageHome.jsx";
+import MemberPackages from "./components/packages/Packages.jsx";
 // ↑ đổi tên import (MamberPackages) để khác với AdminPackages
 
 import GoogleCallback from "./pages/Authentication/GoogleCallback.jsx";

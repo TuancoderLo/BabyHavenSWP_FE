@@ -38,7 +38,10 @@ const getWHOBMIData = async (ageInYears, gender) => {
     }
 
     console.log(`Fetching BMI data for ${dataKey} from API`);
-    const response = await bmiPercentitleApi.getByAgeAndGender(ageInYears, gender);
+    const response = await bmiPercentitleApi.getByAgeAndGender(
+      ageInYears,
+      gender
+    );
     console.log("API Response:", response);
 
     const lms = response.data?.data || response.data;
@@ -237,8 +240,17 @@ const GrowthChart = ({
       }
     };
 
-    fetchGrowthData();
-  }, [childName, refreshTrigger, gender, ageInMonths, ageInYears]);
+    if (selectedTool === "BMI") {
+      fetchGrowthData();
+    }
+  }, [
+    childName,
+    refreshTrigger,
+    gender,
+    ageInMonths,
+    ageInYears,
+    selectedTool,
+  ]);
 
   if (loading) {
     return <div className="loading">Loading chart...</div>;
@@ -305,7 +317,11 @@ const GrowthChart = ({
                 tick={{ fill: "#666", fontSize: 11 }}
                 domain={[0, 50]} // BMI từ 0 đến 50
                 ticks={[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]}
-                label={{ value: "BMI (kg/m²)", angle: -90, position: "insideLeft" }}
+                label={{
+                  value: "BMI (kg/m²)",
+                  angle: -90,
+                  position: "insideLeft",
+                }}
               />
               <Tooltip
                 contentStyle={{
@@ -403,6 +419,7 @@ const GrowthChart = ({
             </LineChart>
           </ResponsiveContainer>
         );
+
       default:
         return <div>Select a measurement tool</div>;
     }

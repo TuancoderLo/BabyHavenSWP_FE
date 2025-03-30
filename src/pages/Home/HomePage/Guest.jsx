@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import "./Guest.css";
-import Packages from "../../../components/packages/PackageHome";
+import Packages from "../../../components/packages/Packages";
 import blogCategoryApi from "../../../services/blogCategoryApi";
 import blogApi from "../../../services/blogApi";
 import BlogSection from "../ApiForHomePage/content/BlogSection";

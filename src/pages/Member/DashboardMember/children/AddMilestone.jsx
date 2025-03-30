@@ -5,16 +5,19 @@ import MilestoneApi from "../../../../services/milestoneApi";
 import childApi from "../../../../services/childApi";
 import BabyGrowth from "../../../../assets/baby_growth.png";
 
-// Danh sách các milestone category có sẵn
-const milestoneCategories = [
-  { id: "first_smile", label: "First Smile", minAge: 216, maxAge: 216 },
-  { id: "first_word", label: "First Word", minAge: 216, maxAge: 216 },
-  { id: "first_steps", label: "First Steps", minAge: 216, maxAge: 216 },
-];
-
 const AddMilestone = ({ child, memberId, closeOverlay, onSuccess }) => {
-  // Lưu thông tin chi tiết của trẻ
   const [childDetails, setChildDetails] = useState(null);
+  const [milestoneName, setMilestoneName] = useState("");
+  const [description, setDescription] = useState("");
+  const [importance, setImportance] = useState("Medium");
+  const [category, setCategory] = useState("");
+  const [minAge, setMinAge] = useState("");
+  const [maxAge, setMaxAge] = useState("");
+  const [notes, setNotes] = useState("");
+  const [guidelines, setGuidelines] = useState("");
+  const [achievedDate, setAchievedDate] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (child && memberId) {
@@ -27,46 +30,65 @@ const AddMilestone = ({ child, memberId, closeOverlay, onSuccess }) => {
     }
   }, [child, memberId]);
 
-  // State cho form milestone
-  const [milestoneName, setMilestoneName] = useState("");
-  const [description, setDescription] = useState("");
-  const [importance, setImportance] = useState("Medium");
-  // Thay đổi category từ input thành select với các option có sẵn
-  const [category, setCategory] = useState("");
-  // minAge và maxAge sẽ được set tự động khi chọn category
-  const [minAge, setMinAge] = useState("");
-  const [maxAge, setMaxAge] = useState("");
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const payload = {
+    // Payload cho Milestone
+    const milestonePayload = {
       milestoneName,
       description,
-      importance,
-      category,
+      importance: "Medium",
+      category: "Other",
       minAge: parseInt(minAge, 10),
       maxAge: parseInt(maxAge, 10),
       isPersonal: true,
     };
 
+    // Payload cho ChildMilestone
+    const childMilestonePayload = {
+      milestoneId: null,
+      childName: childDetails?.name || child,
+      dateOfBirth: childDetails?.dateOfBirth,
+      memberId,
+      notes,
+      guidelines,
+      importance,
+      category,
+      achievedDate: achievedDate || new Date().toISOString().split("T")[0], // Mặc định ngày hiện tại nếu không nhập
+    };
+
     try {
-      const response = await MilestoneApi.createMilestone(payload);
-      if (onSuccess) onSuccess(response.data);
+      // Tạo Milestone trước
+      const milestoneResponse = await MilestoneApi.createMilestone(
+        milestonePayload
+      );
+      const milestoneId = milestoneResponse.data.data.milestoneId;
+
+      // Thêm milestoneId vào childMilestonePayload
+      childMilestonePayload.milestoneId = milestoneId;
+
+      // Tạo ChildMilestone
+      const childMilestoneResponse = await MilestoneApi.createChildMilestone(
+        childMilestonePayload
+      );
+
+      if (onSuccess) {
+        onSuccess({
+          milestone: milestoneResponse.data,
+          childMilestone: childMilestoneResponse.data,
+        });
+      }
       closeOverlay();
     } catch (err) {
-      setError("Failed to add milestone. Please try again.");
-      console.error("Error adding milestone:", err);
+      setError("Failed to add milestone or child milestone. Please try again.");
+      console.error("Error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Hàm hiển thị thông tin Child Information Card dựa trên childDetails
   const renderChildInfoCard = () => {
     if (!childDetails) {
       return <div>Loading child information...</div>;
@@ -97,7 +119,6 @@ const AddMilestone = ({ child, memberId, closeOverlay, onSuccess }) => {
   return (
     <div className="add-record-overlay" onClick={closeOverlay}>
       <div className="add-record-wizard" onClick={(e) => e.stopPropagation()}>
-        {/* Cột trái: Thông tin Child Information */}
         <div className="wizard-left">
           <div className="blue-bar"></div>
           <div className="wizard-left-content">
@@ -108,7 +129,6 @@ const AddMilestone = ({ child, memberId, closeOverlay, onSuccess }) => {
             {renderChildInfoCard()}
           </div>
         </div>
-        {/* Cột phải: Form nhập thông tin Milestone */}
         <div className="wizard-content">
           <div className="step-form">
             <h2>Milestone Details</h2>
@@ -130,46 +150,29 @@ const AddMilestone = ({ child, memberId, closeOverlay, onSuccess }) => {
                   onChange={(e) => setDescription(e.target.value)}
                 ></textarea>
               </div>
+              {/* Các trường bổ sung cho ChildMilestone */}
               <div className="form-group">
-                <label>Importance</label>
-                <select
-                  value={importance}
-                  onChange={(e) => setImportance(e.target.value)}
-                >
-                  <option value="High">High</option>
-                  <option value="Medium">Medium</option>
-                  <option value="Low">Low</option>
-                </select>
+                <label>Notes</label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                ></textarea>
               </div>
-              {/* Sử dụng select cho Category và tự động cập nhật minAge/maxAge */}
               <div className="form-group">
-                <label>Category</label>
-                <select
-                  value={category}
-                  onChange={(e) => {
-                    const selectedId = e.target.value;
-                    setCategory(selectedId);
-                    const selectedCategory = milestoneCategories.find(
-                      (item) => item.id === selectedId
-                    );
-                    if (selectedCategory) {
-                      setMinAge(selectedCategory.minAge);
-                      setMaxAge(selectedCategory.maxAge);
-                    }
-                  }}
-                  required
-                >
-                  <option value="" disabled>
-                    Select a category
-                  </option>
-                  {milestoneCategories.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.label}
-                    </option>
-                  ))}
-                </select>
+                <label>Guidelines</label>
+                <textarea
+                  value={guidelines}
+                  onChange={(e) => setGuidelines(e.target.value)}
+                ></textarea>
               </div>
-              {/* Các trường minAge và maxAge được ẩn đi */}
+              <div className="form-group">
+                <label>Achieved Date</label>
+                <input
+                  type="date"
+                  value={achievedDate}
+                  onChange={(e) => setAchievedDate(e.target.value)}
+                />
+              </div>
               <input type="hidden" value={minAge} />
               <input type="hidden" value={maxAge} />
               <button
