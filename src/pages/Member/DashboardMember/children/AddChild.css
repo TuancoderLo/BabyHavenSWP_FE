@@ -275,8 +275,10 @@
 .form-section {
   background-color: #fff;
   border-radius: 10px;
+  margin-top: 20px;
   padding: 20px;
   margin-bottom: 20px;
+  margin-top: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   border: 1px solid #f0f0f0;
 }
