@@ -19,7 +19,6 @@ function Member() {
           <Routes>
             <Route path="/" element={<Navigate to="children" replace />} />
             <Route path="children" element={<Children />} />
-            <Route path="milestone" element={<Milestone />} />
             <Route path="doctor-consultation" element={<Consultation />} />
             <Route path="transactions" element={<TransactionsMember />} />
             <Route path="membership" element={<Membership />} />
