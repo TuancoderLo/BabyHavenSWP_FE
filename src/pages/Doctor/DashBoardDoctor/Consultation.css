@@ -238,6 +238,10 @@
 /* Attachment styling */
 .attachments-container {
   margin-bottom: 20px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 12px;
+  overflow: hidden; /* Ngăn nội dung tràn ra khỏi container */
 }
 
 .attachment-item {
@@ -249,14 +253,65 @@
   background: #f9fbff;
   border: 1px solid #d9e4f5;
   border-radius: 8px;
+  flex-wrap: wrap; /* Cho phép xuống dòng khi không đủ không gian */
 }
 
 .attachment-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  flex: 1;
+  min-width: 0; /* Cho phép co lại khi không đủ không gian */
+  padding-right: 10px; /* Tạo khoảng cách với nút tải xuống */
+  overflow: hidden; /* Ngăn nội dung tràn ra */
+}
+
+.attachment-icon {
+  flex-shrink: 0; /* Không co lại icon */
+  margin-right: 8px;
+}
+
+.attachment-name {
+  margin-right: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Hiển thị dấu ... khi tên file quá dài */
+  max-width: 200px; /* Giới hạn độ rộng tên file */
+}
+
+.attachment-type {
+  color: #8c8c8c;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px; /* Giới hạn độ rộng loại file */
 }
 
 .attachment-item .ant-btn {
   border-radius: 8px;
+  flex-shrink: 0; /* Đảm bảo nút không bị co lại */
+  margin-left: auto; /* Đẩy nút sang phải */
+}
+
+/* Điều chỉnh cho màn hình nhỏ */
+@media (max-width: 576px) {
+  .attachment-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .attachment-info {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .attachment-item .ant-btn {
+    align-self: flex-end;
+  }
+
+  .attachment-name,
+  .attachment-type {
+    max-width: 100%; /* Cho phép sử dụng toàn bộ chiều rộng trên mobile */
+  }
 }

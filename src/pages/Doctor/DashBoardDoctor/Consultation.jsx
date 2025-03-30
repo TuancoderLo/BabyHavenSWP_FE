@@ -131,16 +131,16 @@ const Consultations = () => {
 
       return detailData;
     } catch (error) {
-      console.error(`Lỗi khi lấy chi tiết yêu cầu ${requestId}:`, error);
+      console.error(`Error when getting request details ${requestId}:`, error);
       // Trả về đối tượng mặc định khi API bị lỗi
       return {
         requestId: requestId,
-        memberName: "N/A (Dữ liệu không khả dụng)",
+        memberName: "N/A (Data unavailable)",
         childName: "N/A",
         status: "Pending",
-        attachments: [], // Mảng rỗng để tránh lỗi khi hiển thị
+        attachments: [], // Empty array to avoid errors when displaying
         requestDate: new Date().toISOString(),
-        description: "Không thể tải thông tin chi tiết. Lỗi máy chủ.",
+        description: "Unable to load detail information. Server error.",
         child: {
           age: "N/A",
           gender: "N/A",
@@ -254,7 +254,7 @@ const Consultations = () => {
         });
       } catch (error) {
         console.error("Error fetching consultation requests:", error);
-        message.error("Không thể lấy danh sách yêu cầu tư vấn!");
+        message.error("Could not retrieve consultation request list!");
         setLoading(false);
         return;
       }
@@ -421,7 +421,7 @@ const Consultations = () => {
         ...record,
         isLoading: false,
         childAge: detailedData.child?.age
-          ? `${detailedData.child.age} tuổi`
+          ? `${detailedData.child.age} years old`
           : "N/A",
         childGender: detailedData.child?.gender || "N/A",
         childAllergies: detailedData.child?.allergies || "None",
@@ -437,7 +437,7 @@ const Consultations = () => {
           detailedData.status === "Completed" ? detailedData.updatedAt : null,
       });
     } catch (error) {
-      message.error("Không thể tải thông tin chi tiết");
+      message.error("Unable to load details");
       console.error("Error fetching consultation detail:", error);
       // Đóng drawer nếu có lỗi hoặc hiển thị thông báo lỗi trong drawer
     }
@@ -461,7 +461,7 @@ const Consultations = () => {
         ...record,
         isLoading: false,
         childAge: detailedData.child?.age
-          ? `${detailedData.child.age} tuổi`
+          ? `${detailedData.child.age} years old`
           : "N/A",
         childGender: detailedData.child?.gender || "N/A",
         childAllergies: detailedData.child?.allergies || "None",
@@ -471,7 +471,7 @@ const Consultations = () => {
         attachments: attachmentsArray,
       });
     } catch (error) {
-      message.error("Không thể tải thông tin chi tiết để phản hồi");
+      message.error("Unable to load details for response");
       console.error("Error fetching consultation detail for response:", error);
     }
   };
@@ -728,7 +728,7 @@ const Consultations = () => {
         "application/octet-stream";
 
       if (!content) {
-        message.error(`Thiếu nội dung tệp đính kèm cho "${fileName}"`);
+        message.error(`Missing attachment content for "${fileName}"`);
         return;
       }
 
@@ -749,10 +749,10 @@ const Consultations = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      message.success(`Đã tải xuống tệp ${fileName}`);
+      message.success(`Downloaded file ${fileName}`);
     } catch (error) {
-      console.error("Lỗi khi tải xuống tệp:", error);
-      message.error(`Không thể tải xuống tệp tin: ${error.message}`);
+      console.error("Error when downloading file:", error);
+      message.error(`Cannot download file: ${error.message}`);
     }
   };
 
@@ -771,14 +771,14 @@ const Consultations = () => {
       !Array.isArray(attachments) ||
       attachments.length === 0
     ) {
-      return <p>Không có tệp đính kèm</p>;
+      return <p>No attachments</p>;
     }
 
     return attachments.map((attachment, index) => {
       if (!attachment) return null;
 
       const fileName =
-        attachment.fileName || attachment.FileName || `Tệp ${index + 1}`;
+        attachment.fileName || attachment.FileName || `File ${index + 1}`;
       const mimeType =
         attachment.mimeType ||
         attachment.MimeType ||
@@ -797,7 +797,7 @@ const Consultations = () => {
             onClick={() => downloadAttachment(attachment)}
             icon={<DownloadOutlined />}
           >
-            Tải xuống
+            Download
           </Button>
         </div>
       );
@@ -1031,9 +1031,7 @@ const Consultations = () => {
       >
         {selectedConsultation && selectedConsultation.isLoading ? (
           <div style={{ textAlign: "center", padding: "20px" }}>
-            <div style={{ marginBottom: "20px" }}>
-              Đang tải thông tin chi tiết...
-            </div>
+            <div style={{ marginBottom: "20px" }}>Loading details...</div>
             <Spin size="large" />
           </div>
         ) : (
@@ -1065,7 +1063,7 @@ const Consultations = () => {
 
               {selectedConsultation?.attachments && (
                 <>
-                  <Divider orientation="left">Tệp đính kèm</Divider>
+                  <Divider orientation="left">Attachments</Divider>
                   <div className="attachments-container">
                     {renderAttachments(selectedConsultation.attachments)}
                   </div>
@@ -1150,9 +1148,7 @@ const Consultations = () => {
       >
         {selectedConsultation && selectedConsultation.isLoading ? (
           <div style={{ textAlign: "center", padding: "20px" }}>
-            <div style={{ marginBottom: "20px" }}>
-              Đang tải thông tin chi tiết...
-            </div>
+            <div style={{ marginBottom: "20px" }}>Loading details...</div>
             <Spin size="large" />
           </div>
         ) : (
@@ -1188,7 +1184,7 @@ const Consultations = () => {
 
               {selectedConsultation?.attachments && (
                 <>
-                  <Divider orientation="left">Tệp đính kèm</Divider>
+                  <Divider orientation="left">Attachments</Divider>
                   <div className="attachments-container">
                     {renderAttachments(selectedConsultation.attachments)}
                   </div>
