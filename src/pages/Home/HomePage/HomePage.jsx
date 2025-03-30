@@ -4,7 +4,7 @@ import Header from "../../../layouts/Home/Navbar/Header";
 import Footer from "../../../layouts/Home/Footer";
 import "./HomePage.css";
 
-import Packages from "../../../components/packages/PackageHome";
+import Packages from "../../../components/packages/Packages";
 import blogCategoryApi from "../../../services/blogCategoryApi";
 import blogApi from "../../../services/blogApi"; // Add this import
 import BlogSection from "../ApiForHomePage/content/BlogSection";

@@ -11,7 +11,10 @@ function ExpandableResponseCard({ response, request, onClick }) {
   const truncatedText = combinedText.length > 100 ? combinedText.slice(0, 100) + "..." : combinedText;
 
   return (
-    <div className="consultation-response-card" onClick={() => onClick({ response, request })}>
+    <div
+      className="consultation-response-card"
+      onClick={() => onClick({ response, request })}
+    >
       <div className="response-header">
         <span className="response-date">{response.responseDate}</span>
         <span className="response-status">{response.status}</span>
@@ -147,7 +150,9 @@ function DoctorConsultation() {
       const response = await doctorApi.getAllDoctors();
       if (response?.data) {
         setDoctors(response.data);
-        response.data.forEach((doctor) => fetchDoctorSpecializations(doctor.doctorId));
+        response.data.forEach((doctor) =>
+          fetchDoctorSpecializations(doctor.doctorId)
+        );
       }
     } catch (error) {
       console.error("Error fetching doctors:", error);
@@ -191,14 +196,19 @@ function DoctorConsultation() {
       let responses = Array.isArray(res?.data) ? res.data : [res.data];
       const parsedResponses = responses.map((item) => ({
         ...item,
-        content: typeof item.content === "string" ? parseContentToObject(item.content) : item.content,
+        content:
+          typeof item.content === "string"
+            ? parseContentToObject(item.content)
+            : item.content,
       }));
       setConsultationResponses(parsedResponses);
 
       const requests = {};
       for (const response of parsedResponses) {
         if (response.requestId) {
-          const requestRes = await doctorApi.getConsultationRequestsById(response.requestId);
+          const requestRes = await doctorApi.getConsultationRequestsById(
+            response.requestId
+          );
           if (requestRes?.data) requests[response.requestId] = requestRes.data;
         }
       }
@@ -330,7 +340,9 @@ function DoctorConsultation() {
       setSelectedFiles([]);
     } catch (error) {
       setSubmitError(
-        error.response?.data?.title || error.message || "Unable to send consultation request"
+        error.response?.data?.title ||
+          error.message ||
+          "Unable to send consultation request"
       );
     } finally {
       setSubmitLoading(false);
@@ -460,7 +472,9 @@ function DoctorConsultation() {
                     className="doctor-child-select"
                     value={selectedChild?.name || ""}
                     onChange={(e) =>
-                      handleChildSelect(children.find((child) => child.name === e.target.value))
+                      handleChildSelect(
+                        children.find((child) => child.name === e.target.value)
+                      )
                     }
                   >
                     <option value="">Select a child</option>
@@ -485,11 +499,13 @@ function DoctorConsultation() {
               </div>
             </div>
             <div className="editor-wrapper">
-              <TextEditor value={consultationContent} onChange={setConsultationContent} />
+              <TextEditor
+                value={consultationContent}
+                onChange={setConsultationContent}
+              />
             </div>
           </div>
         );
-
       case 2: // Confirm
         return (
           <div className="doctor-review-container">
@@ -524,20 +540,35 @@ function DoctorConsultation() {
                       className="doctor-profile-avatar"
                     />
                     <div className="doctor-profile-info">
-                      <h4 className="doctor-profile-name">{selectedDoctor.name}</h4>
-                      <span className="doctor-profile-status">{selectedDoctor.status}</span>
+                      <h4 className="doctor-profile-name">
+                        {selectedDoctor.name}
+                      </h4>
+                      <span className="doctor-profile-status">
+                        {selectedDoctor.status}
+                      </span>
                     </div>
                   </div>
                   <div className="doctor-profile-details">
-                    <p className="doctor-profile-degree">{selectedDoctor.degree}</p>
-                    <p className="doctor-profile-hospital">{selectedDoctor.hospitalName}</p>
-                    {Array.isArray(doctorSpecializations[selectedDoctor.doctorId]) && (
+                    <p className="doctor-profile-degree">
+                      {selectedDoctor.degree}
+                    </p>
+                    <p className="doctor-profile-hospital">
+                      {selectedDoctor.hospitalName}
+                    </p>
+                    {Array.isArray(
+                      doctorSpecializations[selectedDoctor.doctorId]
+                    ) && (
                       <div className="doctor-specializations">
-                        {doctorSpecializations[selectedDoctor.doctorId].map((spec, index) => (
-                          <p key={index} className="doctor-profile-specialization">
-                            {spec.name}
-                          </p>
-                        ))}
+                        {doctorSpecializations[selectedDoctor.doctorId].map(
+                          (spec, index) => (
+                            <p
+                              key={index}
+                              className="doctor-profile-specialization"
+                            >
+                              {spec.name}
+                            </p>
+                          )
+                        )}
                       </div>
                     )}
                   </div>
@@ -546,7 +577,11 @@ function DoctorConsultation() {
             )}
             <div className="submit-section">
               {submitError && <div className="submit-error">{submitError}</div>}
-              <button className="doctor-action-button" onClick={handleSubmit} disabled={submitLoading}>
+              <button
+                className="doctor-action-button"
+                onClick={handleSubmit}
+                disabled={submitLoading}
+              >
                 {submitLoading ? "Sending..." : "Complete"}
               </button>
             </div>
@@ -581,7 +616,10 @@ function DoctorConsultation() {
               {renderStepContent()}
               <div className="doctor-navigation-buttons">
                 {currentStep > 0 && (
-                  <button className="doctor-back-button" onClick={handleBackStep}>
+                  <button
+                    className="doctor-back-button"
+                    onClick={handleBackStep}
+                  >
                     Back
                   </button>
                 )}
@@ -656,7 +694,10 @@ function DoctorConsultation() {
 
       {/* Response Modal */}
       {selectedResponse && (
-        <div className="modal-overlay" onClick={() => setSelectedResponse(null)}>
+        <div
+          className="modal-overlay"
+          onClick={() => setSelectedResponse(null)}
+        >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setSelectedResponse(null)}>×</button>
             <h3 className="modal-title">Response Details</h3>
@@ -717,7 +758,10 @@ function DoctorConsultation() {
 
       {/* Sent Request Modal */}
       {selectedSentRequest && (
-        <div className="modal-overlay" onClick={() => setSelectedSentRequest(null)}>
+        <div
+          className="modal-overlay"
+          onClick={() => setSelectedSentRequest(null)}
+        >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setSelectedSentRequest(null)}>×</button>
             <h3 className="modal-title">Sent Request Details</h3>
@@ -779,8 +823,14 @@ function DoctorConsultation() {
 
       {/* Success Modal */}
       {showSuccessModal && (
-        <div className="modal-overlay" onClick={() => setShowSuccessModal(false)}>
-          <div className="success-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="modal-overlay"
+          onClick={() => setShowSuccessModal(false)}
+        >
+          <div
+            className="success-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="success-modal-header">
               <h3>Success!</h3>
               <button className="modal-close" onClick={() => setShowSuccessModal(false)}>×</button>
@@ -789,7 +839,10 @@ function DoctorConsultation() {
               <p>Consultation request sent successfully!</p>
             </div>
             <div className="success-modal-footer">
-              <button className="success-modal-button" onClick={() => setShowSuccessModal(false)}>
+              <button
+                className="success-modal-button"
+                onClick={() => setShowSuccessModal(false)}
+              >
                 OK
               </button>
             </div>

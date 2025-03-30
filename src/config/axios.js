@@ -5,7 +5,7 @@ import axios from "axios";
 const api = axios.create({
   // baseURL: "https://localhost:7279/api/",
   baseURL:
-     "https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/",
+    "https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/",
   // timeout: 10000, // Thêm timeout
   headers: {
     "Content-Type": "application/json",
@@ -44,23 +44,6 @@ api.interceptors.response.use(
       data: error.response?.data,
       config: error.config,
     });
-    return Promise.reject(error);
-  }
-);
-
-// Thêm interceptor để log request/response
-api.interceptors.request.use((request) => {
-  console.log("Starting Request:", request);
-  return request;
-});
-
-api.interceptors.response.use(
-  (response) => {
-    console.log("Response:", response);
-    return response;
-  },
-  (error) => {
-    console.error("Response Error:", error);
     return Promise.reject(error);
   }
 );

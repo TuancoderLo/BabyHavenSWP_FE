@@ -160,9 +160,19 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
         neurologicalReflexes: growthForm.neurologicalReflexes,
         developmentalMilestones: growthForm.developmentalMilestones,
       };
+      
     await childApi.createGrowthRecord(growthPayload);
     // Hiển thị modal thành công, thay vì gọi closeOverlay() ngay
     setShowSuccessModal(true);
+       const alertRes = await alertApi.getAlert(
+          child.name,
+          child.dateOfBirth,
+          memberId
+        );
+        console.log("Alert created and fetched:", alertRes.data);
+      } catch (alertErr) {
+        console.error("Error creating/fetching alert:", alertErr);
+      }
   } catch (err) {
     console.error("Error submitting growth record:", err);
   }
@@ -178,7 +188,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
         <button className="close-button-record" onClick={closeOverlay}>
           ×
         </button>
-
         <div className="wizard-left">
           <div className="blue-bar" />
           <div className="wizard-left-content">
@@ -234,7 +243,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 <p className="warning-text-record">{warnings.createdAt}</p>
               )}
             </div>
-
             <div className="form-section">
               <h4>Basic Measurements</h4>
               <div className="measurements-section">
