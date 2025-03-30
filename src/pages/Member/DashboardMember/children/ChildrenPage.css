@@ -418,9 +418,10 @@
 .child-slots-container {
   grid-area: 2 / 1 / 8 / 2;
   background: transparent;
+  padding: 6px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   height: 100%;
   overflow-y: auto;
 }
@@ -433,7 +434,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   border: 2px solid transparent;
@@ -441,15 +442,19 @@
   position: relative;
 }
 
-.child-slot:not(.selected):hover {
+.child-slot:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   background: #e4e4e4;
   transition: rgb(236, 236, 236) s ease;
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
 .child-slot:not(.selected):hover .child-name,
 .child-slot:not(.selected):hover .child-age {
   color: #000000;
+  transition: rgb(236, 236, 236) s ease;
+  transform: translateY(-4px);
 }
 
 .child-slot.selected {

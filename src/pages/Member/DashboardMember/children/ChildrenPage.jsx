@@ -563,11 +563,12 @@ function ChildrenPage() {
               onClick={handleShowMilestoneModal}
               disabled={!selectedChild}
             />
-            <button 
+            <button
               className="show-milestone-button"
-              onClick={handleShowMilestoneModal}
+              onClick={() => navigate("/member/milestone")}
               disabled={!selectedChild}
-              >
+            >
+              Show Milestones
             </button>
           </div>
 
