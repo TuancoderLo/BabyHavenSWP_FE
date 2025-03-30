@@ -164,6 +164,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     await childApi.createGrowthRecord(growthPayload);
     // Hiển thị modal thành công, thay vì gọi closeOverlay() ngay
     setShowSuccessModal(true);
+      try {
        const alertRes = await alertApi.getAlert(
           child.name,
           child.dateOfBirth,
