@@ -48,6 +48,10 @@ const Members = () => {
   const [activeTab, setActiveTab] = useState("1");
   const [loading, setLoading] = useState(false);
 
+  // Thêm hai state để quản lý việc tải lên ảnh
+  const [imageUrl, setImageUrl] = useState("");
+  const [imageLoading, setImageLoading] = useState(false);
+
   // State for UserAccounts
   const [userAccounts, setUserAccounts] = useState([]);
   const [userAccountModalVisible, setUserAccountModalVisible] = useState(false);
@@ -108,6 +112,8 @@ const Members = () => {
   const handleAddUserAccount = () => {
     setEditingUserAccount(null);
     userAccountForm.resetFields();
+    // Reset imageUrl
+    setImageUrl("");
     // Set default values for required fields
     userAccountForm.setFieldsValue({
       status: "Active",
@@ -119,6 +125,8 @@ const Members = () => {
 
   const handleEditUserAccount = (record) => {
     setEditingUserAccount(record);
+    // Cập nhật giá trị imageUrl
+    setImageUrl(record.profilePicture || "");
     userAccountForm.setFieldsValue({
       ...record,
       dateOfBirth: record.dateOfBirth ? moment(record.dateOfBirth) : null,
@@ -1043,16 +1051,33 @@ const Members = () => {
                     return Upload.LIST_IGNORE;
                   }
 
-                  // Upload lên Cloudinary
-                  // Đã comment để không sử dụng Cloudinary
-                  /* const result = await uploadImageToCloudinary(file);
-                  if (result) {
-                    setImageUrl(result.url);
-                    // Form.setFieldsValue là để cập nhật giá trị của form
-                    userAccountForm.setFieldsValue({
-                      profilePicture: result.url,
-                    });
-                  } */
+                  // Bắt đầu trạng thái loading
+                  setImageLoading(true);
+                  try {
+                    // Đoạn code upload ảnh thực tế (đã comment)
+                    /* const result = await uploadImageToCloudinary(file);
+                    if (result) {
+                      setImageUrl(result.url);
+                      userAccountForm.setFieldsValue({
+                        profilePicture: result.url,
+                      });
+                    } */
+
+                    // Giả lập việc tải ảnh (đọc ảnh bằng FileReader để preview)
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      setImageUrl(reader.result);
+                      userAccountForm.setFieldsValue({
+                        profilePicture: reader.result,
+                      });
+                      setImageLoading(false);
+                    };
+                    reader.readAsDataURL(file);
+                  } catch (error) {
+                    console.error("Error uploading image:", error);
+                    message.error("Failed to upload image");
+                    setImageLoading(false);
+                  }
                   return false; // Chặn upload mặc định của antd
                 }}
               >
