@@ -17,6 +17,18 @@ const MilestoneApi = {
     api.get(
       `ChildMilestone/Child/${child.name}/${child.dateOfBirth}/${memberId}`
     ),
+    
+  // Get all system milestones
+  getAllMilestones: () => 
+    api.get("/Milestone"),
+    
+  // Get milestone by ID
+  getMilestoneById: (id) => 
+    api.get(`/Milestone/${id}`),
+    
+  // Get milestones by age range (in months)
+  getMilestonesByAgeRange: (minAge, maxAge) => 
+    api.get(`/Milestone/AgeRange/${minAge}/${maxAge}`),
 };
 
 export default MilestoneApi;

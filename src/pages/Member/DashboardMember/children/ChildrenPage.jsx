@@ -12,6 +12,7 @@ import AddMilestoneButton from "../../../../components/common/buttons/AddMilesto
 import AddChildButton from "../../../../components/common/buttons/AddChild";
 import memberShipApi from "../../../../services/memberShipApi";
 import alertApi from "../../../../services/alertApi";
+import MilestonePage from "../milestone/Milestone.jsx"
 import AIChat from "./AIChat.jsx";
 import Alert from "./Alert.jsx";
 
@@ -563,11 +564,12 @@ function ChildrenPage() {
               onClick={handleShowMilestoneModal}
               disabled={!selectedChild}
             />
-            <button 
+            <button
               className="show-milestone-button"
-              onClick={handleShowMilestoneModal}
+              onClick={() => navigate("/member/milestone")}
               disabled={!selectedChild}
-              >
+            >
+              Show Milestones
             </button>
           </div>
 

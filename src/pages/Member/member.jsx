@@ -5,6 +5,7 @@ import "./Member.css";
 
 // Import các components
 import Children from "./DashboardMember/children/ChildrenPage";
+import Milestone from "./DashboardMember/milestone/Milestone";
 import Consultation from "./DashboardMember/consultation/DoctorConsultation";
 import TransactionsMember from "./DashboardMember/transactionsMember/TransactionsMember";
 import Membership from "./DashboardMember/membership/MemberShipPage";
@@ -19,6 +20,7 @@ function Member() {
           <Routes>
             <Route path="/" element={<Navigate to="children" replace />} />
             <Route path="children" element={<Children />} />
+            <Route path="milestone" element={<Milestone />} />
             <Route path="doctor-consultation" element={<Consultation />} />
             <Route path="transactions" element={<TransactionsMember />} />
             <Route path="membership" element={<Membership />} />
