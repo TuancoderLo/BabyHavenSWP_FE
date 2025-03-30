@@ -28,6 +28,12 @@ import {
   CommentOutlined,
   SearchOutlined,
   UserOutlined,
+  DownloadOutlined,
+  FileOutlined,
+  FilePdfOutlined,
+  FileImageOutlined,
+  FileWordOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
 import doctorApi from "../../../services/DoctorApi";
@@ -72,6 +78,116 @@ const Consultations = () => {
     onGoingConsultations,
   ]);
 
+  const handleApiError = (error, action) => {
+    let errorMessage = "Lỗi không xác định";
+    let errorDetails = "";
+
+    if (error.response) {
+      // Lỗi từ phản hồi của server
+      errorMessage = `Lỗi ${error.response.status}: ${error.response.statusText}`;
+      if (error.response.data?.title) {
+        errorDetails = error.response.data.title;
+      }
+    } else if (error.request) {
+      // Không nhận được phản hồi từ server
+      errorMessage = "Không thể kết nối đến máy chủ";
+    } else if (error.message) {
+      // Lỗi trong quá trình thiết lập request
+      errorMessage = error.message;
+    }
+
+    // Log lỗi chi tiết để dễ gỡ lỗi
+    console.error(`Lỗi khi ${action}:`, error);
+    console.log(`Chi tiết lỗi: ${errorDetails}`);
+
+    // Hiển thị lỗi ngắn gọn cho người dùng
+    message.error(`${errorMessage}. ${errorDetails}`);
+
+    return { errorMessage, errorDetails };
+  };
+
+  const parseContentToObject = (content) => {
+    try {
+      return JSON.parse(content);
+    } catch (e) {
+      if (typeof content === "string") {
+        const lines = content.split("\r\n\r\n");
+        return {
+          followUp: lines[lines.length - 1] || "",
+        };
+      }
+      return { followUp: "" };
+    }
+  };
+
+  const fetchConsultationRequestsById = async (requestId) => {
+    try {
+      const response = await doctorApi.getConsultationRequestsById(requestId);
+      return response.data;
+    } catch (error) {
+      console.error(`Lỗi khi lấy chi tiết yêu cầu ${requestId}:`, error);
+      // Trả về đối tượng mặc định khi API bị lỗi
+      return {
+        requestId: requestId,
+        memberName: "N/A (Dữ liệu không khả dụng)",
+        childName: "N/A",
+        status: "Pending",
+        attachments: [], // Mảng rỗng để tránh lỗi khi hiển thị
+        requestDate: new Date().toISOString(),
+        description: "Không thể tải thông tin chi tiết. Lỗi máy chủ.",
+        child: {
+          age: "N/A",
+          gender: "N/A",
+          allergies: "N/A",
+          notes: "N/A",
+          dateOfBirth: new Date().toISOString(),
+        },
+      };
+    }
+  };
+
+  const parseAttachments = (attachmentsData) => {
+    try {
+      if (!attachmentsData) return [];
+
+      // Nếu đã là mảng, trả về luôn
+      if (Array.isArray(attachmentsData)) return attachmentsData;
+
+      // Nếu là chuỗi, parse thành JSON
+      if (typeof attachmentsData === "string") {
+        if (attachmentsData.trim() === "") return [];
+
+        try {
+          // Thử parse bình thường trước
+          const parsedData = JSON.parse(attachmentsData);
+
+          // Nếu kết quả vẫn là string (có thể là chuỗi JSON được escape)
+          if (typeof parsedData === "string") {
+            // Parse lần thứ hai
+            return JSON.parse(parsedData);
+          }
+
+          return Array.isArray(parsedData) ? parsedData : [parsedData];
+        } catch (innerError) {
+          console.error("Lỗi khi parse attachments (inner):", innerError);
+          // Thêm log để xem chuỗi gốc
+          console.log("Chuỗi attachments gốc:", attachmentsData);
+          return [];
+        }
+      }
+
+      // Nếu là đối tượng đơn (không phải mảng), bọc trong mảng
+      if (typeof attachmentsData === "object") {
+        return [attachmentsData];
+      }
+
+      return [];
+    } catch (error) {
+      console.error("Lỗi khi parse attachments:", error);
+      return [];
+    }
+  };
+
   const fetchConsultations = async () => {
     setLoading(true);
     try {
@@ -81,73 +197,104 @@ const Consultations = () => {
         return;
       }
 
-      const response = await doctorApi.getConsultationRequestsByDoctorOData(
-        doctorId
-      );
-      const requests = Array.isArray(response) ? response : response.data;
+      let requests = [];
+      try {
+        const response = await doctorApi.getConsultationRequestsByDoctorOData(
+          doctorId
+        );
+        requests = Array.isArray(response) ? response : response.data;
+      } catch (error) {
+        console.error("Error fetching consultation requests:", error);
+        message.error("Không thể lấy danh sách yêu cầu tư vấn!");
+        setLoading(false);
+        return;
+      }
 
-      const detailedRequests = await Promise.all(
-        requests.map(async (request) => {
+      // Xử lý từng yêu cầu một, bỏ qua các yêu cầu bị lỗi
+      const detailedRequests = [];
+      for (const request of requests) {
+        try {
+          // Sử dụng hàm cải tiến
+          const detailedData = await fetchConsultationRequestsById(
+            request.requestId
+          );
+
+          let responses = [];
           try {
-            const detailedResponse =
-              await doctorApi.getConsultationRequestsById(request.requestId);
-            const detailedData = detailedResponse.data;
-            const responses = await doctorApi.getConsultationResponsesOData(
+            const responseData = await doctorApi.getConsultationResponsesOData(
               `?$filter=requestId eq ${request.requestId}`
             );
-            const latestResponse = responses.data[0] || {};
+            responses = responseData.data || [];
+          } catch (respError) {
+            console.error(
+              `Error fetching responses for request ${request.requestId}:`,
+              respError
+            );
+            responses = [];
+          }
 
-            // Lấy rating từ API RatingFeedback nếu có response
-            let rating = 0;
-            if (latestResponse.responseId) {
+          const latestResponse = responses[0] || {};
+
+          // Xử lý rating
+          let rating = 0;
+          if (latestResponse.responseId) {
+            try {
               const feedbackResponse =
                 await doctorApi.getRatingFeedbackByResponseId(
                   latestResponse.responseId
                 );
               const feedbackData = feedbackResponse.data[0] || {};
               rating = feedbackData.rating || 0;
+            } catch (error) {
+              console.error(
+                `Error fetching rating for response ${latestResponse.responseId}:`,
+                error
+              );
             }
-
-            return {
-              id: request.requestId,
-              requestId: request.requestId,
-              parentName: detailedData.memberName || "N/A",
-              parentAvatar: "https://randomuser.me/api/portraits/women/32.jpg",
-              childName: detailedData.childName || "N/A",
-              childAge: detailedData.child?.age
-                ? `${detailedData.child.age} tuổi`
-                : "N/A",
-              childGender: detailedData.child?.gender || "N/A",
-              childAllergies: detailedData.child?.allergies || "None",
-              childNotes: detailedData.child?.notes || "None",
-              childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
-              requestDate: detailedData.requestDate || moment().format(),
-              topic: detailedData.category || "N/A",
-              description: detailedData.description || "N/A",
-              urgency: detailedData.urgency?.toLowerCase() || "normal",
-              status: detailedData.status || "Pending",
-              attachments: detailedData.attachments || [],
-              createdAt: detailedData.createdAt || moment().format(),
-              updatedAt: detailedData.updatedAt || moment().format(),
-              response: latestResponse.content || "",
-              rating: rating, // Sử dụng rating từ API RatingFeedback thay vì latestResponse.rating
-              completedDate:
-                detailedData.status === "Completed"
-                  ? detailedData.updatedAt
-                  : null,
-            };
-          } catch (error) {
-            console.error(
-              `Error fetching details for request ${request.requestId}:`,
-              error
-            );
-            return null;
           }
-        })
-      );
 
-      const mappedData = detailedRequests.filter((request) => request !== null);
-      setConsultations(mappedData);
+          // Xử lý attachments sử dụng hàm parseAttachments
+          const attachmentsArray = parseAttachments(detailedData.attachments);
+
+          // Tạo đối tượng yêu cầu chi tiết
+          detailedRequests.push({
+            id: request.requestId,
+            requestId: request.requestId,
+            parentName: detailedData.memberName || "N/A",
+            parentAvatar: "https://randomuser.me/api/portraits/women/32.jpg",
+            childName: detailedData.childName || "N/A",
+            childAge: detailedData.child?.age
+              ? `${detailedData.child.age} tuổi`
+              : "N/A",
+            childGender: detailedData.child?.gender || "N/A",
+            childAllergies: detailedData.child?.allergies || "None",
+            childNotes: detailedData.child?.notes || "None",
+            childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
+            requestDate: detailedData.requestDate || moment().format(),
+            topic: detailedData.category || "N/A",
+            description: detailedData.description || "N/A",
+            urgency: detailedData.urgency?.toLowerCase() || "normal",
+            status: detailedData.status || "Pending",
+            attachments: attachmentsArray,
+            createdAt: detailedData.createdAt || moment().format(),
+            updatedAt: detailedData.updatedAt || moment().format(),
+            response: latestResponse.content || "",
+            rating: rating,
+            completedDate:
+              detailedData.status === "Completed"
+                ? detailedData.updatedAt
+                : null,
+          });
+        } catch (error) {
+          console.error(`Lỗi khi xử lý yêu cầu ${request.requestId}:`, error);
+          // Bỏ qua yêu cầu bị lỗi
+        }
+      }
+
+      console.log(
+        `Đã xử lý thành công ${detailedRequests.length}/${requests.length} yêu cầu.`
+      );
+      setConsultations(detailedRequests);
     } catch (error) {
       message.error("Failed to fetch consultation requests!");
       console.error("Error fetching consultations:", error);
@@ -171,75 +318,68 @@ const Consultations = () => {
       );
       console.log("Requests from API for Ongoing:", requests);
 
-      const detailedRequests = await Promise.all(
-        requests.map(async (request) => {
-          try {
-            const detailedResponse =
-              await doctorApi.getConsultationRequestsById(request.requestId);
-            const detailedData = detailedResponse.data;
-            console.log("Detailed data for request:", detailedData);
+      // Xử lý từng yêu cầu một, bỏ qua các yêu cầu bị lỗi
+      const detailedRequests = [];
+      for (const request of requests) {
+        try {
+          const detailedData = await fetchConsultationRequestsById(
+            request.requestId
+          );
+          if (detailedData.status !== "Approved") continue;
 
-            if (detailedData.status !== "Approved") {
-              console.warn(
-                `Request ${request.requestId} has status ${detailedData.status}, skipping...`
+          const responses = await doctorApi.getConsultationResponsesOData(
+            `?$filter=requestId eq ${request.requestId}`
+          );
+          const latestResponse = responses.data[0] || {};
+
+          // Lấy rating từ API RatingFeedback nếu có response
+          let rating = 0;
+          if (latestResponse.responseId) {
+            const feedbackResponse =
+              await doctorApi.getRatingFeedbackByResponseId(
+                latestResponse.responseId
               );
-              return null;
-            }
-
-            const responses = await doctorApi.getConsultationResponsesOData(
-              `?$filter=requestId eq ${request.requestId}`
-            );
-            const latestResponse = responses.data[0] || {};
-
-            // Lấy rating từ API RatingFeedback nếu có response
-            let rating = 0;
-            if (latestResponse.responseId) {
-              const feedbackResponse =
-                await doctorApi.getRatingFeedbackByResponseId(
-                  latestResponse.responseId
-                );
-              const feedbackData = feedbackResponse.data[0] || {};
-              rating = feedbackData.rating || 0;
-            }
-
-            return {
-              id: request.requestId,
-              requestId: request.requestId,
-              parentName: detailedData.memberName || "N/A",
-              parentAvatar: "https://randomuser.me/api/portraits/women/32.jpg",
-              childName: detailedData.childName || "N/A",
-              childAge: detailedData.child?.age
-                ? `${detailedData.child.age} tuổi`
-                : "N/A",
-              childGender: detailedData.child?.gender || "N/A",
-              childAllergies: detailedData.child?.allergies || "None",
-              childNotes: detailedData.child?.notes || "None",
-              childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
-              requestDate: detailedData.requestDate || moment().format(),
-              description: detailedData.description || "N/A",
-              status: detailedData.status,
-              response: latestResponse.content || "",
-              rating: rating, // Sử dụng rating từ API RatingFeedback
-              createdAt: detailedData.createdAt || moment().format(),
-              updatedAt: detailedData.updatedAt || moment().format(),
-              completedDate:
-                detailedData.status === "Completed"
-                  ? detailedData.updatedAt
-                  : null,
-            };
-          } catch (error) {
-            console.error(
-              `Error fetching details for request ${request.requestId}:`,
-              error
-            );
-            return null;
+            const feedbackData = feedbackResponse.data[0] || {};
+            rating = feedbackData.rating || 0;
           }
-        })
-      );
 
-      const mappedData = detailedRequests.filter((request) => request !== null);
-      console.log("Mapped Ongoing Consultations:", mappedData);
-      setOnGoingConsultations(mappedData);
+          // Sử dụng hàm parseAttachments cải tiến
+          const attachmentsArray = parseAttachments(detailedData.attachments);
+
+          detailedRequests.push({
+            id: request.requestId,
+            requestId: request.requestId,
+            parentName: detailedData.memberName || "N/A",
+            parentAvatar: "https://randomuser.me/api/portraits/women/32.jpg",
+            childName: detailedData.childName || "N/A",
+            childAge: detailedData.child?.age
+              ? `${detailedData.child.age} tuổi`
+              : "N/A",
+            childGender: detailedData.child?.gender || "N/A",
+            childAllergies: detailedData.child?.allergies || "None",
+            childNotes: detailedData.child?.notes || "None",
+            childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
+            requestDate: detailedData.requestDate || moment().format(),
+            description: detailedData.description || "N/A",
+            status: detailedData.status,
+            response: latestResponse.content || "",
+            rating: rating, // Sử dụng rating từ API RatingFeedback
+            createdAt: detailedData.createdAt || moment().format(),
+            updatedAt: detailedData.updatedAt || moment().format(),
+            completedDate:
+              detailedData.status === "Completed"
+                ? detailedData.updatedAt
+                : null,
+            attachments: attachmentsArray,
+          });
+        } catch (error) {
+          console.error(`Lỗi khi xử lý yêu cầu ${request.requestId}:`, error);
+          // Bỏ qua yêu cầu này
+        }
+      }
+
+      console.log("Mapped Ongoing Consultations:", detailedRequests);
+      setOnGoingConsultations(detailedRequests);
     } catch (error) {
       message.error("Failed to fetch ongoing consultations!");
       console.error("Error fetching ongoing consultations:", error);
@@ -537,6 +677,154 @@ const Consultations = () => {
     (item) => item.status === "Pending"
   ).length;
 
+  const downloadAttachment = (attachment) => {
+    try {
+      // Hỗ trợ cả viết hoa và viết thường cho tên trường
+      const fileName =
+        attachment.fileName || attachment.FileName || "download.file";
+      const content = attachment.content || attachment.Content || "";
+      const mimeType =
+        attachment.mimeType ||
+        attachment.MimeType ||
+        "application/octet-stream";
+
+      if (!content) {
+        message.error(`Thiếu nội dung tệp đính kèm cho "${fileName}"`);
+        return;
+      }
+
+      // Chuyển đổi Base64 thành tệp và tải xuống
+      const byteCharacters = atob(content);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: mimeType });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      message.success(`Đã tải xuống tệp ${fileName}`);
+    } catch (error) {
+      console.error("Lỗi khi tải xuống tệp:", error);
+      message.error(`Không thể tải xuống tệp tin: ${error.message}`);
+    }
+  };
+
+  const getFileIcon = (mimeType) => {
+    if (!mimeType) return <FileOutlined />;
+    if (mimeType.includes("pdf")) return <FilePdfOutlined />;
+    if (mimeType.includes("image")) return <FileImageOutlined />;
+    if (mimeType.includes("word") || mimeType.includes("doc"))
+      return <FileWordOutlined />;
+    return <FileTextOutlined />;
+  };
+
+  const renderAttachments = (attachments) => {
+    if (
+      !attachments ||
+      !Array.isArray(attachments) ||
+      attachments.length === 0
+    ) {
+      return <p>Không có tệp đính kèm</p>;
+    }
+
+    return attachments.map((attachment, index) => {
+      if (!attachment) return null;
+
+      const fileName =
+        attachment.fileName || attachment.FileName || `Tệp ${index + 1}`;
+      const mimeType =
+        attachment.mimeType ||
+        attachment.MimeType ||
+        "application/octet-stream";
+
+      return (
+        <div key={index} className="attachment-item">
+          <div className="attachment-info">
+            <span className="attachment-icon">{getFileIcon(mimeType)}</span>
+            <span className="attachment-name">{fileName}</span>
+            <span className="attachment-type">{mimeType}</span>
+          </div>
+          <Button
+            type="primary"
+            size="small"
+            onClick={() => downloadAttachment(attachment)}
+            icon={<DownloadOutlined />}
+          >
+            Tải xuống
+          </Button>
+        </div>
+      );
+    });
+  };
+
+  useEffect(() => {
+    const attachmentStyles = `
+      .attachments-container {
+        border: 1px solid #f0f0f0;
+        border-radius: 4px;
+        padding: 12px;
+        margin-top: 8px;
+        margin-bottom: 16px;
+      }
+      
+      .attachment-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #f0f0f0;
+        margin-bottom: 4px;
+      }
+      
+      .attachment-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+      }
+      
+      .attachment-info {
+        display: flex;
+        align-items: center;
+        flex: 1;
+      }
+      
+      .attachment-icon {
+        margin-right: 8px;
+        font-size: 18px;
+        color: #1890ff;
+      }
+      
+      .attachment-name {
+        font-weight: 500;
+        margin-right: 12px;
+      }
+      
+      .attachment-type {
+        font-size: 12px;
+        color: #8c8c8c;
+      }
+    `;
+
+    // Thêm style vào document
+    const styleElement = document.createElement("style");
+    styleElement.innerHTML = attachmentStyles;
+    document.head.appendChild(styleElement);
+
+    // Cleanup khi component unmount
+    return () => {
+      if (document.head.contains(styleElement)) {
+        document.head.removeChild(styleElement);
+      }
+    };
+  }, []);
+
   return (
     <div className="consult-container">
       <Card className="consult-card">
@@ -704,6 +992,15 @@ const Consultations = () => {
               </Descriptions.Item>
             </Descriptions>
 
+            {selectedConsultation?.attachments && (
+              <>
+                <Divider orientation="left">Tệp đính kèm</Divider>
+                <div className="attachments-container">
+                  {renderAttachments(selectedConsultation.attachments)}
+                </div>
+              </>
+            )}
+
             <Divider orientation="left">Child Information</Divider>
             <Descriptions bordered size="small" column={1}>
               <Descriptions.Item label="Date of Birth">
@@ -806,6 +1103,15 @@ const Consultations = () => {
                 {selectedConsultation.description}
               </Descriptions.Item>
             </Descriptions>
+
+            {selectedConsultation?.attachments && (
+              <>
+                <Divider orientation="left">Tệp đính kèm</Divider>
+                <div className="attachments-container">
+                  {renderAttachments(selectedConsultation.attachments)}
+                </div>
+              </>
+            )}
 
             <Divider orientation="left">Child Information</Divider>
             <Descriptions bordered column={1}>
