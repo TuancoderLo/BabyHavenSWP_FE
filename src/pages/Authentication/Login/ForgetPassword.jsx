@@ -361,9 +361,7 @@ const ForgetPassword = () => {
 
   return (
     <div className="forget-password-container">
-      {/* Nền với điểm sáng tĩnh */}
-      <div className="particles-background"></div>
-
+      {/* Thay đổi nền để phù hợp với Register.jsx */}
       <div className="forget-password-card">
         <h2 className="forget-password-title">
           {step === 1 && "Forgot Password"}

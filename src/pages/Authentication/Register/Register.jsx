@@ -58,6 +58,12 @@ function Register() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    // Thêm kiểm tra đặc biệt cho trường phoneNumber
+    if (name === "phoneNumber" && !/^\d*$/.test(value)) {
+      return; // Không cập nhật state nếu có ký tự không phải số
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -97,13 +103,13 @@ function Register() {
       return false;
     }
 
-    if (formData.phoneNumber.length !== 10) {
-      setError("Phone number must be exactly 10 digits");
+    if (!/^\d{10,11}$/.test(formData.phoneNumber)) {
+      setError("Phone number must be 10 or 11 digits");
       return false;
     }
 
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters long");
+    if (formData.password.length < 8) {
+      setError("Password must be at least 8 characters long");
       return false;
     }
 
@@ -283,6 +289,9 @@ function Register() {
                 placeholder="Phone Number"
                 value={formData.phoneNumber}
                 onChange={handleChange}
+                pattern="[0-9]*"
+                inputMode="numeric"
+                maxLength="11"
                 required
               />
             </div>
@@ -308,6 +317,7 @@ function Register() {
                 value={formData.dateOfBirth}
                 onChange={handleChange}
                 required
+                max={new Date().toISOString().split("T")[0]}
               />
             </div>
 

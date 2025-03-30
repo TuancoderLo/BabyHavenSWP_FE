@@ -10,10 +10,12 @@ const VerifyEmail = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [registrationData, setRegistrationData] = useState(null);
-  const [remainingTime, setRemainingTime] = useState(60); // Reduced to 1 minute (60 seconds)
   const [icons, setIcons] = useState([]);
   const containerRef = useRef(null);
   const navigate = useNavigate();
+  const [resendDisabled, setResendDisabled] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   // Email from registration process
   const email = localStorage.getItem("pending_email") || "";
@@ -28,45 +30,6 @@ const VerifyEmail = () => {
       navigate("/register");
     }
   }, [navigate]);
-
-  // OTP countdown timer - reduced to 1 minute
-  useEffect(() => {
-    if (step === 1 && remainingTime > 0) {
-      const timer = setTimeout(() => {
-        setRemainingTime(remainingTime - 1);
-      }, 1000);
-      return () => clearTimeout(timer);
-    } else if (step === 1 && remainingTime <= 0) {
-      // When OTP time expires (reaches 0), wait 2 seconds and redirect
-      const redirectTimer = setTimeout(() => {
-        // Display notification
-        setError(
-          "OTP entry time has expired. The system will redirect you to the registration page."
-        );
-
-        // Wait 2 seconds before redirecting
-        setTimeout(() => {
-          // Remove temporary registration data
-          localStorage.removeItem("registration_data");
-          localStorage.removeItem("pending_email");
-          // Redirect to registration page
-          navigate("/register");
-        }, 2000);
-      }, 500);
-
-      return () => clearTimeout(redirectTimer);
-    }
-  }, [remainingTime, step, navigate]);
-
-  // Format countdown time
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
-  };
-
-  // Check if time is about to expire
-  const isTimeExpiring = remainingTime <= 20; // Last 20 seconds for 1 minute time
 
   // Handle OTP form submission
   const handleOtpSubmit = async (e) => {
@@ -92,22 +55,21 @@ const VerifyEmail = () => {
         return;
       }
 
-      // Restructure data according to API requirements
+      // THAY ĐỔI: Đảm bảo dữ liệu đúng định dạng mà API yêu cầu
       const verifyData = {
-        email: userData.email,
-        username: userData.username,
-        phoneNumber: userData.phoneNumber,
-        name: userData.name,
-        gender: userData.gender,
-        dateOfBirth: userData.dateOfBirth,
-        address: userData.address,
-        password: userData.password,
-        otp: otp,
+        email: userData.email || email,
+        username: userData.username || "",
+        phoneNumber: userData.phoneNumber || "",
+        name: userData.name || "",
+        gender: userData.gender || "",
+        dateOfBirth: userData.dateOfBirth || "",
+        address: userData.address || "",
+        password: userData.password || "",
       };
 
       console.log("Sending verification data:", verifyData);
 
-      // Call API to verify OTP and complete registration
+      // THAY ĐỔI: Có thể API yêu cầu OTP là tham số riêng, không nằm trong body
       const response = await api.post(
         `Authentication/VerifyRegistrationOtp?otp=${otp}`,
         verifyData
@@ -115,36 +77,43 @@ const VerifyEmail = () => {
 
       console.log("Verification response:", response.data);
 
-      if (response.data.status === 1) {
-        // Verification successful, account has been created
-        // Remove temporary registration data
+      // Kiểm tra message trong response
+      if (
+        response.data.message &&
+        response.data.message.includes("successfully")
+      ) {
+        // Đánh dấu là thành công
+        setIsSuccess(true);
         localStorage.removeItem("registration_data");
         localStorage.removeItem("pending_email");
-
-        setStep(2); // Move to completion step
+      } else if (response.data.status === 1) {
+        // Nếu API trả về status = 1
+        setIsSuccess(true);
+        localStorage.removeItem("registration_data");
+        localStorage.removeItem("pending_email");
       } else {
         setError(response.data.message || "Invalid OTP. Please try again.");
-
-        // If OTP is incorrect and little time remains (under 10 seconds), automatically redirect to registration page
-        if (remainingTime <= 10) {
-          setTimeout(() => {
-            setError(
-              "Verification time is almost up. The system will redirect you to the registration page."
-            );
-
-            setTimeout(() => {
-              localStorage.removeItem("registration_data");
-              localStorage.removeItem("pending_email");
-              navigate("/register");
-            }, 2000);
-          }, 500);
-        }
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      setError(
-        error.response?.data?.message || "An error occurred. Please try again."
-      );
+      console.error("Error details:", {
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+
+      // THAY ĐỔI: Kiểm tra chi tiết lỗi từ API
+      if (error.response?.status === 400) {
+        setError(
+          "Invalid verification data. Please check your information and try again."
+        );
+      } else if (error.response?.status === 500) {
+        setError("Server error. Please try again later or contact support.");
+      } else {
+        setError(
+          error.response?.data?.message ||
+            "An error occurred. Please try again."
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -154,8 +123,8 @@ const VerifyEmail = () => {
   const handleResendOtp = async () => {
     try {
       setIsLoading(true);
-      // Reset the timer immediately when clicking the resend button
-      setRemainingTime(60);
+      setResendDisabled(true);
+      setCountdown(60);
 
       // Get email from localStorage
       const email = localStorage.getItem("pending_email");
@@ -163,16 +132,16 @@ const VerifyEmail = () => {
       if (!email) {
         setError("Email information not found!");
         setIsLoading(false);
+        setResendDisabled(false);
         return;
       }
 
-      // Call API to resend OTP - use Register endpoint
+      // THAY ĐỔI: Gọi đúng API chỉ với email để yêu cầu OTP mới
       const response = await api.post("Authentication/Register", {
         email: email,
       });
 
       if (response.data.status === 1) {
-        // Time has already been reset above
         setError(""); // Clear error message (if any)
       } else {
         setError(
@@ -189,21 +158,34 @@ const VerifyEmail = () => {
     }
   };
 
+  // Countdown timer for resend button
+  useEffect(() => {
+    let intervalId;
+
+    if (countdown > 0) {
+      intervalId = setInterval(() => {
+        setCountdown((prevCount) => {
+          if (prevCount <= 1) {
+            setResendDisabled(false);
+            return 0;
+          }
+          return prevCount - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [countdown]);
+
   // Return to login page
   const handleReturnToLogin = () => {
-    clearTemporaryData(["registration", "verification"], navigate, "/register");
+    clearTemporaryData(["registration", "verification"], navigate, "/login");
   };
 
   // Handle OTP input
   const handleOtpChange = (e) => {
-    // If OTP has expired, do not allow input
-    if (remainingTime <= 0) {
-      setError(
-        "OTP entry time has expired. Please wait for the system to redirect to the registration page."
-      );
-      return;
-    }
-
     setOtp(e.target.value);
   };
 
@@ -269,25 +251,35 @@ const VerifyEmail = () => {
 
       <div className="verify-email-card">
         <h2 className="verify-email-title">
-          {step === 1 && "Email Verification"}
-          {step === 2 && "Completed"}
+          {isSuccess ? "Completed" : "Email Verification"}
         </h2>
 
-        {error && <div className="verify-email-error-message">{error}</div>}
+        {error && !isSuccess && (
+          <div className="verify-email-error-message">{error}</div>
+        )}
 
-        {/* Step 1: Enter OTP */}
-        {step === 1 && (
+        {/* Nếu thành công, hiển thị thông báo thành công */}
+        {isSuccess ? (
+          <div className="verify-email-success-container">
+            <div className="verify-email-success-icon">✓</div>
+            <p className="verify-email-success-message">
+              Congratulations! Your account has been successfully registered.
+              You can login now to use our services.
+            </p>
+            <button
+              type="button"
+              className="verify-email-primary-button"
+              onClick={handleReturnToLogin}
+            >
+              Login Now
+            </button>
+          </div>
+        ) : (
+          /* Step 1: Enter OTP */
           <form onSubmit={handleOtpSubmit}>
             <p className="verify-email-instruction-text">
               Please enter the 6-digit verification code sent to your email{" "}
               <strong>{email}</strong> to complete your account registration.
-              You have <strong>1 minute</strong> to enter the verification code.
-              {remainingTime <= 20 && (
-                <span className="verify-email-warning-text">
-                  <br />
-                  Time is running out! Please enter quickly.
-                </span>
-              )}
             </p>
             <div className="verify-email-form-group">
               <label htmlFor="otp">Verification Code</label>
@@ -301,46 +293,20 @@ const VerifyEmail = () => {
                 required
                 className="verify-email-otp-input"
                 autoComplete="off"
-                disabled={remainingTime <= 0}
               />
             </div>
 
-            <p
-              className={`verify-email-time-remaining ${
-                isTimeExpiring ? "expiring" : ""
-              }`}
-            >
-              Time remaining: {formatTime(remainingTime)}
+            <p className="verify-email-resend-link">
+              Didn't receive the code?
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                className="verify-email-resend-button"
+                disabled={isLoading || resendDisabled}
+              >
+                {resendDisabled ? `Resend code (${countdown}s)` : "Resend code"}
+              </button>
             </p>
-
-            {remainingTime <= 0 ? (
-              <p className="verify-email-expired-message">
-                Code entry time has expired. Redirecting to registration page...
-              </p>
-            ) : remainingTime <= 20 ? (
-              <p className="verify-email-resend-link urgent">
-                <button
-                  type="button"
-                  onClick={handleResendOtp}
-                  className="verify-email-resend-button urgent"
-                  disabled={isLoading}
-                >
-                  Resend code now
-                </button>
-              </p>
-            ) : (
-              <p className="verify-email-resend-link">
-                Didn't receive the code?
-                <button
-                  type="button"
-                  onClick={handleResendOtp}
-                  className="verify-email-resend-button"
-                  disabled={isLoading}
-                >
-                  Resend code
-                </button>
-              </p>
-            )}
 
             <div className="verify-email-button-group">
               <button
@@ -354,30 +320,12 @@ const VerifyEmail = () => {
               <button
                 type="submit"
                 className="verify-email-primary-button"
-                disabled={isLoading || remainingTime <= 0}
+                disabled={isLoading}
               >
                 {isLoading ? "Processing..." : "Confirm"}
               </button>
             </div>
           </form>
-        )}
-
-        {/* Step 2: Complete */}
-        {step === 2 && (
-          <div className="verify-email-success-container">
-            <div className="verify-email-success-icon">✓</div>
-            <p className="verify-email-success-message">
-              Congratulations! You have successfully registered your account.
-              You can now log in to use our services.
-            </p>
-            <button
-              type="button"
-              className="verify-email-primary-button"
-              onClick={handleReturnToLogin}
-            >
-              Log in now
-            </button>
-          </div>
         )}
       </div>
     </div>
