@@ -82,16 +82,6 @@ function Sidebar() {
           </li>
 
           <li
-            className={activePath === "/member/notifications" ? "active" : ""}
-            onClick={() => setActivePath("/member/notifications")}
-          >
-            <Link to="/member/notifications" className="menu-item">
-              <i className="fas fa-bell"></i>
-              <span>Notifications</span>
-            </Link>
-          </li>
-
-          <li
             className={activePath === "/member/account" ? "active" : ""}
             onClick={() => setActivePath("/member/account")}
           >
