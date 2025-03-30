@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./PackageHome.css";
+import "./Packages.css";
 import membershipApi from "../../services/memberShipApi";
 import transactionsApi from "../../services/transactionsApi";
 import { jwtDecode } from "jwt-decode";

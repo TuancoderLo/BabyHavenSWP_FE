@@ -156,6 +156,7 @@ function ChildrenPage() {
     try {
       const membershipRes = await memberShipApi.getMemberMembership(memberId);
       const membershipData = membershipRes.data?.data;
+      console.log("Membership data:", membershipData);
 
       const activeMembership = Array.isArray(membershipData)
         ? membershipData.find(
@@ -167,6 +168,7 @@ function ChildrenPage() {
         ? membershipData
         : null;
 
+        console.log("Active membership:", activeMembership);
       if (!activeMembership) {
         alert("No active membership found. Please activate a membership plan.");
         return;
@@ -561,6 +563,12 @@ function ChildrenPage() {
               onClick={handleShowMilestoneModal}
               disabled={!selectedChild}
             />
+            <button 
+              className="show-milestone-button"
+              onClick={handleShowMilestoneModal}
+              disabled={!selectedChild}
+              >
+            </button>
           </div>
 
           <div className="latest-record-section">

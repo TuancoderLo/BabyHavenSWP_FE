@@ -48,21 +48,4 @@ api.interceptors.response.use(
   }
 );
 
-// Thêm interceptor để log request/response
-api.interceptors.request.use((request) => {
-  console.log("Starting Request:", request);
-  return request;
-});
-
-api.interceptors.response.use(
-  (response) => {
-    console.log("Response:", response);
-    return response;
-  },
-  (error) => {
-    console.error("Response Error:", error);
-    return Promise.reject(error);
-  }
-);
-
 export default api;
