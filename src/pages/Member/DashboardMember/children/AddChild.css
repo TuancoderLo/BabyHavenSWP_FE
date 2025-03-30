@@ -328,7 +328,6 @@
   justify-content: flex-end;
   position: sticky;
   bottom: 0;
-  background: #fff;
   padding: 1rem 0;
   z-index: 10; /* Đảm bảo nút không bị che bởi các phần tử khác */
 }
@@ -337,7 +336,6 @@
   background: #0682ff;
   border: none;
   border-radius: 6px;
-  color: #fff;
   padding: 8px 16px;
   cursor: pointer;
   font-size: 0.9rem;
