@@ -169,13 +169,13 @@
 
 /* Quick Stats */
 .quick-stats-doctor {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
-  margin-bottom: 20px;
 }
 
+
 .stat-card-doctor {
-  flex: 1;
   background-color: white;
   border-radius: 20px;
   padding: 20px;
@@ -423,7 +423,10 @@
   margin-bottom: 10px;
 }
 
-/* Thêm class positive, negative, neutral cho màu chữ nếu cần */
+
+.stat-change-doctor {
+  font-size: 12px;
+}
 .stat-change-doctor.positive {
   color: green;
 }
@@ -482,4 +485,8 @@
 
 .create-post-btn:hover {
   background-color: #357abd; /* Hiệu ứng hover */
+}
+/* Mini Chart trong card */
+.mini-chart {
+  margin: 10px 0;
 }

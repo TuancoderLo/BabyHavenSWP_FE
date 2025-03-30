@@ -2,20 +2,20 @@
 .consult-container {
   padding: 24px;
   min-height: 100vh;
-  background: #E6F0FA; /* Soft blue background like the dashboard */
+  background: #e6f0fa; /* Soft blue background like the dashboard */
 }
 
 /* Card styling */
 .consult-card {
   border-radius: 16px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  background: #FFFFFF; /* White card background */
+  background: #ffffff; /* White card background */
   padding: 16px; /* Thêm padding để nội dung không sát mép */
 }
 
 /* Title styling */
 .consult-title {
-  color: #4A90E2 !important; /* Keep the blue for the title */
+  color: #4a90e2 !important; /* Keep the blue for the title */
   margin-bottom: 24px;
   font-weight: 600;
 }
@@ -33,27 +33,27 @@
 /* Search input styling */
 .consult-search {
   border-radius: 10px !important;
-  border: 1px solid #D9E4F5 !important;
-  background: #F9FBFF !important;
+  border: 1px solid #d9e4f5 !important;
+  background: #f9fbff !important;
   padding: 8px 12px; /* Thêm padding cho đẹp mắt */
 }
 
 .consult-search:hover,
 .consult-search:focus {
-  border-color: #4AC1E2 !important; /* Teal accent on hover/focus */
+  border-color: #4ac1e2 !important; /* Teal accent on hover/focus */
   box-shadow: 0 0 0 3px rgba(74, 193, 226, 0.2) !important;
 }
 
 /* Filter select styling (dùng cho Completed và History) */
 .ant-select-selector {
   border-radius: 10px !important;
-  border: 1px solid #D9E4F5 !important;
-  background: #F9FBFF !important;
+  border: 1px solid #d9e4f5 !important;
+  background: #f9fbff !important;
 }
 
 .ant-select-selector:hover,
 .ant-select-selector:focus {
-  border-color: #4AC1E2 !important;
+  border-color: #4ac1e2 !important;
   box-shadow: 0 0 0 3px rgba(74, 193, 226, 0.2) !important;
 }
 
@@ -71,7 +71,7 @@
 .consult-refresh-btn:hover {
   background: #02dcf4 !important;
   border-color: #02dcf4 !important;
-  color: #FFFFFF !important; /* Đổi màu chữ khi hover */
+  color: #ffffff !important; /* Đổi màu chữ khi hover */
 }
 
 /* Parent info in table */
@@ -82,7 +82,7 @@
 }
 
 .consult-parent-info .ant-avatar {
-  border: 2px solid #A29BFE; /* Purple border for avatars */
+  border: 2px solid #a29bfe; /* Purple border for avatars */
 }
 
 /* Child age text */
@@ -111,14 +111,14 @@
 }
 
 .consult-modal-buttons .ant-btn-primary {
-  background: #4AC1E2 !important; /* Teal for primary buttons in modal */
-  border-color: #4AC1E2 !important;
+  background: #4ac1e2 !important; /* Teal for primary buttons in modal */
+  border-color: #4ac1e2 !important;
   border-radius: 10px !important; /* Đồng bộ với các nút khác */
 }
 
 .consult-modal-buttons .ant-btn-primary:hover {
-  background: #3AB0D2 !important;
-  border-color: #3AB0D2 !important;
+  background: #3ab0d2 !important;
+  border-color: #3ab0d2 !important;
 }
 
 .consult-modal-buttons .ant-btn-default {
@@ -133,15 +133,15 @@
 }
 
 .consult-drawer-parent .ant-avatar {
-  border: 2px solid #A29BFE; /* Purple border for avatars in drawer */
+  border: 2px solid #a29bfe; /* Purple border for avatars in drawer */
 }
 
 /* Table styling */
 .ant-table-thead > tr > th {
-  background: #F0F5FF !important; /* Light blue header background */
-  color: #4A90E2 !important; /* Blue text for headers */
+  background: #f0f5ff !important; /* Light blue header background */
+  color: #4a90e2 !important; /* Blue text for headers */
   font-weight: 600;
-  border-bottom: 2px solid #D9E4F5 !important;
+  border-bottom: 2px solid #d9e4f5 !important;
   padding: 12px !important; /* Điều chỉnh padding cho đẹp */
 }
 
@@ -154,7 +154,7 @@
 }
 
 .ant-table-row:hover {
-  background: #F9FBFF !important; /* Very light blue on hover */
+  background: #f9fbff !important; /* Very light blue on hover */
   transform: scale(1.01);
 }
 
@@ -171,7 +171,7 @@
 }
 
 .ant-tabs-tab:hover {
-  color: #4A90E2 !important; /* Hover effect cho tab */
+  color: #4a90e2 !important; /* Hover effect cho tab */
 }
 
 .ant-tabs-tab-active {
@@ -192,12 +192,12 @@
 
 /* Timeline styling */
 .ant-timeline-item-tail {
-  border-left: 2px dashed #D9E4F5 !important;
+  border-left: 2px dashed #d9e4f5 !important;
 }
 
 .ant-timeline-item-head {
-  background: #FFFFFF !important;
-  border: 2px solid #4AC1E2 !important; /* Teal dot for timeline */
+  background: #ffffff !important;
+  border: 2px solid #4ac1e2 !important; /* Teal dot for timeline */
 }
 
 .ant-timeline-item-content {
@@ -207,8 +207,8 @@
 /* Card in timeline */
 .ant-card {
   border-radius: 10px !important;
-  border: 1px solid #D9E4F5 !important;
-  background: #F9FBFF !important; /* Nhẹ nhàng hơn màu trắng mặc định */
+  border: 1px solid #d9e4f5 !important;
+  background: #f9fbff !important; /* Nhẹ nhàng hơn màu trắng mặc định */
 }
 
 /* Rate stars */
@@ -233,4 +233,30 @@
   .consult-title {
     font-size: 1.5rem; /* Giảm kích thước chữ trên mobile */
   }
+}
+
+/* Attachment styling */
+.attachments-container {
+  margin-bottom: 20px;
+}
+
+.attachment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: #f9fbff;
+  border: 1px solid #d9e4f5;
+  border-radius: 8px;
+}
+
+.attachment-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.attachment-item .ant-btn {
+  border-radius: 8px;
 }
