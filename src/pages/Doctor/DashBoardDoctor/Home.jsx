@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css';
 import Doctor from "../../../assets/doctor.jpg";
-import { FaSearch, FaBell, FaCog } from 'react-icons/fa';
+import { FaSearch, FaBell, FaCog, FaArrowUp, FaArrowDown, FaArrowRight } from 'react-icons/fa';
 import doctorApi from '../../../services/DoctorApi';
 import DoctorCalendar from './DoctorCalendar';
 
@@ -9,7 +9,48 @@ const Home = () => {
   const [currentDateTime, setCurrentDateTime] = useState('');
   const [doctorInfo, setDoctorInfo] = useState(null);
 
-  // Logic to update current date and time
+  // Mẫu dữ liệu thống kê (có thể thay bằng dữ liệu thật từ API)
+  const statsData = [
+    {
+      title: "Total Requests",
+      value: "41 requests received",
+      change: "+8% than last month",
+      type: "positive"  // có thể là 'positive', 'negative', 'neutral'
+    },
+    {
+      title: "Total Responses",
+      value: "36 responses sent",
+      change: "+10% than last month",
+      type: "positive"
+    },
+    {
+      title: "Average Rating",
+      value: "4.7 / 5",
+      change: "+5% than last month",
+      type: "positive"
+    }
+  ];
+
+  // Mẫu danh sách bài blog (có thể thay bằng dữ liệu thật từ API)
+  const [recentPosts] = useState([
+    {
+      title: "Understanding Hypertension",
+      snippet: "Hypertension is one of the leading risk factors for heart disease..."
+    },
+    {
+      title: "Benefits of Daily Cardio",
+      snippet: "Regular cardiovascular exercise can significantly reduce the risk of..."
+    }
+  ]);
+
+  // Hàm xác định icon mũi tên cho thay đổi thống kê
+  const getChangeIcon = (type) => {
+    if (type === 'positive') return <FaArrowUp style={{ color: 'green', marginRight: '4px' }} />;
+    if (type === 'negative') return <FaArrowDown style={{ color: 'red', marginRight: '4px' }} />;
+    return <FaArrowRight style={{ color: '#888', marginRight: '4px' }} />;
+  };
+
+  // Cập nhật thời gian hiện tại
   useEffect(() => {
     const updateDateTime = () => {
       const now = new Date();
@@ -25,7 +66,7 @@ const Home = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Logic to fetch doctor info using doctorId from localStorage
+  // Lấy thông tin bác sĩ theo doctorId từ localStorage
   useEffect(() => {
     const fetchDoctorInfo = async () => {
       try {
@@ -35,7 +76,6 @@ const Home = () => {
           return;
         }
 
-        // Call getDoctorById API
         const doctorResponse = await doctorApi.getDoctorById(doctorId);
         const doctor = doctorResponse.data;
 
@@ -55,11 +95,11 @@ const Home = () => {
 
   return (
     <div className="home-container-doctor">
-      {/* Left Section (unchanged) */}
+      {/* Phần bên trái */}
       <div className="left-section">
         <div className="header-doctor">
           <div className="search-bar-doctor">
-            <input type="text" placeholder="Search for events, patients etc." />
+            <input type="text" placeholder="Search for requests, patients, etc." />
             <span className="search-icon-doctor"><FaSearch /></span>
           </div>
           <div className="header-icons-doctor">
@@ -73,66 +113,44 @@ const Home = () => {
             <span>{currentDateTime}</span>
           </div>
           <div className="welcome-text">
-            <h1>Good Day, {doctorInfo ? doctorInfo.name : 'Dr. Nicholls'}!</h1>
-            <p>Have a Nice Monday!</p>
+            <h1>Welcome, {doctorInfo ? doctorInfo.name : 'Doctor'}!</h1>
+            <p>Here is a summary of your recent activities.</p>
           </div>
         </div>
 
+        {/* Thống kê nhanh (Quick Stats) */}
         <div className="quick-stats-doctor">
-          <div className="stat-card-doctor">
-            <h4>Total Requests</h4>
-            <p>41 requests received</p>
-            <p className="stat-change positive-doctor">+8% than last month</p>
-          </div>
-          <div className="stat-card-doctor">
-            <h4>Total Responses</h4>
-            <p>36 responses sent</p>
-            <p className="stat-change positive-doctor">+10% than last month</p>
-          </div>
-          <div className="stat-card-doctor">
-            <h4>Pending Requests</h4>
-            <p>5 requests pending</p>
-            <p className="stat-change neutral">+0% than last month</p>
-          </div>
+          {statsData.map((stat, index) => (
+            <div key={index} className="stat-card-doctor">
+              <h4>{stat.title}</h4>
+              <p>{stat.value}</p>
+              <p className={`stat-change-doctor ${stat.type}`}>
+                {getChangeIcon(stat.type)}
+                {stat.change}
+              </p>
+            </div>
+          ))}
         </div>
 
-        <div className="events-plans">
-          <div className="scheduled-events-doctor">
-            <h4>My Scheduled Online Events</h4>
-            <div className="progress-circle-doctor">
-              <span>85%</span>
-              <p>Busyness</p>
+        {/* My Blog Section */}
+        <div className="blog-section-doctor">
+          <h4>My Blog</h4>
+          {recentPosts.map((post, index) => (
+            <div key={index} className="blog-post-card">
+              <h5>{post.title}</h5>
+              <p>{post.snippet}</p>
             </div>
-            <div className="event-stats-doctor">
-              <p><span className="dot blue"></span> 25 Online Consultations</p>
-              <p><span className="dot green"></span> 10 Request Responses</p>
-            </div>
-          </div>
-
-          <div className="plans-done-doctor">
-            <h4>My Online Plans Done</h4>
-            <p>Today</p>
-            <div className="progress-bar-doctor">
-              <p>Consultations</p>
-              <div className="bar"><div className="fill blue" style={{ width: '70%' }}></div></div>
-              <p>70%</p>
-            </div>
-            <div className="progress-bar-doctor">
-              <p>Responses</p>
-              <div className="bar"><div className="fill green" style={{ width: '60%' }}></div></div>
-              <p>60%</p>
-            </div>
-            <button className="add-plan">Add plan +</button>
-          </div>
+          ))}
+          <button className="create-post-btn">Create New Post</button>
         </div>
       </div>
 
-      {/* Right Section */}
+      {/* Phần bên phải */}
       <div className="right-section">
-        {/* Profile Section with API Data */}
+        {/* Thông tin bác sĩ */}
         <div className="profile-section-doctor">
-          <img src={Doctor} alt="Profile-doctor" className="profile-image-doctor" />
-          <h3>{doctorInfo ? doctorInfo.name : 'Dr. Alisha Nicholls'}</h3>
+          <img src={Doctor} alt="Profile" className="profile-image-doctor" />
+          <h3>{doctorInfo ? doctorInfo.name : 'Dr. John Doe'}</h3>
           <p className="specialty">{doctorInfo ? doctorInfo.degree : 'Online Consultant'}</p>
           <p className="location">📍 {doctorInfo ? doctorInfo.hospitalAddress : 'Remote'}</p>
           <p className="biography">{doctorInfo ? doctorInfo.biography : 'N/A'}</p>

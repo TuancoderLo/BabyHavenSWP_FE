@@ -361,8 +361,8 @@ const Consultations = () => {
         values.action === "approved"
           ? "Consultation request approved"
           : values.action === "rejected"
-          ? "Consultation request rejected"
-          : "Response submitted successfully"
+            ? "Consultation request rejected"
+            : "Response submitted successfully"
       );
     } catch (error) {
       message.error("Failed to submit response!");
