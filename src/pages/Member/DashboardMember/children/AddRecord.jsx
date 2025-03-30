@@ -160,12 +160,12 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
         neurologicalReflexes: growthForm.neurologicalReflexes,
         developmentalMilestones: growthForm.developmentalMilestones,
       };
-      
-    await childApi.createGrowthRecord(growthPayload);
-    // Hiển thị modal thành công, thay vì gọi closeOverlay() ngay
-    setShowSuccessModal(true);
+
+      await childApi.createGrowthRecord(growthPayload);
+      // Hiển thị modal thành công, thay vì gọi closeOverlay() ngay
+      setShowSuccessModal(true);
       try {
-       const alertRes = await alertApi.getAlert(
+        const alertRes = await alertApi.getAlert(
           child.name,
           child.dateOfBirth,
           memberId
@@ -174,32 +174,32 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
       } catch (alertErr) {
         console.error("Error creating/fetching alert:", alertErr);
       }
-  } catch (err) {
-    console.error("Error submitting growth record:", err);
-  }
-}, [child, memberId, growthForm, validateForm]);
+    } catch (err) {
+      console.error("Error submitting growth record:", err);
+    }
+  }, [child, memberId, growthForm, validateForm]);
 
   return (
     <>
-    <div
-      className="add-record-overlay"
-      onClick={(e) => e.target === e.currentTarget && closeOverlay()}
-    >
-      <div className="add-record-wizard" onClick={(e) => e.stopPropagation()}>
-        <button className="close-button-record" onClick={closeOverlay}>
-          ×
-        </button>
-        <div className="wizard-left">
-          <div className="blue-bar" />
-          <div className="wizard-left-content">
-            <h1 className="main-title">
-              Enter a new growth record to track your baby's health
-            </h1>
-            <div className="babygrowth-img">
-              <img src={BabyGrowth} alt="Baby Growth" />
+      <div
+        className="add-record-overlay"
+        onClick={(e) => e.target === e.currentTarget && closeOverlay()}
+      >
+        <div className="add-record-wizard" onClick={(e) => e.stopPropagation()}>
+          <button className="close-button-record" onClick={closeOverlay}>
+            ×
+          </button>
+          <div className="wizard-left">
+            <div className="blue-bar" />
+            <div className="wizard-left-content">
+              <h1 className="main-title">
+                Enter a new growth record to track your baby's health
+              </h1>
+              <div className="babygrowth-img">
+                <img src={BabyGrowth} alt="Baby Growth" />
+              </div>
             </div>
           </div>
-        </div>
 
           <div className="wizard-left">
             <div className="blue-bar" />
@@ -234,9 +234,91 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               </div>
             </div>
           </div>
-            {/* Step 1: Basic Measurements */}
-            <div className="form-section date-section">
-              <h4>Record Date</h4>
+          {/* Step 1: Basic Measurements */}
+          <div className="form-section date-section">
+            <h4>Record Date</h4>
+            <input
+              type="date"
+              value={growthForm.createdAt}
+              onChange={handleChange}
+              name="createdAt"
+              max={new Date().toISOString().split("T")[0]}
+              className={errors.createdAt ? "error-input" : ""}
+            />
+            {errors.createdAt && (
+              <p className="error-text">{errors.createdAt}</p>
+            )}
+            {warnings.createdAt && (
+              <p className="warning-text-record">{warnings.createdAt}</p>
+            )}
+          </div>
+          <div className="form-section">
+            <h4>Basic Measurements</h4>
+            <div className="measurements-section">
+              <div>
+                <label>Baby's weight (kg)</label>
+                <input
+                  type="number"
+                  name="weight"
+                  value={growthForm.weight}
+                  onChange={handleChange}
+                  min="0"
+                  className={errors.weight ? "error-input" : ""}
+                  onKeyDown={(e) =>
+                    ["-", "e"].includes(e.key) && e.preventDefault()
+                  }
+                />
+                {errors.weight && (
+                  <p className="error-text">{errors.weight}</p>
+                )}
+                {warnings.weight && (
+                  <p className="warning-text-record">{warnings.weight}</p>
+                )}
+              </div>
+              <div>
+                <label>Baby's height (cm)</label>
+                <input
+                  type="number"
+                  name="height"
+                  value={growthForm.height}
+                  onChange={handleChange}
+                  min="0"
+                  className={errors.height ? "error-input" : ""}
+                  onKeyDown={(e) =>
+                    ["-", "e"].includes(e.key) && e.preventDefault()
+                  }
+                />
+                {errors.height && (
+                  <p className="error-text">{errors.height}</p>
+                )}
+                {warnings.height && (
+                  <p className="warning-text-record">{warnings.height}</p>
+                )}
+              </div>
+              <div>
+                <label>Head circumference (cm)</label>
+                <input
+                  type="number"
+                  name="headCircumference"
+                  value={growthForm.headCircumference}
+                  onChange={handleChange}
+                  min="0"
+                  onKeyDown={(e) =>
+                    ["-", "e"].includes(e.key) && e.preventDefault()
+                  }
+                />
+              </div>
+              <div>
+                <label>BMI (kg/m²)</label>
+                <input
+                  type="number"
+                  value={calculateBMI(growthForm.weight, growthForm.height)}
+                  readOnly
+                />
+              </div>
+            </div>
+            <div className="notes-section">
+              <label>Notes</label>
               <input
                 type="date"
                 value={growthForm.createdAt}
@@ -252,6 +334,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 <p className="warning-text-record">{warnings.createdAt}</p>
               )}
             </div>
+
             <div className="form-section">
               <h4>Basic Measurements</h4>
               <div className="measurements-section">
@@ -320,70 +403,49 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               <div className="notes-section">
                 <label>Notes</label>
                 <input
-                  type="date"
-                  value={growthForm.createdAt}
+                  type="text"
+                  name="notes"
+                  value={growthForm.notes}
                   onChange={handleChange}
-                  name="createdAt"
-                  max={new Date().toISOString().split("T")[0]}
-                  className={errors.createdAt ? "error-input" : ""}
                 />
-                {errors.createdAt && (
-                  <p className="error-text">{errors.createdAt}</p>
-                )}
-                {warnings.createdAt && (
-                  <p className="warning-text-record">{warnings.createdAt}</p>
-                )}
               </div>
+            </div>
 
+            {/* Dropdown 1: Recommendations for Your Baby (Step 2) */}
+            <details>
+              <summary>Recommendations for Your Baby (click to expand)</summary>
               <div className="form-section">
-                <h4>Basic Measurements</h4>
+                <h4>Nutritional Information</h4>
                 <div className="measurements-section">
                   <div>
-                    <label>Baby's weight (kg)</label>
+                    <label>Nutritional status</label>
                     <input
-                      type="number"
-                      name="weight"
-                      value={growthForm.weight}
+                      type="text"
+                      name="nutritionalStatus"
+                      value={growthForm.nutritionalStatus}
                       onChange={handleChange}
-                      min="0"
-                      className={errors.weight ? "error-input" : ""}
-                      onKeyDown={(e) =>
-                        ["-", "e"].includes(e.key) && e.preventDefault()
-                      }
                     />
-                    {errors.weight && (
-                      <p className="error-text">{errors.weight}</p>
-                    )}
-                    {warnings.weight && (
-                      <p className="warning-text-record">{warnings.weight}</p>
-                    )}
                   </div>
                   <div>
-                    <label>Baby's height (cm)</label>
+                    <label>Physical activity level</label>
                     <input
-                      type="number"
-                      name="height"
-                      value={growthForm.height}
+                      type="text"
+                      name="physicalActivityLevel"
+                      value={growthForm.physicalActivityLevel}
                       onChange={handleChange}
-                      min="0"
-                      className={errors.height ? "error-input" : ""}
-                      onKeyDown={(e) =>
-                        ["-", "e"].includes(e.key) && e.preventDefault()
-                      }
                     />
-                    {errors.height && (
-                      <p className="error-text">{errors.height}</p>
-                    )}
-                    {warnings.height && (
-                      <p className="warning-text-record">{warnings.height}</p>
-                    )}
                   </div>
+                </div>
+              </div>
+              <div className="form-section">
+                <h4>Blood Metrics</h4>
+                <div className="measurements-section">
                   <div>
-                    <label>Head circumference (cm)</label>
+                    <label>Ferritin level</label>
                     <input
                       type="number"
-                      name="headCircumference"
-                      value={growthForm.headCircumference}
+                      name="ferritinLevel"
+                      value={growthForm.ferritinLevel}
                       onChange={handleChange}
                       min="0"
                       onKeyDown={(e) =>
@@ -392,315 +454,252 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                     />
                   </div>
                   <div>
-                    <label>BMI (kg/m²)</label>
+                    <label>Triglycerides</label>
                     <input
                       type="number"
-                      value={calculateBMI(growthForm.weight, growthForm.height)}
-                      readOnly
+                      name="triglycerides"
+                      value={growthForm.triglycerides}
+                      onChange={handleChange}
+                      min="0"
+                      onKeyDown={(e) =>
+                        ["-", "e"].includes(e.key) && e.preventDefault()
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label>Blood sugar level</label>
+                    <input
+                      type="number"
+                      name="bloodSugarLevel"
+                      value={growthForm.bloodSugarLevel}
+                      onChange={handleChange}
+                      min="0"
+                      onKeyDown={(e) =>
+                        ["-", "e"].includes(e.key) && e.preventDefault()
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label>Chest circumference (cm)</label>
+                    <input
+                      type="number"
+                      name="chestCircumference"
+                      value={growthForm.chestCircumference}
+                      onChange={handleChange}
+                      min="0"
+                      onKeyDown={(e) =>
+                        ["-", "e"].includes(e.key) && e.preventDefault()
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            {/* Dropdown 2: Additional Health Measurements (Step 3) */}
+            <details>
+              <summary>Additional Health Measurements (click to expand)</summary>
+              <div className="form-section">
+                <h4>Vital Signs</h4>
+                <div className="measurements-section">
+                  <div>
+                    <label>Heart rate</label>
+                    <input
+                      type="number"
+                      name="heartRate"
+                      value={growthForm.heartRate}
+                      onChange={handleChange}
+                      min="0"
+                      onKeyDown={(e) =>
+                        ["-", "e"].includes(e.key) && e.preventDefault()
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label>Blood pressure</label>
+                    <input
+                      type="number"
+                      name="bloodPressure"
+                      value={growthForm.bloodPressure}
+                      onChange={handleChange}
+                      min="0"
+                      onKeyDown={(e) =>
+                        ["-", "e"].includes(e.key) && e.preventDefault()
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label>Body temperature (°C)</label>
+                    <input
+                      type="number"
+                      name="bodyTemperature"
+                      value={growthForm.bodyTemperature}
+                      onChange={handleChange}
+                      min="0"
+                      className={errors.bodyTemperature ? "error-input" : ""}
+                      onKeyDown={(e) =>
+                        ["-", "e"].includes(e.key) && e.preventDefault()
+                      }
+                    />
+                    {errors.bodyTemperature && (
+                      <p className="error-text">{errors.bodyTemperature}</p>
+                    )}
+                    {warnings.bodyTemperature && (
+                      <p className="warning-text-record">
+                        {warnings.bodyTemperature}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label>Oxygen saturation (%)</label>
+                    <input
+                      type="number"
+                      name="oxygenSaturation"
+                      value={growthForm.oxygenSaturation}
+                      onChange={handleChange}
+                      min="0"
+                      className={errors.oxygenSaturation ? "error-input" : ""}
+                      onKeyDown={(e) =>
+                        ["-", "e"].includes(e.key) && e.preventDefault()
+                      }
+                    />
+                    {errors.oxygenSaturation && (
+                      <p className="error-text">{errors.oxygenSaturation}</p>
+                    )}
+                    {warnings.oxygenSaturation && (
+                      <p className="warning-text-record">
+                        {warnings.oxygenSaturation}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="form-section">
+                <h4>Development Metrics</h4>
+                <div className="measurements-section">
+                  <div>
+                    <label>Sleep duration (hrs)</label>
+                    <input
+                      type="number"
+                      name="sleepDuration"
+                      value={growthForm.sleepDuration}
+                      onChange={handleChange}
+                      min="0"
+                      className={errors.sleepDuration ? "error-input" : ""}
+                      onKeyDown={(e) =>
+                        ["-", "e"].includes(e.key) && e.preventDefault()
+                      }
+                    />
+                    {errors.sleepDuration && (
+                      <p className="error-text">{errors.sleepDuration}</p>
+                    )}
+                    {warnings.sleepDuration && (
+                      <p className="warning-text-record">
+                        {warnings.sleepDuration}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label>Growth hormone level</label>
+                    <input
+                      type="number"
+                      name="growthHormoneLevel"
+                      value={growthForm.growthHormoneLevel}
+                      onChange={handleChange}
+                      min="0"
+                      className={errors.growthHormoneLevel ? "error-input" : ""}
+                      onKeyDown={(e) =>
+                        ["-", "e"].includes(e.key) && e.preventDefault()
+                      }
+                    />
+                    {errors.growthHormoneLevel && (
+                      <p className="error-text">{errors.growthHormoneLevel}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="form-section">
+                <h4>Sensory and Health Status</h4>
+                <div className="measurements-section">
+                  <div>
+                    <label>Hearing</label>
+                    <input
+                      type="text"
+                      name="hearing"
+                      value={growthForm.hearing}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div>
+                    <label>Vision</label>
+                    <input
+                      type="text"
+                      name="vision"
+                      value={growthForm.vision}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div>
+                    <label>Mental health status</label>
+                    <input
+                      type="text"
+                      name="mentalHealthStatus"
+                      value={growthForm.mentalHealthStatus}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div>
+                    <label>Immunization status</label>
+                    <input
+                      type="text"
+                      name="immunizationStatus"
+                      value={growthForm.immunizationStatus}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="form-section">
+                <h4>Cognitive Development</h4>
+                <div className="measurements-section">
+                  <div>
+                    <label>Attention span</label>
+                    <input
+                      type="text"
+                      name="attentionSpan"
+                      value={growthForm.attentionSpan}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div>
+                    <label>Neurological reflexes</label>
+                    <input
+                      type="text"
+                      name="neurologicalReflexes"
+                      value={growthForm.neurologicalReflexes}
+                      onChange={handleChange}
                     />
                   </div>
                 </div>
                 <div className="notes-section">
-                  <label>Notes</label>
+                  <label>Developmental milestones</label>
                   <input
                     type="text"
-                    name="notes"
-                    value={growthForm.notes}
+                    name="developmentalMilestones"
+                    value={growthForm.developmentalMilestones}
                     onChange={handleChange}
                   />
                 </div>
               </div>
-
-              {/* Dropdown 1: Recommendations for Your Baby (Step 2) */}
-              <details>
-                <summary>Recommendations for Your Baby (click to expand)</summary>
-                <div className="form-section">
-                  <h4>Nutritional Information</h4>
-                  <div className="measurements-section">
-                    <div>
-                      <label>Nutritional status</label>
-                      <input
-                        type="text"
-                        name="nutritionalStatus"
-                        value={growthForm.nutritionalStatus}
-                        onChange={handleChange}
-                      />
-                    </div>
-                    <div>
-                      <label>Physical activity level</label>
-                      <input
-                        type="text"
-                        name="physicalActivityLevel"
-                        value={growthForm.physicalActivityLevel}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="form-section">
-                  <h4>Blood Metrics</h4>
-                  <div className="measurements-section">
-                    <div>
-                      <label>Ferritin level</label>
-                      <input
-                        type="number"
-                        name="ferritinLevel"
-                        value={growthForm.ferritinLevel}
-                        onChange={handleChange}
-                        min="0"
-                        onKeyDown={(e) =>
-                          ["-", "e"].includes(e.key) && e.preventDefault()
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label>Triglycerides</label>
-                      <input
-                        type="number"
-                        name="triglycerides"
-                        value={growthForm.triglycerides}
-                        onChange={handleChange}
-                        min="0"
-                        onKeyDown={(e) =>
-                          ["-", "e"].includes(e.key) && e.preventDefault()
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label>Blood sugar level</label>
-                      <input
-                        type="number"
-                        name="bloodSugarLevel"
-                        value={growthForm.bloodSugarLevel}
-                        onChange={handleChange}
-                        min="0"
-                        onKeyDown={(e) =>
-                          ["-", "e"].includes(e.key) && e.preventDefault()
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label>Chest circumference (cm)</label>
-                      <input
-                        type="number"
-                        name="chestCircumference"
-                        value={growthForm.chestCircumference}
-                        onChange={handleChange}
-                        min="0"
-                        onKeyDown={(e) =>
-                          ["-", "e"].includes(e.key) && e.preventDefault()
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              </details>
-
-              {/* Dropdown 2: Additional Health Measurements (Step 3) */}
-              <details>
-                <summary>Additional Health Measurements (click to expand)</summary>
-                <div className="form-section">
-                  <h4>Vital Signs</h4>
-                  <div className="measurements-section">
-                    <div>
-                      <label>Heart rate</label>
-                      <input
-                        type="number"
-                        name="heartRate"
-                        value={growthForm.heartRate}
-                        onChange={handleChange}
-                        min="0"
-                        onKeyDown={(e) =>
-                          ["-", "e"].includes(e.key) && e.preventDefault()
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label>Blood pressure</label>
-                      <input
-                        type="number"
-                        name="bloodPressure"
-                        value={growthForm.bloodPressure}
-                        onChange={handleChange}
-                        min="0"
-                        onKeyDown={(e) =>
-                          ["-", "e"].includes(e.key) && e.preventDefault()
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label>Body temperature (°C)</label>
-                      <input
-                        type="number"
-                        name="bodyTemperature"
-                        value={growthForm.bodyTemperature}
-                        onChange={handleChange}
-                        min="0"
-                        className={errors.bodyTemperature ? "error-input" : ""}
-                        onKeyDown={(e) =>
-                          ["-", "e"].includes(e.key) && e.preventDefault()
-                        }
-                      />
-                      {errors.bodyTemperature && (
-                        <p className="error-text">{errors.bodyTemperature}</p>
-                      )}
-                      {warnings.bodyTemperature && (
-                        <p className="warning-text-record">
-                          {warnings.bodyTemperature}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label>Oxygen saturation (%)</label>
-                      <input
-                        type="number"
-                        name="oxygenSaturation"
-                        value={growthForm.oxygenSaturation}
-                        onChange={handleChange}
-                        min="0"
-                        className={errors.oxygenSaturation ? "error-input" : ""}
-                        onKeyDown={(e) =>
-                          ["-", "e"].includes(e.key) && e.preventDefault()
-                        }
-                      />
-                      {errors.oxygenSaturation && (
-                        <p className="error-text">{errors.oxygenSaturation}</p>
-                      )}
-                      {warnings.oxygenSaturation && (
-                        <p className="warning-text-record">
-                          {warnings.oxygenSaturation}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="form-section">
-                  <h4>Development Metrics</h4>
-                  <div className="measurements-section">
-                    <div>
-                      <label>Sleep duration (hrs)</label>
-                      <input
-                        type="number"
-                        name="sleepDuration"
-                        value={growthForm.sleepDuration}
-                        onChange={handleChange}
-                        min="0"
-                        className={errors.sleepDuration ? "error-input" : ""}
-                        onKeyDown={(e) =>
-                          ["-", "e"].includes(e.key) && e.preventDefault()
-                        }
-                      />
-                      {errors.sleepDuration && (
-                        <p className="error-text">{errors.sleepDuration}</p>
-                      )}
-                      {warnings.sleepDuration && (
-                        <p className="warning-text-record">
-                          {warnings.sleepDuration}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label>Growth hormone level</label>
-                      <input
-                        type="number"
-                        name="growthHormoneLevel"
-                        value={growthForm.growthHormoneLevel}
-                        onChange={handleChange}
-                        min="0"
-                        className={errors.growthHormoneLevel ? "error-input" : ""}
-                        onKeyDown={(e) =>
-                          ["-", "e"].includes(e.key) && e.preventDefault()
-                        }
-                      />
-                      {errors.growthHormoneLevel && (
-                        <p className="error-text">{errors.growthHormoneLevel}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="form-section">
-                  <h4>Sensory and Health Status</h4>
-                  <div className="measurements-section">
-                    <div>
-                      <label>Hearing</label>
-                      <input
-                        type="text"
-                        name="hearing"
-                        value={growthForm.hearing}
-                        onChange={handleChange}
-                      />
-                    </div>
-                    <div>
-                      <label>Vision</label>
-                      <input
-                        type="text"
-                        name="vision"
-                        value={growthForm.vision}
-                        onChange={handleChange}
-                      />
-                    </div>
-                    <div>
-                      <label>Mental health status</label>
-                      <input
-                        type="text"
-                        name="mentalHealthStatus"
-                        value={growthForm.mentalHealthStatus}
-                        onChange={handleChange}
-                      />
-                    </div>
-                    <div>
-                      <label>Immunization status</label>
-                      <input
-                        type="text"
-                        name="immunizationStatus"
-                        value={growthForm.immunizationStatus}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="form-section">
-                  <h4>Cognitive Development</h4>
-                  <div className="measurements-section">
-                    <div>
-                      <label>Attention span</label>
-                      <input
-                        type="text"
-                        name="attentionSpan"
-                        value={growthForm.attentionSpan}
-                        onChange={handleChange}
-                      />
-                    </div>
-                    <div>
-                      <label>Neurological reflexes</label>
-                      <input
-                        type="text"
-                        name="neurologicalReflexes"
-                        value={growthForm.neurologicalReflexes}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-                  <div className="notes-section">
-                    <label>Developmental milestones</label>
-                    <input
-                      type="text"
-                      name="developmentalMilestones"
-                      value={growthForm.developmentalMilestones}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-              </details>
-              <div className="step-buttons">
-                <button
-                  type="button"
-                  className="confirm-button-step1"
-                  onClick={handleSubmit}
-                >
-                  Submit Record
-                </button>
-              </div>
+            </details>
+            <div className="step-buttons">
+              <button
+                type="button"
+                className="confirm-button-step1"
+                onClick={handleSubmit}
+              >
+                Submit Record
+              </button>
             </div>
           </div>
         </div>
