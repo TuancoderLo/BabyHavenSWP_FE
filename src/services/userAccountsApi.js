@@ -38,12 +38,11 @@ const userAccountsApi = {
       dateOfBirth: data.dateOfBirth,
       address: data.address?.trim(),
       status: data.status || 0,
-      roleId: data.roleId,
       profilePicture: data.profilePicture,
       ...(data.password ? { password: data.password } : {}),
     };
 
-    return api.put(`UserAccounts/${id}`, formattedData);
+    return api.put(`UserAccounts`, formattedData);
   },
 
   updateMemberAccount: (id, data) => {
@@ -59,14 +58,10 @@ const userAccountsApi = {
       status: data.status || 0,
       roleId: 1, // roleId mặc định là 1 (Member)
       profilePicture: data.profilePicture,
-      password: data.password ? data.password : "" // nếu không nhập, gửi chuỗi rỗng
+      password: data.password ? data.password : "", // nếu không nhập, gửi chuỗi rỗng
     };
     return api.put(`UserAccounts`, formattedData);
   },
-
-
-
-
 
   delete: (id) => {
     return api.delete(`UserAccounts/${id}`);
@@ -79,7 +74,6 @@ const userAccountsApi = {
   updateStatus: (id, status) => {
     return api.patch(`UserAccounts/${id}/status`, { status });
   },
-
 };
 
 export default userAccountsApi;

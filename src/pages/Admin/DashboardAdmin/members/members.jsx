@@ -168,7 +168,8 @@ const Members = () => {
           ? values.dateOfBirth.format("YYYY-MM-DD")
           : null,
         address: values.address?.trim(),
-        password: values.password,
+        ...(values.password ? { password: values.password } : {}),
+        profilePicture: values.profilePicture || null,
         status:
           typeof values.status === "string"
             ? values.status === "Active"
@@ -177,29 +178,38 @@ const Members = () => {
               ? 1
               : 2
             : values.status,
-        roleId: values.roleId || 2, // Default to Member role (2)
       };
 
       if (editingUserAccount) {
-        // Cập nhật tài khoản hiện có
+        console.log(
+          "Cập nhật tài khoản:",
+          editingUserAccount.userId,
+          formattedData
+        );
         await userAccountsApi.update(editingUserAccount.userId, formattedData);
-        message.success("User account updated successfully");
+        message.success("Cập nhật tài khoản thành công");
       } else {
-        // Tạo tài khoản mới
         if (!values.password) {
-          message.error("Password is required when creating a new account");
+          message.error("Mật khẩu bắt buộc khi tạo tài khoản mới");
           setLoading(false);
           return;
         }
         await userAccountsApi.create(formattedData);
-        message.success("User account created successfully");
+        message.success("Tạo tài khoản thành công");
       }
 
       setUserAccountModalVisible(false);
       fetchUserAccounts();
     } catch (error) {
-      console.error("Error saving user account:", error);
-      message.error(error.message || "Could not save user account");
+      console.error("Lỗi khi lưu tài khoản:", error);
+      if (error.response) {
+        console.error("Chi tiết lỗi:", error.response.data);
+        message.error(
+          `Lỗi: ${error.response.data.message || error.response.statusText}`
+        );
+      } else {
+        message.error("Không thể lưu tài khoản");
+      }
     } finally {
       setLoading(false);
     }
