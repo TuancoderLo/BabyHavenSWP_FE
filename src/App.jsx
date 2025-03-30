@@ -20,9 +20,6 @@ import Admin from "./pages/Admin/Admin";
 import Blog from "./pages/Admin/DashboardAdmin/blog/blog";
 import Members from "./pages/Admin/DashboardAdmin/members/members";
 import AdminPackages from "./pages/Admin/DashboardAdmin/packages/packages";
-import Inbox from "./pages/Admin/DashboardAdmin/inbox/inbox";
-import Notifications from "./pages/Admin/DashboardAdmin/Notifications/notifications.jsx";
-import Settings from "./pages/Admin/DashboardAdmin/settings/settings";
 
 //doctor
 import Doctor from "./pages/Doctor/Doctor";
@@ -139,9 +136,6 @@ function App() {
           <Route path="blog" element={<Blog />} />
           <Route path="members" element={<Members />} />
           <Route path="packages" element={<AdminPackages />} />
-          <Route path="notifications" element={<Notifications />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="inbox" element={<Inbox />} />
         </Route>
 
         {/* Bắt tất cả còn lại => về "/" */}

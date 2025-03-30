@@ -5,9 +5,6 @@ import {
   FaChartLine,
   FaUsers,
   FaBox,
-  FaEnvelope,
-  FaBell,
-  FaCog,
   FaSignOutAlt,
 } from "react-icons/fa";
 import "./SidebarHover.css";
@@ -68,30 +65,6 @@ function SidebarHover() {
           >
             <FaBox className="admin-icon" />
             <span>Service Packages</span>
-          </Link>
-        </li>
-        <li className={activeItem === "/admin/inbox" ? "active" : ""}>
-          <Link to="/admin/inbox" onClick={() => setActiveItem("/admin/inbox")}>
-            <FaEnvelope className="admin-icon" />
-            <span>Inbox</span>
-          </Link>
-        </li>
-        <li className={activeItem === "/admin/notifications" ? "active" : ""}>
-          <Link
-            to="/admin/notifications"
-            onClick={() => setActiveItem("/admin/notifications")}
-          >
-            <FaBell className="admin-icon" />
-            <span>Notifications</span>
-          </Link>
-        </li>
-        <li className={activeItem === "/admin/settings" ? "active" : ""}>
-          <Link
-            to="/admin/settings"
-            onClick={() => setActiveItem("/admin/settings")}
-          >
-            <FaCog className="admin-icon" />
-            <span>Settings</span>
           </Link>
         </li>
         <li className="signout-item" onClick={handleLogout}>
