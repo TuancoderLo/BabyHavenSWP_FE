@@ -322,30 +322,15 @@
   box-shadow: 0 5px 15px rgba(156, 125, 243, 0.2);
 }
 
-/* Đảm bảo nút Submit luôn ở cuối */
-.step-buttons {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-  justify-content: flex-end;
-  position: sticky;
-  bottom: 0;
-  padding: 1rem 0;
-  z-index: 10; /* Đảm bảo nút không bị che bởi các phần tử khác */
-}
-
-.step-buttons button {
-  background: #0682ff;
+.confirm-button-step1{
+  background-color: #0682ff;
+  color: #eee;
   border: none;
   border-radius: 6px;
   padding: 8px 16px;
   cursor: pointer;
   font-size: 0.9rem;
   transition: background-color 0.2s;
-}
-
-.step-buttons button:hover {
-  background: #0565cc;
 }
 /* Style cho dropdown */
 details {
