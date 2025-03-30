@@ -19,6 +19,7 @@ import {
   Timeline,
   Rate,
   Badge,
+  Spin,
 } from "antd";
 import {
   EyeOutlined,
@@ -57,11 +58,47 @@ const Consultations = () => {
   const [historyFilterStatus, setHistoryFilterStatus] = useState("");
   const [historyFilterRating, setHistoryFilterRating] = useState("");
 
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 5,
+    total: 0,
+  });
+
+  // Thêm biến cho caching
+  const [cache, setCache] = useState({
+    consultationDetails: {},
+    lastFetch: {
+      consultations: null,
+      ongoingConsultations: null,
+    },
+  });
+
+  // Kiểm tra cache trước khi gọi API
+  const getConsultationDetailFromCache = (requestId) => {
+    return cache.consultationDetails[requestId];
+  };
+
+  const cacheConsultationDetail = (requestId, detailData) => {
+    setCache((prev) => ({
+      ...prev,
+      consultationDetails: {
+        ...prev.consultationDetails,
+        [requestId]: {
+          data: detailData,
+          timestamp: new Date().getTime(),
+        },
+      },
+    }));
+  };
+
   useEffect(() => {
     if (activeTab === "ongoing") {
-      fetchOnGoingConsultations();
+      fetchOnGoingConsultationsWithPagination(
+        pagination.current,
+        pagination.pageSize
+      );
     } else {
-      fetchConsultations();
+      fetchConsultationsWithPagination(pagination.current, pagination.pageSize);
     }
   }, [activeTab]);
 
@@ -76,9 +113,23 @@ const Consultations = () => {
   ]);
 
   const fetchConsultationRequestsById = async (requestId) => {
+    // Kiểm tra cache trước
+    const cachedData = getConsultationDetailFromCache(requestId);
+    const currentTime = new Date().getTime();
+
+    // Nếu có dữ liệu cache và cache chưa quá 5 phút, sử dụng cache
+    if (cachedData && currentTime - cachedData.timestamp < 5 * 60 * 1000) {
+      return cachedData.data;
+    }
+
     try {
       const response = await doctorApi.getConsultationRequestsById(requestId);
-      return response.data;
+      const detailData = response.data;
+
+      // Lưu vào cache
+      cacheConsultationDetail(requestId, detailData);
+
+      return detailData;
     } catch (error) {
       console.error(`Lỗi khi lấy chi tiết yêu cầu ${requestId}:`, error);
       // Trả về đối tượng mặc định khi API bị lỗi
@@ -143,7 +194,7 @@ const Consultations = () => {
     }
   };
 
-  const fetchConsultations = async () => {
+  const fetchConsultationsWithPagination = async (page = 1, pageSize = 5) => {
     setLoading(true);
     try {
       const doctorId = localStorage.getItem("doctorId");
@@ -152,104 +203,61 @@ const Consultations = () => {
         return;
       }
 
-      let requests = [];
+      // Thay vì gọi API phân trang không tồn tại, sử dụng API hiện có và tự phân trang
+      let response;
       try {
-        const response = await doctorApi.getConsultationRequestsByDoctorOData(
+        // Sử dụng API hiện có để lấy toàn bộ dữ liệu
+        response = await doctorApi.getConsultationRequestsByDoctorOData(
           doctorId
         );
-        requests = Array.isArray(response) ? response : response.data;
+        const allRequests = Array.isArray(response)
+          ? response
+          : response.data || [];
+
+        // Lọc theo tab nếu cần
+        let filteredData = allRequests;
+        if (activeTab === "new") {
+          filteredData = allRequests.filter(
+            (item) => item.status === "Pending"
+          );
+        } else if (activeTab === "completed") {
+          filteredData = allRequests.filter(
+            (item) => item.status === "Completed"
+          );
+        } else if (activeTab === "history") {
+          // Không lọc gì thêm cho tab History
+        }
+
+        // Thực hiện phân trang thủ công
+        const total = filteredData.length;
+        const startIndex = (page - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const paginatedData = filteredData.slice(startIndex, endIndex);
+
+        // Map dữ liệu để lấy thông tin cơ bản cho danh sách
+        const basicRequests = paginatedData.map((request) => ({
+          id: request.requestId,
+          requestId: request.requestId,
+          parentName: request.memberName || "N/A",
+          childName: request.childName || "N/A",
+          requestDate: request.requestDate || moment().format(),
+          status: request.status || "Pending",
+          // Các trường cơ bản khác
+        }));
+
+        // Cập nhật state dữ liệu và phân trang
+        setConsultations(basicRequests);
+        setPagination({
+          current: page,
+          pageSize: pageSize,
+          total: total,
+        });
       } catch (error) {
         console.error("Error fetching consultation requests:", error);
         message.error("Không thể lấy danh sách yêu cầu tư vấn!");
         setLoading(false);
         return;
       }
-
-      // Xử lý từng yêu cầu một, bỏ qua các yêu cầu bị lỗi
-      const detailedRequests = [];
-      for (const request of requests) {
-        try {
-          // Sử dụng hàm cải tiến
-          const detailedData = await fetchConsultationRequestsById(
-            request.requestId
-          );
-
-          let responses = [];
-          try {
-            const responseData = await doctorApi.getConsultationResponsesOData(
-              `?$filter=requestId eq ${request.requestId}`
-            );
-            responses = responseData.data || [];
-          } catch (respError) {
-            console.error(
-              `Error fetching responses for request ${request.requestId}:`,
-              respError
-            );
-            responses = [];
-          }
-
-          const latestResponse = responses[0] || {};
-
-          // Xử lý rating
-          let rating = 0;
-          if (latestResponse.responseId) {
-            try {
-              const feedbackResponse =
-                await doctorApi.getRatingFeedbackByResponseId(
-                  latestResponse.responseId
-                );
-              const feedbackData = feedbackResponse.data[0] || {};
-              rating = feedbackData.rating || 0;
-            } catch (error) {
-              console.error(
-                `Error fetching rating for response ${latestResponse.responseId}:`,
-                error
-              );
-            }
-          }
-
-          // Xử lý attachments sử dụng hàm parseAttachments
-          const attachmentsArray = parseAttachments(detailedData.attachments);
-
-          // Tạo đối tượng yêu cầu chi tiết
-          detailedRequests.push({
-            id: request.requestId,
-            requestId: request.requestId,
-            parentName: detailedData.memberName || "N/A",
-            parentAvatar: "https://randomuser.me/api/portraits/women/32.jpg",
-            childName: detailedData.childName || "N/A",
-            childAge: detailedData.child?.age
-              ? `${detailedData.child.age} tuổi`
-              : "N/A",
-            childGender: detailedData.child?.gender || "N/A",
-            childAllergies: detailedData.child?.allergies || "None",
-            childNotes: detailedData.child?.notes || "None",
-            childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
-            requestDate: detailedData.requestDate || moment().format(),
-            topic: detailedData.category || "N/A",
-            description: detailedData.description || "N/A",
-            urgency: detailedData.urgency?.toLowerCase() || "normal",
-            status: detailedData.status || "Pending",
-            attachments: attachmentsArray,
-            createdAt: detailedData.createdAt || moment().format(),
-            updatedAt: detailedData.updatedAt || moment().format(),
-            response: latestResponse.content || "",
-            rating: rating,
-            completedDate:
-              detailedData.status === "Completed"
-                ? detailedData.updatedAt
-                : null,
-          });
-        } catch (error) {
-          console.error(`Lỗi khi xử lý yêu cầu ${request.requestId}:`, error);
-          // Bỏ qua yêu cầu bị lỗi
-        }
-      }
-
-      console.log(
-        `Đã xử lý thành công ${detailedRequests.length}/${requests.length} yêu cầu.`
-      );
-      setConsultations(detailedRequests);
     } catch (error) {
       message.error("Failed to fetch consultation requests!");
       console.error("Error fetching consultations:", error);
@@ -258,7 +266,10 @@ const Consultations = () => {
     }
   };
 
-  const fetchOnGoingConsultations = async () => {
+  const fetchOnGoingConsultationsWithPagination = async (
+    page = 1,
+    pageSize = 5
+  ) => {
     setLoading(true);
     try {
       const doctorId = localStorage.getItem("doctorId");
@@ -267,74 +278,35 @@ const Consultations = () => {
         return;
       }
 
+      // Sử dụng API hiện có để lấy các yêu cầu đang diễn ra
       const requests = await doctorApi.getConsultationRequestsByDoctorAndStatus(
         doctorId,
         "Approved"
       );
-      console.log("Requests from API for Ongoing:", requests);
 
-      // Xử lý từng yêu cầu một, bỏ qua các yêu cầu bị lỗi
-      const detailedRequests = [];
-      for (const request of requests) {
-        try {
-          const detailedData = await fetchConsultationRequestsById(
-            request.requestId
-          );
-          if (detailedData.status !== "Approved") continue;
+      // Thực hiện phân trang thủ công
+      const total = requests.length;
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = Math.min(startIndex + pageSize, total);
+      const paginatedRequests = requests.slice(startIndex, endIndex);
 
-          const responses = await doctorApi.getConsultationResponsesOData(
-            `?$filter=requestId eq ${request.requestId}`
-          );
-          const latestResponse = responses.data[0] || {};
+      // Xử lý dữ liệu cơ bản cho danh sách
+      const basicRequests = paginatedRequests.map((request) => ({
+        id: request.requestId,
+        requestId: request.requestId,
+        parentName: request.memberName || "N/A",
+        childName: request.childName || "N/A",
+        requestDate: request.requestDate || moment().format(),
+        status: request.status || "Approved",
+        // Các trường cơ bản khác
+      }));
 
-          // Lấy rating từ API RatingFeedback nếu có response
-          let rating = 0;
-          if (latestResponse.responseId) {
-            const feedbackResponse =
-              await doctorApi.getRatingFeedbackByResponseId(
-                latestResponse.responseId
-              );
-            const feedbackData = feedbackResponse.data[0] || {};
-            rating = feedbackData.rating || 0;
-          }
-
-          // Sử dụng hàm parseAttachments cải tiến
-          const attachmentsArray = parseAttachments(detailedData.attachments);
-
-          detailedRequests.push({
-            id: request.requestId,
-            requestId: request.requestId,
-            parentName: detailedData.memberName || "N/A",
-            parentAvatar: "https://randomuser.me/api/portraits/women/32.jpg",
-            childName: detailedData.childName || "N/A",
-            childAge: detailedData.child?.age
-              ? `${detailedData.child.age} tuổi`
-              : "N/A",
-            childGender: detailedData.child?.gender || "N/A",
-            childAllergies: detailedData.child?.allergies || "None",
-            childNotes: detailedData.child?.notes || "None",
-            childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
-            requestDate: detailedData.requestDate || moment().format(),
-            description: detailedData.description || "N/A",
-            status: detailedData.status,
-            response: latestResponse.content || "",
-            rating: rating, // Sử dụng rating từ API RatingFeedback
-            createdAt: detailedData.createdAt || moment().format(),
-            updatedAt: detailedData.updatedAt || moment().format(),
-            completedDate:
-              detailedData.status === "Completed"
-                ? detailedData.updatedAt
-                : null,
-            attachments: attachmentsArray,
-          });
-        } catch (error) {
-          console.error(`Lỗi khi xử lý yêu cầu ${request.requestId}:`, error);
-          // Bỏ qua yêu cầu này
-        }
-      }
-
-      console.log("Mapped Ongoing Consultations:", detailedRequests);
-      setOnGoingConsultations(detailedRequests);
+      setOnGoingConsultations(basicRequests);
+      setPagination({
+        current: page,
+        pageSize: pageSize,
+        total: total,
+      });
     } catch (error) {
       message.error("Failed to fetch ongoing consultations!");
       console.error("Error fetching ongoing consultations:", error);
@@ -406,15 +378,102 @@ const Consultations = () => {
     setSearchText(e.target.value);
   };
 
-  const handleViewDetail = (record) => {
-    setSelectedConsultation(record);
-    setDetailVisible(true);
+  const handleViewDetail = async (record) => {
+    try {
+      // Hiển thị drawer trước với loading state
+      setSelectedConsultation({ ...record, isLoading: true });
+      setDetailVisible(true);
+
+      // Tải chi tiết chỉ khi người dùng bấm vào
+      const detailedData = await fetchConsultationRequestsById(
+        record.requestId
+      );
+
+      // Lấy responses
+      const responses = await doctorApi.getConsultationResponsesOData(
+        `?$filter=requestId eq ${record.requestId}`
+      );
+      const latestResponse = responses.data[0] || {};
+
+      // Lấy rating nếu có response
+      let rating = 0;
+      if (latestResponse.responseId) {
+        try {
+          const feedbackResponse =
+            await doctorApi.getRatingFeedbackByResponseId(
+              latestResponse.responseId
+            );
+          const feedbackData = feedbackResponse.data[0] || {};
+          rating = feedbackData.rating || 0;
+        } catch (error) {
+          console.error(
+            `Error fetching rating for response ${latestResponse.responseId}:`,
+            error
+          );
+        }
+      }
+
+      // Xử lý attachments
+      const attachmentsArray = parseAttachments(detailedData.attachments);
+
+      // Cập nhật thông tin chi tiết
+      setSelectedConsultation({
+        ...record,
+        isLoading: false,
+        childAge: detailedData.child?.age
+          ? `${detailedData.child.age} tuổi`
+          : "N/A",
+        childGender: detailedData.child?.gender || "N/A",
+        childAllergies: detailedData.child?.allergies || "None",
+        childNotes: detailedData.child?.notes || "None",
+        childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
+        description: detailedData.description || "N/A",
+        attachments: attachmentsArray,
+        response: latestResponse.content || "",
+        rating: rating,
+        createdAt: detailedData.createdAt || moment().format(),
+        updatedAt: detailedData.updatedAt || moment().format(),
+        completedDate:
+          detailedData.status === "Completed" ? detailedData.updatedAt : null,
+      });
+    } catch (error) {
+      message.error("Không thể tải thông tin chi tiết");
+      console.error("Error fetching consultation detail:", error);
+      // Đóng drawer nếu có lỗi hoặc hiển thị thông báo lỗi trong drawer
+    }
   };
 
-  const handleRespond = (record) => {
-    setSelectedConsultation(record);
-    responseForm.resetFields();
-    setResponseVisible(true);
+  const handleRespond = async (record) => {
+    try {
+      // Thiết lập form và hiển thị modal với trạng thái loading
+      setSelectedConsultation({ ...record, isLoading: true });
+      responseForm.resetFields();
+      setResponseVisible(true);
+
+      // Tải thông tin chi tiết chỉ khi người dùng muốn phản hồi
+      const detailedData = await fetchConsultationRequestsById(
+        record.requestId
+      );
+      const attachmentsArray = parseAttachments(detailedData.attachments);
+
+      // Cập nhật thông tin chi tiết cho form phản hồi
+      setSelectedConsultation({
+        ...record,
+        isLoading: false,
+        childAge: detailedData.child?.age
+          ? `${detailedData.child.age} tuổi`
+          : "N/A",
+        childGender: detailedData.child?.gender || "N/A",
+        childAllergies: detailedData.child?.allergies || "None",
+        childNotes: detailedData.child?.notes || "None",
+        childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
+        description: detailedData.description || "N/A",
+        attachments: attachmentsArray,
+      });
+    } catch (error) {
+      message.error("Không thể tải thông tin chi tiết để phản hồi");
+      console.error("Error fetching consultation detail for response:", error);
+    }
   };
 
   const handleResponseSubmit = async (values) => {
@@ -450,14 +509,26 @@ const Consultations = () => {
         stringStatus
       );
 
-      await fetchConsultations();
+      // Gọi hàm fetch với pagination hiện tại
+      if (activeTab === "ongoing") {
+        await fetchOnGoingConsultationsWithPagination(
+          pagination.current,
+          pagination.pageSize
+        );
+      } else {
+        await fetchConsultationsWithPagination(
+          pagination.current,
+          pagination.pageSize
+        );
+      }
+
       setResponseVisible(false);
       message.success(
         values.action === "approved"
           ? "Consultation request approved"
           : values.action === "rejected"
-            ? "Consultation request rejected"
-            : "Response submitted successfully"
+          ? "Consultation request rejected"
+          : "Response submitted successfully"
       );
     } catch (error) {
       message.error("Failed to submit response!");
@@ -474,7 +545,20 @@ const Consultations = () => {
         record.requestId,
         "Completed"
       );
-      await fetchConsultations();
+
+      // Gọi hàm fetch với pagination hiện tại
+      if (activeTab === "ongoing") {
+        await fetchOnGoingConsultationsWithPagination(
+          pagination.current,
+          pagination.pageSize
+        );
+      } else {
+        await fetchConsultationsWithPagination(
+          pagination.current,
+          pagination.pageSize
+        );
+      }
+
       message.success("Consultation completed");
     } catch (error) {
       message.error("Failed to complete consultation!");
@@ -780,6 +864,20 @@ const Consultations = () => {
     };
   }, []);
 
+  const handleTableChange = (newPagination) => {
+    if (activeTab === "ongoing") {
+      fetchOnGoingConsultationsWithPagination(
+        newPagination.current,
+        newPagination.pageSize
+      );
+    } else {
+      fetchConsultationsWithPagination(
+        newPagination.current,
+        newPagination.pageSize
+      );
+    }
+  };
+
   return (
     <div className="consult-container">
       <Card className="consult-card">
@@ -831,10 +929,16 @@ const Consultations = () => {
           )}
           <Button
             type="primary"
-            onClick={
+            onClick={() =>
               activeTab === "ongoing"
-                ? fetchOnGoingConsultations
-                : fetchConsultations
+                ? fetchOnGoingConsultationsWithPagination(
+                    pagination.current,
+                    pagination.pageSize
+                  )
+                : fetchConsultationsWithPagination(
+                    pagination.current,
+                    pagination.pageSize
+                  )
             }
             loading={loading}
             className="consult-refresh-btn"
@@ -867,7 +971,8 @@ const Consultations = () => {
                   dataSource={filteredConsultations}
                   rowKey="id"
                   loading={loading}
-                  pagination={{ pageSize: 5 }}
+                  pagination={pagination}
+                  onChange={handleTableChange}
                 />
               ),
             },
@@ -880,7 +985,8 @@ const Consultations = () => {
                   dataSource={filteredConsultations}
                   rowKey="id"
                   loading={loading}
-                  pagination={{ pageSize: 5 }}
+                  pagination={pagination}
+                  onChange={handleTableChange}
                 />
               ),
             },
@@ -893,7 +999,8 @@ const Consultations = () => {
                   dataSource={filteredConsultations}
                   rowKey="id"
                   loading={loading}
-                  pagination={{ pageSize: 5 }}
+                  pagination={pagination}
+                  onChange={handleTableChange}
                 />
               ),
             },
@@ -906,7 +1013,8 @@ const Consultations = () => {
                   dataSource={filteredConsultations}
                   rowKey="id"
                   loading={loading}
-                  pagination={{ pageSize: 5 }}
+                  pagination={pagination}
+                  onChange={handleTableChange}
                 />
               ),
             },
@@ -921,104 +1029,115 @@ const Consultations = () => {
         footer={null}
         width={600}
       >
-        {selectedConsultation && (
-          <Form
-            form={responseForm}
-            layout="vertical"
-            onFinish={handleResponseSubmit}
-            initialValues={{ action: "approved" }}
-          >
-            <Divider orientation="left">Consultation Information</Divider>
-            <Descriptions bordered size="small" column={1}>
-              <Descriptions.Item label="Parent">
-                {selectedConsultation.parentName}
-              </Descriptions.Item>
-              <Descriptions.Item label="Child">
-                {selectedConsultation.childName} (
-                {selectedConsultation.childAge})
-              </Descriptions.Item>
-              <Descriptions.Item label="Request Date">
-                {moment(selectedConsultation.requestDate).format(
-                  "DD/MM/YYYY HH:mm"
-                )}
-              </Descriptions.Item>
-              <Descriptions.Item label="Description">
-                {selectedConsultation.description}
-              </Descriptions.Item>
-            </Descriptions>
+        {selectedConsultation && selectedConsultation.isLoading ? (
+          <div style={{ textAlign: "center", padding: "20px" }}>
+            <div style={{ marginBottom: "20px" }}>
+              Đang tải thông tin chi tiết...
+            </div>
+            <Spin size="large" />
+          </div>
+        ) : (
+          selectedConsultation && (
+            <Form
+              form={responseForm}
+              layout="vertical"
+              onFinish={handleResponseSubmit}
+              initialValues={{ action: "approved" }}
+            >
+              <Divider orientation="left">Consultation Information</Divider>
+              <Descriptions bordered size="small" column={1}>
+                <Descriptions.Item label="Parent">
+                  {selectedConsultation.parentName}
+                </Descriptions.Item>
+                <Descriptions.Item label="Child">
+                  {selectedConsultation.childName} (
+                  {selectedConsultation.childAge})
+                </Descriptions.Item>
+                <Descriptions.Item label="Request Date">
+                  {moment(selectedConsultation.requestDate).format(
+                    "DD/MM/YYYY HH:mm"
+                  )}
+                </Descriptions.Item>
+                <Descriptions.Item label="Description">
+                  {selectedConsultation.description}
+                </Descriptions.Item>
+              </Descriptions>
 
-            {selectedConsultation?.attachments && (
-              <>
-                <Divider orientation="left">Tệp đính kèm</Divider>
-                <div className="attachments-container">
-                  {renderAttachments(selectedConsultation.attachments)}
+              {selectedConsultation?.attachments && (
+                <>
+                  <Divider orientation="left">Tệp đính kèm</Divider>
+                  <div className="attachments-container">
+                    {renderAttachments(selectedConsultation.attachments)}
+                  </div>
+                </>
+              )}
+
+              <Divider orientation="left">Child Information</Divider>
+              <Descriptions bordered size="small" column={1}>
+                <Descriptions.Item label="Date of Birth">
+                  {moment(selectedConsultation.childDateOfBirth).format(
+                    "DD/MM/YYYY"
+                  )}
+                </Descriptions.Item>
+                <Descriptions.Item label="Gender">
+                  {selectedConsultation.childGender}
+                </Descriptions.Item>
+                <Descriptions.Item label="Allergies">
+                  {selectedConsultation.childAllergies}
+                </Descriptions.Item>
+                <Descriptions.Item label="Notes">
+                  {selectedConsultation.childNotes}
+                </Descriptions.Item>
+              </Descriptions>
+
+              <Divider orientation="left">Response</Divider>
+              <Form.Item
+                name="action"
+                label="Action"
+                rules={[{ required: true, message: "Please select an action" }]}
+              >
+                <Select>
+                  <Option value="approved">Approve Request</Option>
+                  <Option value="rejected">Reject Request</Option>
+                </Select>
+              </Form.Item>
+
+              <Form.Item noStyle shouldUpdate>
+                {({ getFieldValue }) =>
+                  getFieldValue("action") === "rejected" ? (
+                    <Form.Item
+                      name="rejectReason"
+                      label="Reject Reason"
+                      rules={[
+                        { required: true, message: "Please enter reason" },
+                      ]}
+                    >
+                      <TextArea rows={4} placeholder="Enter reject reason" />
+                    </Form.Item>
+                  ) : null
+                }
+              </Form.Item>
+
+              <Form.Item
+                name="response"
+                label="Response"
+                rules={[{ required: true, message: "Please enter response" }]}
+              >
+                <TextArea rows={4} placeholder="Enter response to parent" />
+              </Form.Item>
+
+              <Form.Item>
+                <div className="consult-modal-buttons">
+                  <Button onClick={() => setResponseVisible(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="primary" htmlType="submit" loading={loading}>
+                    Send Response
+                  </Button>
                 </div>
-              </>
-            )}
-
-            <Divider orientation="left">Child Information</Divider>
-            <Descriptions bordered size="small" column={1}>
-              <Descriptions.Item label="Date of Birth">
-                {moment(selectedConsultation.childDateOfBirth).format(
-                  "DD/MM/YYYY"
-                )}
-              </Descriptions.Item>
-              <Descriptions.Item label="Gender">
-                {selectedConsultation.childGender}
-              </Descriptions.Item>
-              <Descriptions.Item label="Allergies">
-                {selectedConsultation.childAllergies}
-              </Descriptions.Item>
-              <Descriptions.Item label="Notes">
-                {selectedConsultation.childNotes}
-              </Descriptions.Item>
-            </Descriptions>
-
-            <Divider orientation="left">Response</Divider>
-            <Form.Item
-              name="action"
-              label="Action"
-              rules={[{ required: true, message: "Please select an action" }]}
-            >
-              <Select>
-                <Option value="approved">Approve Request</Option>
-                <Option value="rejected">Reject Request</Option>
-              </Select>
-            </Form.Item>
-
-            <Form.Item noStyle shouldUpdate>
-              {({ getFieldValue }) =>
-                getFieldValue("action") === "rejected" ? (
-                  <Form.Item
-                    name="rejectReason"
-                    label="Reject Reason"
-                    rules={[{ required: true, message: "Please enter reason" }]}
-                  >
-                    <TextArea rows={4} placeholder="Enter reject reason" />
-                  </Form.Item>
-                ) : null
-              }
-            </Form.Item>
-
-            <Form.Item
-              name="response"
-              label="Response"
-              rules={[{ required: true, message: "Please enter response" }]}
-            >
-              <TextArea rows={4} placeholder="Enter response to parent" />
-            </Form.Item>
-
-            <Form.Item>
-              <div className="consult-modal-buttons">
-                <Button onClick={() => setResponseVisible(false)}>
-                  Cancel
-                </Button>
-                <Button type="primary" htmlType="submit" loading={loading}>
-                  Send Response
-                </Button>
-              </div>
-            </Form.Item>
-          </Form>
+              </Form.Item>
+            </Form>
+          )
         )}
       </Modal>
 
@@ -1029,125 +1148,134 @@ const Consultations = () => {
         open={detailVisible}
         width={500}
       >
-        {selectedConsultation && (
-          <>
-            <Divider orientation="left">Consultation Information</Divider>
-            <Descriptions bordered column={1}>
-              <Descriptions.Item label="Status">
-                {getStatusTag(selectedConsultation.status)}
-              </Descriptions.Item>
-              <Descriptions.Item label="Parent">
-                <div className="consult-drawer-parent">
-                  <Avatar
-                    src={selectedConsultation.parentAvatar}
-                    size="small"
-                  />
-                  <span>{selectedConsultation.parentName}</span>
-                </div>
-              </Descriptions.Item>
-              <Descriptions.Item label="Child">
-                {selectedConsultation.childName} (
-                {selectedConsultation.childAge})
-              </Descriptions.Item>
-              <Descriptions.Item label="Request Date">
-                {moment(selectedConsultation.requestDate).format(
-                  "DD/MM/YYYY HH:mm"
-                )}
-              </Descriptions.Item>
-              <Descriptions.Item label="Description">
-                {selectedConsultation.description}
-              </Descriptions.Item>
-            </Descriptions>
-
-            {selectedConsultation?.attachments && (
-              <>
-                <Divider orientation="left">Tệp đính kèm</Divider>
-                <div className="attachments-container">
-                  {renderAttachments(selectedConsultation.attachments)}
-                </div>
-              </>
-            )}
-
-            <Divider orientation="left">Child Information</Divider>
-            <Descriptions bordered column={1}>
-              <Descriptions.Item label="Date of Birth">
-                {moment(selectedConsultation.childDateOfBirth).format(
-                  "DD/MM/YYYY"
-                )}
-              </Descriptions.Item>
-              <Descriptions.Item label="Gender">
-                {selectedConsultation.childGender}
-              </Descriptions.Item>
-              <Descriptions.Item label="Allergies">
-                {selectedConsultation.childAllergies}
-              </Descriptions.Item>
-              <Descriptions.Item label="Notes">
-                {selectedConsultation.childNotes}
-              </Descriptions.Item>
-            </Descriptions>
-
-            <Divider orientation="left">System Information</Divider>
-            <Descriptions bordered column={1}>
-              <Descriptions.Item label="Created At">
-                {moment(selectedConsultation.createdAt).format(
-                  "DD/MM/YYYY HH:mm"
-                )}
-              </Descriptions.Item>
-              <Descriptions.Item label="Updated At">
-                {moment(selectedConsultation.updatedAt).format(
-                  "DD/MM/YYYY HH:mm"
-                )}
-              </Descriptions.Item>
-            </Descriptions>
-
-            <Divider orientation="left">Progress</Divider>
-            <Timeline>
-              <Timeline.Item>
-                <p>
-                  <strong>Request</strong> -{" "}
+        {selectedConsultation && selectedConsultation.isLoading ? (
+          <div style={{ textAlign: "center", padding: "20px" }}>
+            <div style={{ marginBottom: "20px" }}>
+              Đang tải thông tin chi tiết...
+            </div>
+            <Spin size="large" />
+          </div>
+        ) : (
+          selectedConsultation && (
+            <>
+              <Divider orientation="left">Consultation Information</Divider>
+              <Descriptions bordered column={1}>
+                <Descriptions.Item label="Status">
+                  {getStatusTag(selectedConsultation.status)}
+                </Descriptions.Item>
+                <Descriptions.Item label="Parent">
+                  <div className="consult-drawer-parent">
+                    <Avatar
+                      src={selectedConsultation.parentAvatar}
+                      size="small"
+                    />
+                    <span>{selectedConsultation.parentName}</span>
+                  </div>
+                </Descriptions.Item>
+                <Descriptions.Item label="Child">
+                  {selectedConsultation.childName} (
+                  {selectedConsultation.childAge})
+                </Descriptions.Item>
+                <Descriptions.Item label="Request Date">
                   {moment(selectedConsultation.requestDate).format(
                     "DD/MM/YYYY HH:mm"
                   )}
-                </p>
-                <Card size="small">
-                  <p>{selectedConsultation.description}</p>
-                </Card>
-              </Timeline.Item>
-              {selectedConsultation.response && (
+                </Descriptions.Item>
+                <Descriptions.Item label="Description">
+                  {selectedConsultation.description}
+                </Descriptions.Item>
+              </Descriptions>
+
+              {selectedConsultation?.attachments && (
+                <>
+                  <Divider orientation="left">Tệp đính kèm</Divider>
+                  <div className="attachments-container">
+                    {renderAttachments(selectedConsultation.attachments)}
+                  </div>
+                </>
+              )}
+
+              <Divider orientation="left">Child Information</Divider>
+              <Descriptions bordered column={1}>
+                <Descriptions.Item label="Date of Birth">
+                  {moment(selectedConsultation.childDateOfBirth).format(
+                    "DD/MM/YYYY"
+                  )}
+                </Descriptions.Item>
+                <Descriptions.Item label="Gender">
+                  {selectedConsultation.childGender}
+                </Descriptions.Item>
+                <Descriptions.Item label="Allergies">
+                  {selectedConsultation.childAllergies}
+                </Descriptions.Item>
+                <Descriptions.Item label="Notes">
+                  {selectedConsultation.childNotes}
+                </Descriptions.Item>
+              </Descriptions>
+
+              <Divider orientation="left">System Information</Divider>
+              <Descriptions bordered column={1}>
+                <Descriptions.Item label="Created At">
+                  {moment(selectedConsultation.createdAt).format(
+                    "DD/MM/YYYY HH:mm"
+                  )}
+                </Descriptions.Item>
+                <Descriptions.Item label="Updated At">
+                  {moment(selectedConsultation.updatedAt).format(
+                    "DD/MM/YYYY HH:mm"
+                  )}
+                </Descriptions.Item>
+              </Descriptions>
+
+              <Divider orientation="left">Progress</Divider>
+              <Timeline>
                 <Timeline.Item>
                   <p>
-                    <strong>Response</strong> -{" "}
-                    {moment(selectedConsultation.updatedAt).format(
+                    <strong>Request</strong> -{" "}
+                    {moment(selectedConsultation.requestDate).format(
                       "DD/MM/YYYY HH:mm"
                     )}
                   </p>
                   <Card size="small">
-                    <p>{selectedConsultation.response}</p>
+                    <p>{selectedConsultation.description}</p>
                   </Card>
                 </Timeline.Item>
-              )}
-              {selectedConsultation.status === "Rejected" && (
-                <Timeline.Item color="red">
-                  <p>
-                    <strong>Rejected</strong>
-                  </p>
-                  <Card size="small">
-                    <p>{selectedConsultation.rejectReason}</p>
-                  </Card>
-                </Timeline.Item>
-              )}
-              {selectedConsultation.completedDate && (
-                <Timeline.Item color="green">
-                  <p>
-                    <strong>Completed</strong> -{" "}
-                    {moment(selectedConsultation.completedDate).format(
-                      "DD/MM/YYYY HH:mm"
-                    )}
-                  </p>
-                </Timeline.Item>
-              )}
-            </Timeline>
-          </>
+                {selectedConsultation.response && (
+                  <Timeline.Item>
+                    <p>
+                      <strong>Response</strong> -{" "}
+                      {moment(selectedConsultation.updatedAt).format(
+                        "DD/MM/YYYY HH:mm"
+                      )}
+                    </p>
+                    <Card size="small">
+                      <p>{selectedConsultation.response}</p>
+                    </Card>
+                  </Timeline.Item>
+                )}
+                {selectedConsultation.status === "Rejected" && (
+                  <Timeline.Item color="red">
+                    <p>
+                      <strong>Rejected</strong>
+                    </p>
+                    <Card size="small">
+                      <p>{selectedConsultation.rejectReason}</p>
+                    </Card>
+                  </Timeline.Item>
+                )}
+                {selectedConsultation.completedDate && (
+                  <Timeline.Item color="green">
+                    <p>
+                      <strong>Completed</strong> -{" "}
+                      {moment(selectedConsultation.completedDate).format(
+                        "DD/MM/YYYY HH:mm"
+                      )}
+                    </p>
+                  </Timeline.Item>
+                )}
+              </Timeline>
+            </>
+          )
         )}
       </Drawer>
     </div>
