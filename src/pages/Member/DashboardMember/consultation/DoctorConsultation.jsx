@@ -146,8 +146,12 @@ function DoctorConsultation() {
       setLoading(true);
       const response = await doctorApi.getAllDoctors();
       if (response?.data) {
-        setDoctors(response.data);
-        response.data.forEach((doctor) => fetchDoctorSpecializations(doctor.doctorId));
+        // Lọc ra những bác sĩ có status "Active" (không phân biệt hoa thường)
+        const activeDoctors = response.data.filter(
+          (doctor) => doctor.status && doctor.status.toLowerCase() === "active"
+        );
+        setDoctors(activeDoctors);
+        activeDoctors.forEach((doctor) => fetchDoctorSpecializations(doctor.doctorId));
       }
     } catch (error) {
       console.error("Error fetching doctors:", error);
@@ -156,6 +160,7 @@ function DoctorConsultation() {
       setLoading(false);
     }
   };
+
 
   const fetchDoctorSpecializations = async (doctorId) => {
     try {
@@ -410,7 +415,6 @@ function DoctorConsultation() {
                     </div>
                     <div className="doctor-info-grid">
                       <h4>{doctor.name}</h4>
-                      <p><strong>Status:</strong> {doctor.status}</p>
                       <p><strong>Degree:</strong> {doctor.degree}</p>
                       <p><strong>Hospital:</strong> {doctor.hospitalName}</p>
                       {Array.isArray(doctorSpecializations[doctor.doctorId]) && (
@@ -525,7 +529,6 @@ function DoctorConsultation() {
                     />
                     <div className="doctor-profile-info">
                       <h4 className="doctor-profile-name">{selectedDoctor.name}</h4>
-                      <span className="doctor-profile-status">{selectedDoctor.status}</span>
                     </div>
                   </div>
                   <div className="doctor-profile-details">
