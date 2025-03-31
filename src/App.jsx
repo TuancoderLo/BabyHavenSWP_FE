@@ -90,7 +90,7 @@ function App() {
         />
         <Route path="/forget-password" element={<ForgetPassword />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route path="/google-callback" element={<GoogleCallback />} />
+        <Route path="/google-callback" element={<GoogleCallback onLoginSuccess={updateAuthState}/>} />
         <Route path="/register" element={<Register />} />
         <Route path="/complete-profile" element={<CompleteProfile />} />
         <Route path="/packages" element={<MemberPackages />} />
