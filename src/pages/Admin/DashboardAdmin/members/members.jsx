@@ -172,81 +172,75 @@ const Members = () => {
     try {
       setLoading(true);
 
-      if (editingUserAccount) {
-        // Xử lý edit user như cũ
-        await userAccountsApi.update(editingUserAccount.userId, values);
-        message.success("Cập nhật tài khoản thành công");
-        setUserAccountModalVisible(false);
-        fetchUserAccounts();
-      } else {
-        // Tạo mới user
-        if (!values.password) {
-          message.error("Mật khẩu bắt buộc khi tạo tài khoản mới");
-          setLoading(false);
-          return;
-        }
+      const userAccountData = {
+        username: values.username?.trim(),
+        email: values.email?.trim(),
+        phoneNumber: values.phoneNumber?.trim(),
+        name: values.name?.trim(),
+        gender: values.gender,
+        dateOfBirth: values.dateOfBirth
+          ? values.dateOfBirth.format("YYYY-MM-DD")
+          : null,
+        address: values.address?.trim(),
+        password: values.password,
+        status: 0,
+        roleId: values.roleId,
+      };
 
-        const userAccountData = {
-          username: values.username?.trim(),
-          email: values.email?.trim(),
-          phoneNumber: values.phoneNumber?.trim(),
-          name: values.name?.trim(),
-          gender: values.gender,
-          dateOfBirth: values.dateOfBirth
-            ? values.dateOfBirth.format("YYYY-MM-DD")
-            : null,
-          address: values.address?.trim(),
-          password: values.password,
-          profilePicture: values.profilePicture || "",
-          status: 0, // Mặc định là 0 (Active)
-          roleId: values.roleId, // 1: Member, 2: Doctor, 3: Admin
-        };
+      console.log("Creating account with data:", userAccountData);
 
-        // Tạo user account
-        await userAccountsApi.create(userAccountData);
+      const response = await userAccountsApi.create(userAccountData);
+      console.log("Create account response:", response);
+
+      // Kiểm tra response theo đúng cấu trúc API trả về
+      if (response?.data?.data?.userId) {
+        const userData = response.data.data; // Lấy data object từ response
 
         if (values.roleId === 2) {
-          // Nếu là tài khoản Doctor
-          // Lưu thông tin tạm thời và chuyển sang form nhập thông tin doctor
-          setTempUserData(userAccountData);
+          setTempUserData({
+            userId: userData.userId,
+            name: userData.name,
+            email: userData.email,
+            phoneNumber: userData.phoneNumber,
+          });
+
+          message.success(
+            "Tạo tài khoản thành công. Vui lòng nhập thông tin bác sĩ"
+          );
           setUserAccountModalVisible(false);
           setIsCreatingDoctor(true);
         } else {
           message.success("Tạo tài khoản thành công");
           setUserAccountModalVisible(false);
-          fetchUserAccounts();
         }
+        fetchUserAccounts();
+      } else {
+        console.error("Response structure:", response);
+        throw new Error("Không tìm thấy userId trong response");
       }
     } catch (error) {
-      console.error("Lỗi khi lưu tài khoản:", error);
-      message.error(error.response?.data?.message || "Không thể lưu tài khoản");
+      console.error("Error creating account:", error);
+      message.error(error.message || "Có lỗi xảy ra khi tạo tài khoản");
     } finally {
       setLoading(false);
     }
   };
 
-  // Thêm hàm xử lý submit form doctor
+  // Form doctor submit
   const handleDoctorSubmit = async (values) => {
     try {
       setLoading(true);
 
-      // Tìm userId của account vừa tạo
-      const findUserResponse = await userAccountsApi.findByEmail(
-        tempUserData.email
-      );
-      const user = findUserResponse.data.value[0];
-
-      if (!user || !user.userId) {
-        throw new Error("Không thể tìm thấy tài khoản vừa tạo");
+      if (!tempUserData?.userId) {
+        throw new Error("Không tìm thấy thông tin userId");
       }
 
-      // Tạo thông tin doctor
       const doctorData = {
-        userId: user.userId,
+        userId: tempUserData.userId,
         name: tempUserData.name,
         email: tempUserData.email,
         phoneNumber: tempUserData.phoneNumber,
-        specializationIds: values.specializationIds,
+        specializationIds: [],
         degree: values.degree,
         hospitalName: values.hospitalName,
         hospitalAddress: values.hospitalAddress,
@@ -254,13 +248,15 @@ const Members = () => {
         status: 0,
       };
 
+      console.log("Creating doctor with data:", doctorData);
+
       await userAccountsApi.createDoctor(doctorData);
       message.success("Tạo thông tin bác sĩ thành công");
       setIsCreatingDoctor(false);
       setTempUserData(null);
       fetchUserAccounts();
     } catch (error) {
-      console.error("Lỗi khi tạo thông tin bác sĩ:", error);
+      console.error("Error creating doctor:", error);
       message.error(
         error.response?.data?.message || "Không thể tạo thông tin bác sĩ"
       );
@@ -1236,7 +1232,9 @@ const Members = () => {
               rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}
               initialValue={1}
             >
-              <Select>
+              <Select
+                onChange={(value) => console.log("Role changed to:", value)}
+              >
                 <Option value={1}>Member</Option>
                 <Option value={2}>Doctor</Option>
                 <Option value={3}>Admin</Option>
@@ -1408,22 +1406,11 @@ const Members = () => {
       >
         <Form form={doctorForm} layout="vertical" onFinish={handleDoctorSubmit}>
           <Form.Item
-            name="specializationIds"
-            label="Chuyên môn"
-            rules={[{ required: true, message: "Vui lòng chọn chuyên môn" }]}
-          >
-            <Select mode="multiple" placeholder="Chọn chuyên môn">
-              <Select.Option value={0}>Chuyên môn 1</Select.Option>
-              <Select.Option value={1}>Chuyên môn 2</Select.Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item
             name="degree"
             label="Học vị"
             rules={[{ required: true, message: "Vui lòng nhập học vị" }]}
           >
-            <Input />
+            <Input placeholder="Nhập học vị của bác sĩ" />
           </Form.Item>
 
           <Form.Item
@@ -1431,7 +1418,7 @@ const Members = () => {
             label="Tên bệnh viện"
             rules={[{ required: true, message: "Vui lòng nhập tên bệnh viện" }]}
           >
-            <Input />
+            <Input placeholder="Nhập tên bệnh viện" />
           </Form.Item>
 
           <Form.Item
@@ -1441,11 +1428,11 @@ const Members = () => {
               { required: true, message: "Vui lòng nhập địa chỉ bệnh viện" },
             ]}
           >
-            <Input />
+            <Input placeholder="Nhập địa chỉ bệnh viện" />
           </Form.Item>
 
           <Form.Item name="biography" label="Tiểu sử">
-            <TextArea rows={4} />
+            <TextArea rows={4} placeholder="Nhập tiểu sử bác sĩ" />
           </Form.Item>
 
           <Form.Item>
