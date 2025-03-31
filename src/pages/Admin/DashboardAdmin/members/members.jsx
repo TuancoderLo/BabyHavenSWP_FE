@@ -112,16 +112,25 @@ const Members = () => {
   const handleAddUserAccount = () => {
     setEditingUserAccount(null);
     userAccountForm.resetFields();
-    // Reset imageUrl
+    // Reset imageUrl nếu cần
     setImageUrl("");
-    // Set default values for required fields
+  
+    // Xác định role mặc định dựa trên filter hiện hành (selectedRole)
+    const defaultRoleId =
+      selectedRole === "Doctor"
+        ? 2
+        : selectedRole === "Admin"
+        ? 3
+        : 1; // Mặc định là 1 (Member) nếu không phải Doctor hay Admin
+  
     userAccountForm.setFieldsValue({
       status: "Active",
-      roleId: 1, // Thay đổi thành 1 vì roleId = 1 là Member
-      gender: "Male", // Default gender
+      roleId: defaultRoleId,
+      gender: "Male", // Giá trị mặc định cho giới tính
     });
     setUserAccountModalVisible(true);
   };
+  
 
   const handleEditUserAccount = (record) => {
     setEditingUserAccount(record);
@@ -156,17 +165,13 @@ const Members = () => {
   const handleUserAccountSubmit = async (values) => {
     try {
       setLoading(true);
-
-      // Format the data according to API requirements
       const formattedData = {
         username: values.username?.trim(),
         email: values.email?.trim(),
         phoneNumber: values.phoneNumber?.trim(),
         name: values.name?.trim(),
         gender: values.gender,
-        dateOfBirth: values.dateOfBirth
-          ? values.dateOfBirth.format("YYYY-MM-DD")
-          : null,
+        dateOfBirth: values.dateOfBirth ? values.dateOfBirth.format("YYYY-MM-DD") : null,
         address: values.address?.trim(),
         ...(values.password ? { password: values.password } : {}),
         profilePicture: values.profilePicture || null,
@@ -178,14 +183,10 @@ const Members = () => {
               ? 1
               : 2
             : values.status,
+        roleId: values.roleId || 1,
       };
-
+  
       if (editingUserAccount) {
-        console.log(
-          "Cập nhật tài khoản:",
-          editingUserAccount.userId,
-          formattedData
-        );
         await userAccountsApi.update(editingUserAccount.userId, formattedData);
         message.success("Cập nhật tài khoản thành công");
       } else {
@@ -194,19 +195,35 @@ const Members = () => {
           setLoading(false);
           return;
         }
-        await userAccountsApi.create(formattedData);
-        message.success("Tạo tài khoản thành công");
+        const res = await userAccountsApi.create(formattedData);
+        const createdUser = res.data;
+        
+        // Nếu role là Doctor (roleId === 2) thì gọi API tạo thông tin Doctor
+        if (formattedData.roleId === 2) {
+          const doctorData = {
+            userId: createdUser.userId,
+            name: formattedData.name,
+            email: formattedData.email,
+            phoneNumber: formattedData.phoneNumber,
+            specializationIds: values.specializationIds,
+            degree: values.degree,
+            hospitalName: values.hospitalName,
+            hospitalAddress: values.hospitalAddress,
+            biography: values.biography || "",
+            status: 0,
+          };
+          await userAccountsApi.createDoctor(doctorData);
+          message.success("Tạo tài khoản và thông tin Doctor thành công");
+        } else {
+          message.success("Tạo tài khoản thành công");
+        }
       }
-
       setUserAccountModalVisible(false);
       fetchUserAccounts();
     } catch (error) {
       console.error("Lỗi khi lưu tài khoản:", error);
       if (error.response) {
-        console.error("Chi tiết lỗi:", error.response.data);
-        message.error(
-          `Lỗi: ${error.response.data.message || error.response.statusText}`
-        );
+        message.error(`Lỗi: ${error.response.data.message || error.response.statusText}`);
       } else {
         message.error("Không thể lưu tài khoản");
       }
@@ -214,6 +231,7 @@ const Members = () => {
       setLoading(false);
     }
   };
+  
 
   // ===== MEMBERS FUNCTIONS =====
   const fetchMembers = async () => {
@@ -1190,6 +1208,45 @@ const Members = () => {
               </Button>
             </Space>
           </Form.Item>
+          {/* Nếu selectedRole là "Doctor", hiển thị thêm các trường nhập liệu cho Doctor */}
+{selectedRole === "Doctor" && (
+  <>
+    <Form.Item
+      name="specializationIds"
+      label="Chuyên môn"
+      rules={[{ required: true, message: "Vui lòng chọn chuyên môn" }]}
+    >
+      <Select mode="multiple" placeholder="Chọn chuyên môn">
+        <Select.Option value={0}>Chuyên môn 1</Select.Option>
+        <Select.Option value={1}>Chuyên môn 2</Select.Option>
+      </Select>
+    </Form.Item>
+    <Form.Item
+      name="degree"
+      label="Học vị"
+      rules={[{ required: true, message: "Vui lòng nhập học vị" }]}
+    >
+      <Input />
+    </Form.Item>
+    <Form.Item
+      name="hospitalName"
+      label="Tên bệnh viện"
+      rules={[{ required: true, message: "Vui lòng nhập tên bệnh viện" }]}
+    >
+      <Input />
+    </Form.Item>
+    <Form.Item
+      name="hospitalAddress"
+      label="Địa chỉ bệnh viện"
+      rules={[{ required: true, message: "Vui lòng nhập địa chỉ bệnh viện" }]}
+    >
+      <Input />
+    </Form.Item>
+    <Form.Item name="biography" label="Tiểu sử">
+      <TextArea rows={4} />
+    </Form.Item>
+  </>
+)}
         </Form>
       </Modal>
 

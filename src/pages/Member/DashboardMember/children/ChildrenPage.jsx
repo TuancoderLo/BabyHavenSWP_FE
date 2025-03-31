@@ -628,19 +628,15 @@ function ChildrenPage() {
           </div>
 
           <div className="growth-chart-section">
-            <h2>
-              Growth chart
-              <div className="chart-filters">
-                <span
-                  className={`filter-item ${
-                    selectedTool === "BMI" ? "active" : ""
-                  }`}
-                  onClick={() => setSelectedTool("BMI")}
-                >
-                  BMI
-                </span>
-              </div>
-            </h2>
+          <h2>
+  Growth chart
+  <div className="chart-filters">
+    <span className={`filter-item ${selectedTool === "BMI" ? "active" : ""}`} onClick={() => setSelectedTool("BMI")}>BMI</span>
+    <span className={`filter-item ${selectedTool === "Height" ? "active" : ""}`} onClick={() => setSelectedTool("Height")}>Height</span>
+    <span className={`filter-item ${selectedTool === "Weight" ? "active" : ""}`} onClick={() => setSelectedTool("Weight")}>Weight</span>
+    <span className={`filter-item ${selectedTool === "ALL" ? "active" : ""}`} onClick={() => setSelectedTool("ALL")}>All</span>
+  </div>
+</h2>
             <div className="chart-area">
               {selectedChild ? (
                 <>

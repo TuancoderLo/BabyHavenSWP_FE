@@ -9,8 +9,6 @@ import {
   addChildForm,
   validateGrowthRecordErrors,
   validateGrowthRecordWarnings,
-  calculateAgeInMonths,
-  WHO_GROWTH_REFERENCE,
 } from "../../../../data/childValidations";
 import baby from "../../../../assets/baby.jpg";
 import "./AddChild.css";
