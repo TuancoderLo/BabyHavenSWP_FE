@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import userAccountsApi from "../../services/userAccountsApi"; // Import the userAccountsApi
+import { createMember } from "../../services/member"; // Import the createMember function
 import "./CompleteProfile.css";
 
 function CompleteProfile() {
@@ -73,7 +74,14 @@ function CompleteProfile() {
       const day = String(date.getDate()).padStart(2, "0");
       const formattedDate = `${year}-${month}-${day}`;
 
-      // Prepare the data for the API with form values
+      // Step 1: Create a new member with only userId
+      const memberData = {
+        userId: userId,
+      };
+
+      await createMember(memberData);
+
+      // Step 2: Prepare the data for updating the user account
       const updateData = {
         userId: userId,
         username: null, // Not provided in the form
