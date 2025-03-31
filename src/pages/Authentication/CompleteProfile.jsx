@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import userAccountsApi from "../../services/userAccountsApi"; // Import the userAccountsApi
 import "./CompleteProfile.css";
 
 function CompleteProfile() {
@@ -14,6 +15,7 @@ function CompleteProfile() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const userId = localStorage.getItem("userId"); // Get userId from localStorage
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -70,11 +72,38 @@ function CompleteProfile() {
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
       const formattedDate = `${year}/${month}/${day}`;
-      localStorage.setItem("isVerified", "true");
-      // Mô phỏng đã hoàn thành hồ sơ và chuyển hướng ngay lập tức
-      navigate("/homepage");
+
+      // Prepare the data for the API (only userId and isVerified, others are null)
+      const updateData = {
+        userId: userId,
+        username: null,
+        email: null,
+        phoneNumber: null,
+        name: null,
+        gender: null,
+        dateOfBirth: null,
+        address: null,
+        status: null,
+        roleId: null,
+        profilePicture: null,
+        password: null,
+        isVerified: true, // Set isVerified to true
+      };
+
+      // Call the API to update the user's profile
+      const response = await userAccountsApi.updateMemberAccount(userId, updateData);
+
+      // Update localStorage to reflect the verification status
+      if (response.data.status === 1) {
+        localStorage.setItem("isVerified", "true");
+        navigate("/homepage");
+      } else {
+        setError("Error updating profile.", response.data.message);
+      }
+
     } catch (error) {
-      setError("Không thể hoàn thành hồ sơ. Vui lòng thử lại sau.");
+      setError("Error updating profile.");
+      console.error("Error updating profile:", error);
     } finally {
       setIsLoading(false);
     }
@@ -170,11 +199,6 @@ function CompleteProfile() {
           >
             {isLoading ? "Saving..." : "Complete Profile"}
           </button>
-
-          <div className="CompleteProfile-toggle-form">
-            Want to update later?
-            <span onClick={() => navigate("/profile")}>Skip for now</span>
-          </div>
         </form>
       </div>
     </div>

@@ -59,6 +59,7 @@ const userAccountsApi = {
       roleId: 1, // roleId mặc định là 1 (Member)
       profilePicture: data.profilePicture,
       password: data.password ? data.password : "", // nếu không nhập, gửi chuỗi rỗng
+      isVerified: data.isVerified,
     };
     return api.put(`UserAccounts`, formattedData);
   },
