@@ -1,0 +1,454 @@
+.parent-milestone-page {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 8px;
+    width: 100%;
+    height: 100vh;
+    padding: 20px;
+    background: transparent;
+  }
+  
+  /* Loading Styles */
+  .loading-container-milestone-page {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .loading-spinner-milestone-page {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #00d0bc;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Child Slots (div1-div6) */
+  .child-slot-milestone-page {
+    background: linear-gradient(135deg, #ffffff, #f8fdff);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    height: 85px;
+    position: relative;
+  }
+  
+  .child-slot-milestone-page:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px);
+  }
+  
+  .child-slot-milestone-page.selected-milestone-page {
+    border-color: #ff00fb;
+    background: white;
+  }
+  
+  .child-slot-milestone-page.selected-milestone-page.male-milestone-page {
+    border-color: #064f83;
+  }
+  
+  .child-slot-milestone-page.selected-milestone-page.female-milestone-page {
+    border-color: #ff69b4;
+  }
+  
+  .child-info-milestone-page {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .child-name-milestone-page {
+    font-weight: bold;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .child-age-milestone-page {
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .gender-icon-milestone-page {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 16px;
+    transition: none;
+  }
+  
+  .gender-icon-milestone-page.male-milestone-page {
+    color: #064f83;
+  }
+  
+  .gender-icon-milestone-page.female-milestone-page {
+    color: #ff69b4;
+  }
+  
+  /* Positioning for child slots */
+  .child-slot-1-milestone-page { grid-column-start: 1; grid-row-start: 1; }
+  .child-slot-2-milestone-page { grid-column-start: 1; grid-row-start: 2; }
+  .child-slot-3-milestone-page { grid-column-start: 1; grid-row-start: 3; }
+  .child-slot-4-milestone-page { grid-column-start: 1; grid-row-start: 4; }
+  .child-slot-5-milestone-page { grid-column-start: 1; grid-row-start: 5; }
+  .child-slot-6-milestone-page { grid-column-start: 1; grid-row-start: 6; }
+  
+  /* System Milestones Roadmap (div7) */
+  .milestone-roadmap-milestone-page {
+    grid-column: span 3 / span 3;
+    grid-row: span 6 / span 6;
+    grid-column-start: 2;
+    grid-row-start: 1;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .milestone-roadmap-milestone-page h2 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 16px;
+  }
+  
+  /* Progress Bar */
+  .progress-bar-milestone-page {
+    width: 100%;
+    height: 10px;
+    background: #e0f7fa;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+  
+  .progress-fill-milestone-page {
+    height: 100%;
+    background: #26c6da;
+    border-radius: 5px;
+    transition: width 0.5s ease;
+  }
+  
+  /* Notifications */
+  .notifications-milestone-page {
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #e0f7fa;
+    border-radius: 8px;
+  }
+  
+  .notification-item-milestone-page {
+    font-size: 14px;
+    color: #333;
+    margin: 5px 0;
+  }
+  
+  /* Filtering Controls */
+  .controls-milestone-page {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .controls-milestone-page select,
+  .controls-milestone-page button {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #b0bec5;
+    cursor: pointer;
+  }
+  
+  .controls-milestone-page button {
+    background: #26c6da;
+    color: white;
+    border: none;
+  }
+  
+  .controls-milestone-page button:hover {
+    background: #00acc1;
+  }
+  
+  .roadmap-container-milestone-page {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    overflow: hidden;
+  }
+  
+  .milestone-list-milestone-page {
+    flex: 1;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 16px;
+    overflow-y: auto;
+    position: relative;
+    padding-left: 20px;
+  }
+  
+  .milestone-item-milestone-page {
+    background: #e0f7fa;
+    border-radius: 8px;
+    padding: 16px;
+    border-left: 4px solid transparent;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.3s ease;
+  }
+  
+  .milestone-item-milestone-page::before {
+    content: "";
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    background: #26c6da;
+    border-radius: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+  }
+  
+  /* Continuous timeline line */
+  .milestone-list-milestone-page::before {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #26c6da;
+  }
+  
+  /* Hide the individual lines between items */
+  .milestone-item-milestone-page::after {
+    display: none;
+  }
+  
+  .milestone-item-milestone-page.achieved-milestone-page {
+    border-left: 4px solid #ff6f61;
+    background: #fff3e0 !important;
+  }
+  
+  .milestone-item-milestone-page.achieved-milestone-page::before {
+    background: #ff6f61;
+  }
+  
+  .milestone-checkbox-milestone-page {
+    display: flex;
+    align-items: center;
+  }
+  
+  .custom-checkbox {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #26c6da;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+  
+  .custom-checkbox.checked {
+    background: #26c6da; /* Green circle when checked */
+    border-color: #26c6da;
+    cursor: not-allowed; /* Indicate it's not clickable */
+  }
+  
+  .custom-checkbox .checkmark {
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+  }
+  
+  .milestone-content-milestone-page {
+    flex: 1;
+  }
+  
+  .milestone-title-milestone-page {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .milestone-age-milestone-page {
+    font-size: 14px;
+    color: #666;
+    margin: 4px 0;
+  }
+  
+  .milestone-description-milestone-page {
+    font-size: 14px;
+    color: #444;
+  }
+  
+  /* Achieved Milestones (div8) */
+  .achieved-milestones-milestone-page {
+    grid-row: span 6 / span 6;
+    grid-column-start: 5;
+    grid-row-start: 1;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .badges-milestone-page {
+    margin-bottom: 20px;
+  }
+  
+  .badge-item-milestone-page {
+    display: inline-block;
+    background: #26c6da;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    margin-right: 10px;
+    font-size: 14px;
+  }
+  
+  .achieved-milestones-milestone-page h2 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 16px;
+  }
+  
+  .achieved-list-milestone-page {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+  }
+  
+  .achieved-item-milestone-page {
+    background: #e0f7fa;
+    border-radius: 8px;
+    padding: 12px;
+  }
+  
+  .achieved-title-milestone-page {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .achieved-date-milestone-page {
+    font-size: 14px;
+    color: #666;
+  }
+  
+  /* Modal Styles */
+  .modal-milestone-page {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal-content-milestone-page {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    max-width: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .modal-content-milestone-page input {
+    padding: 10px;
+    border: 1px solid #b0bec5;
+    border-radius: 5px;
+  }
+  
+  .modal-buttons-milestone-page {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .modal-buttons-milestone-page button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .modal-buttons-milestone-page button:first-child {
+    background: #26c6da;
+    color: white;
+  }
+  
+  .modal-buttons-milestone-page button:last-child {
+    background: #b0bec5;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .parent-milestone-page {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+    }
+  
+    .child-slot-milestone-page {
+      grid-column: 1 / 2;
+      grid-row: auto;
+    }
+  
+    .milestone-roadmap-milestone-page {
+      grid-column: 1 / 2;
+      grid-row: auto;
+    }
+  
+    .achieved-milestones-milestone-page {
+      grid-column: 1 / 2;
+      grid-row: auto;
+    }
+  
+    .roadmap-container-milestone-page {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .milestone-list-milestone-page {
+      padding-left: 0;
+    }
+  
+    .milestone-list-milestone-page::before {
+      display: none;
+    }
+  
+    .milestone-item-milestone-page::before {
+      display: none;
+    }
+  }
