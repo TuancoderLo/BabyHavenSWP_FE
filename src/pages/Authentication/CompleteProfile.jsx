@@ -107,9 +107,11 @@ function CompleteProfile() {
       } catch (error) {
         console.error("Error fetching member:", error);
       }
-      
+
+      const memberId = localStorage.getItem("memberId");
+
       // Update localStorage to reflect the verification status
-      if (response.data.status === 1) {
+      if (response.data.status === 1 && memberId !== null) {
         localStorage.setItem("isVerified", "true");
         navigate("/homepage");
       } else {
