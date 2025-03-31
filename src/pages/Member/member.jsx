@@ -9,6 +9,7 @@ import Consultation from "./DashboardMember/consultation/DoctorConsultation";
 import TransactionsMember from "./DashboardMember/transactionsMember/TransactionsMember";
 import Membership from "./DashboardMember/membership/MemberShipPage";
 import Account from "./DashboardMember/account/Account";
+import Milestone from "./DashboardMember/milestone/MilestonePage";
 
 function Member() {
   return (
@@ -19,6 +20,7 @@ function Member() {
           <Routes>
             <Route path="/" element={<Navigate to="children" replace />} />
             <Route path="children" element={<Children />} />
+            <Route path="milestone" element={<Milestone />} />
             <Route path="doctor-consultation" element={<Consultation />} />
             <Route path="transactions" element={<TransactionsMember />} />
             <Route path="membership" element={<Membership />} />
