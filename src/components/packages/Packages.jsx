@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import "./Packages.css";
 import membershipApi from "../../services/memberShipApi";
 import transactionsApi from "../../services/transactionsApi";
-import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import packagesIcon from "../../assets/packages.png";
 import momo from "../../assets/momo.png";
@@ -10,8 +9,6 @@ import vnpay from "../../assets/vnpay.jpg";
 import visa from "../../assets/visa.jpg";
 import logo from "../../assets/Logo.png";
 import name from "../../assets/Name.png";
-import api from "../../config/axios";
-import packageApi from "../../services/packageApi";
 import vnpayApi from "../../services/vnpayApi";
 import BabyHavenLogo from "/Logo.png"; // Đường dẫn từ thư mục public
 
@@ -26,7 +23,6 @@ function Packages() {
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [promoCode, setPromoCode] = useState("");
   const [paymentMethod, setPaymentMethod] = useState(null);
-  const [error, setError] = useState("");
   const [currentPlan, setCurrentPlan] = useState(null);
 
   // Thêm state mới để kiểm tra trạng thái đăng nhập
@@ -193,13 +189,6 @@ function Packages() {
         alert("Cannot retrieve membership details!");
         return;
       }
-
-      // 3) Tạo Transaction với userId và memberMembershipId (vừa lấy được)
-      const transactionRes = await transactionsApi.createTransaction({
-        userId: userId,
-        memberMembershipId: newMemberMembershipId,
-      });
-
       // Lấy thông tin transaction vừa tạo
       const transactionResponse = await transactionsApi.getTransaction(
         userId,

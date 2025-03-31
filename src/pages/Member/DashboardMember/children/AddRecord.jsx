@@ -9,9 +9,7 @@ import {
   validateGrowthRecordWarnings,
 } from "../../../../data/childValidations";
 import PopupNotification from "../../../../layouts/Member/popUp/PopupNotification";
-
 import "./AddRecord.css";
-
 const AddRecord = ({ child, memberId, closeOverlay }) => {
   if (!child) {
     return (
@@ -176,9 +174,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
       } catch (alertErr) {
         console.error("Error creating/fetching alert:", alertErr);
       }
-
-      // Show the success modal
-      setShowSuccessModal(true);
     } catch (err) {
       console.error("Error submitting growth record:", err);
       setPopupType("error");
@@ -633,7 +628,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     message={popupMessage}
     onClose={() => {
       setShowPopup(false);
-      closeOverlay(); // Gọi hàm đóng form
+      closeOverlay(); 
     }}
   />
 )}
