@@ -34,6 +34,7 @@ const GoogleCallback = () => {
                 try {
                     const member = await api.get("Members/member/" + user.userId);
                     localStorage.setItem("memberId", member.data.data.memberId);
+                    console.log("Member is verified:", member.data.data.IsVerified);
                 } catch (error) {
                     console.error("Error fetching member:", error);
                 }
@@ -46,12 +47,19 @@ const GoogleCallback = () => {
             localStorage.setItem("userId", user.userId);
             localStorage.setItem("name", user.name);
 
+            console.log("User:", user);
+            console.log("User is verified:", user.isVerified);
+            if (user.isVerified === false) {
+                navigate("/complete-profile");
+            } else {
+                navigate("/homepage");
+            }
+
             console.log("User authenticated:", tokenPayload);
         } catch (error) {
             setError(error.message);
             console.error("Error during Google authentication:", error);
         }
-        navigate("/homepage");
     };
 
     handleGoogleAuth(); // Gọi hàm xử lý ngay khi component render
