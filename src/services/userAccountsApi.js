@@ -74,6 +74,9 @@ const userAccountsApi = {
   updateStatus: (id, status) => {
     return api.patch(`UserAccounts/${id}/status`, { status });
   },
+  createDoctor: (data) => {
+    return api.post("Doctors", data);
+  },
 };
 
 export default userAccountsApi;
