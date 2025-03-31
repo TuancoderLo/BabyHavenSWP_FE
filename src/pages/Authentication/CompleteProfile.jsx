@@ -103,7 +103,7 @@ function CompleteProfile() {
       const response = await userAccountsApi.updateMemberAccount(userId, updateData);
 
       try {
-        const member = await api.get("Members/member/" + user.userId);
+        const member = await api.get("Members/member/" + userId);
         localStorage.setItem("memberId", member.data.data.memberId);
       } catch (error) {
         console.error("Error fetching member:", error);
