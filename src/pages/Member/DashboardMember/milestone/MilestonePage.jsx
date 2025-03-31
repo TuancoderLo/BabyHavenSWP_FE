@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import childApi from "../../../../services/childApi";
-import MilestoneApi from "../../../../services/milestoneApi"; // Import the updated MilestoneApi
+import MilestoneApi from "../../../../services/milestoneApi";
+import AddMilestone from "../children/AddMilestone"; // Import the AddMilestone component
+import AddMilestoneButton from "../../../../components/common/buttons/AddMilestone"; // Import the AddMilestoneButton component
 import "./MilestonePage.css";
 
 function MilestonePage() {
@@ -12,6 +14,7 @@ function MilestonePage() {
   const [childMilestones, setChildMilestones] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showAddMilestoneModal, setShowAddMilestoneModal] = useState(false); // Add state for AddMilestone modal
   const [showDetailsModal, setShowDetailsModal] = useState(null);
   const [customMilestone, setCustomMilestone] = useState({ title: "", age: "" });
   const [filterOption, setFilterOption] = useState("all");
@@ -55,7 +58,10 @@ function MilestonePage() {
         // Fetch all system milestones
         const systemMilestonesResponse = await MilestoneApi.getAllMilestones();
         if (systemMilestonesResponse.data && systemMilestonesResponse.data.data) {
-          setSystemMilestones(systemMilestonesResponse.data.data);
+          const sortedMilestones = systemMilestonesResponse.data.data.sort(
+            (a, b) => a.minAge - b.minAge
+          );
+          setSystemMilestones(sortedMilestones);
         }
 
         // Fetch child milestones
@@ -87,12 +93,14 @@ function MilestonePage() {
       try {
         const response = await MilestoneApi.getMilestonesByAgeRange(ageInMonths, ageInMonths);
         if (response.data && response.data.data && response.data.data.length > 0) {
-          const relevantMilestone = response.data.data[0]; // Take the first milestone in the range
+          const relevantMilestone = response.data.data[0];
           const milestoneIndex = systemMilestones.findIndex(
             (milestone) => milestone.id === relevantMilestone.id
           );
           if (milestoneIndex !== -1) {
-            const milestoneElement = milestoneListRef.current.children[milestoneIndex];
+            const milestoneElement = milestoneListRef.current.children[
+              systemMilestones.length - 1 - milestoneIndex
+            ];
             if (milestoneElement) {
               milestoneElement.scrollIntoView({ behavior: "smooth", block: "center" });
             }
@@ -172,7 +180,10 @@ function MilestonePage() {
     try {
       const response = await MilestoneApi.createMilestone(newMilestone);
       if (response.data && response.data.data) {
-        setSystemMilestones([...systemMilestones, response.data.data]);
+        const updatedMilestones = [...systemMilestones, response.data.data].sort(
+          (a, b) => a.minAge - b.minAge
+        );
+        setSystemMilestones(updatedMilestones);
         setCustomMilestone({ title: "", age: "" });
         setShowAddModal(false);
       }
@@ -214,7 +225,7 @@ function MilestonePage() {
 
   const filteredMilestones = () => {
     let filtered = [...systemMilestones];
-    filtered.sort((a, b) => b.maxAge - a.minAge);
+    filtered.sort((a, b) => a.minAge - b.minAge);
 
     if (filterOption === "achieved") {
       filtered = filtered.filter((milestone) =>
@@ -236,6 +247,32 @@ function MilestonePage() {
       );
     }
     return filtered;
+  };
+
+  // Function to handle opening the AddMilestone modal
+  const handleShowMilestoneModal = () => {
+    if (!selectedChild) {
+      alert("Please select a child to add a milestone.");
+      return;
+    }
+    setShowAddMilestoneModal(true);
+  };
+
+  // Function to close the AddMilestone modal and refresh data
+  const closeMilestoneOverlay = () => {
+    setShowAddMilestoneModal(false);
+    // Refresh the child milestones after adding a new milestone
+    if (selectedChild) {
+      MilestoneApi.getMilestoneByChild(selectedChild, memberId)
+        .then((response) => {
+          if (response.data && response.data.data) {
+            setChildMilestones(response.data.data);
+          }
+        })
+        .catch((error) => {
+          console.error("Error refreshing child milestones:", error);
+        });
+    }
   };
 
   return (
@@ -297,7 +334,7 @@ function MilestonePage() {
                 ))}
               </div>
             )}
-            {/* Filtering */}
+            {/* Filtering and Add Milestone Button */}
             <div className="controls-milestone-page">
               <select
                 value={filterOption}
@@ -308,9 +345,10 @@ function MilestonePage() {
                 <option value="upcoming">Upcoming</option>
                 <option value="overdue">Overdue</option>
               </select>
-              <button onClick={() => setShowAddModal(true)}>
-                Add Custom Milestone
-              </button>
+              <AddMilestoneButton
+                onClick={handleShowMilestoneModal}
+                disabled={!selectedChild}
+              />
             </div>
             <div className="roadmap-container-milestone-page">
               <div className="milestone-list-milestone-page" ref={milestoneListRef}>
@@ -417,6 +455,18 @@ function MilestonePage() {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Add Milestone Modal */}
+          {showAddMilestoneModal && (
+            <AddMilestone
+              child={selectedChild}
+              memberId={memberId}
+              closeOverlay={closeMilestoneOverlay}
+              onSuccess={() => {
+                // Optional: Add any additional success logic here
+              }}
+            />
           )}
 
           {/* Milestone Details Modal */}
