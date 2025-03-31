@@ -189,6 +189,13 @@ function Packages() {
         alert("Cannot retrieve membership details!");
         return;
       }
+
+        // 3) Tạo Transaction với userId và memberMembershipId (vừa lấy được)
+      const transactionRes = await transactionsApi.createTransaction({
+        userId: userId,
+        memberMembershipId: newMemberMembershipId,
+      });
+      
       // Lấy thông tin transaction vừa tạo
       const transactionResponse = await transactionsApi.getTransaction(
         userId,
