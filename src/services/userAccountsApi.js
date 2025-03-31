@@ -74,8 +74,18 @@ const userAccountsApi = {
   updateStatus: (id, status) => {
     return api.patch(`UserAccounts/${id}/status`, { status });
   },
-  createDoctor: (data) => {
-    return api.post("Doctors", data);
+
+  findByEmail: (email) => {
+    return api.get(`UserAccounts/odata?$filter=email eq '${email}'`);
+  },
+
+  createDoctor: async (doctorData) => {
+    try {
+      const response = await api.post("Doctors", doctorData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   },
 };
 

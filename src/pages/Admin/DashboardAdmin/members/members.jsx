@@ -75,6 +75,11 @@ const Members = () => {
   const [membershipPackages, setMembershipPackages] = useState([]);
   const [membershipSearchText, setMembershipSearchText] = useState("");
 
+  // Thêm state để quản lý bước tạo doctor
+  const [isCreatingDoctor, setIsCreatingDoctor] = useState(false);
+  const [tempUserData, setTempUserData] = useState(null);
+  const [doctorForm] = Form.useForm();
+
   // Fetch data when component mounts and when tab changes
   useEffect(() => {
     if (activeTab === "1") {
@@ -114,15 +119,11 @@ const Members = () => {
     userAccountForm.resetFields();
     // Reset imageUrl nếu cần
     setImageUrl("");
-  
+
     // Xác định role mặc định dựa trên filter hiện hành (selectedRole)
     const defaultRoleId =
-      selectedRole === "Doctor"
-        ? 2
-        : selectedRole === "Admin"
-        ? 3
-        : 1; // Mặc định là 1 (Member) nếu không phải Doctor hay Admin
-  
+      selectedRole === "Doctor" ? 2 : selectedRole === "Admin" ? 3 : 1; // Mặc định là 1 (Member) nếu không phải Doctor hay Admin
+
     userAccountForm.setFieldsValue({
       status: "Active",
       roleId: defaultRoleId,
@@ -130,7 +131,6 @@ const Members = () => {
     });
     setUserAccountModalVisible(true);
   };
-  
 
   const handleEditUserAccount = (record) => {
     setEditingUserAccount(record);
@@ -162,76 +162,112 @@ const Members = () => {
     }
   };
 
+  // Chỉ giữ lại việc kiểm tra không cho chọn ngày trong tương lai
+  const disabledDate = (current) => {
+    // Không cho phép chọn ngày trong tương lai
+    return current && current > moment().endOf("day");
+  };
+
   const handleUserAccountSubmit = async (values) => {
     try {
       setLoading(true);
-      const formattedData = {
-        username: values.username?.trim(),
-        email: values.email?.trim(),
-        phoneNumber: values.phoneNumber?.trim(),
-        name: values.name?.trim(),
-        gender: values.gender,
-        dateOfBirth: values.dateOfBirth ? values.dateOfBirth.format("YYYY-MM-DD") : null,
-        address: values.address?.trim(),
-        ...(values.password ? { password: values.password } : {}),
-        profilePicture: values.profilePicture || null,
-        status:
-          typeof values.status === "string"
-            ? values.status === "Active"
-              ? 0
-              : values.status === "Inactive"
-              ? 1
-              : 2
-            : values.status,
-        roleId: values.roleId || 1,
-      };
-  
+
       if (editingUserAccount) {
-        await userAccountsApi.update(editingUserAccount.userId, formattedData);
+        // Xử lý edit user như cũ
+        await userAccountsApi.update(editingUserAccount.userId, values);
         message.success("Cập nhật tài khoản thành công");
+        setUserAccountModalVisible(false);
+        fetchUserAccounts();
       } else {
+        // Tạo mới user
         if (!values.password) {
           message.error("Mật khẩu bắt buộc khi tạo tài khoản mới");
           setLoading(false);
           return;
         }
-        const res = await userAccountsApi.create(formattedData);
-        const createdUser = res.data;
-        
-        // Nếu role là Doctor (roleId === 2) thì gọi API tạo thông tin Doctor
-        if (formattedData.roleId === 2) {
-          const doctorData = {
-            userId: createdUser.userId,
-            name: formattedData.name,
-            email: formattedData.email,
-            phoneNumber: formattedData.phoneNumber,
-            specializationIds: values.specializationIds,
-            degree: values.degree,
-            hospitalName: values.hospitalName,
-            hospitalAddress: values.hospitalAddress,
-            biography: values.biography || "",
-            status: 0,
-          };
-          await userAccountsApi.createDoctor(doctorData);
-          message.success("Tạo tài khoản và thông tin Doctor thành công");
+
+        const userAccountData = {
+          username: values.username?.trim(),
+          email: values.email?.trim(),
+          phoneNumber: values.phoneNumber?.trim(),
+          name: values.name?.trim(),
+          gender: values.gender,
+          dateOfBirth: values.dateOfBirth
+            ? values.dateOfBirth.format("YYYY-MM-DD")
+            : null,
+          address: values.address?.trim(),
+          password: values.password,
+          profilePicture: values.profilePicture || "",
+          status: 0, // Mặc định là 0 (Active)
+          roleId: values.roleId, // 1: Member, 2: Doctor, 3: Admin
+        };
+
+        // Tạo user account
+        await userAccountsApi.create(userAccountData);
+
+        if (values.roleId === 2) {
+          // Nếu là tài khoản Doctor
+          // Lưu thông tin tạm thời và chuyển sang form nhập thông tin doctor
+          setTempUserData(userAccountData);
+          setUserAccountModalVisible(false);
+          setIsCreatingDoctor(true);
         } else {
           message.success("Tạo tài khoản thành công");
+          setUserAccountModalVisible(false);
+          fetchUserAccounts();
         }
       }
-      setUserAccountModalVisible(false);
-      fetchUserAccounts();
     } catch (error) {
       console.error("Lỗi khi lưu tài khoản:", error);
-      if (error.response) {
-        message.error(`Lỗi: ${error.response.data.message || error.response.statusText}`);
-      } else {
-        message.error("Không thể lưu tài khoản");
-      }
+      message.error(error.response?.data?.message || "Không thể lưu tài khoản");
     } finally {
       setLoading(false);
     }
   };
-  
+
+  // Thêm hàm xử lý submit form doctor
+  const handleDoctorSubmit = async (values) => {
+    try {
+      setLoading(true);
+
+      // Tìm userId của account vừa tạo
+      const findUserResponse = await userAccountsApi.findByEmail(
+        tempUserData.email
+      );
+      const user = findUserResponse.data.value[0];
+
+      if (!user || !user.userId) {
+        throw new Error("Không thể tìm thấy tài khoản vừa tạo");
+      }
+
+      // Tạo thông tin doctor
+      const doctorData = {
+        userId: user.userId,
+        name: tempUserData.name,
+        email: tempUserData.email,
+        phoneNumber: tempUserData.phoneNumber,
+        specializationIds: values.specializationIds,
+        degree: values.degree,
+        hospitalName: values.hospitalName,
+        hospitalAddress: values.hospitalAddress,
+        biography: values.biography || "",
+        status: 0,
+      };
+
+      await userAccountsApi.createDoctor(doctorData);
+      message.success("Tạo thông tin bác sĩ thành công");
+      setIsCreatingDoctor(false);
+      setTempUserData(null);
+      fetchUserAccounts();
+    } catch (error) {
+      console.error("Lỗi khi tạo thông tin bác sĩ:", error);
+      message.error(
+        error.response?.data?.message || "Không thể tạo thông tin bác sĩ"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ===== MEMBERS FUNCTIONS =====
   const fetchMembers = async () => {
@@ -1039,6 +1075,7 @@ const Members = () => {
               name="gender"
               label="Gender"
               className="MemberAdmin-form-col"
+              rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
             >
               <Select>
                 <Option value="Male">Male</Option>
@@ -1046,12 +1083,24 @@ const Members = () => {
                 <Option value="Other">Other</Option>
               </Select>
             </Form.Item>
+
             <Form.Item
               name="dateOfBirth"
               label="Date of Birth"
               className="MemberAdmin-form-col"
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng chọn ngày sinh",
+                },
+              ]}
             >
-              <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
+              <DatePicker
+                format="DD/MM/YYYY"
+                style={{ width: "100%" }}
+                disabledDate={disabledDate}
+                placeholder="Chọn ngày sinh"
+              />
             </Form.Item>
           </div>
 
@@ -1163,13 +1212,7 @@ const Members = () => {
               },
             ]}
           >
-            <Input.Password
-              placeholder={
-                editingUserAccount
-                  ? "Enter new password or leave blank"
-                  : "Enter password"
-              }
-            />
+            <Input.Password />
           </Form.Item>
 
           <div className="MemberAdmin-form-row">
@@ -1177,6 +1220,7 @@ const Members = () => {
               name="status"
               label="Status"
               className="MemberAdmin-form-col"
+              initialValue="Active"
             >
               <Select>
                 <Option value="Active">Active</Option>
@@ -1189,6 +1233,8 @@ const Members = () => {
               name="roleId"
               label="Role"
               className="MemberAdmin-form-col"
+              rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}
+              initialValue={1}
             >
               <Select>
                 <Option value={1}>Member</Option>
@@ -1208,45 +1254,6 @@ const Members = () => {
               </Button>
             </Space>
           </Form.Item>
-          {/* Nếu selectedRole là "Doctor", hiển thị thêm các trường nhập liệu cho Doctor */}
-{selectedRole === "Doctor" && (
-  <>
-    <Form.Item
-      name="specializationIds"
-      label="Chuyên môn"
-      rules={[{ required: true, message: "Vui lòng chọn chuyên môn" }]}
-    >
-      <Select mode="multiple" placeholder="Chọn chuyên môn">
-        <Select.Option value={0}>Chuyên môn 1</Select.Option>
-        <Select.Option value={1}>Chuyên môn 2</Select.Option>
-      </Select>
-    </Form.Item>
-    <Form.Item
-      name="degree"
-      label="Học vị"
-      rules={[{ required: true, message: "Vui lòng nhập học vị" }]}
-    >
-      <Input />
-    </Form.Item>
-    <Form.Item
-      name="hospitalName"
-      label="Tên bệnh viện"
-      rules={[{ required: true, message: "Vui lòng nhập tên bệnh viện" }]}
-    >
-      <Input />
-    </Form.Item>
-    <Form.Item
-      name="hospitalAddress"
-      label="Địa chỉ bệnh viện"
-      rules={[{ required: true, message: "Vui lòng nhập địa chỉ bệnh viện" }]}
-    >
-      <Input />
-    </Form.Item>
-    <Form.Item name="biography" label="Tiểu sử">
-      <TextArea rows={4} />
-    </Form.Item>
-  </>
-)}
         </Form>
       </Modal>
 
@@ -1314,9 +1321,20 @@ const Members = () => {
           <Form.Item
             name="memberId"
             label="Member"
-            rules={[{ required: true, message: "Please select a member" }]}
+            rules={[{ required: true, message: "Vui lòng chọn thành viên" }]}
           >
-            <Select>
+            <Select
+              showSearch
+              placeholder="Tìm kiếm thành viên"
+              optionFilterProp="children"
+              filterOption={(input, option) => {
+                // Chuyển đổi tất cả về chữ thường để tìm kiếm không phân biệt hoa thường
+                return (option?.children ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase());
+              }}
+              style={{ width: "100%" }}
+            >
               {members.map((member) => (
                 <Option key={member.memberId} value={member.memberId}>
                   {member.memberName}
@@ -1357,11 +1375,10 @@ const Members = () => {
               <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
             </Form.Item>
           </div>
-          <Form.Item name="status" label="Status">
+          <Form.Item name="status" label="Status" initialValue="Active">
             <Select>
               <Option value="Active">Active</Option>
               <Option value="Inactive">Inactive</Option>
-              <Option value="Pending">Pending</Option>
             </Select>
           </Form.Item>
           <Form.Item>
@@ -1371,6 +1388,78 @@ const Members = () => {
               </Button>
               <Button onClick={() => setMembershipModalVisible(false)}>
                 Cancel
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Doctor Information Modal */}
+      <Modal
+        title="Nhập thông tin bác sĩ"
+        visible={isCreatingDoctor}
+        onCancel={() => {
+          setIsCreatingDoctor(false);
+          setTempUserData(null);
+        }}
+        footer={null}
+        width={700}
+        destroyOnClose
+      >
+        <Form form={doctorForm} layout="vertical" onFinish={handleDoctorSubmit}>
+          <Form.Item
+            name="specializationIds"
+            label="Chuyên môn"
+            rules={[{ required: true, message: "Vui lòng chọn chuyên môn" }]}
+          >
+            <Select mode="multiple" placeholder="Chọn chuyên môn">
+              <Select.Option value={0}>Chuyên môn 1</Select.Option>
+              <Select.Option value={1}>Chuyên môn 2</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="degree"
+            label="Học vị"
+            rules={[{ required: true, message: "Vui lòng nhập học vị" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            name="hospitalName"
+            label="Tên bệnh viện"
+            rules={[{ required: true, message: "Vui lòng nhập tên bệnh viện" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            name="hospitalAddress"
+            label="Địa chỉ bệnh viện"
+            rules={[
+              { required: true, message: "Vui lòng nhập địa chỉ bệnh viện" },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item name="biography" label="Tiểu sử">
+            <TextArea rows={4} />
+          </Form.Item>
+
+          <Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                Tạo thông tin bác sĩ
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsCreatingDoctor(false);
+                  setTempUserData(null);
+                }}
+              >
+                Hủy
               </Button>
             </Space>
           </Form.Item>
