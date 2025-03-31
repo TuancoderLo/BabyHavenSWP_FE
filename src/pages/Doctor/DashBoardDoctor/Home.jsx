@@ -11,126 +11,14 @@ import DoctorCalendar from './DoctorCalendar';
 const Home = () => {
   const [currentDateTime, setCurrentDateTime] = useState('');
   const [doctorInfo, setDoctorInfo] = useState(null);
-  const [totals, setTotals] = useState({
-    totalRequests: 0,
-    totalResponses: 0,
-    averageRating: 0,
-    blogPosts: 23 // Số bài blog hiện có (dummy data)
+  const [totals] = useState({
+    totalRequests: 30,
+    totalResponses: 20,
+    averageRating: 4.5,
+    blogPosts: 23
   });
 
-  // Hàm lấy chi tiết của một yêu cầu tư vấn (dựa trên logic từ Consultation.jsx)
-  const fetchConsultationRequestsById = async (requestId) => {
-    try {
-      const response = await doctorApi.getConsultationRequestsById(requestId);
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching consultation detail for ${requestId}:`, error);
-      return { status: "Pending" };
-    }
-  };
-
-  // Hàm tính tổng số liệu từ dữ liệu tư vấn
-  const fetchConsultationTotals = async () => {
-    const doctorId = localStorage.getItem("doctorId");
-    if (!doctorId) {
-      console.error("Doctor ID not found in localStorage");
-      return;
-    }
-
-    let allRequests = [];
-
-    // Lấy danh sách yêu cầu tư vấn thông thường
-    try {
-      const response = await doctorApi.getConsultationRequestsByDoctorOData(doctorId);
-      const requests = Array.isArray(response) ? response : response.data;
-      for (const req of requests) {
-        try {
-          const detail = await fetchConsultationRequestsById(req.requestId);
-          let responses = [];
-          try {
-            const responseData = await doctorApi.getConsultationResponsesOData(`?$filter=requestId eq ${req.requestId}`);
-            responses = responseData.data || [];
-          } catch (respError) {
-            console.error(`Error fetching responses for request ${req.requestId}:`, respError);
-          }
-          const latestResponse = responses[0] || {};
-          let rating = 0;
-          if (latestResponse.responseId) {
-            try {
-              const feedbackResponse = await doctorApi.getRatingFeedbackByResponseId(latestResponse.responseId);
-              const feedbackData = feedbackResponse.data[0] || {};
-              rating = feedbackData.rating || 0;
-            } catch (error) {
-              console.error(`Error fetching rating for response ${latestResponse.responseId}:`, error);
-            }
-          }
-          allRequests.push({
-            id: req.requestId,
-            status: detail.status || "Pending",
-            response: latestResponse.content || "",
-            rating: rating,
-          });
-        } catch (error) {
-          console.error(`Error processing request ${req.requestId}:`, error);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching consultation requests:", error);
-    }
-
-    // Lấy danh sách yêu cầu tư vấn đang diễn ra (Approved)
-    try {
-      const ongoingResponse = await doctorApi.getConsultationRequestsByDoctorAndStatus(doctorId, "Approved");
-      const ongoingRequests = Array.isArray(ongoingResponse) ? ongoingResponse : ongoingResponse.data;
-      for (const req of ongoingRequests) {
-        try {
-          const detail = await fetchConsultationRequestsById(req.requestId);
-          let responses = [];
-          try {
-            const responseData = await doctorApi.getConsultationResponsesOData(`?$filter=requestId eq ${req.requestId}`);
-            responses = responseData.data || [];
-          } catch (respError) {
-            console.error(`Error fetching responses for ongoing request ${req.requestId}:`, respError);
-          }
-          const latestResponse = responses[0] || {};
-          let rating = 0;
-          if (latestResponse.responseId) {
-            try {
-              const feedbackResponse = await doctorApi.getRatingFeedbackByResponseId(latestResponse.responseId);
-              const feedbackData = feedbackResponse.data[0] || {};
-              rating = feedbackData.rating || 0;
-            } catch (error) {
-              console.error(`Error fetching rating for ongoing response ${latestResponse.responseId}:`, error);
-            }
-          }
-          allRequests.push({
-            id: req.requestId,
-            status: detail.status || "Approved",
-            response: latestResponse.content || "",
-            rating: rating,
-          });
-        } catch (error) {
-          console.error(`Error processing ongoing request ${req.requestId}:`, error);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching ongoing consultations:", error);
-    }
-
-    // Tính toán tổng số yêu cầu, tổng số phản hồi và trung bình rating
-    const totalRequests = allRequests.length;
-    const totalResponses = allRequests.filter(req => req.response && req.response.trim() !== "").length;
-    const rated = allRequests.filter(req => req.rating > 0);
-    const averageRating = rated.length > 0 ? (rated.reduce((acc, req) => acc + req.rating, 0) / rated.length).toFixed(1) : 0;
-
-    setTotals({
-      totalRequests,
-      totalResponses,
-      averageRating,
-      blogPosts: totals.blogPosts
-    });
-  };
-
+  
   // Cập nhật thời gian hiển thị
   useEffect(() => {
     const updateDateTime = () => {
@@ -167,11 +55,6 @@ const Home = () => {
       }
     };
     fetchDoctorInfo();
-  }, []);
-
-  // Gọi hàm tính tổng số liệu khi component được mount
-  useEffect(() => {
-    fetchConsultationTotals();
   }, []);
 
   // Dữ liệu mẫu cho các mini chart trong mỗi stat card (hard-coded)

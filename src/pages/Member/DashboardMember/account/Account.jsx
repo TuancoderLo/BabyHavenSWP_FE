@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import userAccountsApi from "../../../../services/userAccountsApi";
+import PopupNotification from "../../../../layouts/Member/popUp/PopupNotification";
 import "./Account.css"; // Import file CSS mới
 
 const Account = () => {
@@ -20,7 +21,9 @@ const Account = () => {
   const [isGoogleUser, setIsGoogleUser] = useState(false);
 
   // State cho modal thông báo thành công
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState("success");
 
   useEffect(() => {
     const fetchAccountData = async () => {
@@ -53,15 +56,19 @@ const Account = () => {
 
   // Xử lý lưu thay đổi
   const handleSaveChanges = async (e) => {
-    e.preventDefault();
+e.preventDefault();
     // Nếu có thay đổi mật khẩu, kiểm tra hợp lệ:
     if (newPassword || confirmPassword || currentPassword) {
       if (!currentPassword) {
-        alert("Please enter your current password!");
+        setPopupType("error");
+        setPopupMessage("Please enter your current password!");
+        setShowPopup(true);
         return;
       }
       if (newPassword !== confirmPassword) {
-        alert("New password and confirmation do not match!");
+        setPopupType("error");
+        setPopupMessage("New password and confirmation do not match!");
+        setShowPopup(true);
         return;
       }
     }
@@ -84,14 +91,19 @@ const Account = () => {
         updatedData
       );
       if (response.data.status === 1) {
-        // Thay vì alert, hiển thị modal thành công
-        setShowSuccessModal(true);
+        setPopupType("success");
+        setPopupMessage("Account updated successfully.");
+        setShowPopup(true);
       } else {
-        alert("Update failed, please try again.");
+        setPopupType("error");
+        setPopupMessage("Update failed, please try again.");
+        setShowPopup(true);
       }
     } catch (error) {
       console.error("Error updating account:", error);
-      alert("An error occurred while updating your information.");
+      setPopupType("error");
+      setPopupMessage("An error occurred while updating your information.");
+      setShowPopup(true);
     }
   };
 
@@ -206,39 +218,12 @@ const Account = () => {
           Save Changes
         </button>
       </form>
-
-      {/* Modal thông báo thành công */}
-      {showSuccessModal && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowSuccessModal(false)}
-        >
-          <div
-            className="success-modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="success-modal-header">
-              <h3>Success!</h3>
-              <button
-                className="modal-close"
-                onClick={() => setShowSuccessModal(false)}
-              >
-                ×
-              </button>
-            </div>
-            <div className="success-modal-body">
-              <p>Update successful!</p>
-            </div>
-            <div className="success-modal-footer">
-              <button
-                className="success-modal-button"
-                onClick={() => setShowSuccessModal(false)}
-              >
-                OK
-              </button>
-            </div>
-          </div>
-        </div>
+      {showPopup && (
+        <PopupNotification
+          type={popupType}
+          message={popupMessage}
+          onClose={() => setShowPopup(false)}
+        />
       )}
     </div>
   );
