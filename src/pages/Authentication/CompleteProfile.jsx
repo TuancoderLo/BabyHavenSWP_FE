@@ -80,7 +80,7 @@ function CompleteProfile() {
       };
 
       await createMember(memberData);
-
+      
       // Step 2: Prepare the data for updating the user account
       const updateData = {
         userId: userId,
@@ -101,6 +101,13 @@ function CompleteProfile() {
       // Call the API to update the user's profile
       const response = await userAccountsApi.updateMemberAccount(userId, updateData);
 
+      try {
+        const member = await api.get("Members/member/" + user.userId);
+        localStorage.setItem("memberId", member.data.data.memberId);
+      } catch (error) {
+        console.error("Error fetching member:", error);
+      }
+      
       // Update localStorage to reflect the verification status
       if (response.data.status === 1) {
         localStorage.setItem("isVerified", "true");
