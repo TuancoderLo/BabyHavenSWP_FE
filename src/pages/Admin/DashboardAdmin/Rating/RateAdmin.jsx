@@ -27,6 +27,7 @@ const RateAdmin = () => {
   const [detailVisible, setDetailVisible] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [consultationDetail, setConsultationDetail] = useState(null);
+  const [consultationRequest, setConsultationRequest] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [feedbackToDelete, setFeedbackToDelete] = useState(null);
@@ -86,24 +87,119 @@ const RateAdmin = () => {
   const fetchConsultationDetail = async (responseId) => {
     try {
       setDetailLoading(true);
-      const response = await axios.get(
+      setConsultationDetail(null);
+      setConsultationRequest(null);
+
+      console.log("Fetching details for responseId:", responseId);
+
+      // Bước 1: Lấy thông tin phản hồi tư vấn từ responseId
+      const responseDetail = await axios.get(
         `https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/ConsultationResponses/odata?$filter=responseId eq ${responseId}`
       );
 
+      console.log("Response detail API result:", responseDetail.data);
+
+      let consultationResponse = null;
       if (
-        response.data &&
-        response.data.value &&
-        response.data.value.length > 0
+        responseDetail.data &&
+        responseDetail.data.value &&
+        responseDetail.data.value.length > 0
       ) {
-        setConsultationDetail(response.data.value[0]);
+        consultationResponse = responseDetail.data.value[0];
+      } else if (
+        Array.isArray(responseDetail.data) &&
+        responseDetail.data.length > 0
+      ) {
+        consultationResponse = responseDetail.data[0];
+      }
+
+      if (consultationResponse) {
+        setConsultationDetail(consultationResponse);
+        console.log("Found consultation response:", consultationResponse);
+
+        // Bước 2: Nếu có requestId, lấy thông tin yêu cầu tư vấn
+        if (consultationResponse.requestId) {
+          console.log(
+            "Fetching request with ID:",
+            consultationResponse.requestId
+          );
+
+          // Khi sử dụng OData với API ConsultationRequests
+          const requestDetail = await axios.get(
+            `https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/ConsultationRequests/odata?$filter=requestId eq ${consultationResponse.requestId}`
+          );
+
+          console.log("Request detail API result:", requestDetail.data);
+
+          // Kiểm tra nhiều cấu trúc dữ liệu khác nhau mà API có thể trả về
+          if (
+            requestDetail.data &&
+            Array.isArray(requestDetail.data) &&
+            requestDetail.data.length > 0
+          ) {
+            setConsultationRequest(requestDetail.data[0]);
+            console.log(
+              "Found consultation request (array):",
+              requestDetail.data[0]
+            );
+          } else if (
+            requestDetail.data &&
+            requestDetail.data.value &&
+            requestDetail.data.value.length > 0
+          ) {
+            setConsultationRequest(requestDetail.data.value[0]);
+            console.log(
+              "Found consultation request (value):",
+              requestDetail.data.value[0]
+            );
+          } else {
+            // Nếu không tìm thấy, thử tìm trực tiếp trong dữ liệu hoàn chỉnh
+            try {
+              const allRequests = await axios.get(
+                `https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/ConsultationRequests/odata`
+              );
+
+              console.log("All requests:", allRequests.data);
+
+              const foundRequest = Array.isArray(allRequests.data)
+                ? allRequests.data.find(
+                    (req) => req.requestId === consultationResponse.requestId
+                  )
+                : allRequests.data.value
+                ? allRequests.data.value.find(
+                    (req) => req.requestId === consultationResponse.requestId
+                  )
+                : null;
+
+              if (foundRequest) {
+                setConsultationRequest(foundRequest);
+                console.log(
+                  "Found consultation request manually:",
+                  foundRequest
+                );
+              } else {
+                console.log(
+                  "Could not find consultation request with ID:",
+                  consultationResponse.requestId
+                );
+              }
+            } catch (error) {
+              console.error("Error when fetching all requests:", error);
+            }
+          }
+        } else {
+          console.log("No requestId found in consultation response");
+        }
       } else {
-        setConsultationDetail(null);
-        message.info("Không tìm thấy thông tin chi tiết");
+        console.log(
+          "No consultation response found for responseId:",
+          responseId
+        );
+        message.info("Không tìm thấy thông tin chi tiết về phản hồi tư vấn");
       }
     } catch (error) {
       console.error("Lỗi khi lấy thông tin chi tiết:", error);
       message.error("Không thể lấy thông tin chi tiết");
-      setConsultationDetail(null);
     } finally {
       setDetailLoading(false);
     }
@@ -397,29 +493,29 @@ const RateAdmin = () => {
           <div className="feedback-detail">
             <div className="feedback-info">
               <h3>Thông tin đánh giá</h3>
-              <p>
+              <div className="feedback-item">
                 <strong>Người dùng:</strong>{" "}
                 {getUserName(selectedFeedback.userId)}
-              </p>
-              <p>
+              </div>
+              <div className="feedback-item">
                 <strong>Đánh giá:</strong>{" "}
                 <Rate disabled value={selectedFeedback.rating} />
-              </p>
-              <p>
+              </div>
+              <div className="feedback-item">
                 <strong>Bình luận:</strong> {selectedFeedback.comment}
-              </p>
-              <p>
+              </div>
+              <div className="feedback-item">
                 <strong>Ngày đánh giá:</strong>{" "}
                 {formatDate(selectedFeedback.feedbackDate)}
-              </p>
-              <p>
+              </div>
+              <div className="feedback-item">
                 <strong>Loại:</strong>{" "}
                 {renderFeedbackType(selectedFeedback.feedbackType)}
-              </p>
-              <p>
+              </div>
+              <div className="feedback-item">
                 <strong>Trạng thái:</strong>{" "}
                 {renderStatus(selectedFeedback.status)}
-              </p>
+              </div>
             </div>
 
             <div className="consultation-detail">
@@ -429,22 +525,91 @@ const RateAdmin = () => {
               ) : consultationDetail ? (
                 <div>
                   <p>
-                    <strong>Tên bác sĩ:</strong> {consultationDetail.doctorName}
+                    <strong>Tên bác sĩ:</strong>{" "}
+                    {consultationDetail.doctorName || "Không có thông tin"}
                   </p>
                   <p>
                     <strong>Ngày phản hồi:</strong>{" "}
-                    {formatDate(consultationDetail.responseDate)}
+                    {consultationDetail.responseDate
+                      ? formatDate(consultationDetail.responseDate)
+                      : "Không có thông tin"}
                   </p>
                   <p>
-                    <strong>Nội dung:</strong>
+                    <strong>Nội dung phản hồi:</strong>
                   </p>
                   <div className="consultation-content">
-                    {consultationDetail.content}
+                    {consultationDetail.content || "Không có nội dung"}
                   </div>
                   <p>
                     <strong>Hữu ích:</strong>{" "}
-                    {consultationDetail.isHelpful ? "Có" : "Không"}
+                    {consultationDetail.isHelpful !== undefined
+                      ? consultationDetail.isHelpful
+                        ? "Có"
+                        : "Không"
+                      : "Không có thông tin"}
                   </p>
+
+                  {consultationRequest ? (
+                    <div className="request-detail">
+                      <h4>Thông tin yêu cầu ban đầu</h4>
+                      <p>
+                        <strong>Tên trẻ:</strong>{" "}
+                        {consultationRequest.childName || "Không có thông tin"}
+                      </p>
+                      <p>
+                        <strong>Người dùng:</strong>{" "}
+                        {consultationRequest.memberName || "Không có thông tin"}
+                      </p>
+                      <p>
+                        <strong>Ngày yêu cầu:</strong>{" "}
+                        {consultationRequest.requestDate
+                          ? formatDate(consultationRequest.requestDate)
+                          : "Không có thông tin"}
+                      </p>
+                      <p>
+                        <strong>Mô tả vấn đề:</strong>
+                      </p>
+                      <div className="consultation-content">
+                        {consultationRequest.description || "Không có mô tả"}
+                      </div>
+                      <p>
+                        <strong>Mức độ khẩn cấp:</strong>{" "}
+                        <Tag
+                          color={
+                            consultationRequest.urgency === "High"
+                              ? "red"
+                              : consultationRequest.urgency === "Medium"
+                              ? "orange"
+                              : "blue"
+                          }
+                        >
+                          {consultationRequest.urgency || "Không xác định"}
+                        </Tag>
+                      </p>
+                      <p>
+                        <strong>Danh mục:</strong>{" "}
+                        {consultationRequest.category || "Không có thông tin"}
+                      </p>
+                      <p>
+                        <strong>Trạng thái:</strong>{" "}
+                        <Tag
+                          color={
+                            consultationRequest.status === "Completed"
+                              ? "green"
+                              : consultationRequest.status === "Pending"
+                              ? "orange"
+                              : "blue"
+                          }
+                        >
+                          {consultationRequest.status || "Không xác định"}
+                        </Tag>
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="no-request-info">
+                      <p>Không tìm thấy thông tin về yêu cầu tư vấn ban đầu</p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <p>Không tìm thấy thông tin chi tiết về tư vấn</p>
