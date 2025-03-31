@@ -91,7 +91,7 @@ function CompleteProfile() {
         gender: formData.gender,
         dateOfBirth: formattedDate,
         address: formData.address.trim(),
-        status: 0, // Default status as per API
+        status: 1, // Default status as per API
         roleId: 1, // Default roleId for Member as per API
         profilePicture: null, // Not provided in the form
         password: formData.password, // Include the password
