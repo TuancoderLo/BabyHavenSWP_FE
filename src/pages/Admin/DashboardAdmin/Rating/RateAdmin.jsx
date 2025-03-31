@@ -17,6 +17,7 @@ import {
   SearchOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
+import "antd/dist/reset.css";
 import "./RateAdmin.css";
 
 const { Search } = Input;
@@ -508,129 +509,142 @@ const RateAdmin = () => {
             Close
           </Button>,
         ]}
-        width={700}
+        width={800}
       >
         {selectedFeedback && (
           <div className="feedback-detail">
             <div className="feedback-info">
               <div className="section-title">Rating Information</div>
-              <div className="feedback-item">
-                <strong>User:</strong> {getUserName(selectedFeedback.userId)}
-              </div>
-              <div className="feedback-item">
-                <strong>Rating:</strong>{" "}
-                <Rate disabled value={selectedFeedback.rating} />
-              </div>
-              <div className="feedback-item">
-                <strong>Comment:</strong> {selectedFeedback.comment}
-              </div>
-              <div className="feedback-item">
-                <strong>Rating Date:</strong>{" "}
-                {formatDate(selectedFeedback.feedbackDate)}
-              </div>
-              <div className="feedback-item">
-                <strong>Type:</strong>{" "}
-                {renderFeedbackType(selectedFeedback.feedbackType)}
-              </div>
-              <div className="feedback-item">
-                <strong>Status:</strong> {renderStatus(selectedFeedback.status)}
+              <div className="feedback-content">
+                <div className="feedback-item">
+                  <strong>User:</strong>
+                  <span>{getUserName(selectedFeedback.userId)}</span>
+                </div>
+                <div className="feedback-item">
+                  <strong>Rating:</strong>
+                  <Rate disabled value={selectedFeedback.rating} />
+                </div>
+                <div className="feedback-item">
+                  <strong>Comment:</strong>
+                  <div className="content-box">{selectedFeedback.comment}</div>
+                </div>
+                <div className="feedback-item">
+                  <strong>Rating Date:</strong>
+                  <span>{formatDate(selectedFeedback.feedbackDate)}</span>
+                </div>
+                <div className="feedback-item">
+                  <strong>Type:</strong>
+                  {renderFeedbackType(selectedFeedback.feedbackType)}
+                </div>
+                <div className="feedback-item">
+                  <strong>Status:</strong>
+                  {renderStatus(selectedFeedback.status)}
+                </div>
               </div>
             </div>
 
             <div className="consultation-detail">
               <div className="section-title">Consultation Information</div>
-              {detailLoading ? (
-                <Spin tip="Loading information..."></Spin>
-              ) : consultationDetail ? (
-                <div>
-                  <div className="consultation-item">
-                    <strong>Doctor Name:</strong>{" "}
-                    {consultationDetail.doctorName || "No information"}
+              <div className="feedback-content">
+                {detailLoading ? (
+                  <div className="detail-loading">
+                    <Spin size="large" />
+                    <div>Loading information...</div>
                   </div>
-                  <div className="consultation-item">
-                    <strong>Response Date:</strong>{" "}
-                    {consultationDetail.responseDate
-                      ? formatDate(consultationDetail.responseDate)
-                      : "No information"}
-                  </div>
-                  <div className="consultation-item">
-                    <strong>Response Content:</strong>
-                  </div>
-                  <div className="consultation-content">
-                    {consultationDetail.content || "No content"}
-                  </div>
-                  <div className="consultation-item">
-                    <strong>Helpful:</strong>{" "}
-                    {consultationDetail.isHelpful !== undefined
-                      ? consultationDetail.isHelpful
-                        ? "Yes"
-                        : "No"
-                      : "No information"}
-                  </div>
-
-                  {consultationRequest && (
-                    <div className="request-detail">
-                      <div className="subsection-title">
-                        Initial Request Information
-                      </div>
-                      <div className="request-item">
-                        <strong>Child Name:</strong>{" "}
-                        {consultationRequest.childName || "No information"}
-                      </div>
-                      <div className="request-item">
-                        <strong>User:</strong>{" "}
-                        {consultationRequest.memberName || "No information"}
-                      </div>
-                      <div className="request-item">
-                        <strong>Request Date:</strong>{" "}
-                        {consultationRequest.requestDate
-                          ? formatDate(consultationRequest.requestDate)
+                ) : consultationDetail ? (
+                  <>
+                    <div className="consultation-item">
+                      <strong>Doctor Name:</strong>
+                      <span>
+                        {consultationDetail.doctorName || "No information"}
+                      </span>
+                    </div>
+                    <div className="consultation-item">
+                      <strong>Response Date:</strong>
+                      <span>
+                        {consultationDetail.responseDate
+                          ? formatDate(consultationDetail.responseDate)
                           : "No information"}
-                      </div>
-                      <div className="request-item">
-                        <strong>Problem Description:</strong>
-                      </div>
-                      <div className="consultation-content">
-                        {consultationRequest.description || "No description"}
-                      </div>
-                      <div className="request-item">
-                        <strong>Urgency Level:</strong>{" "}
-                        <Tag
-                          color={
-                            consultationRequest.urgency === "High"
-                              ? "red"
-                              : consultationRequest.urgency === "Medium"
-                              ? "orange"
-                              : "blue"
-                          }
-                        >
-                          {consultationRequest.urgency || "Undefined"}
-                        </Tag>
-                      </div>
-                      <div className="request-item">
-                        <strong>Category:</strong>{" "}
-                        {consultationRequest.category || "No information"}
-                      </div>
-                      <div className="request-item">
-                        <strong>Status:</strong>{" "}
-                        <Tag
-                          color={
-                            consultationRequest.status === "Completed"
-                              ? "green"
-                              : consultationRequest.status === "Pending"
-                              ? "orange"
-                              : "blue"
-                          }
-                        >
-                          {consultationRequest.status || "Undefined"}
-                        </Tag>
+                      </span>
+                    </div>
+                    <div className="consultation-item">
+                      <strong>Response:</strong>
+                      <div className="content-box">
+                        {consultationDetail.content || "No content"}
                       </div>
                     </div>
-                  )}
-                </div>
-              ) : (
-                <p>No detailed information found about consultation</p>
-              )}
+                    <div className="consultation-item">
+                      <strong>Helpful:</strong>
+                      <Tag
+                        color={
+                          consultationDetail.isHelpful ? "success" : "warning"
+                        }
+                      >
+                        {consultationDetail.isHelpful ? "Yes" : "No"}
+                      </Tag>
+                    </div>
+
+                    {consultationRequest && (
+                      <div className="request-detail">
+                        <div className="subsection-title">
+                          Initial Request Information
+                        </div>
+                        <div className="request-item">
+                          <strong>Child Name:</strong>
+                          <span>
+                            {consultationRequest.childName || "No information"}
+                          </span>
+                        </div>
+                        <div className="request-item">
+                          <strong>Problem:</strong>
+                          <div className="content-box">
+                            {consultationRequest.description ||
+                              "No description"}
+                          </div>
+                        </div>
+                        <div className="request-item">
+                          <strong>Urgency Level:</strong>
+                          <Tag
+                            color={
+                              consultationRequest.urgency === "High"
+                                ? "red"
+                                : consultationRequest.urgency === "Medium"
+                                ? "orange"
+                                : "blue"
+                            }
+                          >
+                            {consultationRequest.urgency || "Undefined"}
+                          </Tag>
+                        </div>
+                        <div className="request-item">
+                          <strong>Category:</strong>
+                          <span>
+                            {consultationRequest.category || "No information"}
+                          </span>
+                        </div>
+                        <div className="request-item">
+                          <strong>Status:</strong>
+                          <Tag
+                            color={
+                              consultationRequest.status === "Completed"
+                                ? "success"
+                                : consultationRequest.status === "Pending"
+                                ? "processing"
+                                : "default"
+                            }
+                          >
+                            {consultationRequest.status || "Undefined"}
+                          </Tag>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="content-box">
+                    No detailed information found about consultation
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
