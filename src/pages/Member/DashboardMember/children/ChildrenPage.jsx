@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ChildrenPage.css";
 import AddMilestone from "./AddMilestone.jsx";
@@ -30,14 +30,13 @@ function ChildrenPage() {
   const [showAddChildModal, setShowAddChildModal] = useState(false);
   const [showAddRecordModal, setShowAddRecordModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
+  const [setShowWelcomeMessage] = useState(false);
   const [selectedTool, setSelectedTool] = useState("BMI");
   const [latestAlert, setLatestAlert] = useState(null);
   const [alerts, setAlerts] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [popupType, setPopupType] = useState("error"); // default dùng kiểu error
-  
   const memberId = localStorage.getItem("memberId");
 
   // Gọi danh sách alert hiện có khi thay đổi selectedChild
@@ -158,45 +157,54 @@ function ChildrenPage() {
 
   const handleAddChild = async () => {
     try {
+      // Lấy tất cả các gói thành viên
+      const allPackagesRes = await memberShipApi.getAllPackages();
+      const packages = allPackagesRes.data?.data;
+      console.log("All Packages:", packages);
+  
+      // Lấy thông tin gói thành viên của người dùng hiện tại
       const membershipRes = await memberShipApi.getMemberMembership(memberId);
       const membershipData = membershipRes.data?.data;
       console.log("Membership data:", membershipData);
   
-      const activeMembership = Array.isArray(membershipData)
-        ? membershipData.find(
-            (membership) =>
-              membership.status === "Active" && membership.isActive === true
-          )
-        : membershipData?.status === "Active" && membershipData?.isActive === true
-        ? membershipData
-        : null;
-  
-      console.log("Active membership:", activeMembership);
-      if (!activeMembership) {
-        // Thay vì alert, hiển thị popup lỗi
-        setPopupType("error");
-        setPopupMessage("No active membership found. Please activate a membership plan.");
-        setShowPopup(true);
-        return;
-      }
-  
-      const membershipPackage = activeMembership.packageName;
-      let maxChildren = 1;
-      if (membershipPackage === "Standard") {
-        maxChildren = 2;
-      } else if (membershipPackage === "Premium") {
-        maxChildren = 6;
-      }
-  
-      if (childrenList.length >= maxChildren) {
+      // Kiểm tra xem người dùng có đang sử dụng gói thành viên hợp lệ không
+      if (
+        !membershipData ||
+        membershipData.status !== "Active" ||
+        membershipData.isActive !== true
+      ) {
         setPopupType("error");
         setPopupMessage(
-          `You have reached the limit of ${maxChildren} children for the ${membershipPackage} plan. Please upgrade your plan.`
+          "No active membership found. Please activate a membership plan."
         );
         setShowPopup(true);
         return;
       }
   
+      // Tìm gói thành viên của người dùng dựa trên packageId
+      const userPackage = packages.find(
+        (pkg) => pkg.packageName === membershipData.packageName
+      );
+      if (!userPackage) {
+        setPopupType("error");
+        setPopupMessage("User membership package not found.");
+        setShowPopup(true);
+        return;
+      }
+  
+      const maxChildren = userPackage.maxChildrenAllowed;
+  
+      // Kiểm tra số lượng trẻ đã thêm so với giới hạn của gói
+      if (childrenList.length >= maxChildren) {
+        setPopupType("error");
+        setPopupMessage(
+          `You have reached the limit of ${maxChildren} children for the ${userPackage.packageName} plan. Please upgrade your plan.`
+        );
+        setShowPopup(true);
+        return;
+      }
+  
+      // Nếu mọi điều kiện đều thỏa mãn, hiển thị modal thêm trẻ mới
       setShowAddChildModal(true);
     } catch (error) {
       console.error("Error checking membership plan:", error);
@@ -204,9 +212,8 @@ function ChildrenPage() {
       setPopupMessage("Unable to check membership package. Please try again.");
       setShowPopup(true);
     }
-  };
+  };  
   
-
   const closeOverlay = () => {
     setShowAddChildModal(false);
   };
