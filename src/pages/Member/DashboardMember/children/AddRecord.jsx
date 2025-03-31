@@ -638,49 +638,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
   />
 )}
       </div>
-
-      {showSuccessModal && (
-        <div
-          className="modal-overlay"
-          onClick={() => {
-            setShowSuccessModal(false);
-            closeOverlay();
-            window.location.reload();
-          }}
-        >
-          <div className="success-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="success-modal-header">
-              <h3>Success!</h3>
-              <button
-                className="modal-close"
-                onClick={() => {
-                  setShowSuccessModal(false);
-                  closeOverlay();
-                  window.location.reload();
-                }}
-              >
-                ×
-              </button>
-            </div>
-            <div className="success-modal-body">
-              <p>Growth record added successfully!</p>
-            </div>
-            <div className="success-modal-footer">
-              <button
-                className="success-modal-button"
-                onClick={() => {
-                  setShowSuccessModal(false);
-                  closeOverlay();
-                  window.location.reload();
-                }}
-              >
-                OK
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
   );
 };
 
