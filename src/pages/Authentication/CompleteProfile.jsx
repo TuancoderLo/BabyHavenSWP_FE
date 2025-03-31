@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import userAccountsApi from "../../services/userAccountsApi"; // Import the userAccountsApi
 import { createMember } from "../../services/member"; // Import the createMember function
+import api from "../../../config/axios";
 import "./CompleteProfile.css";
 
 function CompleteProfile() {
