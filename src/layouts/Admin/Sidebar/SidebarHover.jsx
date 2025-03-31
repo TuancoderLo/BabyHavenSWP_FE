@@ -74,7 +74,7 @@ function SidebarHover() {
             onClick={() => setActiveItem("/admin/ratings")}
           >
             <FaStar className="admin-icon" />
-            <span>Đánh Giá</span>
+            <span>Ratings</span>
           </Link>
         </li>
         <li className="signout-item" onClick={handleLogout}>

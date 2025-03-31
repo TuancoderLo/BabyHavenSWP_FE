@@ -50,11 +50,11 @@ const RateAdmin = () => {
         const userIds = feedbackData.map((feedback) => feedback.userId);
         fetchUserDetails(userIds);
       } else {
-        message.error("Không thể lấy dữ liệu đánh giá");
+        message.error("Unable to fetch rating data");
       }
     } catch (error) {
-      console.error("Lỗi khi lấy danh sách đánh giá:", error);
-      message.error("Đã xảy ra lỗi khi tải dữ liệu");
+      console.error("Error when fetching rating list:", error);
+      message.error("An error occurred while loading data");
     } finally {
       setLoading(false);
     }
@@ -195,11 +195,13 @@ const RateAdmin = () => {
           "No consultation response found for responseId:",
           responseId
         );
-        message.info("Không tìm thấy thông tin chi tiết về phản hồi tư vấn");
+        message.info(
+          "No detailed information found about consultation response"
+        );
       }
     } catch (error) {
-      console.error("Lỗi khi lấy thông tin chi tiết:", error);
-      message.error("Không thể lấy thông tin chi tiết");
+      console.error("Error when fetching detailed information:", error);
+      message.error("Unable to fetch detailed information");
     } finally {
       setDetailLoading(false);
     }
@@ -214,14 +216,14 @@ const RateAdmin = () => {
       );
 
       if (response.status === 200) {
-        message.success("Đã xóa đánh giá thành công");
+        message.success("Rating deleted successfully");
         fetchFeedbacks(); // Tải lại danh sách
       } else {
-        message.error("Không thể xóa đánh giá");
+        message.error("Unable to delete rating");
       }
     } catch (error) {
-      console.error("Lỗi khi xóa đánh giá:", error);
-      message.error("Đã xảy ra lỗi khi xóa đánh giá");
+      console.error("Error when deleting rating:", error);
+      message.error("An error occurred while deleting rating");
     } finally {
       setLoading(false);
       setDeleteModalVisible(false);
@@ -323,13 +325,13 @@ const RateAdmin = () => {
   // Cấu hình cột của bảng
   const columns = [
     {
-      title: "STT",
+      title: "No.",
       key: "index",
       width: 60,
       render: (_, __, index) => index + 1,
     },
     {
-      title: "Người dùng",
+      title: "User",
       dataIndex: "userId",
       key: "userId",
       width: 200,
@@ -339,57 +341,57 @@ const RateAdmin = () => {
       },
     },
     {
-      title: "Đánh giá",
+      title: "Rating",
       dataIndex: "rating",
       key: "rating",
       width: 150,
       render: (rating) => <Rate disabled value={rating} />,
     },
     {
-      title: "Bình luận",
+      title: "Comment",
       dataIndex: "comment",
       key: "comment",
       ellipsis: true,
     },
     {
-      title: "Ngày đánh giá",
+      title: "Rating Date",
       dataIndex: "feedbackDate",
       key: "feedbackDate",
       width: 180,
       render: (date) => formatDate(date),
     },
     {
-      title: "Loại",
+      title: "Type",
       dataIndex: "feedbackType",
       key: "feedbackType",
       width: 150,
       render: (type) => renderFeedbackType(type),
       filters: [
-        { text: "Chung", value: "General" },
-        { text: "Chất lượng dịch vụ", value: "ServiceQuality" },
-        { text: "Thái độ bác sĩ", value: "DoctorAttitude" },
-        { text: "Thời gian phản hồi", value: "ResponseTime" },
-        { text: "Trải nghiệm ứng dụng", value: "AppExperience" },
-        { text: "Khác", value: "Other" },
+        { text: "General", value: "General" },
+        { text: "Service Quality", value: "ServiceQuality" },
+        { text: "Doctor Attitude", value: "DoctorAttitude" },
+        { text: "Response Time", value: "ResponseTime" },
+        { text: "App Experience", value: "AppExperience" },
+        { text: "Other", value: "Other" },
       ],
       onFilter: (value, record) => record.feedbackType === value,
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       width: 120,
       render: (status) => renderStatus(status),
       filters: [
-        { text: "Đang chờ", value: "Pending" },
-        { text: "Đã duyệt", value: "Approved" },
-        { text: "Từ chối", value: "Rejected" },
-        { text: "Đã giải quyết", value: "Resolved" },
+        { text: "Pending", value: "Pending" },
+        { text: "Approved", value: "Approved" },
+        { text: "Rejected", value: "Rejected" },
+        { text: "Resolved", value: "Resolved" },
       ],
       onFilter: (value, record) => record.status === value,
     },
     {
-      title: "Thao tác",
+      title: "Actions",
       key: "actions",
       width: 120,
       render: (_, record) => (
@@ -397,12 +399,21 @@ const RateAdmin = () => {
           <Button
             type="primary"
             icon={<EyeOutlined />}
-            onClick={() => showDetailModal(record)}
+            onClick={(e) => {
+              e.stopPropagation();
+              showDetailModal(record);
+            }}
+            className="view-button"
+            title="View details"
           />
           <Button
-            danger
             icon={<DeleteOutlined />}
-            onClick={() => showDeleteConfirm(record)}
+            onClick={(e) => {
+              e.stopPropagation();
+              showDeleteConfirm(record);
+            }}
+            className="delete-button"
+            title="Delete rating"
           />
         </div>
       ),
@@ -423,13 +434,22 @@ const RateAdmin = () => {
         .includes(searchText.toLowerCase())
   );
 
+  // Thêm click row để xem chi tiết
+  const onRow = (record) => {
+    return {
+      onClick: () => {
+        showDetailModal(record);
+      },
+    };
+  };
+
   return (
     <div className="rate-admin-container">
-      <h1>Quản lý đánh giá từ người dùng</h1>
+      <h1>User Rating Management</h1>
 
       <div className="rate-admin-tools">
         <Search
-          placeholder="Tìm kiếm theo người dùng hoặc nội dung"
+          placeholder="Search by user or content"
           allowClear
           enterButton={<SearchOutlined />}
           size="middle"
@@ -442,7 +462,7 @@ const RateAdmin = () => {
             onClick={fetchFeedbacks}
             loading={loading}
           >
-            Làm mới
+            Refresh
           </Button>
         </div>
       </div>
@@ -454,12 +474,13 @@ const RateAdmin = () => {
             dataSource={filteredFeedbacks}
             rowKey="feedbackId"
             bordered
+            onRow={onRow}
             pagination={{
               pageSize: 10,
               showSizeChanger: true,
               pageSizeOptions: ["10", "20", "50"],
               showTotal: (total, range) =>
-                `${range[0]}-${range[1]} của ${total} đánh giá`,
+                `${range[0]}-${range[1]} of ${total} ratings`,
             }}
           />
         </Spin>
@@ -467,24 +488,24 @@ const RateAdmin = () => {
 
       {/* Modal xác nhận xóa */}
       <Modal
-        title="Xác nhận xóa"
+        title="Confirm Delete"
         open={deleteModalVisible}
         onOk={handleDelete}
         onCancel={() => setDeleteModalVisible(false)}
-        okText="Xóa"
-        cancelText="Hủy"
+        okText="Delete"
+        cancelText="Cancel"
       >
-        <p>Bạn có chắc chắn muốn xóa đánh giá này không?</p>
+        <p>Are you sure you want to delete this rating?</p>
       </Modal>
 
       {/* Modal hiển thị chi tiết */}
       <Modal
-        title="Chi tiết đánh giá"
+        title="Rating Details"
         open={detailVisible}
         onCancel={() => setDetailVisible(false)}
         footer={[
           <Button key="close" onClick={() => setDetailVisible(false)}>
-            Đóng
+            Close
           </Button>,
         ]}
         width={700}
@@ -492,88 +513,88 @@ const RateAdmin = () => {
         {selectedFeedback && (
           <div className="feedback-detail">
             <div className="feedback-info">
-              <h3>Thông tin đánh giá</h3>
+              <div className="section-title">Rating Information</div>
               <div className="feedback-item">
-                <strong>Người dùng:</strong>{" "}
-                {getUserName(selectedFeedback.userId)}
+                <strong>User:</strong> {getUserName(selectedFeedback.userId)}
               </div>
               <div className="feedback-item">
-                <strong>Đánh giá:</strong>{" "}
+                <strong>Rating:</strong>{" "}
                 <Rate disabled value={selectedFeedback.rating} />
               </div>
               <div className="feedback-item">
-                <strong>Bình luận:</strong> {selectedFeedback.comment}
+                <strong>Comment:</strong> {selectedFeedback.comment}
               </div>
               <div className="feedback-item">
-                <strong>Ngày đánh giá:</strong>{" "}
+                <strong>Rating Date:</strong>{" "}
                 {formatDate(selectedFeedback.feedbackDate)}
               </div>
               <div className="feedback-item">
-                <strong>Loại:</strong>{" "}
+                <strong>Type:</strong>{" "}
                 {renderFeedbackType(selectedFeedback.feedbackType)}
               </div>
               <div className="feedback-item">
-                <strong>Trạng thái:</strong>{" "}
-                {renderStatus(selectedFeedback.status)}
+                <strong>Status:</strong> {renderStatus(selectedFeedback.status)}
               </div>
             </div>
 
             <div className="consultation-detail">
-              <h3>Thông tin tư vấn</h3>
+              <div className="section-title">Consultation Information</div>
               {detailLoading ? (
-                <Spin tip="Đang tải thông tin..."></Spin>
+                <Spin tip="Loading information..."></Spin>
               ) : consultationDetail ? (
                 <div>
-                  <p>
-                    <strong>Tên bác sĩ:</strong>{" "}
-                    {consultationDetail.doctorName || "Không có thông tin"}
-                  </p>
-                  <p>
-                    <strong>Ngày phản hồi:</strong>{" "}
+                  <div className="consultation-item">
+                    <strong>Doctor Name:</strong>{" "}
+                    {consultationDetail.doctorName || "No information"}
+                  </div>
+                  <div className="consultation-item">
+                    <strong>Response Date:</strong>{" "}
                     {consultationDetail.responseDate
                       ? formatDate(consultationDetail.responseDate)
-                      : "Không có thông tin"}
-                  </p>
-                  <p>
-                    <strong>Nội dung phản hồi:</strong>
-                  </p>
-                  <div className="consultation-content">
-                    {consultationDetail.content || "Không có nội dung"}
+                      : "No information"}
                   </div>
-                  <p>
-                    <strong>Hữu ích:</strong>{" "}
+                  <div className="consultation-item">
+                    <strong>Response Content:</strong>
+                  </div>
+                  <div className="consultation-content">
+                    {consultationDetail.content || "No content"}
+                  </div>
+                  <div className="consultation-item">
+                    <strong>Helpful:</strong>{" "}
                     {consultationDetail.isHelpful !== undefined
                       ? consultationDetail.isHelpful
-                        ? "Có"
-                        : "Không"
-                      : "Không có thông tin"}
-                  </p>
+                        ? "Yes"
+                        : "No"
+                      : "No information"}
+                  </div>
 
-                  {consultationRequest ? (
+                  {consultationRequest && (
                     <div className="request-detail">
-                      <h4>Thông tin yêu cầu ban đầu</h4>
-                      <p>
-                        <strong>Tên trẻ:</strong>{" "}
-                        {consultationRequest.childName || "Không có thông tin"}
-                      </p>
-                      <p>
-                        <strong>Người dùng:</strong>{" "}
-                        {consultationRequest.memberName || "Không có thông tin"}
-                      </p>
-                      <p>
-                        <strong>Ngày yêu cầu:</strong>{" "}
+                      <div className="subsection-title">
+                        Initial Request Information
+                      </div>
+                      <div className="request-item">
+                        <strong>Child Name:</strong>{" "}
+                        {consultationRequest.childName || "No information"}
+                      </div>
+                      <div className="request-item">
+                        <strong>User:</strong>{" "}
+                        {consultationRequest.memberName || "No information"}
+                      </div>
+                      <div className="request-item">
+                        <strong>Request Date:</strong>{" "}
                         {consultationRequest.requestDate
                           ? formatDate(consultationRequest.requestDate)
-                          : "Không có thông tin"}
-                      </p>
-                      <p>
-                        <strong>Mô tả vấn đề:</strong>
-                      </p>
-                      <div className="consultation-content">
-                        {consultationRequest.description || "Không có mô tả"}
+                          : "No information"}
                       </div>
-                      <p>
-                        <strong>Mức độ khẩn cấp:</strong>{" "}
+                      <div className="request-item">
+                        <strong>Problem Description:</strong>
+                      </div>
+                      <div className="consultation-content">
+                        {consultationRequest.description || "No description"}
+                      </div>
+                      <div className="request-item">
+                        <strong>Urgency Level:</strong>{" "}
                         <Tag
                           color={
                             consultationRequest.urgency === "High"
@@ -583,15 +604,15 @@ const RateAdmin = () => {
                               : "blue"
                           }
                         >
-                          {consultationRequest.urgency || "Không xác định"}
+                          {consultationRequest.urgency || "Undefined"}
                         </Tag>
-                      </p>
-                      <p>
-                        <strong>Danh mục:</strong>{" "}
-                        {consultationRequest.category || "Không có thông tin"}
-                      </p>
-                      <p>
-                        <strong>Trạng thái:</strong>{" "}
+                      </div>
+                      <div className="request-item">
+                        <strong>Category:</strong>{" "}
+                        {consultationRequest.category || "No information"}
+                      </div>
+                      <div className="request-item">
+                        <strong>Status:</strong>{" "}
                         <Tag
                           color={
                             consultationRequest.status === "Completed"
@@ -601,18 +622,14 @@ const RateAdmin = () => {
                               : "blue"
                           }
                         >
-                          {consultationRequest.status || "Không xác định"}
+                          {consultationRequest.status || "Undefined"}
                         </Tag>
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="no-request-info">
-                      <p>Không tìm thấy thông tin về yêu cầu tư vấn ban đầu</p>
+                      </div>
                     </div>
                   )}
                 </div>
               ) : (
-                <p>Không tìm thấy thông tin chi tiết về tư vấn</p>
+                <p>No detailed information found about consultation</p>
               )}
             </div>
           </div>
