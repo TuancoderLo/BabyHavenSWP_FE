@@ -88,6 +88,16 @@ const userAccountsApi = {
       throw error;
     }
   },
+
+  createMember: async (memberData) => {
+    try {
+      // Bước 1: Tạo user account
+      const response = await api.post("UserAccounts", memberData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export default userAccountsApi;

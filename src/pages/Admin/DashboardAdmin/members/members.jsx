@@ -80,6 +80,11 @@ const Members = () => {
   const [tempUserData, setTempUserData] = useState(null);
   const [doctorForm] = Form.useForm();
 
+  // Thêm state để quản lý bước tạo member
+  const [isCreatingMemberInfo, setIsCreatingMemberInfo] = useState(false);
+  const [tempMemberData, setTempMemberData] = useState(null);
+  const [memberInfoForm] = Form.useForm();
+
   // Fetch data when component mounts and when tab changes
   useEffect(() => {
     if (activeTab === "1") {
@@ -192,23 +197,33 @@ const Members = () => {
       const response = await userAccountsApi.create(userAccountData);
       console.log("Create account response:", response);
 
-      // Kiểm tra response theo đúng cấu trúc API trả về
       if (response?.data?.data?.userId) {
-        const userData = response.data.data; // Lấy data object từ response
+        const userData = response.data.data;
 
         if (values.roleId === 2) {
+          // Logic hiện tại cho Doctor
           setTempUserData({
             userId: userData.userId,
             name: userData.name,
             email: userData.email,
             phoneNumber: userData.phoneNumber,
           });
-
           message.success(
             "Tạo tài khoản thành công. Vui lòng nhập thông tin bác sĩ"
           );
           setUserAccountModalVisible(false);
           setIsCreatingDoctor(true);
+        } else if (values.roleId === 1) {
+          // Logic mới cho Member
+          setTempMemberData({
+            userId: userData.userId,
+            name: userData.name,
+          });
+          message.success(
+            "Tạo tài khoản thành công. Vui lòng nhập thông tin member"
+          );
+          setUserAccountModalVisible(false);
+          setIsCreatingMemberInfo(true);
         } else {
           message.success("Tạo tài khoản thành công");
           setUserAccountModalVisible(false);
@@ -818,6 +833,38 @@ const Members = () => {
   // Thêm hàm xử lý khi thay đổi role
   const handleRoleChange = (role) => {
     setSelectedRole(role);
+  };
+
+  // Thêm hàm xử lý submit form thông tin member
+  const handleMemberInfoSubmit = async (values) => {
+    try {
+      setLoading(true);
+
+      if (!tempMemberData?.userId) {
+        throw new Error("Không tìm thấy thông tin userId");
+      }
+
+      const memberData = {
+        userId: tempMemberData.userId,
+        emergencyContact: values.emergencyContact,
+        notes: values.notes || "",
+      };
+
+      console.log("Creating member with data:", memberData);
+
+      await createMember(memberData);
+      message.success("Tạo thông tin member thành công");
+      setIsCreatingMemberInfo(false);
+      setTempMemberData(null);
+      fetchMembers();
+    } catch (error) {
+      console.error("Error creating member:", error);
+      message.error(
+        error.response?.data?.message || "Không thể tạo thông tin member"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -1444,6 +1491,58 @@ const Members = () => {
                 onClick={() => {
                   setIsCreatingDoctor(false);
                   setTempUserData(null);
+                }}
+              >
+                Hủy
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Member Information Modal */}
+      <Modal
+        title="Nhập thông tin member"
+        visible={isCreatingMemberInfo}
+        onCancel={() => {
+          setIsCreatingMemberInfo(false);
+          setTempMemberData(null);
+        }}
+        footer={null}
+        width={700}
+        destroyOnClose
+      >
+        <Form
+          form={memberInfoForm}
+          layout="vertical"
+          onFinish={handleMemberInfoSubmit}
+        >
+          <Form.Item
+            name="emergencyContact"
+            label="Emergency Contact"
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng nhập thông tin liên hệ khẩn cấp",
+              },
+            ]}
+          >
+            <Input placeholder="Nhập thông tin liên hệ khẩn cấp" />
+          </Form.Item>
+
+          <Form.Item name="notes" label="Ghi chú">
+            <TextArea rows={4} placeholder="Nhập ghi chú nếu có" />
+          </Form.Item>
+
+          <Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                Tạo thông tin member
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsCreatingMemberInfo(false);
+                  setTempMemberData(null);
                 }}
               >
                 Hủy
