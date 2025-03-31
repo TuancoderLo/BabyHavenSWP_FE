@@ -248,7 +248,9 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
             )}
             <div className="step-form">
               <div className="form-section date-section">
-                <h4>Record Date</h4>
+              <h4>
+                  Record Date <span className="required-asterisk">*</span>
+                </h4>
                 <input
                   type="date"
                   value={growthForm.createdAt}
@@ -268,7 +270,9 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 <h4>Basic Measurements</h4>
                 <div className="measurements-section">
                   <div>
-                    <label>Baby's weight (kg)</label>
+                  <label>
+                      Baby's weight (kg) <span className="required-asterisk">*</span>
+                    </label>
                     <input
                       type="number"
                       name="weight"
@@ -288,7 +292,9 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                     )}
                   </div>
                   <div>
-                    <label>Baby's height (cm)</label>
+                  <label>
+                      Baby's height (cm) <span className="required-asterisk">*</span>
+                    </label>
                     <input
                       type="number"
                       name="height"
