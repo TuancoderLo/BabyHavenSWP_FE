@@ -8,6 +8,8 @@ import {
   validateGrowthRecordErrors,
   validateGrowthRecordWarnings
 } from "../../../../data/childValidations";
+import PopupNotification from "../../../../layouts/Member/popUp/PopupNotification";
+
 import "./AddRecord.css";
 
 const AddRecord = ({ child, memberId, closeOverlay }) => {
@@ -29,9 +31,10 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
       </div>
     );
   }
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState("success");
 
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [childDetails, setChildDetails] = useState(null);
   const [growthForm, setGrowthForm] = useState({
     createdAt: "",
     weight: "",
@@ -126,57 +129,61 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
 
   const handleSubmit = useCallback(async () => {
     if (!validateForm()) return;
+    
+    const growthPayload = {
+      name: child.name,
+      dateOfBirth: child.dateOfBirth,
+      recordedBy: memberId,
+      createdAt: growthForm.createdAt || new Date().toISOString().split("T")[0],
+      weight: Number(growthForm.weight) || 0,
+      height: Number(growthForm.height) || 0,
+      headCircumference: Number(growthForm.headCircumference) || 0,
+      notes: growthForm.notes,
+      muscleMass: Number(growthForm.muscleMass) || 0,
+      chestCircumference: Number(growthForm.chestCircumference) || 0,
+      nutritionalStatus: growthForm.nutritionalStatus,
+      ferritinLevel: Number(growthForm.ferritinLevel) || 0,
+      triglycerides: Number(growthForm.triglycerides) || 0,
+      bloodSugarLevel: Number(growthForm.bloodSugarLevel) || 0,
+      physicalActivityLevel: growthForm.physicalActivityLevel,
+      heartRate: Number(growthForm.heartRate) || 0,
+      bloodPressure: Number(growthForm.bloodPressure) || 0,
+      bodyTemperature: Number(growthForm.bodyTemperature) || 0,
+      oxygenSaturation: Number(growthForm.oxygenSaturation) || 0,
+      sleepDuration: Number(growthForm.sleepDuration) || 0,
+      vision: growthForm.vision,
+      hearing: growthForm.hearing,
+      immunizationStatus: growthForm.immunizationStatus,
+      mentalHealthStatus: growthForm.mentalHealthStatus,
+      growthHormoneLevel: Number(growthForm.growthHormoneLevel) || 0,
+      attentionSpan: growthForm.attentionSpan,
+      neurologicalReflexes: growthForm.neurologicalReflexes,
+      developmentalMilestones: growthForm.developmentalMilestones,
+    };
+  
     try {
-      const growthPayload = {
-        name: child.name,
-        dateOfBirth: child.dateOfBirth,
-        recordedBy: memberId,
-        createdAt: growthForm.createdAt || new Date().toISOString().split("T")[0],
-        weight: Number(growthForm.weight) || 0,
-        height: Number(growthForm.height) || 0,
-        headCircumference: Number(growthForm.headCircumference) || 0,
-        notes: growthForm.notes,
-        muscleMass: Number(growthForm.muscleMass) || 0,
-        chestCircumference: Number(growthForm.chestCircumference) || 0,
-        nutritionalStatus: growthForm.nutritionalStatus,
-        ferritinLevel: Number(growthForm.ferritinLevel) || 0,
-        triglycerides: Number(growthForm.triglycerides) || 0,
-        bloodSugarLevel: Number(growthForm.bloodSugarLevel) || 0,
-        physicalActivityLevel: growthForm.physicalActivityLevel,
-        heartRate: Number(growthForm.heartRate) || 0,
-        bloodPressure: Number(growthForm.bloodPressure) || 0,
-        bodyTemperature: Number(growthForm.bodyTemperature) || 0,
-        oxygenSaturation: Number(growthForm.oxygenSaturation) || 0,
-        sleepDuration: Number(growthForm.sleepDuration) || 0,
-        vision: growthForm.vision,
-        hearing: growthForm.hearing,
-        immunizationStatus: growthForm.immunizationStatus,
-        mentalHealthStatus: growthForm.mentalHealthStatus,
-        growthHormoneLevel: Number(growthForm.growthHormoneLevel) || 0,
-        attentionSpan: growthForm.attentionSpan,
-        neurologicalReflexes: growthForm.neurologicalReflexes,
-        developmentalMilestones: growthForm.developmentalMilestones,
-      };
-
       await childApi.createGrowthRecord(growthPayload);
-      setShowSuccessModal(true);
+      // Hiển thị popup thông báo thành công cho growth record
+      setPopupType("success");
+      setPopupMessage("Growth record added successfully.");
+      setShowPopup(true);
+  
       try {
-        const alertRes = await alertApi.getAlert(
-          child.name,
-          child.dateOfBirth,
-          memberId
-        );
+        const alertRes = await alertApi.getAlert(child.name, child.dateOfBirth, memberId);
         console.log("Alert created and fetched:", alertRes.data);
       } catch (alertErr) {
         console.error("Error creating/fetching alert:", alertErr);
+        // Không cần hiển thị popup riêng cho lỗi alert
       }
     } catch (err) {
       console.error("Error submitting growth record:", err);
+      setPopupType("error");
+      setPopupMessage("Failed to add growth record. Please try again.");
+      setShowPopup(true);
     }
   }, [child, memberId, growthForm, validateForm]);
-
+  
   return (
-    <>
       <div
         className="add-record-overlay"
         onClick={(e) => e.target === e.currentTarget && closeOverlay()}
@@ -606,49 +613,17 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               </button>
           </div>
         </div>
+        {showPopup && (
+  <PopupNotification
+    type={popupType}
+    message={popupMessage}
+    onClose={() => {
+      setShowPopup(false);
+      closeOverlay(); // Gọi hàm đóng form
+    }}
+  />
+)}
       </div>
-      {showSuccessModal && (
-        <div
-          className="modal-overlay"
-          onClick={() => {
-            setShowSuccessModal(false);
-            closeOverlay();
-            window.location.reload();
-          }}
-        >
-          <div className="success-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="success-modal-header">
-              <h3>Success!</h3>
-              <button
-                className="modal-close"
-                onClick={() => {
-                  setShowSuccessModal(false);
-                  closeOverlay();
-                  window.location.reload();
-                }}
-              >
-                ×
-              </button>
-            </div>
-            <div className="success-modal-body">
-              <p>Growth record added successfully!</p>
-            </div>
-            <div className="success-modal-footer">
-              <button
-                className="success-modal-button"
-                onClick={() => {
-                  setShowSuccessModal(false);
-                  closeOverlay();
-                  window.location.reload();
-                }}
-              >
-                OK
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
   );
 };
 

@@ -1,0 +1,115 @@
+/* PopupNotification.css */
+
+/* Overlay nền mờ */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4); /* Mờ nhẹ, phù hợp với tone tổng thể */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  /* Khung pop-up chung */
+  .popup-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 320px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: fadeIn 0.3s ease;
+  }
+  
+  /* Header pop-up */
+  .popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 15px;
+  }
+  
+  .popup-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+  
+  /* Nút đóng modal */
+  .popup-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+  
+  /* Nội dung pop-up */
+  .popup-body {
+    text-align: center;
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 15px;
+  }
+  
+  /* Footer chứa nút xác nhận */
+  .popup-footer {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .popup-button {
+    background: #d81b60; /* Mặc định dùng deep pink */
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s ease;
+  }
+  
+  .popup-button:hover {
+    background: #c2185b;
+  }
+  
+  /* Biến thể cho thông báo thành công */
+  .popup-success .popup-header h3 {
+    color: #28a745; /* xanh lá mềm mại */
+  }
+  
+  .popup-success .popup-button {
+    background: #28a745;
+  }
+  
+  .popup-success .popup-button:hover {
+    background: #218838;
+  }
+  
+  /* Biến thể cho thông báo lỗi */
+  .popup-error .popup-header h3 {
+    color: #f44336; /* đỏ nhẹ */
+  }
+  
+  .popup-error .popup-button {
+    background: #f44336;
+  }
+  
+  .popup-error .popup-button:hover {
+    background: #d32f2f;
+  }
+  
+  /* Hiệu ứng fadeIn */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  

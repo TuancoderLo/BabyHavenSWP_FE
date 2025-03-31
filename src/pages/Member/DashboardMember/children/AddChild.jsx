@@ -12,10 +12,17 @@ import {
 } from "../../../../data/childValidations";
 import baby from "../../../../assets/baby.jpg";
 import "./AddChild.css";
+import PopupNotification from "../../../../layouts/Member/popUp/PopupNotification";
+
 const AddChild = ({ closeOverlay }) => {
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState({});
   const [warnings, setWarnings] = useState({});
+
+const [showPopup, setShowPopup] = useState(false);
+const [popupMessage, setPopupMessage] = useState("");
+const [popupType, setPopupType] = useState("success"); // "success" hoặc "error"
+
 
   const [childForm, setChildForm] = useState({
     name: "",
@@ -181,10 +188,10 @@ const AddChild = ({ closeOverlay }) => {
       setSubmitted(true);
     } catch (err) {
       console.error("Error submitting data:", err);
-      setErrors((prev) => ({
-        ...prev,
-        submit: "Failed to submit data. Please try again.",
-      }));
+      // Hiển thị popup lỗi
+      setPopupType("error");
+      setPopupMessage("Failed to add child. Please try again.");
+      setShowPopup(true);
     }
   };
 
@@ -735,7 +742,14 @@ const AddChild = ({ closeOverlay }) => {
               {errors.submit && <p className="error-text">{errors.submit}</p>}
           </div>
         </div>
-      </div>
+      </div>     
+      {showPopup && (
+        <PopupNotification
+          type={popupType}
+          message={popupMessage}
+          onClose={() => setShowPopup(false)}
+        />
+      )}
     </div>
   );
 };

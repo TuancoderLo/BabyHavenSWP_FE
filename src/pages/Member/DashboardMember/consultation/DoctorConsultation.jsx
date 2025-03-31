@@ -4,6 +4,7 @@ import childApi from "../../../../services/childApi";
 import doctorApi from "../../../../services/DoctorApi";
 import TextEditor from "../../../../pages/Admin/DashboardAdmin/blog/textEditor";
 import moment from "moment";
+import PopupNotification from "../../../../layouts/Member/popUp/PopupNotification";
 
 // Response Card
 function ExpandableResponseCard({ response, request, onClick }) {
@@ -83,7 +84,9 @@ function DoctorConsultation() {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
-
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState("success"); 
   // Consultation Data
   const [consultationResponses, setConsultationResponses] = useState([]);
   const [consultationRequests, setConsultationRequests] = useState({});
@@ -93,7 +96,6 @@ function DoctorConsultation() {
   const [selectedResponse, setSelectedResponse] = useState(null);
   const [selectedSentRequest, setSelectedSentRequest] = useState(null);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -302,8 +304,7 @@ function DoctorConsultation() {
 
       const currentDate = new Date();
       const requestDate = `${currentDate.toISOString().slice(0, 10)} ${currentDate.toTimeString().slice(0, 8)}.${currentDate.getMilliseconds().toString().padEnd(3, "0")}`;
-      const plainDescription = stripHtml(consultationContent);
-
+      const plainDescription = consultationContent.replace(/<[^>]+>/g, ""); // Giả sử stripHtml đơn giản
       const attachments = await Promise.all(
         selectedFiles.map(async (file) => {
           const base64Content = await new Promise((resolve) => {
@@ -333,10 +334,16 @@ function DoctorConsultation() {
       };
 
       await doctorApi.createConsultationRequest(payload);
+      // Gọi lại fetch dữ liệu để cập nhật giao diện
       await fetchConsultationResponses();
       await fetchSentRequests();
-      setShowSuccessModal(true);
+      
+      // Thay vì hiển thị modal success cũ, sử dụng popup
+      setPopupType("success");
+      setPopupMessage("Consultation request sent successfully!");
+      setShowPopup(true);
 
+      // Reset các trạng thái liên quan
       setCurrentStep(0);
       setConsultationContent("");
       setSelectedDoctor(null);
@@ -344,9 +351,12 @@ function DoctorConsultation() {
     } catch (error) {
       setSubmitError(
         error.response?.data?.title ||
-          error.message ||
-          "Unable to send consultation request"
+        error.message ||
+        "Unable to send consultation request"
       );
+      setPopupType("error");
+      setPopupMessage("Failed to send consultation request. Please try again.");
+      setShowPopup(true);
     } finally {
       setSubmitLoading(false);
     }
@@ -817,34 +827,12 @@ function DoctorConsultation() {
           </div>
         </div>
       )}
-
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowSuccessModal(false)}
-        >
-          <div
-            className="success-modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="success-modal-header">
-              <h3>Success!</h3>
-              <button className="modal-close" onClick={() => setShowSuccessModal(false)}>×</button>
-            </div>
-            <div className="success-modal-body">
-              <p>Consultation request sent successfully!</p>
-            </div>
-            <div className="success-modal-footer">
-              <button
-                className="success-modal-button"
-                onClick={() => setShowSuccessModal(false)}
-              >
-                OK
-              </button>
-            </div>
-          </div>
-        </div>
+        {showPopup && (
+        <PopupNotification
+          type={popupType}
+          message={popupMessage}
+          onClose={() => setShowPopup(false)}
+        />
       )}
     </div>
   );
