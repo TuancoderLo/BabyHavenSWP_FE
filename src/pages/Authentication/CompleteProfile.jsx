@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import userAccountsApi from "../../services/userAccountsApi"; // Import the userAccountsApi
 import "./CompleteProfile.css";
 
 function CompleteProfile() {
@@ -14,6 +15,7 @@ function CompleteProfile() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const userId = localStorage.getItem("userId"); // Get userId from localStorage
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -69,12 +71,38 @@ function CompleteProfile() {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
-      const formattedDate = `${year}/${month}/${day}`;
-      localStorage.setItem("isVerified", "true");
-      // Mô phỏng đã hoàn thành hồ sơ và chuyển hướng ngay lập tức
-      navigate("/homepage");
+      const formattedDate = `${year}-${month}-${day}`;
+
+      // Prepare the data for the API with form values
+      const updateData = {
+        userId: userId,
+        username: null, // Not provided in the form
+        email: null, // Not provided in the form
+        phoneNumber: formData.phoneNumber.trim(),
+        name: null, // Not provided in the form
+        gender: formData.gender,
+        dateOfBirth: formattedDate,
+        address: formData.address.trim(),
+        status: 1, // Default status as per API
+        roleId: 1, // Default roleId for Member as per API
+        profilePicture: null, // Not provided in the form
+        password: formData.password, // Include the password
+        isVerified: true, // Set isVerified to true
+      };
+
+      // Call the API to update the user's profile
+      const response = await userAccountsApi.updateMemberAccount(userId, updateData);
+
+      // Update localStorage to reflect the verification status
+      if (response.data.status === 1) {
+        localStorage.setItem("isVerified", "true");
+        navigate("/homepage");
+      } else {
+        setError(`Error updating profile: ${response.data.message}`);
+      }
     } catch (error) {
-      setError("Không thể hoàn thành hồ sơ. Vui lòng thử lại sau.");
+      setError("Error updating profile.");
+      console.error("Error updating profile:", error);
     } finally {
       setIsLoading(false);
     }
@@ -170,11 +198,6 @@ function CompleteProfile() {
           >
             {isLoading ? "Saving..." : "Complete Profile"}
           </button>
-
-          <div className="CompleteProfile-toggle-form">
-            Want to update later?
-            <span onClick={() => navigate("/profile")}>Skip for now</span>
-          </div>
         </form>
       </div>
     </div>
