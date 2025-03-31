@@ -4,10 +4,10 @@ import { CKEditor, useCKEditorCloud } from "@ckeditor/ckeditor5-react";
 import "./textEditor.css";
 
 const LICENSE_KEY =
-  "eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3NDMzNzkxOTksImp0aSI6IjMyMTE1YTJkLTUyMTMtNGVhOC04NjE4LTcyNDMyOTFiMTBiOSIsInVzYWdlRW5kcG9pbnQiOiJodHRwczovL3Byb3h5LWV2ZW50LmNrZWRpdG9yLmNvbSIsImRpc3RyaWJ1dGlvbkNoYW5uZWwiOlsiY2xvdWQiLCJkcnVwYWwiLCJzaCJdLCJ3aGl0ZUxhYmVsIjp0cnVlLCJsaWNlbnNlVHlwZSI6InRyaWFsIiwiZmVhdHVyZXMiOlsiKiJdLCJ2YyI6IjQ5OTUzOWQyIn0.EDYde32vafpZWBe_eQ13es_gb2XLQwN-L9paZvvsV3fHUhl7qfORb-vgBaHQxD4IsQrf0kQJnrvoJYs3jIhG9A";
+  "eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3NDQ1ODg3OTksImp0aSI6IjU4NDcxNDE5LTk0MDctNGMyNC1iODE5LWQyOTA3OWRjNzM2NiIsInVzYWdlRW5kcG9pbnQiOiJodHRwczovL3Byb3h5LWV2ZW50LmNrZWRpdG9yLmNvbSIsImRpc3RyaWJ1dGlvbkNoYW5uZWwiOlsiY2xvdWQiLCJkcnVwYWwiLCJzaCJdLCJ3aGl0ZUxhYmVsIjp0cnVlLCJsaWNlbnNlVHlwZSI6InRyaWFsIiwiZmVhdHVyZXMiOlsiKiJdLCJ2YyI6ImJmNTE4YWRhIn0.QixUv8Xhgtr5QS8YggLkYnsjJaz5Tdj1lf3exrruIVcOqHMKWeKJuuM4lSlcRSz-bodibMJZiH7RCkgw_CEYPQ";
 
 const CLOUD_SERVICES_TOKEN_URL =
-  "https://kmiu6_dddqr9.cke-cs.com/token/dev/752a521f73caaf5e2602008c6a5f2360d8c0c49b6d76f37b301407aaff1b?limit=10";
+  "https://fsh49r7uv3vp.cke-cs.com/token/dev/435de8818b4c73bfc0c43e54e1def89541e64daacf810387840b1e2bda58?limit=10";
 
 export default function TextEditor({ value = "", onChange }) {
   const editorContainerRef = useRef(null);
