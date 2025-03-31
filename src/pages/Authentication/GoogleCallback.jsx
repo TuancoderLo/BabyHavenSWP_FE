@@ -53,7 +53,11 @@ const GoogleCallback = ({ onLoginSuccess }) => {
 
             console.log("User authenticated:", tokenPayload);
             onLoginSuccess();
-            navigate("/homepage");
+            if (user.isVerified === false) {
+                navigate("/complete-profile");
+            } else {
+                navigate("/homepage");
+            }
         } catch (error) {
             setError(error.message);
             console.error("Error during Google authentication:", error);
