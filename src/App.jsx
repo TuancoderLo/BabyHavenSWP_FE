@@ -20,6 +20,7 @@ import Admin from "./pages/Admin/Admin";
 import Blog from "./pages/Admin/DashboardAdmin/blog/blog";
 import Members from "./pages/Admin/DashboardAdmin/members/members";
 import AdminPackages from "./pages/Admin/DashboardAdmin/packages/packages";
+import RateAdmin from "./pages/Admin/DashboardAdmin/Rating/RateAdmin";
 
 //doctor
 import Doctor from "./pages/Doctor/Doctor";
@@ -136,6 +137,7 @@ function App() {
           <Route path="blog" element={<Blog />} />
           <Route path="members" element={<Members />} />
           <Route path="packages" element={<AdminPackages />} />
+          <Route path="ratings" element={<RateAdmin />} />
         </Route>
 
         {/* Bắt tất cả còn lại => về "/" */}
