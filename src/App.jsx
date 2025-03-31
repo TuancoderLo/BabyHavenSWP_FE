@@ -9,6 +9,7 @@ import ForgetPassword from "./pages/Authentication/Login/ForgetPassword";
 import VerifyEmail from "./pages/Authentication/Register/VerifyEmail";
 import CategoryPage from "./pages/Home/ApiForHomePage/Navbar/CategoryPage";
 import FormatBlog from "./pages/Home/ApiForHomePage/Navbar/FormatBlog";
+import CompleteProfile from "./pages/Authentication/CompleteProfile";
 
 // HomePage (user)
 import Homepage from "./pages/Home/HomePage/HomePage";
@@ -91,6 +92,7 @@ function App() {
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/google-callback" element={<GoogleCallback />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/complete-profile" element={<CompleteProfile />} />
         <Route path="/packages" element={<MemberPackages />} />
         <Route path="/category/:categoryId" element={<CategoryPage />} />
         <Route path="/blog/:blogId" element={<FormatBlog />} />
