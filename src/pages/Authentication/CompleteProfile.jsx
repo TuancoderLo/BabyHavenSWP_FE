@@ -5,7 +5,7 @@ import "./CompleteProfile.css";
 function CompleteProfile() {
   const [formData, setFormData] = useState({
     phoneNumber: "",
-    name: "",
+    password: "",
     gender: "Male",
     dateOfBirth: "",
     address: "",
@@ -32,7 +32,7 @@ function CompleteProfile() {
   const validateForm = () => {
     if (
       !formData.phoneNumber.trim() ||
-      !formData.name.trim() ||
+      !formData.password.trim() ||
       !formData.dateOfBirth.trim() ||
       !formData.address.trim()
     ) {
@@ -42,6 +42,11 @@ function CompleteProfile() {
 
     if (!/^\d{10,11}$/.test(formData.phoneNumber)) {
       setError("Phone number must be 10 or 11 digits");
+      return false;
+    }
+
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters");
       return false;
     }
 
@@ -67,7 +72,6 @@ function CompleteProfile() {
       const formattedDate = `${year}/${month}/${day}`;
 
       // Mô phỏng đã hoàn thành hồ sơ và chuyển hướng ngay lập tức
-      // Bỏ setTimeout vì nó gây trễ và có thể làm người dùng nghĩ là nút không hoạt động
       navigate("/profile");
     } catch (error) {
       setError("Không thể hoàn thành hồ sơ. Vui lòng thử lại sau.");
@@ -99,17 +103,6 @@ function CompleteProfile() {
           <div className="CompleteProfile-form-container">
             <div className="CompleteProfile-form-group half-width">
               <input
-                type="text"
-                name="name"
-                placeholder="Full Name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="CompleteProfile-form-group half-width">
-              <input
                 type="tel"
                 name="phoneNumber"
                 placeholder="Phone Number"
@@ -118,6 +111,17 @@ function CompleteProfile() {
                 pattern="[0-9]*"
                 inputMode="numeric"
                 maxLength="11"
+                required
+              />
+            </div>
+
+            <div className="CompleteProfile-form-group half-width">
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
                 required
               />
             </div>
