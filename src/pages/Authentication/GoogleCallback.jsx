@@ -53,7 +53,7 @@ const GoogleCallback = ({ onLoginSuccess }) => {
 
             console.log("User authenticated:", tokenPayload);
             onLoginSuccess();
-            if (user.isVerified === false) {
+            if (user.isVerified === "False") {
                 navigate("/complete-profile");
             } else {
                 navigate("/homepage");
