@@ -22,6 +22,12 @@ justify-content: center;
   overflow: hidden;
 }
 
+.required-asterisk {
+  color: red;
+  font-size: 14px;
+  margin-left: 2px;
+}
+
 .confirm-button-step1{
   background-color: #0682ff;
   color: #eee;
@@ -458,67 +464,4 @@ details .form-section {
   margin-top: 30px;
   display: flex;
   justify-content: center;
-}
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.success-modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 300px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.success-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
-}
-
-.success-modal-header h3 {
-  margin: 0;
-  color: #28a745; /* Màu xanh lá cho tiêu đề */
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.success-modal-body {
-  padding: 20px 0;
-  text-align: center;
-}
-
-.success-modal-footer {
-  display: flex;
-  justify-content: center;
-}
-
-.success-modal-button {
-  background: #28a745;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.success-modal-button:hover {
-  background: #218838;
 }

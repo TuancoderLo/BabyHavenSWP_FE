@@ -639,12 +639,12 @@
 .growth-chart-section {
   grid-area: 4 / 3 / 8 / 6;
   background: white;
-  border-radius: 8px;
-  padding: 4px 16px;
+  border-radius: 12px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 380px;
+  min-height: 400px;
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 208, 188, 0.1);
 }
@@ -652,9 +652,10 @@
 .growth-chart-section h2 {
   display: flex;
   align-items: center;
-  color: #000000;
-  font-size: 20px;
-  margin-bottom: 2px;
+  color: #333;
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 12px;
 }
 
 .chart-toolbar {

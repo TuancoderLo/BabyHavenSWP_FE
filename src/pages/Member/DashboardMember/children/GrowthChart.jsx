@@ -38,10 +38,7 @@ const getWHOBMIData = async (ageInYears, gender) => {
     }
 
     console.log(`Fetching BMI data for ${dataKey} from API`);
-    const response = await bmiPercentitleApi.getByAgeAndGender(
-      ageInYears,
-      gender
-    );
+    const response = await bmiPercentitleApi.getByAgeAndGender(ageInYears, gender);
     console.log("API Response:", response);
 
     const lms = response.data?.data || response.data;
@@ -102,6 +99,7 @@ const GrowthChart = ({
   ageInYears,
 }) => {
   const [data, setData] = useState([]);
+  const [allRecords, setAllRecords] = useState([]); // Store all processed records for plotting dots
   const [loading, setLoading] = useState(true);
   const [whoBMIData, setWhoBMIData] = useState(null);
 
@@ -164,9 +162,12 @@ const GrowthChart = ({
           throw new Error("parentName is undefined or empty");
         }
 
-        // Lấy dữ liệu WHO BMI-for-age từ API hoặc localStorage
-        const whoData = await getWHOBMIData(ageInYears, gender);
-        setWhoBMIData(whoData);
+        // Fetch WHO BMI data if needed
+        let whoData = null;
+        if (selectedTool === "BMI" || selectedTool === "ALL") {
+          whoData = await getWHOBMIData(ageInYears, gender);
+          setWhoBMIData(whoData);
+        }
 
         const response = await childApi.getGrowthRecords(childName, parentName);
         console.log("Full API Response:", response);
@@ -175,6 +176,7 @@ const GrowthChart = ({
           ? response.data
           : [response.data];
 
+        // Process records with day-based x-axis positioning
         const processedRecords = records
           .filter((record) => record && (record.weight || record.height))
           .map((record) => {
@@ -191,7 +193,7 @@ const GrowthChart = ({
 
             const month = recordDate.getMonth();
             const day = recordDate.getDate();
-            const x = month + (day - 1) / 31; // Tính vị trí x dựa trên tháng và ngày
+            const x = month + (day - 1) / 31; // Calculate x position based on month and day
 
             return {
               x,
@@ -211,8 +213,9 @@ const GrowthChart = ({
           .sort((a, b) => a.timestamp - b.timestamp);
 
         console.log("Processed Records:", processedRecords);
+        setAllRecords(processedRecords); // Store all records for plotting dots
 
-        // Tạo dữ liệu biểu đồ cho 12 tháng
+        // Create chart data for 12 months (for percentile lines)
         const chartData = Array.from({ length: 12 }, (_, i) => {
           const recordsInMonth = processedRecords.filter(
             (r) => Math.floor(r.x) === i
@@ -223,10 +226,10 @@ const GrowthChart = ({
               month: "short",
             }),
             records: recordsInMonth,
-            p01: whoData.p01,
-            p50: whoData.p50,
-            p75: whoData.p75,
-            p99: whoData.p99,
+            p01: whoData ? whoData.p01 : null,
+            p50: whoData ? whoData.p50 : null,
+            p75: whoData ? whoData.p75 : null,
+            p99: whoData ? whoData.p99 : null,
           };
         });
 
@@ -235,14 +238,13 @@ const GrowthChart = ({
       } catch (error) {
         console.error("Error fetching growth data:", error);
         setData([]);
+        setAllRecords([]);
       } finally {
         setLoading(false);
       }
     };
 
-    if (selectedTool === "BMI") {
-      fetchGrowthData();
-    }
+    fetchGrowthData();
   }, [
     childName,
     refreshTrigger,
@@ -257,26 +259,24 @@ const GrowthChart = ({
   }
 
   const renderChart = () => {
+    if (!data || data.length === 0 || allRecords.length === 0) {
+      return (
+        <div
+          style={{
+            height: "350px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#666",
+          }}
+        >
+          No data available
+        </div>
+      );
+    }
+
     switch (selectedTool) {
       case "BMI":
-        if (!data || data.length === 0) {
-          return (
-            <div
-              style={{
-                height: "350px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#666",
-              }}
-            >
-              No BMI data available
-            </div>
-          );
-        }
-
-        const allRecords = data.flatMap((monthData) => monthData.records);
-
         return (
           <ResponsiveContainer width="100%" height={320}>
             <LineChart
@@ -287,7 +287,7 @@ const GrowthChart = ({
               <XAxis
                 dataKey="x"
                 type="number"
-                domain={[0, 11]} // 12 tháng (0 đến 11)
+                domain={[0, 11]}
                 ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
                 tickFormatter={(value) => {
                   const months = [
@@ -308,14 +308,18 @@ const GrowthChart = ({
                 }}
                 stroke="#666"
                 tick={{ fill: "#666", fontSize: 10 }}
-                label={{ value: "Month", position: "insideBottom", offset: -5 }}
+                label={{
+                  value: "Month",
+                  position: "insideBottom",
+                  offset: -5,
+                }}
               />
               <YAxis
                 yAxisId="bmi"
                 orientation="left"
                 stroke="#FF9AA2"
                 tick={{ fill: "#666", fontSize: 11 }}
-                domain={[0, 50]} // BMI từ 0 đến 50
+                domain={[0, 50]}
                 ticks={[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]}
                 label={{
                   value: "BMI (kg/m²)",
@@ -415,6 +419,354 @@ const GrowthChart = ({
                 dot={false}
                 name="99th Percentile"
                 connectNulls={true}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        );
+
+      case "Height":
+        return (
+          <ResponsiveContainer width="100%" height={320}>
+            <LineChart
+              data={data}
+              margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis
+                dataKey="x"
+                type="number"
+                domain={[0, 11]}
+                ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
+                tickFormatter={(value) => {
+                  const months = [
+                    "Jan",
+                    "Feb",
+                    "Mar",
+                    "Apr",
+                    "May",
+                    "Jun",
+                    "Jul",
+                    "Aug",
+                    "Sep",
+                    "Oct",
+                    "Nov",
+                    "Dec",
+                  ];
+                  return months[Math.floor(value)];
+                }}
+                stroke="#666"
+                tick={{ fill: "#666", fontSize: 10 }}
+                label={{
+                  value: "Month",
+                  position: "insideBottom",
+                  offset: -5,
+                }}
+              />
+              <YAxis
+                orientation="left"
+                stroke="#008cff"
+                tick={{ fill: "#666", fontSize: 11 }}
+                label={{
+                  value: "Height (cm)",
+                  angle: -90,
+                  position: "insideLeft",
+                }}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "rgba(255, 255, 255, 0.9)",
+                  border: "1px solid #ccc",
+                  borderRadius: "8px",
+                  padding: "10px",
+                }}
+                formatter={(value, name) => [`${value}`, name]}
+                labelFormatter={(label, payload) => {
+                  if (payload && payload[0]) {
+                    const recordsInMonth = payload[0].payload.records;
+                    if (recordsInMonth && recordsInMonth.length > 0) {
+                      return recordsInMonth
+                        .map((r) => `Date: ${r.date}`)
+                        .join(", ");
+                    }
+                  }
+                  return "";
+                }}
+              />
+              <Legend
+                verticalAlign="top"
+                height={30}
+                wrapperStyle={{
+                  paddingTop: "5px",
+                  fontSize: "12px",
+                }}
+              />
+              <Line
+                data={allRecords}
+                type="monotone"
+                dataKey="height"
+                stroke="#008cff"
+                strokeWidth={2}
+                dot={{ r: 4, fill: "#008cff" }}
+                activeDot={{ r: 6, fill: "#008cff" }}
+                name="Height"
+                connectNulls={true}
+                onClick={(point) => {
+                  if (onRecordSelect && point) onRecordSelect(point);
+                }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        );
+
+      case "Weight":
+        return (
+          <ResponsiveContainer width="100%" height={320}>
+            <LineChart
+              data={data}
+              margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis
+                dataKey="x"
+                type="number"
+                domain={[0, 11]}
+                ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
+                tickFormatter={(value) => {
+                  const months = [
+                    "Jan",
+                    "Feb",
+                    "Mar",
+                    "Apr",
+                    "May",
+                    "Jun",
+                    "Jul",
+                    "Aug",
+                    "Sep",
+                    "Oct",
+                    "Nov",
+                    "Dec",
+                  ];
+                  return months[Math.floor(value)];
+                }}
+                stroke="#666"
+                tick={{ fill: "#666", fontSize: 10 }}
+                label={{
+                  value: "Month",
+                  position: "insideBottom",
+                  offset: -5,
+                }}
+              />
+              <YAxis
+                orientation="left"
+                stroke="#ff7300"
+                tick={{ fill: "#666", fontSize: 11 }}
+                label={{
+                  value: "Weight (kg)",
+                  angle: -90,
+                  position: "insideLeft",
+                }}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "rgba(255, 255, 255, 0.9)",
+                  border: "1px solid #ccc",
+                  borderRadius: "8px",
+                  padding: "10px",
+                }}
+                formatter={(value, name) => [`${value}`, name]}
+                labelFormatter={(label, payload) => {
+                  if (payload && payload[0]) {
+                    const recordsInMonth = payload[0].payload.records;
+                    if (recordsInMonth && recordsInMonth.length > 0) {
+                      return recordsInMonth
+                        .map((r) => `Date: ${r.date}`)
+                        .join(", ");
+                    }
+                  }
+                  return "";
+                }}
+              />
+              <Legend
+                verticalAlign="top"
+                height={30}
+                wrapperStyle={{
+                  paddingTop: "5px",
+                  fontSize: "12px",
+                }}
+              />
+              <Line
+                data={allRecords}
+                type="monotone"
+                dataKey="weight"
+                stroke="#ff7300"
+                strokeWidth={2}
+                dot={{ r: 4, fill: "#ff7300" }}
+                activeDot={{ r: 6, fill: "#ff7300" }}
+                name="Weight"
+                connectNulls={true}
+                onClick={(point) => {
+                  if (onRecordSelect && point) onRecordSelect(point);
+                }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        );
+
+      case "ALL":
+        return (
+          <ResponsiveContainer width="100%" height={320}>
+            <LineChart
+              data={data}
+              margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis
+                dataKey="x"
+                type="number"
+                domain={[0, 11]}
+                ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
+                tickFormatter={(value) => {
+                  const months = [
+                    "Jan",
+                    "Feb",
+                    "Mar",
+                    "Apr",
+                    "May",
+                    "Jun",
+                    "Jul",
+                    "Aug",
+                    "Sep",
+                    "Oct",
+                    "Nov",
+                    "Dec",
+                  ];
+                  return months[Math.floor(value)];
+                }}
+                stroke="#666"
+                tick={{ fill: "#666", fontSize: 10 }}
+                label={{
+                  value: "Month",
+                  position: "insideBottom",
+                  offset: -5,
+                }}
+              />
+              {/* Trục Y bên trái cho BMI */}
+              <YAxis
+                yAxisId="bmi"
+                orientation="left"
+                stroke="#FF9AA2"
+                domain={[0, 50]}
+                tick={{ fill: "#666", fontSize: 11 }}
+                label={{
+                  value: "BMI (kg/m²)",
+                  angle: -90,
+                  position: "insideLeft",
+                }}
+              />
+              {/* Trục Y bên phải cho Weight */}
+              <YAxis
+                yAxisId="weight"
+                orientation="right"
+                stroke="#ff7300"
+                domain={[0, 70]}
+                tick={{ fill: "#666", fontSize: 11 }}
+                label={{
+                  value: "Weight (kg)",
+                  angle: -90,
+                  position: "insideRight",
+                  offset: 20,
+                }}
+              />
+              {/* Trục Y thứ 3 cho Height */}
+              <YAxis
+                yAxisId="height"
+                orientation="right"
+                stroke="#008cff"
+                domain={[0, 180]}
+                tick={{ fill: "#666", fontSize: 11 }}
+                label={{
+                  value: "Height (cm)",
+                  angle: -90,
+                  position: "insideRight",
+                  offset: 20,
+                }}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "rgba(255, 255, 255, 0.9)",
+                  border: "1px solid #ccc",
+                  borderRadius: "8px",
+                  padding: "10px",
+                }}
+                formatter={(value, name) => [`${value}`, name]}
+                labelFormatter={(label, payload) => {
+                  if (payload && payload[0]) {
+                    const recordsInMonth = payload[0].payload.records;
+                    if (recordsInMonth && recordsInMonth.length > 0) {
+                      return recordsInMonth
+                        .map((r) => `Date: ${r.date}`)
+                        .join(", ");
+                    }
+                  }
+                  return "";
+                }}
+              />
+              <Legend
+                verticalAlign="top"
+                height={30}
+                wrapperStyle={{
+                  paddingTop: "5px",
+                  fontSize: "12px",
+                  display: "flex",
+                }}
+              />
+              {/* Đường biểu diễn BMI */}
+              <Line
+                type="monotone"
+                data={allRecords}
+                dataKey="bmi"
+                yAxisId="bmi"
+                stroke="#FF9AA2"
+                strokeWidth={2}
+                dot={{ r: 4, fill: "#FF9AA2" }}
+                activeDot={{ r: 6, fill: "#FF9AA2" }}
+                name="BMI"
+                connectNulls={true}
+                onClick={(point) => {
+                  if (onRecordSelect && point) onRecordSelect(point);
+                }}
+              />
+              {/* Đường biểu diễn Weight */}
+              <Line
+                type="monotone"
+                data={allRecords}
+                dataKey="weight"
+                yAxisId="weight"
+                stroke="#ff7300"
+                strokeWidth={2}
+                dot={{ r: 4, fill: "#ff7300" }}
+                activeDot={{ r: 6, fill: "#ff7300" }}
+                name="Weight"
+                connectNulls={true}
+                onClick={(point) => {
+                  if (onRecordSelect && point) onRecordSelect(point);
+                }}
+              />
+              {/* Đường biểu diễn Height */}
+              <Line
+                type="monotone"
+                data={allRecords}
+                dataKey="height"
+                yAxisId="height"
+                stroke="#008cff"
+                strokeWidth={2}
+                dot={{ r: 4, fill: "#008cff" }}
+                activeDot={{ r: 6, fill: "#008cff" }}
+                name="Height"
+                connectNulls={true}
+                onClick={(point) => {
+                  if (onRecordSelect && point) onRecordSelect(point);
+                }}
               />
             </LineChart>
           </ResponsiveContainer>

@@ -1,0 +1,274 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body,
+html {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.CompleteProfile-auth-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: url("https://www.vietjack.com/tai-lieu-mon-tieng-anh/images/tu-vung-tieng-anh-ve-cac-kieu-gia-dinh-trong-tieng-anh-3461.jpeg");
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Lớp overlay để làm tối ảnh nền để form nổi bật hơn */
+.CompleteProfile-auth-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 1;
+}
+
+.CompleteProfile-auth-box {
+  width: 100%;
+  max-width: 500px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 0 0 15px rgba(0, 191, 166, 0.15);
+  position: relative;
+  z-index: 2;
+  backdrop-filter: blur(5px);
+}
+
+/* Thêm viền gradient ở đầu form */
+.CompleteProfile-auth-box::before {
+  display: none; /* Ẩn vạch xanh lá ở đầu form */
+}
+
+/* Ẩn thanh cuộn nhưng vẫn cho phép cuộn */
+.CompleteProfile-auth-box::-webkit-scrollbar {
+  width: 5px;
+}
+
+.CompleteProfile-auth-box::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 10px;
+}
+
+.CompleteProfile-home-link {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 18px;
+  color: #ffffff;
+  cursor: pointer;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.15);
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.CompleteProfile-auth-header {
+  margin-bottom: 25px;
+  text-align: center;
+  position: relative;
+}
+
+.CompleteProfile-auth-header h1 {
+  color: #00bfa6;
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
+  position: relative;
+  display: inline-block;
+}
+
+.CompleteProfile-auth-header h1::after {
+  content: "";
+  position: absolute;
+  width: 50%;
+  height: 3px;
+  background: linear-gradient(90deg, #00bfa6, transparent);
+  bottom: -6px;
+  left: 25%;
+  border-radius: 2px;
+}
+
+.CompleteProfile-header-subtitle {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 300;
+}
+
+/* Bố cục form 2 cột */
+.CompleteProfile-form-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -8px;
+}
+
+.CompleteProfile-form-group {
+  position: relative;
+  padding: 0 8px;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+/* Thiết lập các form-group có chiều rộng 50% */
+.CompleteProfile-form-group.half-width {
+  width: 50%;
+}
+
+.CompleteProfile-form-group input,
+.CompleteProfile-form-group select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #1e293b;
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+.CompleteProfile-form-group input:focus,
+.CompleteProfile-form-group select:focus {
+  outline: none;
+  border-color: #00bfa6;
+  box-shadow: 0 0 0 4px rgba(0, 191, 166, 0.15);
+}
+
+.CompleteProfile-form-group input::placeholder {
+  color: #94a3b8;
+}
+
+.CompleteProfile-submit-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #00bfa6, #00d0bc);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 10px rgba(0, 191, 166, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.CompleteProfile-submit-btn:hover {
+  background: linear-gradient(135deg, #00a892, #00c0ae);
+}
+
+.CompleteProfile-toggle-form {
+  display: none; /* Ẩn phần "Want to update later? Skip for now" */
+  text-align: center;
+  color: #64748b;
+  font-size: 13px;
+  margin-top: 5px;
+}
+
+.CompleteProfile-toggle-form span {
+  color: #00bfa6;
+  cursor: pointer;
+  font-weight: 500;
+  margin-left: 4px;
+  position: relative;
+}
+
+.CompleteProfile-toggle-form span:hover {
+  color: #00a892;
+  text-decoration: underline;
+}
+
+.CompleteProfile-error-message {
+  color: #dc2626;
+  font-size: 14px;
+  margin-bottom: 18px;
+  text-align: center;
+  padding: 10px;
+  background-color: rgba(254, 242, 242, 0.9);
+  border-radius: 8px;
+  border: 1px solid #fee2e2;
+  box-shadow: 0 2px 5px rgba(220, 38, 38, 0.1);
+}
+
+/* Style cho select */
+.CompleteProfile-form-group select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg fill='none' stroke='%2364748b' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 35px;
+  cursor: pointer;
+}
+
+/* Style cho date input */
+.CompleteProfile-form-group input[type="date"] {
+  cursor: pointer;
+}
+
+.CompleteProfile-form-group
+  input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .CompleteProfile-auth-box {
+    max-width: 90%;
+    padding: 25px 20px;
+  }
+
+  .CompleteProfile-form-group.half-width {
+    width: 100%;
+  }
+
+  .CompleteProfile-auth-header h1 {
+    font-size: 24px;
+  }
+}
+
+@media (max-height: 700px) {
+  .CompleteProfile-auth-box {
+    padding: 20px 15px;
+  }
+
+  .CompleteProfile-form-group {
+    margin-bottom: 10px;
+  }
+
+  .CompleteProfile-auth-header {
+    margin-bottom: 15px;
+  }
+
+  .CompleteProfile-auth-header h1 {
+    font-size: 22px;
+  }
+}

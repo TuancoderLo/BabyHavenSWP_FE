@@ -6,6 +6,7 @@ import {
   FaUsers,
   FaBox,
   FaSignOutAlt,
+  FaStar,
 } from "react-icons/fa";
 import "./SidebarHover.css";
 import { MdArticle } from "react-icons/md"; // ví dụ cho Blog
@@ -65,6 +66,15 @@ function SidebarHover() {
           >
             <FaBox className="admin-icon" />
             <span>Service Packages</span>
+          </Link>
+        </li>
+        <li className={activeItem === "/admin/ratings" ? "active" : ""}>
+          <Link
+            to="/admin/ratings"
+            onClick={() => setActiveItem("/admin/ratings")}
+          >
+            <FaStar className="admin-icon" />
+            <span>Đánh Giá</span>
           </Link>
         </li>
         <li className="signout-item" onClick={handleLogout}>

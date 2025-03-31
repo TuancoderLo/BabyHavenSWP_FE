@@ -14,6 +14,8 @@ import memberShipApi from "../../../../services/memberShipApi";
 import alertApi from "../../../../services/alertApi";
 import AIChat from "./AIChat.jsx";
 import Alert from "./Alert.jsx";
+import PopupNotification from "../../../../layouts/Member/popUp/PopupNotification";
+
 
 function ChildrenPage() {
   const navigate = useNavigate();
@@ -32,7 +34,10 @@ function ChildrenPage() {
   const [selectedTool, setSelectedTool] = useState("BMI");
   const [latestAlert, setLatestAlert] = useState(null);
   const [alerts, setAlerts] = useState(null);
-
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState("error"); // default dùng kiểu error
+  
   const memberId = localStorage.getItem("memberId");
 
   // Gọi danh sách alert hiện có khi thay đổi selectedChild
@@ -152,50 +157,55 @@ function ChildrenPage() {
   };
 
   const handleAddChild = async () => {
-    // Logic giữ nguyên
     try {
       const membershipRes = await memberShipApi.getMemberMembership(memberId);
       const membershipData = membershipRes.data?.data;
       console.log("Membership data:", membershipData);
-
+  
       const activeMembership = Array.isArray(membershipData)
         ? membershipData.find(
             (membership) =>
               membership.status === "Active" && membership.isActive === true
           )
-        : membershipData?.status === "Active" &&
-          membershipData?.isActive === true
+        : membershipData?.status === "Active" && membershipData?.isActive === true
         ? membershipData
         : null;
-
-        console.log("Active membership:", activeMembership);
+  
+      console.log("Active membership:", activeMembership);
       if (!activeMembership) {
-        alert("No active membership found. Please activate a membership plan.");
+        // Thay vì alert, hiển thị popup lỗi
+        setPopupType("error");
+        setPopupMessage("No active membership found. Please activate a membership plan.");
+        setShowPopup(true);
         return;
       }
-
+  
       const membershipPackage = activeMembership.packageName;
-
       let maxChildren = 1;
       if (membershipPackage === "Standard") {
         maxChildren = 2;
       } else if (membershipPackage === "Premium") {
         maxChildren = 6;
       }
-
+  
       if (childrenList.length >= maxChildren) {
-        alert(
+        setPopupType("error");
+        setPopupMessage(
           `You have reached the limit of ${maxChildren} children for the ${membershipPackage} plan. Please upgrade your plan.`
         );
+        setShowPopup(true);
         return;
       }
-
+  
       setShowAddChildModal(true);
     } catch (error) {
       console.error("Error checking membership plan:", error);
-      alert("Unable to check membership package. Please try again.");
+      setPopupType("error");
+      setPopupMessage("Unable to check membership package. Please try again.");
+      setShowPopup(true);
     }
   };
+  
 
   const closeOverlay = () => {
     setShowAddChildModal(false);
@@ -628,19 +638,15 @@ function ChildrenPage() {
           </div>
 
           <div className="growth-chart-section">
-            <h2>
-              Growth chart
-              <div className="chart-filters">
-                <span
-                  className={`filter-item ${
-                    selectedTool === "BMI" ? "active" : ""
-                  }`}
-                  onClick={() => setSelectedTool("BMI")}
-                >
-                  BMI
-                </span>
-              </div>
-            </h2>
+          <h2>
+  Growth chart
+  <div className="chart-filters">
+    <span className={`filter-item ${selectedTool === "BMI" ? "active" : ""}`} onClick={() => setSelectedTool("BMI")}>BMI</span>
+    <span className={`filter-item ${selectedTool === "Height" ? "active" : ""}`} onClick={() => setSelectedTool("Height")}>Height</span>
+    <span className={`filter-item ${selectedTool === "Weight" ? "active" : ""}`} onClick={() => setSelectedTool("Weight")}>Weight</span>
+    <span className={`filter-item ${selectedTool === "ALL" ? "active" : ""}`} onClick={() => setSelectedTool("ALL")}>All</span>
+  </div>
+</h2>
             <div className="chart-area">
               {selectedChild ? (
                 <>
@@ -696,6 +702,13 @@ function ChildrenPage() {
           onSuccess={() => {}}
         />
       )}
+      {showPopup && (
+      <PopupNotification
+        type={popupType}
+        message={popupMessage}
+        onClose={() => setShowPopup(false)}
+      />
+    )}
     </div>
   );
 }
