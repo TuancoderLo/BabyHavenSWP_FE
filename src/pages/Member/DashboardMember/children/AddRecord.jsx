@@ -6,7 +6,7 @@ import BabyGrowth from "../../../../assets/baby_growth.png";
 import alertApi from "../../../../services/alertApi";
 import {
   validateGrowthRecordErrors,
-  validateGrowthRecordWarnings
+  validateGrowthRecordWarnings,
 } from "../../../../data/childValidations";
 import PopupNotification from "../../../../layouts/Member/popUp/PopupNotification";
 
@@ -34,7 +34,10 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [popupType, setPopupType] = useState("success");
-
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [childDetails, setChildDetails] = useState(null);
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
+  const [errorMessage, setErrorMessage] = useState(""); // Add error state for user feedback
   const [growthForm, setGrowthForm] = useState({
     createdAt: "",
     weight: "",
@@ -73,6 +76,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
         setChildDetails(response.data.data);
       } catch (err) {
         console.error("Error fetching child details:", err);
+        setErrorMessage("Failed to load child details. Please try again.");
       }
     };
     fetchChildDetails();
@@ -93,8 +97,8 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     return years === 0 && months === 0
       ? `${diffDays} days`
       : years < 1
-        ? `${months} months`
-        : `${years} years old`;
+      ? `${months} months`
+      : `${years} years old`;
   };
 
   const handleChange = useCallback(
@@ -128,8 +132,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
   }, [growthForm, child.dateOfBirth]);
 
   const handleSubmit = useCallback(async () => {
-    if (!validateForm()) return;
-    
+    if (!validateForm()) return;    
     const growthPayload = {
       name: child.name,
       dateOfBirth: child.dateOfBirth,
@@ -167,14 +170,15 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
       setPopupType("success");
       setPopupMessage("Growth record added successfully.");
       setShowPopup(true);
-  
       try {
         const alertRes = await alertApi.getAlert(child.name, child.dateOfBirth, memberId);
         console.log("Alert created and fetched:", alertRes.data);
       } catch (alertErr) {
         console.error("Error creating/fetching alert:", alertErr);
-        // Không cần hiển thị popup riêng cho lỗi alert
       }
+
+      // Show the success modal
+      setShowSuccessModal(true);
     } catch (err) {
       console.error("Error submitting growth record:", err);
       setPopupType("error");
@@ -187,6 +191,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
       <div
         className="add-record-overlay"
         onClick={(e) => e.target === e.currentTarget && closeOverlay()}
+        style={{ display: showSuccessModal ? "none" : "visible" }} // Hide overlay when success modal is shown
       >
         <div className="add-record-wizard" onClick={(e) => e.stopPropagation()}>
           <button className="close-button-record" onClick={closeOverlay}>
@@ -201,7 +206,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
               <div className="babygrowth-img">
                 <img src={BabyGrowth} alt="Baby Growth" />
               </div>
-              {/* Di chuyển Child Information xuống ngay sau babygrowth-img */}
               <div className="child-info-card">
                 <h3>Child Information</h3>
                 <div className="child-info-details">
@@ -228,10 +232,16 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
           </div>
 
           <div className="wizard-content">
+            {errorMessage && (
+              <div className="error-message">
+                <p>{errorMessage}</p>
+              </div>
+            )}
             <div className="step-form">
-              {/* Các phần form khác được giữ nguyên */}
               <div className="form-section date-section">
-                <h4>Record Date</h4>
+              <h4>
+                  Record Date <span className="required-asterisk">*</span>
+                </h4>
                 <input
                   type="date"
                   value={growthForm.createdAt}
@@ -251,7 +261,9 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 <h4>Basic Measurements</h4>
                 <div className="measurements-section">
                   <div>
-                    <label>Baby's weight (kg)</label>
+                  <label>
+                      Baby's weight (kg) <span className="required-asterisk">*</span>
+                    </label>
                     <input
                       type="number"
                       name="weight"
@@ -271,7 +283,9 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                     )}
                   </div>
                   <div>
-                    <label>Baby's height (cm)</label>
+                  <label>
+                      Baby's height (cm) <span className="required-asterisk">*</span>
+                    </label>
                     <input
                       type="number"
                       name="height"
@@ -603,14 +617,14 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 </div>
               </details>
             </div>
-            {/* Nút submit được di chuyển ra ngoài form, đặt trong container mới */}
-              <button
-                type="button"
-                className="confirm-button-step1"
-                onClick={handleSubmit}
-              >
-                Submit Record
-              </button>
+            <button
+              type="button"
+              className="confirm-button-step1"
+              onClick={handleSubmit}
+              disabled={isLoading}
+            >
+              {isLoading ? "Submitting..." : "Submit Record"}
+            </button>
           </div>
         </div>
         {showPopup && (
@@ -624,6 +638,49 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
   />
 )}
       </div>
+
+      {showSuccessModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => {
+            setShowSuccessModal(false);
+            closeOverlay();
+            window.location.reload();
+          }}
+        >
+          <div className="success-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="success-modal-header">
+              <h3>Success!</h3>
+              <button
+                className="modal-close"
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  closeOverlay();
+                  window.location.reload();
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <div className="success-modal-body">
+              <p>Growth record added successfully!</p>
+            </div>
+            <div className="success-modal-footer">
+              <button
+                className="success-modal-button"
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  closeOverlay();
+                  window.location.reload();
+                }}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
