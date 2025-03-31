@@ -31,6 +31,7 @@ const RateAdmin = () => {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [feedbackToDelete, setFeedbackToDelete] = useState(null);
   const [searchText, setSearchText] = useState("");
+  const [users, setUsers] = useState({}); // Lưu trữ thông tin người dùng
 
   // Hàm lấy danh sách đánh giá
   const fetchFeedbacks = async () => {
@@ -41,7 +42,12 @@ const RateAdmin = () => {
       );
 
       if (response.data.status === 1) {
-        setFeedbacks(response.data.data);
+        const feedbackData = response.data.data;
+        setFeedbacks(feedbackData);
+
+        // Lấy danh sách userId để tìm kiếm thông tin người dùng
+        const userIds = feedbackData.map((feedback) => feedback.userId);
+        fetchUserDetails(userIds);
       } else {
         message.error("Không thể lấy dữ liệu đánh giá");
       }
@@ -50,6 +56,29 @@ const RateAdmin = () => {
       message.error("Đã xảy ra lỗi khi tải dữ liệu");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Hàm lấy thông tin chi tiết người dùng
+  const fetchUserDetails = async (userIds) => {
+    if (!userIds || userIds.length === 0) return;
+
+    try {
+      const response = await axios.get(
+        "https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/UserAccounts/odata"
+      );
+
+      if (response.data) {
+        // Tạo một đối tượng map từ userId đến thông tin người dùng
+        const userMap = {};
+        response.data.forEach((user) => {
+          userMap[user.userId] = user;
+        });
+
+        setUsers(userMap);
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy thông tin người dùng:", error);
     }
   };
 
@@ -187,31 +216,37 @@ const RateAdmin = () => {
     return <Tag color={color}>{type}</Tag>;
   };
 
+  // Lấy tên người dùng từ userId
+  const getUserName = (userId) => {
+    if (users[userId]) {
+      return users[userId].name;
+    }
+    return userId.substring(0, 8) + "...";
+  };
+
   // Cấu hình cột của bảng
   const columns = [
     {
-      title: "ID",
-      dataIndex: "feedbackId",
-      key: "feedbackId",
-      width: 80,
+      title: "STT",
+      key: "index",
+      width: 60,
+      render: (_, __, index) => index + 1,
     },
     {
       title: "Người dùng",
       dataIndex: "userId",
       key: "userId",
-      width: 280,
-      ellipsis: true,
-      render: (userId) => (
-        <Tooltip title={userId}>
-          <span>{userId.substring(0, 8)}...</span>
-        </Tooltip>
-      ),
+      width: 200,
+      render: (userId) => {
+        const name = getUserName(userId);
+        return <span>{name}</span>;
+      },
     },
     {
       title: "Đánh giá",
       dataIndex: "rating",
       key: "rating",
-      width: 180,
+      width: 150,
       render: (rating) => <Rate disabled value={rating} />,
     },
     {
@@ -287,8 +322,9 @@ const RateAdmin = () => {
   const filteredFeedbacks = feedbacks.filter(
     (feedback) =>
       feedback.comment?.toLowerCase().includes(searchText.toLowerCase()) ||
-      feedback.userId?.toLowerCase().includes(searchText.toLowerCase()) ||
-      feedback.feedbackId?.toString().includes(searchText)
+      getUserName(feedback.userId)
+        .toLowerCase()
+        .includes(searchText.toLowerCase())
   );
 
   return (
@@ -297,7 +333,7 @@ const RateAdmin = () => {
 
       <div className="rate-admin-tools">
         <Search
-          placeholder="Tìm kiếm theo ID, người dùng hoặc nội dung"
+          placeholder="Tìm kiếm theo người dùng hoặc nội dung"
           allowClear
           enterButton={<SearchOutlined />}
           size="middle"
@@ -362,10 +398,8 @@ const RateAdmin = () => {
             <div className="feedback-info">
               <h3>Thông tin đánh giá</h3>
               <p>
-                <strong>ID:</strong> {selectedFeedback.feedbackId}
-              </p>
-              <p>
-                <strong>Người dùng:</strong> {selectedFeedback.userId}
+                <strong>Người dùng:</strong>{" "}
+                {getUserName(selectedFeedback.userId)}
               </p>
               <p>
                 <strong>Đánh giá:</strong>{" "}
