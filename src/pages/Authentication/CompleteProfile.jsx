@@ -71,22 +71,22 @@ function CompleteProfile() {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
-      const formattedDate = `${year}/${month}/${day}`;
+      const formattedDate = `${year}-${month}-${day}`;
 
-      // Prepare the data for the API (only userId and isVerified, others are null)
+      // Prepare the data for the API with form values
       const updateData = {
         userId: userId,
-        username: null,
-        email: null,
-        phoneNumber: null,
-        name: null,
-        gender: null,
-        dateOfBirth: null,
-        address: null,
-        status: null,
-        roleId: null,
-        profilePicture: null,
-        password: null,
+        username: null, // Not provided in the form
+        email: null, // Not provided in the form
+        phoneNumber: formData.phoneNumber.trim(),
+        name: null, // Not provided in the form
+        gender: formData.gender,
+        dateOfBirth: formattedDate,
+        address: formData.address.trim(),
+        status: 1, // Default status as per API
+        roleId: 1, // Default roleId for Member as per API
+        profilePicture: null, // Not provided in the form
+        password: formData.password, // Include the password
         isVerified: true, // Set isVerified to true
       };
 
@@ -98,9 +98,8 @@ function CompleteProfile() {
         localStorage.setItem("isVerified", "true");
         navigate("/homepage");
       } else {
-        setError("Error updating profile.", response.data.message);
+        setError(`Error updating profile: ${response.data.message}`);
       }
-
     } catch (error) {
       setError("Error updating profile.");
       console.error("Error updating profile:", error);
