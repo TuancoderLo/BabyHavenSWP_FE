@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import api from "../../config/axios";
 import "./GoogleCallback.css";
 
-const GoogleCallback = () => {
+const GoogleCallback = ({ onLoginSuccess }) => {
     const navigate = useNavigate();
     const [error, setError] = useState("");
 
@@ -43,19 +43,21 @@ const GoogleCallback = () => {
             // Lưu thông tin vào localStorage
             localStorage.setItem("isAuthenticated", "true");
             localStorage.setItem("role", user.roleId);
+            localStorage.setItem("isVerified", user.isVerified);
             localStorage.setItem("email", user.email);
             localStorage.setItem("userId", user.userId);
             localStorage.setItem("name", user.name);
 
             console.log("User:", user);
             console.log("User is verified:", user.isVerified);
+
+            console.log("User authenticated:", tokenPayload);
+            onLoginSuccess();
             if (user.isVerified === false) {
                 navigate("/complete-profile");
             } else {
                 navigate("/homepage");
             }
-
-            console.log("User authenticated:", tokenPayload);
         } catch (error) {
             setError(error.message);
             console.error("Error during Google authentication:", error);

@@ -70,9 +70,9 @@ function CompleteProfile() {
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
       const formattedDate = `${year}/${month}/${day}`;
-
+      localStorage.setItem("isVerified", "true");
       // Mô phỏng đã hoàn thành hồ sơ và chuyển hướng ngay lập tức
-      navigate("/profile");
+      navigate("/homepage");
     } catch (error) {
       setError("Không thể hoàn thành hồ sơ. Vui lòng thử lại sau.");
     } finally {
