@@ -1,8 +1,8 @@
-# BabyHavenBackend
+# BabyHavenFrontend
 Child Growth Tracking System: Phần mềm theo dõi sự tăng trưởng của trẻ em
 
 ## Mô Tả Dự Án
-BabyHavenBackend là hệ thống giúp các bậc phụ huynh theo dõi sự phát triển của trẻ em qua các chỉ số như cân nặng, chiều cao, BMI và các mốc phát triển quan trọng khác. Dự án cung cấp các biểu đồ tăng trưởng, cảnh báo sớm các vấn đề về sức khỏe của trẻ, và cho phép kết nối giữa thành viên và bác sĩ để nhận tư vấn kịp thời.
+BabyHavenFrontend là hệ thống giúp các bậc phụ huynh theo dõi sự phát triển của trẻ em qua các chỉ số như cân nặng, chiều cao, BMI và các mốc phát triển quan trọng khác. Dự án cung cấp các biểu đồ tăng trưởng, cảnh báo sớm các vấn đề về sức khỏe của trẻ, và cho phép kết nối giữa thành viên và bác sĩ để nhận tư vấn kịp thời.
 
 ---
 
