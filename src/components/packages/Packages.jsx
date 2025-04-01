@@ -314,7 +314,7 @@ function Packages() {
                         <span className="feature-label">
                           Available to make consultation with AI
                         </span>
-                        <span className="feature-value">UnAvailable</span>
+                        <span className="feature-value">Not allowed</span>
                       </div>
                       <div className="feature-item">
                         <span className="feature-label">
