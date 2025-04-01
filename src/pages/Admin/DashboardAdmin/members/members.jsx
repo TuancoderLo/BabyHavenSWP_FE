@@ -953,13 +953,13 @@ const Members = () => {
   // Thêm cột cho bảng Doctors
   const doctorColumns = [
     {
-      title: "STT",
+      title: "No.",
       key: "index",
       width: 60,
       render: (_, __, index) => index + 1,
     },
     {
-      title: "Tên Bác Sĩ",
+      title: "Doctor Name",
       dataIndex: "name",
       key: "name",
     },
@@ -969,34 +969,34 @@ const Members = () => {
       key: "email",
     },
     {
-      title: "Số Điện Thoại",
+      title: "Phone Number",
       dataIndex: "phoneNumber",
       key: "phoneNumber",
     },
     {
-      title: "Học Vị",
+      title: "Degree",
       dataIndex: "degree",
       key: "degree",
     },
     {
-      title: "Bệnh Viện",
+      title: "Hospital",
       dataIndex: "hospitalName",
       key: "hospitalName",
     },
     {
-      title: "Địa Chỉ",
+      title: "Address",
       dataIndex: "hospitalAddress",
       key: "hospitalAddress",
       ellipsis: true,
     },
     {
-      title: "Trạng Thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: (status) => renderStatus(status),
     },
     {
-      title: "Thao Tác",
+      title: "Actions",
       key: "action",
       width: 120,
       render: (_, record) => (
@@ -1009,10 +1009,10 @@ const Members = () => {
             className="MemberAdmin-action-button"
           />
           <Popconfirm
-            title="Bạn có chắc chắn muốn xóa bác sĩ này?"
+            title="Are you sure you want to delete this doctor?"
             onConfirm={() => handleDeleteDoctor(record)}
-            okText="Có"
-            cancelText="Không"
+            okText="Yes"
+            cancelText="No"
           >
             <Button
               type="primary"
@@ -1222,7 +1222,7 @@ const Members = () => {
               <div className="MemberAdmin-user-accounts-actions">
                 <div className="MemberAdmin-search-input-container">
                   <Input
-                    placeholder="Tìm kiếm theo tên, email, số điện thoại"
+                    placeholder="Search by name, email, phone number"
                     value={doctorSearchText}
                     onChange={handleDoctorSearchChange}
                     allowClear
@@ -1239,7 +1239,7 @@ const Members = () => {
                       onClick={() => handleDoctorStatusChange("All")}
                       className="MemberAdmin-filter-button"
                     >
-                      Tất Cả
+                      All
                     </Button>
                     <Button
                       type={
@@ -1250,7 +1250,7 @@ const Members = () => {
                       onClick={() => handleDoctorStatusChange("Active")}
                       className="MemberAdmin-filter-button"
                     >
-                      Đang Hoạt Động
+                      Active
                     </Button>
                     <Button
                       type={
@@ -1261,7 +1261,7 @@ const Members = () => {
                       onClick={() => handleDoctorStatusChange("Inactive")}
                       className="MemberAdmin-filter-button"
                     >
-                      Ngưng Hoạt Động
+                      Inactive
                     </Button>
                   </div>
                 </div>
@@ -1275,7 +1275,7 @@ const Members = () => {
               pagination={{
                 pageSize: 10,
                 showSizeChanger: true,
-                showTotal: (total) => `Tổng ${total} bác sĩ`,
+                showTotal: (total) => `Total ${total} doctors`,
                 showQuickJumper: true,
               }}
               size="middle"
@@ -1792,7 +1792,7 @@ const Members = () => {
           <div className="MemberAdmin-form-row">
             <Form.Item
               name="name"
-              label="Tên Bác Sĩ"
+              label="Doctor Name"
               className="MemberAdmin-form-col"
               rules={[{ required: true, message: "Vui lòng nhập tên bác sĩ" }]}
             >
@@ -1814,7 +1814,7 @@ const Members = () => {
           <div className="MemberAdmin-form-row">
             <Form.Item
               name="phoneNumber"
-              label="Số Điện Thoại"
+              label="Phone Number"
               className="MemberAdmin-form-col"
               rules={[
                 { required: true, message: "Vui lòng nhập số điện thoại" },
@@ -1824,7 +1824,7 @@ const Members = () => {
             </Form.Item>
             <Form.Item
               name="degree"
-              label="Học Vị"
+              label="Degree"
               className="MemberAdmin-form-col"
               rules={[{ required: true, message: "Vui lòng nhập học vị" }]}
             >
@@ -1834,7 +1834,7 @@ const Members = () => {
 
           <Form.Item
             name="hospitalName"
-            label="Tên Bệnh Viện"
+            label="Hospital"
             rules={[{ required: true, message: "Vui lòng nhập tên bệnh viện" }]}
           >
             <Input />
@@ -1842,7 +1842,7 @@ const Members = () => {
 
           <Form.Item
             name="hospitalAddress"
-            label="Địa Chỉ Bệnh Viện"
+            label="Address"
             rules={[
               { required: true, message: "Vui lòng nhập địa chỉ bệnh viện" },
             ]}
@@ -1850,7 +1850,7 @@ const Members = () => {
             <Input />
           </Form.Item>
 
-          <Form.Item name="biography" label="Tiểu Sử">
+          <Form.Item name="biography" label="Biography">
             <TextArea rows={4} />
           </Form.Item>
 
