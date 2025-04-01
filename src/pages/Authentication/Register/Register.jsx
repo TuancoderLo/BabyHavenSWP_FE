@@ -5,8 +5,6 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../../config/firebase";
 import api from "../../../config/axios";
 import { sendRegistrationOTP } from "../../../services/VerifyOPT";
-// import { toast } from "react-toastify";
-// import "react-toastify/dist/ReactToastify.css";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -30,19 +28,19 @@ function Register() {
   const handleGoogleRedirect = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      // Thêm các tham số để tối ưu hóa popup
+      // Add parameters to optimize popup
       provider.setCustomParameters({
         prompt: "select_account",
       });
 
       const result = await signInWithPopup(auth, provider);
 
-      // Xử lý kết quả đăng nhập thành công
+      // Handle successful login result
       const user = result.user;
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const token = credential.accessToken;
 
-      // Gọi API backend của bạn với thông tin user
+      // Call your backend API with user information
       const response = await api.post("google-auth", {
         email: user.email,
         displayName: user.displayName,
@@ -50,18 +48,18 @@ function Register() {
         uid: user.uid,
       });
 
-      navigate("/login"); // hoặc trang bạn muốn chuyển đến
+      navigate("/login");
     } catch (error) {
-      console.error("Lỗi đăng nhập Google:", error);
+      console.error("Google login error:", error);
     }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Thêm kiểm tra đặc biệt cho trường phoneNumber
+    // Special check for phoneNumber field
     if (name === "phoneNumber" && !/^\d*$/.test(value)) {
-      return; // Không cập nhật state nếu có ký tự không phải số
+      return; // Don't update state if non-numeric characters
     }
 
     setFormData((prev) => ({
@@ -118,23 +116,6 @@ function Register() {
       return false;
     }
 
-    const birthDate = new Date(formData.dateOfBirth);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-
-    if (age < 18) {
-      setError("Bạn phải đủ 18 tuổi để đăng ký tài khoản");
-      return false;
-    }
-
     return true;
   };
 
@@ -149,56 +130,53 @@ function Register() {
     setIsLoading(true);
 
     try {
-      // Định dạng lại ngày tháng năm thành yyyy/MM/dd
+      // Format date to yyyy/MM/dd
       const date = new Date(formData.dateOfBirth);
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
       const formattedDate = `${year}/${month}/${day}`;
 
-      // Tạo dữ liệu đăng ký để lưu trữ
+      // Create registration data for storage
       const registrationData = {
         username: formData.username,
         email: formData.email,
         phoneNumber: formData.phoneNumber,
         name: formData.name,
         gender: formData.gender,
-        dateOfBirth: formattedDate, // Sử dụng định dạng năm/tháng/ngày
+        dateOfBirth: formattedDate,
         address: formData.address,
         password: formData.password,
       };
 
-      // Gửi email đến API Register để nhận OTP
+      // Send email to Register API to receive OTP
       const response = await api.post("Authentication/Register", {
         email: formData.email,
       });
 
       console.log("API Response:", response.data);
 
-      // Lưu thông tin đăng ký vào localStorage (bất kể kết quả API)
+      // Save registration info to localStorage
       localStorage.setItem("pending_email", formData.email);
       localStorage.setItem(
         "registration_data",
         JSON.stringify(registrationData)
       );
 
-      // Kiểm tra phản hồi từ API
       if (
         response.data.status === 1 ||
         response.data.status === 200 ||
         response.status === 200
       ) {
-        // Chuyển đến trang xác thực email
         navigate("/verify-email");
       } else {
         setError(
-          response.data.message || "Không thể gửi OTP. Vui lòng thử lại sau."
+          response.data.message || "Cannot send OTP. Please try again later."
         );
       }
     } catch (error) {
-      console.error("Lỗi khi gửi yêu cầu đăng ký:", error);
+      console.error("Registration request error:", error);
 
-      // Kiểm tra nếu phản hồi có status 200 hoặc thông báo OTP
       if (
         error.response &&
         (error.response.status === 200 ||
@@ -206,39 +184,28 @@ function Register() {
             error.response.data.message &&
             error.response.data.message.includes("OTP")))
       ) {
-        // Lưu email và chuyển trang
         localStorage.setItem("pending_email", formData.email);
-
-        // Hiển thị thông báo OTP đã được gửi
         setError("OTP sent. Please verify your email.");
-
-        // Thêm nút để chuyển trang
         setTimeout(() => {
           navigate("/verify-email");
         }, 1000);
-
         return;
       }
 
       if (error.response) {
         setError(
           error.response.data.message ||
-            "Đăng ký thất bại. Vui lòng thử lại sau."
+            "Registration failed. Please try again later."
         );
       } else if (error.request) {
-        setError("Đăng ký thất bại. Vui lòng thử lại sau.");
+        setError("Registration failed. Please try again later.");
       } else {
-        setError("Lỗi đăng ký");
+        setError("Registration Error");
       }
     } finally {
       setIsLoading(false);
     }
   };
-
-  const maxDate = new Date();
-  const minDate = new Date();
-  minDate.setFullYear(maxDate.getFullYear() - 100); // Giới hạn độ tuổi tối đa 100
-  maxDate.setFullYear(maxDate.getFullYear() - 18); // Giới hạn độ tuổi tối thiểu 18
 
   return (
     <div className="Register-auth-container">
@@ -256,7 +223,6 @@ function Register() {
 
         {error && <div className="Register-error-message">{error}</div>}
 
-        {/* Hiển thị nút khi đã nhận được OTP */}
         {error && error.includes("OTP sent") && (
           <div style={{ marginBottom: "15px", textAlign: "center" }}>
             <button
@@ -264,7 +230,7 @@ function Register() {
               className="primary-button"
               onClick={() => navigate("/verify-email")}
             >
-              Tiếp tục xác thực email
+              Continue to email verification
             </button>
           </div>
         )}
@@ -339,8 +305,7 @@ function Register() {
                 value={formData.dateOfBirth}
                 onChange={handleChange}
                 required
-                max={maxDate.toISOString().split("T")[0]}
-                min={minDate.toISOString().split("T")[0]}
+                max={new Date().toISOString().split("T")[0]}
               />
             </div>
 
