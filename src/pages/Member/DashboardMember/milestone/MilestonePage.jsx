@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import childApi from "../../../../services/childApi";
 import MilestoneApi from "../../../../services/milestoneApi";
-import AddMilestone from "../children/AddMilestone"; // Import the AddMilestone component
-import AddMilestoneButton from "../../../../components/common/buttons/AddMilestone"; // Import the AddMilestoneButton component
+import AddMilestone from "../children/AddMilestone";
+import AddMilestoneButton from "../../../../components/common/buttons/AddMilestone";
 import "./MilestonePage.css";
 
 function MilestonePage() {
@@ -14,9 +14,9 @@ function MilestonePage() {
   const [childMilestones, setChildMilestones] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showAddMilestoneModal, setShowAddMilestoneModal] = useState(false); // Add state for AddMilestone modal
+  const [showAddMilestoneModal, setShowAddMilestoneModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(null);
-  const [customMilestone, setCustomMilestone] = useState({ title: "", age: "" });
+  const [customMilestone, setCustomMilestone] = useState({ milestoneName: "", age: "" }); // Update to match API field
   const [filterOption, setFilterOption] = useState("all");
   const [badges, setBadges] = useState([]);
   const milestoneListRef = useRef(null);
@@ -58,6 +58,7 @@ function MilestonePage() {
         // Fetch all system milestones
         const systemMilestonesResponse = await MilestoneApi.getAllMilestones();
         if (systemMilestonesResponse.data && systemMilestonesResponse.data.data) {
+          console.log("System Milestones:", systemMilestonesResponse.data.data); // Debug log
           const sortedMilestones = systemMilestonesResponse.data.data.sort(
             (a, b) => a.minAge - b.minAge
           );
@@ -95,7 +96,7 @@ function MilestonePage() {
         if (response.data && response.data.data && response.data.data.length > 0) {
           const relevantMilestone = response.data.data[0];
           const milestoneIndex = systemMilestones.findIndex(
-            (milestone) => milestone.id === relevantMilestone.id
+            (milestone) => milestone.milestoneId === relevantMilestone.milestoneId
           );
           if (milestoneIndex !== -1) {
             const milestoneElement = milestoneListRef.current.children[
@@ -150,7 +151,7 @@ function MilestonePage() {
   const completionPercentage = () => {
     if (!systemMilestones.length) return 0;
     const completedMilestones = childMilestones.filter((cm) =>
-      systemMilestones.some((sm) => sm.id === cm.milestoneId && !sm.isPersonal)
+      systemMilestones.some((sm) => sm.milestoneId === cm.milestoneId && !sm.isPersonal)
     );
     return (completedMilestones.length / systemMilestones.length) * 100;
   };
@@ -162,19 +163,21 @@ function MilestonePage() {
       (milestone) =>
         milestone.minAge > ageInMonths &&
         milestone.minAge <= ageInMonths + 1 &&
-        !childMilestones.some((cm) => cm.milestoneId === milestone.id)
+        !childMilestones.some((cm) => cm.milestoneId === milestone.milestoneId)
     );
   };
 
   const handleAddCustomMilestone = async () => {
-    if (!customMilestone.title || !customMilestone.age) return;
+    if (!customMilestone.milestoneName || !customMilestone.age) return;
 
     const newMilestone = {
-      title: customMilestone.title,
+      milestoneName: customMilestone.milestoneName, // Update to match API field
       minAge: parseInt(customMilestone.age),
       maxAge: parseInt(customMilestone.age) + 1,
       description: "Custom milestone added by user.",
       isPersonal: true,
+      importance: "Medium", // Add default value
+      category: "custom", // Add default value
     };
 
     try {
@@ -184,7 +187,7 @@ function MilestonePage() {
           (a, b) => a.minAge - b.minAge
         );
         setSystemMilestones(updatedMilestones);
-        setCustomMilestone({ title: "", age: "" });
+        setCustomMilestone({ milestoneName: "", age: "" });
         setShowAddModal(false);
       }
     } catch (error) {
@@ -195,23 +198,36 @@ function MilestonePage() {
   const handleToggleMilestone = async (milestoneId) => {
     const isAchieved = childMilestones.some((cm) => cm.milestoneId === milestoneId);
     if (isAchieved) {
-      return;
+      return; // If already achieved, do nothing
     }
 
-    const newChildMilestone = {
-      milestoneId: milestoneId,
-      childName: selectedChild.name,
-      achievedDate: new Date().toISOString().split("T")[0],
+    const achievedDate = new Date().toISOString().split("T")[0]; // Current date in YYYY-MM-DD format
+
+    // Construct the request body for updateChildMilestone
+    const updatedChildMilestone = {
+      milestoneId: milestoneId, // The milestoneId of the selected milestone
+      name: selectedChild.name, // Child's name
+      dateOfBirth: selectedChild.dateOfBirth, // Child's date of birth
+      memberId: memberId, // Member ID from localStorage
+      achievedDate: achievedDate, // Current date
+      status: "Achieved", // Set status to "Achieved"
+      notes: "", // Optional field
+      guidelines: "", // Optional field
+      importance: "", // Optional field
+      category: "", // Optional field
     };
 
     try {
-      const response = await MilestoneApi.createChildMilestone(newChildMilestone);
-      if (response.data && response.data.data) {
-        const updatedChildMilestones = [...childMilestones, response.data.data];
+      // Directly update the child milestone with the achieved status using PUT
+      const updateResponse = await MilestoneApi.updateChildMilestone(updatedChildMilestone);
+      if (updateResponse.data && updateResponse.data.data) {
+        // Update the local state with the new child milestone data
+        const updatedChildMilestones = [...childMilestones, updateResponse.data.data];
         setChildMilestones(updatedChildMilestones);
 
+        // Calculate badges based on achieved milestones
         const completedCount = updatedChildMilestones.filter((cm) =>
-          systemMilestones.some((sm) => sm.id === cm.milestoneId && !sm.isPersonal)
+          systemMilestones.some((sm) => sm.milestoneId === cm.milestoneId && !sm.isPersonal)
         ).length;
         const newBadges = [];
         if (completedCount >= 2) newBadges.push("Early Achiever");
@@ -219,7 +235,7 @@ function MilestonePage() {
         setBadges(newBadges);
       }
     } catch (error) {
-      console.error("Error creating child milestone:", error);
+      console.error("Error updating child milestone:", error);
     }
   };
 
@@ -229,27 +245,26 @@ function MilestonePage() {
 
     if (filterOption === "achieved") {
       filtered = filtered.filter((milestone) =>
-        childMilestones.some((cm) => cm.milestoneId === milestone.id)
+        childMilestones.some((cm) => cm.milestoneId === milestone.milestoneId)
       );
     } else if (filterOption === "upcoming") {
       const ageInMonths = selectedChild ? calculateAgeInMonths(selectedChild.dateOfBirth) : 0;
       filtered = filtered.filter(
         (milestone) =>
           milestone.minAge > ageInMonths &&
-          !childMilestones.some((cm) => cm.milestoneId === milestone.id)
+          !childMilestones.some((cm) => cm.milestoneId === milestone.milestoneId)
       );
     } else if (filterOption === "overdue") {
       const ageInMonths = selectedChild ? calculateAgeInMonths(selectedChild.dateOfBirth) : 0;
       filtered = filtered.filter(
         (milestone) =>
           milestone.maxAge < ageInMonths &&
-          !childMilestones.some((cm) => cm.milestoneId === milestone.id)
+          !childMilestones.some((cm) => cm.milestoneId === milestone.milestoneId)
       );
     }
     return filtered;
   };
 
-  // Function to handle opening the AddMilestone modal
   const handleShowMilestoneModal = () => {
     if (!selectedChild) {
       alert("Please select a child to add a milestone.");
@@ -258,10 +273,8 @@ function MilestonePage() {
     setShowAddMilestoneModal(true);
   };
 
-  // Function to close the AddMilestone modal and refresh data
   const closeMilestoneOverlay = () => {
     setShowAddMilestoneModal(false);
-    // Refresh the child milestones after adding a new milestone
     if (selectedChild) {
       MilestoneApi.getMilestoneByChild(selectedChild, memberId)
         .then((response) => {
@@ -316,25 +329,22 @@ function MilestonePage() {
           {/* System Milestones Roadmap (div7) */}
           <div className="milestone-roadmap-milestone-page">
             <h2>System Milestones Roadmap</h2>
-            {/* Progress Bar */}
             <div className="progress-bar-milestone-page">
               <div
                 className="progress-fill-milestone-page"
                 style={{ width: `${completionPercentage()}%` }}
               ></div>
             </div>
-            {/* Notifications */}
             {getUpcomingMilestones().length > 0 && (
               <div className="notifications-milestone-page">
                 <h3>Upcoming Milestones</h3>
                 {getUpcomingMilestones().map((milestone) => (
-                  <div key={milestone.id} className="notification-item-milestone-page">
-                    {milestone.title} (at {milestone.minAge} months)
+                  <div key={milestone.milestoneId} className="notification-item-milestone-page">
+                    {milestone.milestoneName} (at {milestone.minAge} months)
                   </div>
                 ))}
               </div>
             )}
-            {/* Filtering and Add Milestone Button */}
             <div className="controls-milestone-page">
               <select
                 value={filterOption}
@@ -354,11 +364,14 @@ function MilestonePage() {
               <div className="milestone-list-milestone-page" ref={milestoneListRef}>
                 {filteredMilestones().map((milestone) => {
                   const isAchieved = childMilestones.some(
-                    (cm) => cm.milestoneId === milestone.id
+                    (cm) => cm.milestoneId === milestone.milestoneId
+                  );
+                  const childMilestone = childMilestones.find(
+                    (cm) => cm.milestoneId === milestone.milestoneId
                   );
                   return (
                     <div
-                      key={milestone.id}
+                      key={milestone.milestoneId}
                       className={`milestone-item-milestone-page ${isAchieved ? "achieved-milestone-page" : ""}`}
                       onClick={() => setShowDetailsModal(milestone)}
                     >
@@ -368,7 +381,7 @@ function MilestonePage() {
                           onClick={(e) => {
                             e.stopPropagation();
                             if (!isAchieved) {
-                              handleToggleMilestone(milestone.id);
+                              handleToggleMilestone(milestone.milestoneId);
                             }
                           }}
                         >
@@ -376,13 +389,18 @@ function MilestonePage() {
                         </div>
                       </div>
                       <div className="milestone-content-milestone-page">
-                        <div className="milestone-title-milestone-page">{milestone.title}</div>
+                        <div className="milestone-title-milestone-page">{milestone.milestoneName}</div>
                         <div className="milestone-age-milestone-page">
                           {milestone.minAge} - {milestone.maxAge} months
                         </div>
                         <div className="milestone-description-milestone-page">
                           {milestone.description}
                         </div>
+                        {isAchieved && childMilestone?.achievedDate && (
+                          <div className="achieved-date-milestone-page">
+                            Achieved on: {new Date(childMilestone.achievedDate).toLocaleDateString()}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -394,7 +412,6 @@ function MilestonePage() {
           {/* Achieved Milestones (div8) */}
           <div className="achieved-milestones-milestone-page">
             <h2>Achieved Milestones</h2>
-            {/* Badges */}
             {badges.length > 0 && (
               <div className="badges-milestone-page">
                 <h3>Badges Earned</h3>
@@ -409,12 +426,12 @@ function MilestonePage() {
               {childMilestones.length > 0 ? (
                 childMilestones.map((cm) => {
                   const milestone = systemMilestones.find(
-                    (sm) => sm.id === cm.milestoneId
+                    (sm) => sm.milestoneId === cm.milestoneId
                   );
                   return (
                     <div key={cm.id} className="achieved-item-milestone-page">
                       <div className="achieved-title-milestone-page">
-                        {milestone ? milestone.title : "Custom Milestone"}
+                        {milestone ? milestone.milestoneName : "Custom Milestone"}
                       </div>
                       <div className="achieved-date-milestone-page">
                         Achieved on: {new Date(cm.achievedDate).toLocaleDateString()}
@@ -428,17 +445,16 @@ function MilestonePage() {
             </div>
           </div>
 
-          {/* Add Custom Milestone Modal */}
           {showAddModal && (
             <div className="modal-milestone-page">
               <div className="modal-content-milestone-page">
                 <h3>Add Custom Milestone</h3>
                 <input
                   type="text"
-                  placeholder="Milestone Title"
-                  value={customMilestone.title}
+                  placeholder="Milestone Name"
+                  value={customMilestone.milestoneName}
                   onChange={(e) =>
-                    setCustomMilestone({ ...customMilestone, title: e.target.value })
+                    setCustomMilestone({ ...customMilestone, milestoneName: e.target.value })
                   }
                 />
                 <input
@@ -457,7 +473,6 @@ function MilestonePage() {
             </div>
           )}
 
-          {/* Add Milestone Modal */}
           {showAddMilestoneModal && (
             <AddMilestone
               child={selectedChild}
@@ -469,11 +484,10 @@ function MilestonePage() {
             />
           )}
 
-          {/* Milestone Details Modal */}
           {showDetailsModal && (
             <div className="modal-milestone-page">
               <div className="modal-content-milestone-page">
-                <h3>{showDetailsModal.title}</h3>
+                <h3>{showDetailsModal.milestoneName}</h3>
                 <p>{showDetailsModal.description}</p>
                 <p>Age Range: {showDetailsModal.minAge} - {showDetailsModal.maxAge} months</p>
                 <p>Tips: Encourage this milestone by engaging in related activities.</p>
