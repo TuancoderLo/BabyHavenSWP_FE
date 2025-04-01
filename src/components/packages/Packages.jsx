@@ -304,20 +304,24 @@ function Packages() {
                         <span className="feature-label">
                           Max children allowed
                         </span>
-                        <span className="feature-value">1</span>
+                        <span className="feature-value">  
+                          {packagesData
+                          .find((p) => p.packageName === "Free")
+                          ?.maxChildrenAllowed}
+                          </span>
                       </div>
                       <div className="feature-item">
                         <span className="feature-label">
-                          Available to make consultation with experts
+                          Available to make consultation with AI
                         </span>
-                        <span className="feature-value">Not allowed</span>
+                        <span className="feature-value">UnAvailable</span>
                       </div>
                       <div className="feature-item">
                         <span className="feature-label">
                           Tracking milestones of child
                         </span>
                         <span className="feature-value">
-                          3 milestone per child
+                        Unlimited
                         </span>
                       </div>
                       <div className="feature-item">
@@ -350,15 +354,13 @@ function Packages() {
                           ? "current-plan"
                           : "Free"
                       }`}
+                      onClick={() =>
+                        currentPlan?.packageName !== "Free" &&
+                        handleBuyPackage(
+                          packagesData.find((p) => p.packageName === "Free")
+                        )
+                      }
                       disabled={currentPlan?.packageName === "Free"}
-                      onClick={() => {
-                        if (
-                          currentPlan?.packageName !== "Free" &&
-                          !isLoggedIn
-                        ) {
-                          setShowLoginPrompt(true);
-                        }
-                      }}
                     >
                       {currentPlan?.packageName === "Free"
                         ? "YOUR CURRENT PLAN"
@@ -382,14 +384,18 @@ function Packages() {
                         <span className="feature-label">
                           Max children allowed
                         </span>
-                        <span className="feature-value">2</span>
+                        <span className="feature-value">
+                          {packagesData
+                          .find((p) => p.packageName === "Standard")
+                          ?.maxChildrenAllowed}
+                        </span>
                       </div>
                       <div className="feature-item">
                         <span className="feature-label">
-                          Available to make consultation with experts
+                          Available to make consultation with AI
                         </span>
                         <span className="feature-value">
-                          5 consultation per month
+                        Unlimited
                         </span>
                       </div>
                       <div className="feature-item">
@@ -460,14 +466,18 @@ function Packages() {
                         <span className="feature-label">
                           Max children allowed
                         </span>
-                        <span className="feature-value">6</span>
+                        <span className="feature-value">
+                          {packagesData
+                           .find ((p) => p.packageName === "Premium")
+                           ?.maxChildrenAllowed}
+                        </span>
                       </div>
                       <div className="feature-item">
                         <span className="feature-label">
-                          Available to make consultation with experts
+                          Available to make consultation with AI
                         </span>
                         <span className="feature-value">
-                          10 consultation per month
+                        Unlimited
                         </span>
                       </div>
                       <div className="feature-item">
@@ -601,7 +611,7 @@ function Packages() {
                       </div>
                       <button
                         className="change-button"
-                        onClick={() => handleCloseOverlay()}
+                        onClick={() => setCurrentStep(0)}
                       >
                         Change
                       </button>
