@@ -133,8 +133,8 @@ const ForgetPassword = () => {
     setError("");
 
     // Password validation
-    if (newPassword.length < 8) {
-      setError("Password must be at least 8 characters");
+    if (newPassword.length < 6) {
+      setError("Password must be at least 6 characters");
       return;
     }
 
@@ -477,7 +477,7 @@ const ForgetPassword = () => {
                   id="newPassword"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Minimum 8 characters"
+                  placeholder="Minimum 6 characters"
                   required
                 />
                 <span
