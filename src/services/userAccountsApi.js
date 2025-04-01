@@ -19,9 +19,10 @@ const userAccountsApi = {
       dateOfBirth: data.dateOfBirth,
       address: data.address?.trim(),
       password: data.password,
-      status: 0, // Mặc định status = 0
-      roleId: data.roleId || 1, // Sử dụng roleId từ form, mặc định là 1 (Member) nếu không có
-      profilePicture: data.profilePicture, // Đảm bảo thêm trường này nếu có
+      status: 0, // Mặc định status = 0 (Active)
+      roleId: data.roleId || 1, // Sử dụng roleId từ form, mặc định là 1 (Member)
+      profilePicture: data.profilePicture,
+      isVerified: false, // Mặc định là false
     };
 
     return api.post("UserAccounts", formattedData);
@@ -37,8 +38,9 @@ const userAccountsApi = {
       gender: data.gender,
       dateOfBirth: data.dateOfBirth,
       address: data.address?.trim(),
-      status: data.status || 0,
       profilePicture: data.profilePicture,
+      status: data.status === "Active" ? 0 : data.status === "Inactive" ? 1 : 2,
+      isVerified: data.isVerified || false,
       ...(data.password ? { password: data.password } : {}),
     };
 
@@ -65,7 +67,25 @@ const userAccountsApi = {
   },
 
   delete: (id) => {
-    return api.delete(`UserAccounts/${id}`);
+    // Trước khi xóa, lấy thông tin user hiện tại
+    return api.get(`UserAccounts/${id}`).then((response) => {
+      const userData = response.data;
+      // Cập nhật status = 1 (Inactive)
+      const formattedData = {
+        userId: id,
+        username: userData.username,
+        email: userData.email,
+        phoneNumber: userData.phoneNumber,
+        name: userData.name,
+        gender: userData.gender,
+        dateOfBirth: userData.dateOfBirth,
+        address: userData.address,
+        profilePicture: userData.profilePicture,
+        status: 1, // Set status = 1 for soft delete
+        isVerified: userData.isVerified,
+      };
+      return api.put("UserAccounts", formattedData);
+    });
   },
 
   getParentCategories: (id) => {
@@ -91,7 +111,6 @@ const userAccountsApi = {
 
   createMember: async (memberData) => {
     try {
-      // Bước 1: Tạo user account
       const response = await api.post("UserAccounts", memberData);
       return response.data;
     } catch (error) {
