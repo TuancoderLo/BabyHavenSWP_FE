@@ -5,6 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import childApi from "../../../../services/childApi";
 import calculateBMI from "../../../../services/bmiUtils";
 import BabyGrowth from "../../../../assets/baby_growth.png";
+import alertApi from "../../../../services/alertApi";
 import {
   addChildForm,
   validateGrowthRecordErrors,
@@ -178,6 +179,13 @@ const [popupType, setPopupType] = useState("success"); // "success" hoặc "erro
           neurologicalReflexes: growthForm.neurologicalReflexes || "",
           developmentalMilestones: growthForm.developmentalMilestones || "",
         };
+
+        try {
+          const alertRes = await alertApi.getAlert(child.name, child.dateOfBirth, memberId);
+          console.log("Alert created and fetched:", alertRes.data);
+        } catch (alertErr) {
+          console.error("Error creating/fetching alert:", alertErr);
+        }
 
         // Gửi yêu cầu tạo growth record
         const growthRes = await childApi.createGrowthRecord(growthPayload);
