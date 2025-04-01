@@ -57,7 +57,7 @@ const doctorApi = {
     const response = await api.get(`/ConsultationRequests/odata${filter}`);
     return response.data;
   },
-  
+
   getRatingFeedbackByResponseId: async (responseId) => {
     try {
       const query = `?$filter=responseId eq ${responseId}`;
@@ -72,7 +72,6 @@ const doctorApi = {
       throw error;
     }
   },
-
 
   //Api doctorformember
   createConsultationRequest: async (data) => {
@@ -140,7 +139,6 @@ const doctorApi = {
     }
   },
 
-
   getDoctorsFromEndpoint: async () => {
     const response = await api.get("/Doctors");
     return response.data;
@@ -184,12 +182,32 @@ const doctorApi = {
   },
 
   updateDoctor: async (doctorId, data) => {
-    const response = await api.put(`/Doctors/${doctorId}`, data);
+    const response = await api.put(`/Doctors/${doctorId}`, {
+      doctorId: data.doctorId,
+      userName: data.userName,
+      name: data.name,
+      email: data.email,
+      phoneNumber: data.phoneNumber,
+      degree: data.degree,
+      hospitalName: data.hospitalName,
+      hospitalAddress: data.hospitalAddress,
+      biography: data.biography,
+      status: data.status,
+    });
     return response.data;
   },
 
   updateDoctorSpecialization: async (doctorId, data) => {
     const response = await api.put(`/Specializations/${doctorId}`, data);
+    return response.data;
+  },
+
+  // Thêm phương thức để "xóa mềm" bác sĩ (cập nhật status = 1)
+  deleteDoctor: async (doctorId, doctorData) => {
+    const response = await api.put(`/Doctors/${doctorId}`, {
+      ...doctorData,
+      status: 1, // Đặt status = 1 để "xóa mềm"
+    });
     return response.data;
   },
 };

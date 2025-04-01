@@ -21,6 +21,7 @@ import {
 import axios from "axios";
 import membershipApi from "../../../../services/memberShipApi";
 import userAccountsApi from "../../../../services/userAccountsApi";
+import doctorApi from "../../../../services/DoctorApi";
 import {
   getAllMembers,
   updateMember,
@@ -85,6 +86,15 @@ const Members = () => {
   const [tempMemberData, setTempMemberData] = useState(null);
   const [memberInfoForm] = Form.useForm();
 
+  // Thêm state cho Doctors
+  const [doctors, setDoctors] = useState([]);
+  const [doctorModalVisible, setDoctorModalVisible] = useState(false);
+  const [editingDoctor, setEditingDoctor] = useState(null);
+  const [doctorSearchText, setDoctorSearchText] = useState("");
+
+  // Thêm state cho việc lọc status của doctors
+  const [selectedDoctorStatus, setSelectedDoctorStatus] = useState("All");
+
   // Fetch data when component mounts and when tab changes
   useEffect(() => {
     if (activeTab === "1") {
@@ -94,6 +104,8 @@ const Members = () => {
     } else if (activeTab === "3") {
       fetchMemberships();
       fetchMembershipPackages();
+    } else if (activeTab === "4") {
+      fetchDoctors();
     }
   }, [activeTab]);
 
@@ -236,45 +248,6 @@ const Members = () => {
     } catch (error) {
       console.error("Error creating account:", error);
       message.error(error.message || "Có lỗi xảy ra khi tạo tài khoản");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Form doctor submit
-  const handleDoctorSubmit = async (values) => {
-    try {
-      setLoading(true);
-
-      if (!tempUserData?.userId) {
-        throw new Error("Không tìm thấy thông tin userId");
-      }
-
-      const doctorData = {
-        userId: tempUserData.userId,
-        name: tempUserData.name,
-        email: tempUserData.email,
-        phoneNumber: tempUserData.phoneNumber,
-        specializationIds: [],
-        degree: values.degree,
-        hospitalName: values.hospitalName,
-        hospitalAddress: values.hospitalAddress,
-        biography: values.biography || "",
-        status: 0,
-      };
-
-      console.log("Creating doctor with data:", doctorData);
-
-      await userAccountsApi.createDoctor(doctorData);
-      message.success("Tạo thông tin bác sĩ thành công");
-      setIsCreatingDoctor(false);
-      setTempUserData(null);
-      fetchUserAccounts();
-    } catch (error) {
-      console.error("Error creating doctor:", error);
-      message.error(
-        error.response?.data?.message || "Không thể tạo thông tin bác sĩ"
-      );
     } finally {
       setLoading(false);
     }
@@ -867,6 +840,193 @@ const Members = () => {
     }
   };
 
+  // Thêm các hàm xử lý cho Doctors
+  const fetchDoctors = async () => {
+    try {
+      setLoading(true);
+      const response = await doctorApi.getAllDoctors();
+      if (Array.isArray(response.data)) {
+        setDoctors(response.data);
+      } else if (response.data && Array.isArray(response.data.data)) {
+        setDoctors(response.data.data);
+      } else {
+        console.log("Data is not an array:", response.data);
+        setDoctors([]);
+      }
+    } catch (error) {
+      console.error("Error loading doctors:", error);
+      message.error("Không thể tải danh sách bác sĩ");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddDoctor = () => {
+    setEditingDoctor(null);
+    doctorForm.resetFields();
+    setDoctorModalVisible(true);
+  };
+
+  const handleEditDoctor = (record) => {
+    setEditingDoctor(record);
+    doctorForm.setFieldsValue({
+      ...record,
+    });
+    setDoctorModalVisible(true);
+  };
+
+  const handleDeleteDoctor = async (doctor) => {
+    try {
+      setLoading(true);
+      await doctorApi.deleteDoctor(doctor.doctorId, doctor);
+      message.success("Đã xóa bác sĩ thành công");
+      fetchDoctors();
+    } catch (error) {
+      console.error("Error deleting doctor:", error);
+      message.error("Không thể xóa bác sĩ");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDoctorSubmit = async (values) => {
+    try {
+      setLoading(true);
+      if (editingDoctor) {
+        await doctorApi.updateDoctor(editingDoctor.doctorId, {
+          ...values,
+          doctorId: editingDoctor.doctorId,
+        });
+        message.success("Cập nhật thông tin bác sĩ thành công");
+      } else {
+        // Xử lý thêm mới bác sĩ nếu cần
+        const doctorData = {
+          userId: tempUserData?.userId,
+          name: values.name,
+          email: values.email,
+          phoneNumber: values.phoneNumber,
+          degree: values.degree,
+          hospitalName: values.hospitalName,
+          hospitalAddress: values.hospitalAddress,
+          biography: values.biography || "",
+          status: 0,
+        };
+        await doctorApi.createDoctor(doctorData);
+        message.success("Tạo thông tin bác sĩ thành công");
+      }
+      setDoctorModalVisible(false);
+      fetchDoctors();
+    } catch (error) {
+      console.error("Error saving doctor:", error);
+      message.error("Không thể lưu thông tin bác sĩ");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDoctorSearchChange = (e) => {
+    setDoctorSearchText(e.target.value);
+  };
+
+  // Thêm hàm xử lý thay đổi status
+  const handleDoctorStatusChange = (status) => {
+    setSelectedDoctorStatus(status);
+  };
+
+  // Cập nhật hàm lọc doctors
+  const filteredDoctors = doctors.filter((doctor) => {
+    // Lọc theo status
+    const matchesStatus =
+      selectedDoctorStatus === "All" || doctor.status === selectedDoctorStatus;
+
+    // Lọc theo chuỗi tìm kiếm
+    const searchLower = doctorSearchText.toLowerCase();
+    const matchesSearch =
+      !doctorSearchText ||
+      (doctor.name && doctor.name.toLowerCase().includes(searchLower)) ||
+      (doctor.email && doctor.email.toLowerCase().includes(searchLower)) ||
+      (doctor.phoneNumber && doctor.phoneNumber.includes(searchLower));
+
+    return matchesStatus && matchesSearch;
+  });
+
+  // Thêm cột cho bảng Doctors
+  const doctorColumns = [
+    {
+      title: "STT",
+      key: "index",
+      width: 60,
+      render: (_, __, index) => index + 1,
+    },
+    {
+      title: "Tên Bác Sĩ",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+    },
+    {
+      title: "Số Điện Thoại",
+      dataIndex: "phoneNumber",
+      key: "phoneNumber",
+    },
+    {
+      title: "Học Vị",
+      dataIndex: "degree",
+      key: "degree",
+    },
+    {
+      title: "Bệnh Viện",
+      dataIndex: "hospitalName",
+      key: "hospitalName",
+    },
+    {
+      title: "Địa Chỉ",
+      dataIndex: "hospitalAddress",
+      key: "hospitalAddress",
+      ellipsis: true,
+    },
+    {
+      title: "Trạng Thái",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => renderStatus(status),
+    },
+    {
+      title: "Thao Tác",
+      key: "action",
+      width: 120,
+      render: (_, record) => (
+        <Space size="small">
+          <Button
+            type="primary"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => handleEditDoctor(record)}
+            className="MemberAdmin-action-button"
+          />
+          <Popconfirm
+            title="Bạn có chắc chắn muốn xóa bác sĩ này?"
+            onConfirm={() => handleDeleteDoctor(record)}
+            okText="Có"
+            cancelText="Không"
+          >
+            <Button
+              type="primary"
+              danger
+              size="small"
+              icon={<DeleteOutlined />}
+              className="MemberAdmin-action-button"
+            />
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
   return (
     <div
       className="MemberAdmin-container"
@@ -1049,6 +1209,73 @@ const Members = () => {
                 pageSize: 10,
                 showSizeChanger: true,
                 showTotal: (total) => `Total ${total} memberships`,
+                showQuickJumper: true,
+              }}
+              size="middle"
+              bordered
+            />
+          </TabPane>
+
+          <TabPane tab="Doctors" key="4">
+            <div className="MemberAdmin-tab-header">
+              <div className="MemberAdmin-tab-header-title">Doctors List</div>
+              <div className="MemberAdmin-user-accounts-actions">
+                <div className="MemberAdmin-search-input-container">
+                  <Input
+                    placeholder="Tìm kiếm theo tên, email, số điện thoại"
+                    value={doctorSearchText}
+                    onChange={handleDoctorSearchChange}
+                    allowClear
+                    className="MemberAdmin-search-input"
+                    prefix={<SearchOutlined />}
+                  />
+                </div>
+                <div className="MemberAdmin-filter-action-container">
+                  <div className="MemberAdmin-role-filter">
+                    <Button
+                      type={
+                        selectedDoctorStatus === "All" ? "primary" : "default"
+                      }
+                      onClick={() => handleDoctorStatusChange("All")}
+                      className="MemberAdmin-filter-button"
+                    >
+                      Tất Cả
+                    </Button>
+                    <Button
+                      type={
+                        selectedDoctorStatus === "Active"
+                          ? "primary"
+                          : "default"
+                      }
+                      onClick={() => handleDoctorStatusChange("Active")}
+                      className="MemberAdmin-filter-button"
+                    >
+                      Đang Hoạt Động
+                    </Button>
+                    <Button
+                      type={
+                        selectedDoctorStatus === "Inactive"
+                          ? "primary"
+                          : "default"
+                      }
+                      onClick={() => handleDoctorStatusChange("Inactive")}
+                      className="MemberAdmin-filter-button"
+                    >
+                      Ngưng Hoạt Động
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <Table
+              columns={doctorColumns}
+              dataSource={filteredDoctors}
+              rowKey="doctorId"
+              loading={loading}
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: true,
+                showTotal: (total) => `Tổng ${total} bác sĩ`,
                 showQuickJumper: true,
               }}
               size="middle"
@@ -1547,6 +1774,92 @@ const Members = () => {
               >
                 Hủy
               </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Thêm Modal cho Doctor */}
+      <Modal
+        title={editingDoctor ? "Chỉnh Sửa Thông Tin Bác Sĩ" : "Thêm Bác Sĩ Mới"}
+        visible={doctorModalVisible}
+        onCancel={() => setDoctorModalVisible(false)}
+        footer={null}
+        width={700}
+        destroyOnClose
+      >
+        <Form form={doctorForm} layout="vertical" onFinish={handleDoctorSubmit}>
+          <div className="MemberAdmin-form-row">
+            <Form.Item
+              name="name"
+              label="Tên Bác Sĩ"
+              className="MemberAdmin-form-col"
+              rules={[{ required: true, message: "Vui lòng nhập tên bác sĩ" }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="email"
+              label="Email"
+              className="MemberAdmin-form-col"
+              rules={[
+                { required: true, message: "Vui lòng nhập email" },
+                { type: "email", message: "Email không hợp lệ" },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+          </div>
+
+          <div className="MemberAdmin-form-row">
+            <Form.Item
+              name="phoneNumber"
+              label="Số Điện Thoại"
+              className="MemberAdmin-form-col"
+              rules={[
+                { required: true, message: "Vui lòng nhập số điện thoại" },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="degree"
+              label="Học Vị"
+              className="MemberAdmin-form-col"
+              rules={[{ required: true, message: "Vui lòng nhập học vị" }]}
+            >
+              <Input />
+            </Form.Item>
+          </div>
+
+          <Form.Item
+            name="hospitalName"
+            label="Tên Bệnh Viện"
+            rules={[{ required: true, message: "Vui lòng nhập tên bệnh viện" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            name="hospitalAddress"
+            label="Địa Chỉ Bệnh Viện"
+            rules={[
+              { required: true, message: "Vui lòng nhập địa chỉ bệnh viện" },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item name="biography" label="Tiểu Sử">
+            <TextArea rows={4} />
+          </Form.Item>
+
+          <Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                {editingDoctor ? "Cập Nhật" : "Thêm Mới"}
+              </Button>
+              <Button onClick={() => setDoctorModalVisible(false)}>Hủy</Button>
             </Space>
           </Form.Item>
         </Form>
