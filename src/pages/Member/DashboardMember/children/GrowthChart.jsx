@@ -344,12 +344,14 @@ const GrowthChart = ({
                   return [value, name];
                 }}
                 labelFormatter={(label, payload) => {
-                  if (payload && payload[0]) {
-                    const recordsInMonth = payload[0].payload.records;
-                    if (recordsInMonth && recordsInMonth.length > 0) {
-                      return recordsInMonth
-                        .map((r) => `Date: ${r.date}`)
-                        .join(", ");
+                  if (payload && payload.length > 0 && payload[0].payload) {
+                    const record = payload[0].payload; // The specific record for the hovered dot
+                    if (record.timestamp) {
+                      return `Date: ${new Date(record.timestamp).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}`;
                     }
                   }
                   return "";
@@ -481,12 +483,14 @@ const GrowthChart = ({
                 }}
                 formatter={(value, name) => [`${value}`, name]}
                 labelFormatter={(label, payload) => {
-                  if (payload && payload[0]) {
-                    const recordsInMonth = payload[0].payload.records;
-                    if (recordsInMonth && recordsInMonth.length > 0) {
-                      return recordsInMonth
-                        .map((r) => `Date: ${r.date}`)
-                        .join(", ");
+                  if (payload && payload.length > 0 && payload[0].payload) {
+                    const record = payload[0].payload; // The specific record for the hovered dot
+                    if (record.timestamp) {
+                      return `Date: ${new Date(record.timestamp).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}`;
                     }
                   }
                   return "";
@@ -575,12 +579,14 @@ const GrowthChart = ({
                 }}
                 formatter={(value, name) => [`${value}`, name]}
                 labelFormatter={(label, payload) => {
-                  if (payload && payload[0]) {
-                    const recordsInMonth = payload[0].payload.records;
-                    if (recordsInMonth && recordsInMonth.length > 0) {
-                      return recordsInMonth
-                        .map((r) => `Date: ${r.date}`)
-                        .join(", ");
+                  if (payload && payload.length > 0 && payload[0].payload) {
+                    const record = payload[0].payload; // The specific record for the hovered dot
+                    if (record.timestamp) {
+                      return `Date: ${new Date(record.timestamp).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}`;
                     }
                   }
                   return "";
@@ -700,12 +706,14 @@ const GrowthChart = ({
                 }}
                 formatter={(value, name) => [`${value}`, name]}
                 labelFormatter={(label, payload) => {
-                  if (payload && payload[0]) {
-                    const recordsInMonth = payload[0].payload.records;
-                    if (recordsInMonth && recordsInMonth.length > 0) {
-                      return recordsInMonth
-                        .map((r) => `Date: ${r.date}`)
-                        .join(", ");
+                  if (payload && payload.length > 0 && payload[0].payload) {
+                    const record = payload[0].payload; // The specific record for the hovered dot
+                    if (record.timestamp) {
+                      return `Date: ${new Date(record.timestamp).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}`;
                     }
                   }
                   return "";
@@ -729,7 +737,7 @@ const GrowthChart = ({
                 stroke="#FF9AA2"
                 strokeWidth={2}
                 dot={{ r: 4, fill: "#FF9AA2" }}
-                activeDot={{ r: 6, fill: "#FF9AA2" }}
+                activeDot={{ r: 4, fill: "#FF9AA2" }}
                 name="BMI"
                 connectNulls={true}
                 onClick={(point) => {
