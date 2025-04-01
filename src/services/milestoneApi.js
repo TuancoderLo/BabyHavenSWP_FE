@@ -17,6 +17,14 @@ const MilestoneApi = {
       },
     }),
 
+updateChildMilestone: (data) =>
+  api.put("/ChildMilestone", data, {
+    validateStatus: (status) => {
+      console.log("updateChildMilestone status:", status); // Debug log
+      return status === 1 || (status >= 200 && status < 300);
+    },
+  }),
+
   getMilestoneByChild: (child, memberId) =>
     api.get(
       `ChildMilestone/Child/${child.name}/${child.dateOfBirth}/${memberId}`,
