@@ -54,9 +54,9 @@ const Consultations = () => {
   const [activeTab, setActiveTab] = useState("new");
   const [searchText, setSearchText] = useState("");
 
-  // Filters for Completed and History tabs
+  // [CHANGED] Xoá biến historyFilterRating
+  // và mọi logic filter rating bên ngoài
   const [historyFilterStatus, setHistoryFilterStatus] = useState("");
-  const [historyFilterRating, setHistoryFilterRating] = useState("");
 
   const [pagination, setPagination] = useState({
     current: 1,
@@ -64,7 +64,6 @@ const Consultations = () => {
     total: 0,
   });
 
-  // Thêm biến cho caching
   const [cache, setCache] = useState({
     consultationDetails: {},
     lastFetch: {
@@ -73,7 +72,6 @@ const Consultations = () => {
     },
   });
 
-  // Kiểm tra cache trước khi gọi API
   const getConsultationDetailFromCache = (requestId) => {
     return cache.consultationDetails[requestId];
   };
@@ -93,31 +91,23 @@ const Consultations = () => {
 
   useEffect(() => {
     if (activeTab === "ongoing") {
-      fetchOnGoingConsultationsWithPagination(
-        pagination.current,
-        pagination.pageSize
-      );
+      fetchOnGoingConsultationsWithPagination(pagination.current, pagination.pageSize);
     } else {
       fetchConsultationsWithPagination(pagination.current, pagination.pageSize);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   useEffect(() => {
     applyFilters();
-  }, [
-    searchText,
-    historyFilterStatus,
-    historyFilterRating,
-    consultations,
-    onGoingConsultations,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchText, historyFilterStatus, consultations, onGoingConsultations]);
 
+  // Lấy chi tiết request (có cache)
   const fetchConsultationRequestsById = async (requestId) => {
-    // Kiểm tra cache trước
     const cachedData = getConsultationDetailFromCache(requestId);
     const currentTime = new Date().getTime();
 
-    // Nếu có dữ liệu cache và cache chưa quá 5 phút, sử dụng cache
     if (cachedData && currentTime - cachedData.timestamp < 5 * 60 * 1000) {
       return cachedData.data;
     }
@@ -125,20 +115,17 @@ const Consultations = () => {
     try {
       const response = await doctorApi.getConsultationRequestsById(requestId);
       const detailData = response.data;
-
-      // Lưu vào cache
       cacheConsultationDetail(requestId, detailData);
-
       return detailData;
     } catch (error) {
       console.error(`Error when getting request details ${requestId}:`, error);
-      // Trả về đối tượng mặc định khi API bị lỗi
+      // Trả về mặc định khi lỗi
       return {
-        requestId: requestId,
+        requestId,
         memberName: "N/A (Data unavailable)",
         childName: "N/A",
         status: "Pending",
-        attachments: [], // Empty array to avoid errors when displaying
+        attachments: [],
         requestDate: new Date().toISOString(),
         description: "Unable to load detail information. Server error.",
         child: {
@@ -155,38 +142,26 @@ const Consultations = () => {
   const parseAttachments = (attachmentsData) => {
     try {
       if (!attachmentsData) return [];
-
-      // Nếu đã là mảng, trả về luôn
       if (Array.isArray(attachmentsData)) return attachmentsData;
 
-      // Nếu là chuỗi, parse thành JSON
       if (typeof attachmentsData === "string") {
-        if (attachmentsData.trim() === "") return [];
-
+        if (!attachmentsData.trim()) return [];
         try {
-          // Thử parse bình thường trước
           const parsedData = JSON.parse(attachmentsData);
 
-          // Nếu kết quả vẫn là string (có thể là chuỗi JSON được escape)
           if (typeof parsedData === "string") {
-            // Parse lần thứ hai
             return JSON.parse(parsedData);
           }
-
           return Array.isArray(parsedData) ? parsedData : [parsedData];
         } catch (innerError) {
           console.error("Lỗi khi parse attachments (inner):", innerError);
-          // Thêm log để xem chuỗi gốc
           console.log("Chuỗi attachments gốc:", attachmentsData);
           return [];
         }
       }
-
-      // Nếu là đối tượng đơn (không phải mảng), bọc trong mảng
       if (typeof attachmentsData === "object") {
         return [attachmentsData];
       }
-
       return [];
     } catch (error) {
       console.error("Lỗi khi parse attachments:", error);
@@ -194,6 +169,7 @@ const Consultations = () => {
     }
   };
 
+  // Hàm fetch các tab new/completed/history
   const fetchConsultationsWithPagination = async (page = 1, pageSize = 5) => {
     setLoading(true);
     try {
@@ -203,61 +179,39 @@ const Consultations = () => {
         return;
       }
 
-      // Thay vì gọi API phân trang không tồn tại, sử dụng API hiện có và tự phân trang
-      let response;
-      try {
-        // Sử dụng API hiện có để lấy toàn bộ dữ liệu
-        response = await doctorApi.getConsultationRequestsByDoctorOData(
-          doctorId
-        );
-        const allRequests = Array.isArray(response)
-          ? response
-          : response.data || [];
+      const response = await doctorApi.getConsultationRequestsByDoctorOData(doctorId);
+      const allRequests = Array.isArray(response) ? response : response.data || [];
 
-        // Lọc theo tab nếu cần
-        let filteredData = allRequests;
-        if (activeTab === "new") {
-          filteredData = allRequests.filter(
-            (item) => item.status === "Pending"
-          );
-        } else if (activeTab === "completed") {
-          filteredData = allRequests.filter(
-            (item) => item.status === "Completed"
-          );
-        } else if (activeTab === "history") {
-          // Không lọc gì thêm cho tab History
-        }
-
-        // Thực hiện phân trang thủ công
-        const total = filteredData.length;
-        const startIndex = (page - 1) * pageSize;
-        const endIndex = startIndex + pageSize;
-        const paginatedData = filteredData.slice(startIndex, endIndex);
-
-        // Map dữ liệu để lấy thông tin cơ bản cho danh sách
-        const basicRequests = paginatedData.map((request) => ({
-          id: request.requestId,
-          requestId: request.requestId,
-          parentName: request.memberName || "N/A",
-          childName: request.childName || "N/A",
-          requestDate: request.requestDate || moment().format(),
-          status: request.status || "Pending",
-          // Các trường cơ bản khác
-        }));
-
-        // Cập nhật state dữ liệu và phân trang
-        setConsultations(basicRequests);
-        setPagination({
-          current: page,
-          pageSize: pageSize,
-          total: total,
-        });
-      } catch (error) {
-        console.error("Error fetching consultation requests:", error);
-        message.error("Could not retrieve consultation request list!");
-        setLoading(false);
-        return;
+      // Lọc theo tab
+      let filteredData = allRequests;
+      if (activeTab === "new") {
+        filteredData = allRequests.filter((item) => item.status === "Pending");
+      } else if (activeTab === "completed") {
+        filteredData = allRequests.filter((item) => item.status === "Completed");
+      } else if (activeTab === "history") {
+        // hiển thị tất cả (nếu muốn)
       }
+
+      const total = filteredData.length;
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedData = filteredData.slice(startIndex, endIndex);
+
+      const basicRequests = paginatedData.map((req) => ({
+        id: req.requestId,
+        requestId: req.requestId,
+        parentName: req.memberName || "N/A",
+        childName: req.childName || "N/A",
+        requestDate: req.requestDate || moment().format(),
+        status: req.status || "Pending",
+      }));
+
+      setConsultations(basicRequests);
+      setPagination({
+        current: page,
+        pageSize,
+        total,
+      });
     } catch (error) {
       message.error("Failed to fetch consultation requests!");
       console.error("Error fetching consultations:", error);
@@ -266,10 +220,8 @@ const Consultations = () => {
     }
   };
 
-  const fetchOnGoingConsultationsWithPagination = async (
-    page = 1,
-    pageSize = 5
-  ) => {
+  // Hàm fetch tab "ongoing"
+  const fetchOnGoingConsultationsWithPagination = async (page = 1, pageSize = 5) => {
     setLoading(true);
     try {
       const doctorId = localStorage.getItem("doctorId");
@@ -278,34 +230,27 @@ const Consultations = () => {
         return;
       }
 
-      // Sử dụng API hiện có để lấy các yêu cầu đang diễn ra
-      const requests = await doctorApi.getConsultationRequestsByDoctorAndStatus(
-        doctorId,
-        "Approved"
-      );
+      const requests = await doctorApi.getConsultationRequestsByDoctorAndStatus(doctorId, "Approved");
 
-      // Thực hiện phân trang thủ công
       const total = requests.length;
       const startIndex = (page - 1) * pageSize;
       const endIndex = Math.min(startIndex + pageSize, total);
       const paginatedRequests = requests.slice(startIndex, endIndex);
 
-      // Xử lý dữ liệu cơ bản cho danh sách
-      const basicRequests = paginatedRequests.map((request) => ({
-        id: request.requestId,
-        requestId: request.requestId,
-        parentName: request.memberName || "N/A",
-        childName: request.childName || "N/A",
-        requestDate: request.requestDate || moment().format(),
-        status: request.status || "Approved",
-        // Các trường cơ bản khác
+      const basicRequests = paginatedRequests.map((req) => ({
+        id: req.requestId,
+        requestId: req.requestId,
+        parentName: req.memberName || "N/A",
+        childName: req.childName || "N/A",
+        requestDate: req.requestDate || moment().format(),
+        status: req.status || "Approved",
       }));
 
       setOnGoingConsultations(basicRequests);
       setPagination({
         current: page,
-        pageSize: pageSize,
-        total: total,
+        pageSize,
+        total,
       });
     } catch (error) {
       message.error("Failed to fetch ongoing consultations!");
@@ -315,16 +260,18 @@ const Consultations = () => {
     }
   };
 
+  // [CHANGED] Xoá toàn bộ filter rating
+  // Chỉ còn filter searchText + historyFilterStatus
   const applyFilters = () => {
     let data = [];
     if (activeTab === "ongoing") {
-      data = onGoingConsultations.filter((item) => item.status === "Approved"); // Đảm bảo chỉ lấy Approved
+      data = onGoingConsultations.filter((item) => item.status === "Approved");
       if (searchText) {
         data = data.filter(
           (item) =>
             item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
             item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.description.toLowerCase().includes(searchText.toLowerCase())
+            (item.description && item.description.toLowerCase().includes(searchText.toLowerCase()))
         );
       }
     } else if (activeTab === "completed") {
@@ -334,9 +281,7 @@ const Consultations = () => {
           (item) =>
             item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
             item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.description.toLowerCase().includes(searchText.toLowerCase()) ||
-            (item.response &&
-              item.response.toLowerCase().includes(searchText.toLowerCase()))
+            (item.description && item.description.toLowerCase().includes(searchText.toLowerCase()))
         );
       }
     } else if (activeTab === "history") {
@@ -344,30 +289,23 @@ const Consultations = () => {
       if (historyFilterStatus) {
         data = data.filter((item) => item.status === historyFilterStatus);
       }
-      if (historyFilterRating) {
-        data = data.filter(
-          (item) => item.rating.toString() === historyFilterRating
-        );
-      }
       if (searchText) {
         data = data.filter(
           (item) =>
             item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
             item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.description.toLowerCase().includes(searchText.toLowerCase()) ||
-            (item.response &&
-              item.response.toLowerCase().includes(searchText.toLowerCase()))
+            (item.description && item.description.toLowerCase().includes(searchText.toLowerCase()))
         );
       }
     } else {
-      // Tab "new" chỉ hiển thị Pending
+      // Tab "new" => Pending
       data = consultations.filter((item) => item.status === "Pending");
       if (searchText) {
         data = data.filter(
           (item) =>
             item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
             item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.description.toLowerCase().includes(searchText.toLowerCase())
+            (item.description && item.description.toLowerCase().includes(searchText.toLowerCase()))
         );
       }
     }
@@ -378,16 +316,13 @@ const Consultations = () => {
     setSearchText(e.target.value);
   };
 
+  // Khi xem chi tiết
   const handleViewDetail = async (record) => {
     try {
-      // Hiển thị drawer trước với loading state
       setSelectedConsultation({ ...record, isLoading: true });
       setDetailVisible(true);
 
-      // Tải chi tiết chỉ khi người dùng bấm vào
-      const detailedData = await fetchConsultationRequestsById(
-        record.requestId
-      );
+      const detailedData = await fetchConsultationRequestsById(record.requestId);
 
       // Lấy responses
       const responses = await doctorApi.getConsultationResponsesOData(
@@ -395,28 +330,26 @@ const Consultations = () => {
       );
       const latestResponse = responses.data[0] || {};
 
-      // Lấy rating nếu có response
+      // Lấy rating, comment, feedbackDate
       let rating = 0;
+      let comment = "";
+      let feedbackDate = "";
       if (latestResponse.responseId) {
         try {
-          const feedbackResponse =
-            await doctorApi.getRatingFeedbackByResponseId(
-              latestResponse.responseId
-            );
+          const feedbackResponse = await doctorApi.getRatingFeedbackByResponseId(
+            latestResponse.responseId
+          );
           const feedbackData = feedbackResponse.data[0] || {};
           rating = feedbackData.rating || 0;
+          comment = feedbackData.comment || "";
+          feedbackDate = feedbackData.feedbackDate || "";
         } catch (error) {
-          console.error(
-            `Error fetching rating for response ${latestResponse.responseId}:`,
-            error
-          );
+          console.error(`Error fetching feedback for responseId=${latestResponse.responseId}:`, error);
         }
       }
 
-      // Xử lý attachments
       const attachmentsArray = parseAttachments(detailedData.attachments);
 
-      // Cập nhật thông tin chi tiết
       setSelectedConsultation({
         ...record,
         isLoading: false,
@@ -430,33 +363,30 @@ const Consultations = () => {
         description: detailedData.description || "N/A",
         attachments: attachmentsArray,
         response: latestResponse.content || "",
-        rating: rating,
         createdAt: detailedData.createdAt || moment().format(),
         updatedAt: detailedData.updatedAt || moment().format(),
-        completedDate:
-          detailedData.status === "Completed" ? detailedData.updatedAt : null,
+        completedDate: detailedData.status === "Completed" ? detailedData.updatedAt : null,
+
+        // [CHANGED] Lưu thêm rating, comment, feedbackDate trong selectedConsultation
+        rating,
+        comment,
+        feedbackDate,
       });
     } catch (error) {
       message.error("Unable to load details");
       console.error("Error fetching consultation detail:", error);
-      // Đóng drawer nếu có lỗi hoặc hiển thị thông báo lỗi trong drawer
     }
   };
 
   const handleRespond = async (record) => {
     try {
-      // Thiết lập form và hiển thị modal với trạng thái loading
       setSelectedConsultation({ ...record, isLoading: true });
       responseForm.resetFields();
       setResponseVisible(true);
 
-      // Tải thông tin chi tiết chỉ khi người dùng muốn phản hồi
-      const detailedData = await fetchConsultationRequestsById(
-        record.requestId
-      );
+      const detailedData = await fetchConsultationRequestsById(record.requestId);
       const attachmentsArray = parseAttachments(detailedData.attachments);
 
-      // Cập nhật thông tin chi tiết cho form phản hồi
       setSelectedConsultation({
         ...record,
         isLoading: false,
@@ -509,7 +439,6 @@ const Consultations = () => {
         stringStatus
       );
 
-      // Gọi hàm fetch với pagination hiện tại
       if (activeTab === "ongoing") {
         await fetchOnGoingConsultationsWithPagination(
           pagination.current,
@@ -541,12 +470,8 @@ const Consultations = () => {
   const handleComplete = async (record) => {
     setLoading(true);
     try {
-      await doctorApi.updateConsultationRequestsStatus(
-        record.requestId,
-        "Completed"
-      );
+      await doctorApi.updateConsultationRequestsStatus(record.requestId, "Completed");
 
-      // Gọi hàm fetch với pagination hiện tại
       if (activeTab === "ongoing") {
         await fetchOnGoingConsultationsWithPagination(
           pagination.current,
@@ -583,6 +508,7 @@ const Consultations = () => {
     }
   };
 
+  // [CHANGED] Bỏ cột Rating ngoài bảng
   const newRequestColumns = [
     {
       title: "Parent",
@@ -617,10 +543,7 @@ const Consultations = () => {
       key: "action",
       render: (_, record) => (
         <Space>
-          <Button
-            icon={<EyeOutlined />}
-            onClick={() => handleViewDetail(record)}
-          >
+          <Button icon={<EyeOutlined />} onClick={() => handleViewDetail(record)}>
             Details
           </Button>
           {record.status === "Pending" && (
@@ -637,6 +560,7 @@ const Consultations = () => {
     },
   ];
 
+  // [CHANGED] Cũng bỏ cột Rating ở bảng chung
   const columns = [
     {
       title: "Parent",
@@ -673,20 +597,11 @@ const Consultations = () => {
       render: getStatusTag,
     },
     {
-      title: "Rating",
-      dataIndex: "rating",
-      key: "rating",
-      render: (rating) => (rating ? <Rate disabled value={rating} /> : "-"),
-    },
-    {
       title: "Actions",
       key: "action",
       render: (_, record) => (
         <Space>
-          <Button
-            icon={<EyeOutlined />}
-            onClick={() => handleViewDetail(record)}
-          >
+          <Button icon={<EyeOutlined />} onClick={() => handleViewDetail(record)}>
             Details
           </Button>
           {record.status === "Pending" && (
@@ -712,27 +627,20 @@ const Consultations = () => {
     },
   ];
 
-  const newRequestsCount = consultations.filter(
-    (item) => item.status === "Pending"
-  ).length;
+  const newRequestsCount = consultations.filter((item) => item.status === "Pending").length;
 
   const downloadAttachment = (attachment) => {
     try {
-      // Hỗ trợ cả viết hoa và viết thường cho tên trường
-      const fileName =
-        attachment.fileName || attachment.FileName || "download.file";
+      const fileName = attachment.fileName || attachment.FileName || "download.file";
       const content = attachment.content || attachment.Content || "";
       const mimeType =
-        attachment.mimeType ||
-        attachment.MimeType ||
-        "application/octet-stream";
+        attachment.mimeType || attachment.MimeType || "application/octet-stream";
 
       if (!content) {
         message.error(`Missing attachment content for "${fileName}"`);
         return;
       }
 
-      // Chuyển đổi Base64 thành tệp và tải xuống
       const byteCharacters = atob(content);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
@@ -760,29 +668,21 @@ const Consultations = () => {
     if (!mimeType) return <FileOutlined />;
     if (mimeType.includes("pdf")) return <FilePdfOutlined />;
     if (mimeType.includes("image")) return <FileImageOutlined />;
-    if (mimeType.includes("word") || mimeType.includes("doc"))
-      return <FileWordOutlined />;
+    if (mimeType.includes("word") || mimeType.includes("doc")) return <FileWordOutlined />;
     return <FileTextOutlined />;
   };
 
   const renderAttachments = (attachments) => {
-    if (
-      !attachments ||
-      !Array.isArray(attachments) ||
-      attachments.length === 0
-    ) {
+    if (!attachments || !Array.isArray(attachments) || attachments.length === 0) {
       return <p>No attachments</p>;
     }
 
     return attachments.map((attachment, index) => {
       if (!attachment) return null;
 
-      const fileName =
-        attachment.fileName || attachment.FileName || `File ${index + 1}`;
+      const fileName = attachment.fileName || attachment.FileName || `File ${index + 1}`;
       const mimeType =
-        attachment.mimeType ||
-        attachment.MimeType ||
-        "application/octet-stream";
+        attachment.mimeType || attachment.MimeType || "application/octet-stream";
 
       return (
         <div key={index} className="attachment-item">
@@ -851,12 +751,10 @@ const Consultations = () => {
       }
     `;
 
-    // Thêm style vào document
     const styleElement = document.createElement("style");
     styleElement.innerHTML = attachmentStyles;
     document.head.appendChild(styleElement);
 
-    // Cleanup khi component unmount
     return () => {
       if (document.head.contains(styleElement)) {
         document.head.removeChild(styleElement);
@@ -866,15 +764,9 @@ const Consultations = () => {
 
   const handleTableChange = (newPagination) => {
     if (activeTab === "ongoing") {
-      fetchOnGoingConsultationsWithPagination(
-        newPagination.current,
-        newPagination.pageSize
-      );
+      fetchOnGoingConsultationsWithPagination(newPagination.current, newPagination.pageSize);
     } else {
-      fetchConsultationsWithPagination(
-        newPagination.current,
-        newPagination.pageSize
-      );
+      fetchConsultationsWithPagination(newPagination.current, newPagination.pageSize);
     }
   };
 
@@ -885,10 +777,7 @@ const Consultations = () => {
           Consultations
         </Title>
 
-        <div
-          className="consult-header"
-          style={{ display: "flex", alignItems: "center" }}
-        >
+        <div className="consult-header" style={{ display: "flex", alignItems: "center" }}>
           <Input
             placeholder="Search by parent, child, or description"
             prefix={<SearchOutlined />}
@@ -896,6 +785,7 @@ const Consultations = () => {
             onChange={handleSearch}
             style={{ width: 300 }}
           />
+          {/* [CHANGED] Bỏ luôn filter rating UI */}
           {activeTab === "history" && (
             <div style={{ display: "flex", gap: "10px", marginLeft: 10 }}>
               <Select
@@ -911,34 +801,14 @@ const Consultations = () => {
                 <Option value="Rejected">Rejected</Option>
                 <Option value="Completed">Completed</Option>
               </Select>
-              <Select
-                placeholder="Filter by Rating"
-                value={historyFilterRating}
-                onChange={setHistoryFilterRating}
-                style={{ width: 150 }}
-                allowClear
-              >
-                <Option value="">All</Option>
-                {[1, 2, 3, 4, 5].map((rate) => (
-                  <Option key={rate} value={rate.toString()}>
-                    {rate} Stars
-                  </Option>
-                ))}
-              </Select>
             </div>
           )}
           <Button
             type="primary"
             onClick={() =>
               activeTab === "ongoing"
-                ? fetchOnGoingConsultationsWithPagination(
-                    pagination.current,
-                    pagination.pageSize
-                  )
-                : fetchConsultationsWithPagination(
-                    pagination.current,
-                    pagination.pageSize
-                  )
+                ? fetchOnGoingConsultationsWithPagination(pagination.current, pagination.pageSize)
+                : fetchConsultationsWithPagination(pagination.current, pagination.pageSize)
             }
             loading={loading}
             className="consult-refresh-btn"
@@ -948,80 +818,64 @@ const Consultations = () => {
           </Button>
         </div>
 
-        <Tabs
-          activeKey={activeTab}
-          onChange={setActiveTab}
-          items={[
-            {
-              key: "new",
-              label: (
-                <span>
-                  New Requests{" "}
-                  {newRequestsCount > 0 && (
-                    <Badge
-                      count={newRequestsCount}
-                      style={{ backgroundColor: "#e92121" }}
-                    />
-                  )}
-                </span>
-              ),
-              children: (
-                <Table
-                  columns={newRequestColumns}
-                  dataSource={filteredConsultations}
-                  rowKey="id"
-                  loading={loading}
-                  pagination={pagination}
-                  onChange={handleTableChange}
-                />
-              ),
-            },
-            {
-              key: "ongoing",
-              label: "Ongoing",
-              children: (
-                <Table
-                  columns={columns}
-                  dataSource={filteredConsultations}
-                  rowKey="id"
-                  loading={loading}
-                  pagination={pagination}
-                  onChange={handleTableChange}
-                />
-              ),
-            },
-            {
-              key: "completed",
-              label: "Completed",
-              children: (
-                <Table
-                  columns={columns}
-                  dataSource={filteredConsultations}
-                  rowKey="id"
-                  loading={loading}
-                  pagination={pagination}
-                  onChange={handleTableChange}
-                />
-              ),
-            },
-            {
-              key: "history",
-              label: "History",
-              children: (
-                <Table
-                  columns={columns}
-                  dataSource={filteredConsultations}
-                  rowKey="id"
-                  loading={loading}
-                  pagination={pagination}
-                  onChange={handleTableChange}
-                />
-              ),
-            },
-          ]}
-        />
+        <Tabs activeKey={activeTab} onChange={setActiveTab}>
+          <Tabs.TabPane
+            key="new"
+            tab={
+              <span>
+                New Requests{" "}
+                {newRequestsCount > 0 && (
+                  <Badge count={newRequestsCount} style={{ backgroundColor: "#e92121" }} />
+                )}
+              </span>
+            }
+          >
+            <Table
+              columns={newRequestColumns}
+              dataSource={filteredConsultations}
+              rowKey="id"
+              loading={loading}
+              pagination={pagination}
+              onChange={handleTableChange}
+            />
+          </Tabs.TabPane>
+
+          <Tabs.TabPane key="ongoing" tab="Ongoing">
+            <Table
+              columns={columns}
+              dataSource={filteredConsultations}
+              rowKey="id"
+              loading={loading}
+              pagination={pagination}
+              onChange={handleTableChange}
+            />
+          </Tabs.TabPane>
+
+          <Tabs.TabPane key="completed" tab="Completed">
+            <Table
+              columns={columns}
+              dataSource={filteredConsultations}
+              rowKey="id"
+              loading={loading}
+              pagination={pagination}
+              onChange={handleTableChange}
+            />
+          </Tabs.TabPane>
+
+          <Tabs.TabPane key="history" tab="History">
+            <Table
+              columns={columns}
+              dataSource={filteredConsultations}
+              rowKey="id"
+              loading={loading}
+              pagination={pagination}
+              onChange={handleTableChange}
+            />
+          </Tabs.TabPane>
+        </Tabs>
       </Card>
 
+      {/* Modal Respond */}
       <Modal
         title="Respond to Consultation Request"
         open={responseVisible}
@@ -1048,20 +902,17 @@ const Consultations = () => {
                   {selectedConsultation.parentName}
                 </Descriptions.Item>
                 <Descriptions.Item label="Child">
-                  {selectedConsultation.childName} (
-                  {selectedConsultation.childAge})
+                  {selectedConsultation.childName} ({selectedConsultation.childAge})
                 </Descriptions.Item>
                 <Descriptions.Item label="Request Date">
-                  {moment(selectedConsultation.requestDate).format(
-                    "DD/MM/YYYY HH:mm"
-                  )}
+                  {moment(selectedConsultation.requestDate).format("DD/MM/YYYY HH:mm")}
                 </Descriptions.Item>
                 <Descriptions.Item label="Description">
                   {selectedConsultation.description}
                 </Descriptions.Item>
               </Descriptions>
 
-              {selectedConsultation?.attachments && (
+              {selectedConsultation.attachments?.length > 0 && (
                 <>
                   <Divider orientation="left">Attachments</Divider>
                   <div className="attachments-container">
@@ -1073,9 +924,7 @@ const Consultations = () => {
               <Divider orientation="left">Child Information</Divider>
               <Descriptions bordered size="small" column={1}>
                 <Descriptions.Item label="Date of Birth">
-                  {moment(selectedConsultation.childDateOfBirth).format(
-                    "DD/MM/YYYY"
-                  )}
+                  {moment(selectedConsultation.childDateOfBirth).format("DD/MM/YYYY")}
                 </Descriptions.Item>
                 <Descriptions.Item label="Gender">
                   {selectedConsultation.childGender}
@@ -1102,17 +951,15 @@ const Consultations = () => {
 
               <Form.Item noStyle shouldUpdate>
                 {({ getFieldValue }) =>
-                  getFieldValue("action") === "rejected" ? (
+                  getFieldValue("action") === "rejected" && (
                     <Form.Item
                       name="rejectReason"
                       label="Reject Reason"
-                      rules={[
-                        { required: true, message: "Please enter reason" },
-                      ]}
+                      rules={[{ required: true, message: "Please enter reason" }]}
                     >
                       <TextArea rows={4} placeholder="Enter reject reason" />
                     </Form.Item>
-                  ) : null
+                  )
                 }
               </Form.Item>
 
@@ -1126,9 +973,7 @@ const Consultations = () => {
 
               <Form.Item>
                 <div className="consult-modal-buttons">
-                  <Button onClick={() => setResponseVisible(false)}>
-                    Cancel
-                  </Button>
+                  <Button onClick={() => setResponseVisible(false)}>Cancel</Button>
                   <Button type="primary" htmlType="submit" loading={loading}>
                     Send Response
                   </Button>
@@ -1139,6 +984,7 @@ const Consultations = () => {
         )}
       </Modal>
 
+      {/* Drawer Chi Tiết */}
       <Drawer
         title="Consultation Details"
         placement="right"
@@ -1161,28 +1007,22 @@ const Consultations = () => {
                 </Descriptions.Item>
                 <Descriptions.Item label="Parent">
                   <div className="consult-drawer-parent">
-                    <Avatar
-                      src={selectedConsultation.parentAvatar}
-                      size="small"
-                    />
+                    <Avatar size="small" icon={<UserOutlined />} />
                     <span>{selectedConsultation.parentName}</span>
                   </div>
                 </Descriptions.Item>
                 <Descriptions.Item label="Child">
-                  {selectedConsultation.childName} (
-                  {selectedConsultation.childAge})
+                  {selectedConsultation.childName} ({selectedConsultation.childAge})
                 </Descriptions.Item>
                 <Descriptions.Item label="Request Date">
-                  {moment(selectedConsultation.requestDate).format(
-                    "DD/MM/YYYY HH:mm"
-                  )}
+                  {moment(selectedConsultation.requestDate).format("DD/MM/YYYY HH:mm")}
                 </Descriptions.Item>
                 <Descriptions.Item label="Description">
                   {selectedConsultation.description}
                 </Descriptions.Item>
               </Descriptions>
 
-              {selectedConsultation?.attachments && (
+              {selectedConsultation.attachments?.length > 0 && (
                 <>
                   <Divider orientation="left">Attachments</Divider>
                   <div className="attachments-container">
@@ -1194,9 +1034,7 @@ const Consultations = () => {
               <Divider orientation="left">Child Information</Divider>
               <Descriptions bordered column={1}>
                 <Descriptions.Item label="Date of Birth">
-                  {moment(selectedConsultation.childDateOfBirth).format(
-                    "DD/MM/YYYY"
-                  )}
+                  {moment(selectedConsultation.childDateOfBirth).format("DD/MM/YYYY")}
                 </Descriptions.Item>
                 <Descriptions.Item label="Gender">
                   {selectedConsultation.childGender}
@@ -1212,14 +1050,10 @@ const Consultations = () => {
               <Divider orientation="left">System Information</Divider>
               <Descriptions bordered column={1}>
                 <Descriptions.Item label="Created At">
-                  {moment(selectedConsultation.createdAt).format(
-                    "DD/MM/YYYY HH:mm"
-                  )}
+                  {moment(selectedConsultation.createdAt).format("DD/MM/YYYY HH:mm")}
                 </Descriptions.Item>
                 <Descriptions.Item label="Updated At">
-                  {moment(selectedConsultation.updatedAt).format(
-                    "DD/MM/YYYY HH:mm"
-                  )}
+                  {moment(selectedConsultation.updatedAt).format("DD/MM/YYYY HH:mm")}
                 </Descriptions.Item>
               </Descriptions>
 
@@ -1228,9 +1062,7 @@ const Consultations = () => {
                 <Timeline.Item>
                   <p>
                     <strong>Request</strong> -{" "}
-                    {moment(selectedConsultation.requestDate).format(
-                      "DD/MM/YYYY HH:mm"
-                    )}
+                    {moment(selectedConsultation.requestDate).format("DD/MM/YYYY HH:mm")}
                   </p>
                   <Card size="small">
                     <p>{selectedConsultation.description}</p>
@@ -1240,9 +1072,7 @@ const Consultations = () => {
                   <Timeline.Item>
                     <p>
                       <strong>Response</strong> -{" "}
-                      {moment(selectedConsultation.updatedAt).format(
-                        "DD/MM/YYYY HH:mm"
-                      )}
+                      {moment(selectedConsultation.updatedAt).format("DD/MM/YYYY HH:mm")}
                     </p>
                     <Card size="small">
                       <p>{selectedConsultation.response}</p>
@@ -1263,13 +1093,31 @@ const Consultations = () => {
                   <Timeline.Item color="green">
                     <p>
                       <strong>Completed</strong> -{" "}
-                      {moment(selectedConsultation.completedDate).format(
-                        "DD/MM/YYYY HH:mm"
-                      )}
+                      {moment(selectedConsultation.completedDate).format("DD/MM/YYYY HH:mm")}
                     </p>
                   </Timeline.Item>
                 )}
               </Timeline>
+
+              {/* [CHANGED] Thêm phần hiển thị rating, comment, feedbackDate */}
+              <Divider orientation="left">Feedback</Divider>
+              <Descriptions bordered column={1}>
+                <Descriptions.Item label="Rating">
+                  {selectedConsultation.rating ? (
+                    <Rate disabled value={selectedConsultation.rating} />
+                  ) : (
+                    "No rating"
+                  )}
+                </Descriptions.Item>
+                <Descriptions.Item label="Comment">
+                  {selectedConsultation.comment || "No comment"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Feedback Date">
+                  {selectedConsultation.feedbackDate
+                    ? moment(selectedConsultation.feedbackDate).format("DD/MM/YYYY HH:mm")
+                    : "N/A"}
+                </Descriptions.Item>
+              </Descriptions>
             </>
           )
         )}

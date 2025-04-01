@@ -14,7 +14,7 @@ function ExpandableResponseCard({ response, request, onClick }) {
   return (
     <div
       className="consultation-response-card"
-      onClick={() => onClick({ response, request })}
+      onClick={() => onClick(response)}
     >
       <div className="response-header">
         <span className="response-date">{response.responseDate}</span>
@@ -193,35 +193,50 @@ function DoctorConsultation() {
     }
   };
 
-  const fetchConsultationResponses = async () => {
-    try {
-      const memberId = localStorage.getItem("memberId");
-      if (!memberId) throw new Error("Please log in to fetch consultation responses");
-      const res = await doctorApi.getConsultationResponses(memberId);
-      let responses = Array.isArray(res?.data) ? res.data : [res.data];
-      const parsedResponses = responses.map((item) => ({
-        ...item,
-        content:
-          typeof item.content === "string"
-            ? parseContentToObject(item.content)
-            : item.content,
-      }));
-      setConsultationResponses(parsedResponses);
+// Hàm chỉ lấy danh sách consultation responses
+const fetchConsultationResponses = async () => {
+  try {
+    const memberId = localStorage.getItem("memberId");
+    if (!memberId) throw new Error("Please log in to fetch consultation responses");
+    const res = await doctorApi.getConsultationResponses(memberId);
+    const responses = Array.isArray(res?.data) ? res.data : [res.data];
+    const parsedResponses = responses.map((item) => ({
+      ...item,
+      content: typeof item.content === "string" ? parseContentToObject(item.content) : item.content,
+    }));
+    setConsultationResponses(parsedResponses);
+  } catch (error) {
+    console.error("Error fetching consultation responses:", error);
+  }
+};
 
-      const requests = {};
-      for (const response of parsedResponses) {
-        if (response.requestId) {
-          const requestRes = await doctorApi.getConsultationRequestsById(
-            response.requestId
-          );
-          if (requestRes?.data) requests[response.requestId] = requestRes.data;
-        }
+// Hàm lấy chi tiết consultation request dựa trên requestId
+const fetchConsultationRequestDetail = async (requestId) => {
+  try {
+    // Nếu chi tiết chưa có trong state thì mới gọi API
+    if (!consultationRequests[requestId]) {
+      const requestRes = await doctorApi.getConsultationRequestsById(requestId);
+      if (requestRes?.data) {
+        setConsultationRequests((prev) => ({ ...prev, [requestId]: requestRes.data }));
       }
-      setConsultationRequests(requests);
-    } catch (error) {
-      console.error("Error fetching consultation responses:", error);
     }
-  };
+  } catch (error) {
+    console.error("Error fetching consultation request detail:", error);
+  }
+};
+
+// Handler khi người dùng click vào một response cụ thể
+const handleResponseClick = async (response) => {
+  if (response.requestId) {
+    await fetchConsultationRequestDetail(response.requestId);
+  }
+  // Sau khi fetch (hoặc nếu đã có), set state để hiển thị modal chi tiết
+  setSelectedResponse({
+    response,
+    request: consultationRequests[response.requestId],
+  });
+};
+
 
   const fetchSentRequests = async () => {
     try {
@@ -391,6 +406,9 @@ function DoctorConsultation() {
       await doctorApi.updateConsultationResponseStatus(responseId, "Completed");
       await fetchConsultationResponses();
       await fetchUserFeedback();
+      setPopupType("success");
+setPopupMessage("Feedback submitted successfully!");
+setShowPopup(true);
       setShowFeedbackForm(false);
     } catch (error) {
       setFeedbackSubmitError(error.message || "Unable to submit feedback");
@@ -640,14 +658,19 @@ function DoctorConsultation() {
           </div>
         );
 
-      case "responses":
-        return consultationResponses.length > 0 ? (
-          consultationResponses.map((resp, index) => (
-            <ExpandableResponseCard key={index} response={resp} request={consultationRequests[resp.requestId]} onClick={setSelectedResponse} />
-          ))
-        ) : (
-          <p>No responses available.</p>
-        );
+        case "responses":
+          return consultationResponses.length > 0 ? (
+            consultationResponses.map((resp, index) => (
+              <ExpandableResponseCard
+                key={index}
+                response={resp}
+                request={consultationRequests[resp.requestId]}
+                onClick={handleResponseClick}
+              />
+            ))
+          ) : (
+            <p>No responses available.</p>
+          );
 
       case "sentRequests":
         return sentRequests.length > 0 ? (
