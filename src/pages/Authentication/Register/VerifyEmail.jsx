@@ -36,7 +36,6 @@ const VerifyEmail = () => {
     e.preventDefault();
     setError("");
 
-    // Simple OTP validation
     if (otp.length !== 6 || isNaN(Number(otp))) {
       setError("OTP must be 6 digits");
       return;
@@ -45,7 +44,6 @@ const VerifyEmail = () => {
     try {
       setIsLoading(true);
 
-      // Get email and registration data from localStorage
       const email = localStorage.getItem("pending_email");
       const userData = JSON.parse(localStorage.getItem("registration_data"));
 
@@ -55,7 +53,6 @@ const VerifyEmail = () => {
         return;
       }
 
-      // THAY ĐỔI: Đảm bảo dữ liệu đúng định dạng mà API yêu cầu
       const verifyData = {
         email: userData.email || email,
         username: userData.username || "",
@@ -67,47 +64,36 @@ const VerifyEmail = () => {
         password: userData.password || "",
       };
 
-      console.log("Sending verification data:", verifyData);
-
-      // THAY ĐỔI: Có thể API yêu cầu OTP là tham số riêng, không nằm trong body
-      const response = await api.post(
+      // Bước 1: Verify OTP
+      const verifyResponse = await api.post(
         `Authentication/VerifyRegistrationOtp?otp=${otp}`,
         verifyData
       );
 
-      console.log("Verification response:", response.data);
+      // Kiểm tra response và lấy userId
+      if (verifyResponse.data.userId) {
+        // Bước 2: Tạo member mới với userId
+        const memberResponse = await api.post("Members", {
+          userId: verifyResponse.data.userId,
+        });
 
-      // Kiểm tra message trong response
-      if (
-        response.data.message &&
-        response.data.message.includes("successfully")
-      ) {
-        // Đánh dấu là thành công
-        setIsSuccess(true);
-        localStorage.removeItem("registration_data");
-        localStorage.removeItem("pending_email");
-      } else if (response.data.status === 1) {
-        // Nếu API trả về status = 1
-        setIsSuccess(true);
-        localStorage.removeItem("registration_data");
-        localStorage.removeItem("pending_email");
+        if (memberResponse.data.status === 1) {
+          setIsSuccess(true);
+          localStorage.removeItem("registration_data");
+          localStorage.removeItem("pending_email");
+        } else {
+          setError("Failed to create member profile. Please try again.");
+        }
       } else {
-        setError(response.data.message || "Invalid OTP. Please try again.");
+        setError("Invalid verification response. Please try again.");
       }
     } catch (error) {
-      console.error("Error verifying OTP:", error);
-      console.error("Error details:", {
-        status: error.response?.status,
-        data: error.response?.data,
-      });
+      console.error("Error in registration process:", error);
 
-      // THAY ĐỔI: Kiểm tra chi tiết lỗi từ API
       if (error.response?.status === 400) {
-        setError(
-          "Invalid verification data. Please check your information and try again."
-        );
+        setError("Invalid verification data. Please check your information.");
       } else if (error.response?.status === 500) {
-        setError("Server error. Please try again later or contact support.");
+        setError("Server error. Please try again later.");
       } else {
         setError(
           error.response?.data?.message ||
