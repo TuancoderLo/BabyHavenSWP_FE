@@ -118,6 +118,23 @@ function Register() {
       return false;
     }
 
+    const birthDate = new Date(formData.dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    if (age < 18) {
+      setError("Bạn phải đủ 18 tuổi để đăng ký tài khoản");
+      return false;
+    }
+
     return true;
   };
 
@@ -218,6 +235,11 @@ function Register() {
     }
   };
 
+  const maxDate = new Date();
+  const minDate = new Date();
+  minDate.setFullYear(maxDate.getFullYear() - 100); // Giới hạn độ tuổi tối đa 100
+  maxDate.setFullYear(maxDate.getFullYear() - 18); // Giới hạn độ tuổi tối thiểu 18
+
   return (
     <div className="Register-auth-container">
       <div className="Register-home-link" onClick={() => navigate("/guest")}>
@@ -317,7 +339,8 @@ function Register() {
                 value={formData.dateOfBirth}
                 onChange={handleChange}
                 required
-                max={new Date().toISOString().split("T")[0]}
+                max={maxDate.toISOString().split("T")[0]}
+                min={minDate.toISOString().split("T")[0]}
               />
             </div>
 
