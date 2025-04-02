@@ -9,21 +9,14 @@ const MilestoneApi = {
       },
     }),
 
-  createChildMilestone: (data) =>
-    api.post("/ChildMilestone", data, {
+  // Update child milestone using PUT, include childMilestoneId in the URL
+  updateChildMilestone: (childMilestoneId, data) =>
+    api.put(`/ChildMilestone/${childMilestoneId}`, data, {
       validateStatus: (status) => {
-        console.log("createChildMilestone status:", status); // Debug log
+        console.log("updateChildMilestone status:", status); // Debug log
         return status === 1 || (status >= 200 && status < 300);
       },
     }),
-
-updateChildMilestone: (data) =>
-  api.put("/ChildMilestone", data, {
-    validateStatus: (status) => {
-      console.log("updateChildMilestone status:", status); // Debug log
-      return status === 1 || (status >= 200 && status < 300);
-    },
-  }),
 
   getMilestoneByChild: (child, memberId) =>
     api.get(

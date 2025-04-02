@@ -5,19 +5,15 @@ import HealthReportGenerator from "../../../../services/HealthReportGenerator";
 const Alert = ({ alert, alerts, member, child, growthRecords }) => {
   const [expanded, setExpanded] = useState(false);
   const [visible, setVisible] = useState(true);
-  const [expandedAlertIndex, setExpandedAlertIndex] = useState(null); // State để theo dõi alert nào đang mở dropdown
+  const [expandedAlertIndex, setExpandedAlertIndex] = useState(null);
 
   const openOverlay = () => setExpanded(true);
   const closeOverlay = () => setExpanded(false);
   const closeAlert = () => setVisible(false);
 
-  // Thông điệp tích cực khi không có alert
   const goodConditionMessage = "Your child's health is in great condition! Keep up the amazing care!";
-
-  // Xác định có alert hay không
   const hasAlert = !!alert;
 
-  // Determine CSS class based on severityLevel
   function getSeverityClass(level) {
     if (!hasAlert) return "healthy";
     switch (level?.toLowerCase()) {
@@ -32,12 +28,10 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
     }
   }
 
-  // Apply fadeable class for medium or high severity
   const additionalClass = hasAlert && ["medium", "high"].includes(alert?.severityLevel?.toLowerCase())
     ? "fadeable"
     : "";
 
-  // Xác định icon và thông điệp
   const alertIcon = hasAlert
     ? alert.severityLevel?.toLowerCase() === "high"
       ? "🚨"
@@ -47,7 +41,6 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
     ? `Your child's health has a ${alert.severityLevel} level alert`
     : goodConditionMessage;
 
-  // Hàm định dạng ngày
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-GB", {
       day: "2-digit",
@@ -56,25 +49,71 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
     });
   };
 
-  // Hàm phân tách chuỗi alert.message thành các trường
+  // Improved parseAlertMessage function
   const parseAlertMessage = (message) => {
-    if (!message) return {};
-
+    // Define the fields and their labels in order
+    const fieldConfig = [
+      { key: "alert", label: "Alert: " },
+      { key: "diseaseType", label: "Disease Type: " },
+      { key: "symptoms", label: "Symptoms: " },
+      { key: "recommendedTreatment", label: "Recommended Treatment: " },
+      { key: "preventionTips", label: "Prevention Tips: " },
+      { key: "description", label: "Description: " },
+      { key: "notes", label: "Notes: " },
+      { key: "trendAnalysis", label: "Trend Analysis: " },
+    ];
+  
+    // Initialize the result object with default "N/A" values
     const fields = {
-      alert: message.match(/^Alert: (.*?)(?=\. Date:|$)/)?.[1] || "N/A",
-      diseaseType: message.match(/Disease Type: (.*?)(?=\. Symptoms:|$)/)?.[1] || "N/A",
-      symptoms: message.match(/Symptoms: (.*?)(?=\. Recommended Treatment:|$)/)?.[1] || "N/A",
-      recommendedTreatment: message.match(/Recommended Treatment: (.*?)(?=\. Prevention Tips:|$)/)?.[1] || "N/A",
-      preventionTips: message.match(/Prevention Tips: (.*?)(?=\. Description:|$)/)?.[1] || "N/A",
-      description: message.match(/Description: (.*?)(?=\. Notes:|$)/)?.[1] || "N/A",
-      notes: message.match(/Notes: (.*?)(?=\. Trend Analysis:|$)/)?.[1] || "N/A",
-      trendAnalysis: message.match(/Trend Analysis: (.*)/)?.[1] || "N/A",
+      alert: "N/A",
+      diseaseType: "N/A",
+      symptoms: "N/A",
+      recommendedTreatment: "N/A",
+      preventionTips: "N/A",
+      description: "N/A",
+      notes: "N/A",
+      trendAnalysis: "N/A",
     };
-
+  
+    // Return early if the message is empty or not a string
+    if (!message || typeof message !== "string") {
+      return fields;
+    }
+  
+    // Find the start and end indices of each field
+    const indices = fieldConfig.map(({ label }) => ({
+      label,
+      index: message.indexOf(label),
+    }));
+  
+    // Process each field
+    fieldConfig.forEach(({ key, label }, i) => {
+      const startIndex = message.indexOf(label);
+      if (startIndex === -1) return; // Skip if label not found
+  
+      const contentStart = startIndex + label.length;
+      let contentEnd;
+  
+      // Find the start of the next label
+      const nextField = fieldConfig[i + 1];
+      if (nextField) {
+        const nextLabelIndex = message.indexOf(nextField.label, contentStart);
+        contentEnd = nextLabelIndex !== -1 ? nextLabelIndex : message.length;
+      } else {
+        // For the last field, take everything until the end (remove trailing period if present)
+        contentEnd = message.endsWith(".") ? message.length - 1 : message.length;
+      }
+  
+      // Extract and trim the content
+      const content = message.slice(contentStart, contentEnd).trim();
+      if (content) {
+        fields[key] = content;
+      }
+    });
+  
     return fields;
   };
 
-  // Hàm export PDF với alert và record mới nhất
   const exportToPDF = () => {
     const latestGrowthRecord = growthRecords && growthRecords.length > 0
       ? growthRecords.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0]
@@ -84,12 +123,10 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
     report.generatePDF();
   };
 
-  // Hàm toggle dropdown cho alert
   const toggleAlertDetails = (index) => {
     setExpandedAlertIndex(expandedAlertIndex === index ? null : index);
   };
 
-  // Sắp xếp alerts theo ngày giảm dần
   const sortedAlerts = alerts && alerts.length > 0
     ? [...alerts].sort((a, b) => new Date(b.alertDate) - new Date(a.alertDate))
     : [];
@@ -136,8 +173,6 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
             <h2>{hasAlert ? "Alert Details" : "Alert History"}</h2>
             {hasAlert ? (
               <>
-                <p><strong>Message:</strong> {alert?.message || "No additional details available."}</p>
-                <p><strong>Date:</strong> {alert?.alertDate ? formatDate(alert.alertDate) : "N/A"}</p>
                 <h3>All Alerts</h3>
                 {sortedAlerts.length > 0 ? (
                   <table className="alert-history-table">
@@ -166,6 +201,7 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
                                 <td colSpan="3">
                                   <div className="alert-details-content">
                                     <p><strong>Date:</strong> {formatDate(item.alertDate)}</p>
+                                    <p><strong>Alert:</strong> {parsedMessage.alert}</p>
                                     <p><strong>Disease Type:</strong> {parsedMessage.diseaseType}</p>
                                     <p><strong>Symptoms:</strong> {parsedMessage.symptoms}</p>
                                     <p><strong>Recommended Treatment:</strong> {parsedMessage.recommendedTreatment}</p>
@@ -214,6 +250,7 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
                               <td colSpan="3">
                                 <div className="alert-details-content">
                                   <p><strong>Date:</strong> {formatDate(item.alertDate)}</p>
+                                  <p><strong>Alert:</strong> {parsedMessage.alert}</p>
                                   <p><strong>Disease Type:</strong> {parsedMessage.diseaseType}</p>
                                   <p><strong>Symptoms:</strong> {parsedMessage.symptoms}</p>
                                   <p><strong>Recommended Treatment:</strong> {parsedMessage.recommendedTreatment}</p>
