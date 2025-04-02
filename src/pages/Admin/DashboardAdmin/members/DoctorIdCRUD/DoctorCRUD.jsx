@@ -19,7 +19,7 @@ import {
   UploadOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import doctorApi from "../../../../../services/doctorApi";
+import doctorApi from "../../../../../services/DoctorApi";
 import moment from "moment";
 import "./DoctorCRUD.css";
 
