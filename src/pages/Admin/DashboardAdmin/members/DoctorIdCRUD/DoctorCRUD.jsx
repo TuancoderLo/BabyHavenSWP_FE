@@ -27,13 +27,13 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 const STATUS_MAPPING = {
-  0: "Active",
-  1: "Inactive",
+  Active: "Active",
+  Inactive: "Inactive",
 };
 
 const STATUS_MAPPING_REVERSE = {
-  Active: 0,
-  Inactive: 1,
+  Active: "Active",
+  Inactive: "Inactive",
 };
 
 const DoctorCRUD = () => {
@@ -110,7 +110,7 @@ const DoctorCRUD = () => {
         hospitalName: record.hospitalName,
         hospitalAddress: record.hospitalAddress,
         biography: record.biography,
-        status: 1,
+        status: "Inactive",
       };
 
       await doctorApi.updateDoctor(record.doctorId, doctorData);
@@ -137,7 +137,7 @@ const DoctorCRUD = () => {
         hospitalName: values.hospitalName,
         hospitalAddress: values.hospitalAddress,
         biography: values.biography,
-        status: STATUS_MAPPING_REVERSE[values.status],
+        status: values.status,
       };
 
       if (editingDoctor) {
@@ -220,7 +220,7 @@ const DoctorCRUD = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: renderStatus,
+      render: (status) => renderStatus(status),
     },
     {
       title: "Actions",
