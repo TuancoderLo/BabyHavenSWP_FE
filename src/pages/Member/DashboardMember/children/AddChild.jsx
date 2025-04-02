@@ -207,7 +207,7 @@ const [popupType, setPopupType] = useState("success"); // "success" hoặc "erro
     return (
       <div className="add-child-overlay">
         <div className="add-child-wizard congrats-container">
-          <h2 className="congrats-text">
+          <h2 className="congrats-text-child">
             Congratulation!<br />
             Welcome <span className="highlight-pink">{childForm.name}</span> to{" "}
             <span className="highlight-teal">BabyHaven</span>

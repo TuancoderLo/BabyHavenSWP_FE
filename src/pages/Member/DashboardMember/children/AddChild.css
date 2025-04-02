@@ -352,7 +352,7 @@ summary:hover {
 }
 
 /* Congrats screen */
-.congrats-text {
+.congrats-text-child {
   font-size: 45px;
   line-height: 1.3;
   text-align: center;
@@ -409,7 +409,7 @@ summary:hover {
     grid-template-columns: 1fr;
   }
 
-  .congrats-text {
+  .congrats-text-child {
     font-size: 32px;
   }
 }
