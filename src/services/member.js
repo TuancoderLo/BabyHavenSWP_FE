@@ -25,17 +25,11 @@ export const updateMember = async (memberId, memberData) => {
   try {
     // Đảm bảo dữ liệu gửi đi đúng định dạng yêu cầu của API
     const formattedData = {
-      memberId: memberId,
+      memberId: memberData.memberId,
       userId: memberData.userId,
+      memberName: memberData.memberName,
       emergencyContact: memberData.emergencyContact,
-      status:
-        typeof memberData.status === "string"
-          ? memberData.status === "Active"
-            ? 0
-            : memberData.status === "Inactive"
-            ? 1
-            : 2
-          : memberData.status,
+      status: memberData.status,
       notes: memberData.notes,
     };
 
