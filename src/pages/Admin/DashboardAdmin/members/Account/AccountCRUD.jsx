@@ -11,6 +11,7 @@ import {
   Space,
   Upload,
   Modal,
+  Steps,
 } from "antd";
 import {
   PlusOutlined,
@@ -20,10 +21,13 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import userAccountsApi from "../../../../../services/userAccountsApi";
+import { createMember } from "../../../../../services/member";
 import moment from "moment";
 import "./AccountCRUD.css";
 
 const { Option } = Select;
+const { Step } = Steps;
+const { TextArea } = Input;
 
 const AccountCRUD = () => {
   const [loading, setLoading] = useState(false);
@@ -32,9 +36,14 @@ const AccountCRUD = () => {
   const [userAccounts, setUserAccounts] = useState([]);
   const [userAccountModalVisible, setUserAccountModalVisible] = useState(false);
   const [userAccountForm] = Form.useForm();
+  const [memberForm] = Form.useForm();
+  const [doctorForm] = Form.useForm();
   const [editingUserAccount, setEditingUserAccount] = useState(null);
   const [selectedRole, setSelectedRole] = useState("All");
   const [searchText, setSearchText] = useState("");
+  const [currentStep, setCurrentStep] = useState(0);
+  const [tempUserId, setTempUserId] = useState(null);
+  const [tempUserData, setTempUserData] = useState(null);
 
   useEffect(() => {
     fetchUserAccounts();
@@ -65,15 +74,7 @@ const AccountCRUD = () => {
     setEditingUserAccount(null);
     userAccountForm.resetFields();
     setImageUrl("");
-
-    const defaultRoleId =
-      selectedRole === "Doctor" ? 2 : selectedRole === "Admin" ? 3 : 1;
-
-    userAccountForm.setFieldsValue({
-      status: "Active",
-      roleId: defaultRoleId,
-      gender: "Male",
-    });
+    setCurrentStep(0);
     setUserAccountModalVisible(true);
   };
 
@@ -111,7 +112,6 @@ const AccountCRUD = () => {
   const handleUserAccountSubmit = async (values) => {
     try {
       setLoading(true);
-
       const userAccountData = {
         username: values.username?.trim(),
         email: values.email?.trim(),
@@ -123,6 +123,7 @@ const AccountCRUD = () => {
           : null,
         address: values.address?.trim(),
         password: values.password,
+        profilePicture: values.profilePicture || "",
         status: 0,
         roleId: values.roleId,
       };
@@ -133,12 +134,32 @@ const AccountCRUD = () => {
           userAccountData
         );
         message.success("User account updated successfully");
+        setUserAccountModalVisible(false);
+        fetchUserAccounts();
       } else {
-        await userAccountsApi.create(userAccountData);
-        message.success("New user account created successfully");
+        const response = await userAccountsApi.create(userAccountData);
+        setTempUserId(response.data.data.userId);
+        setTempUserData(response.data.data);
+
+        if (values.roleId === 1) {
+          // Member
+          setCurrentStep(1);
+        } else if (values.roleId === 2) {
+          // Doctor
+          setCurrentStep(1);
+          // Điền sẵn thông tin từ account vào form doctor
+          doctorForm.setFieldsValue({
+            name: response.data.data.name,
+            email: response.data.data.email,
+            phoneNumber: response.data.data.phoneNumber,
+          });
+        } else {
+          // Admin
+          message.success("New admin account created successfully");
+          setUserAccountModalVisible(false);
+          fetchUserAccounts();
+        }
       }
-      setUserAccountModalVisible(false);
-      fetchUserAccounts();
     } catch (error) {
       console.error("Error saving user account:", error);
       message.error(
@@ -147,6 +168,68 @@ const AccountCRUD = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleMemberSubmit = async (values) => {
+    try {
+      setLoading(true);
+      const memberData = {
+        userId: tempUserId,
+        emergencyContact: values.emergencyContact,
+        status: 0,
+        notes: values.notes,
+      };
+
+      await createMember(memberData);
+      message.success("New member created successfully");
+      setUserAccountModalVisible(false);
+      setCurrentStep(0);
+      fetchUserAccounts();
+    } catch (error) {
+      console.error("Error creating member:", error);
+      message.error(error.message || "Error occurred while creating member");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDoctorSubmit = async (values) => {
+    try {
+      setLoading(true);
+      const doctorData = {
+        userId: tempUserId,
+        name: values.name,
+        email: values.email,
+        phoneNumber: values.phoneNumber,
+        specializationIds: [], // Để trống theo yêu cầu
+        degree: values.degree,
+        hospitalName: values.hospitalName,
+        hospitalAddress: values.hospitalAddress,
+        biography: values.biography,
+        status: 0,
+      };
+
+      await userAccountsApi.createDoctor(doctorData);
+      message.success("New doctor created successfully");
+      setUserAccountModalVisible(false);
+      setCurrentStep(0);
+      fetchUserAccounts();
+    } catch (error) {
+      console.error("Error creating doctor:", error);
+      message.error(error.message || "Error occurred while creating doctor");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleModalCancel = () => {
+    setUserAccountModalVisible(false);
+    setCurrentStep(0);
+    setTempUserId(null);
+    setTempUserData(null);
+    userAccountForm.resetFields();
+    memberForm.resetFields();
+    doctorForm.resetFields();
   };
 
   const handleSearchChange = (e) => {
@@ -395,232 +478,379 @@ const AccountCRUD = () => {
       <Modal
         title={editingUserAccount ? "Edit Account" : "Add New Account"}
         visible={userAccountModalVisible}
-        onCancel={() => setUserAccountModalVisible(false)}
+        onCancel={handleModalCancel}
         footer={null}
         width={700}
         destroyOnClose
         className="member-modal"
       >
-        <Form
-          form={userAccountForm}
-          layout="vertical"
-          onFinish={handleUserAccountSubmit}
-        >
-          <div className="member-form-row">
-            <Form.Item
-              name="username"
-              label="Username"
-              className="member-form-col"
-              rules={[{ required: true, message: "Please enter username" }]}
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              name="email"
-              label="Email"
-              className="member-form-col"
-              rules={[
-                { required: true, message: "Please enter email" },
-                { type: "email", message: "Invalid email format" },
-              ]}
-            >
-              <Input />
-            </Form.Item>
-          </div>
+        {currentStep === 0 ? (
+          <Form
+            form={userAccountForm}
+            layout="vertical"
+            onFinish={handleUserAccountSubmit}
+            initialValues={{
+              status: "Active",
+              gender: "Male",
+            }}
+          >
+            <div className="member-form-row">
+              <Form.Item
+                name="username"
+                label="Username"
+                className="member-form-col"
+                rules={[{ required: true, message: "Please enter username" }]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                name="email"
+                label="Email"
+                className="member-form-col"
+                rules={[
+                  { required: true, message: "Please enter email" },
+                  { type: "email", message: "Invalid email format" },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+            </div>
 
-          <div className="member-form-row">
-            <Form.Item
-              name="phoneNumber"
-              label="Phone Number"
-              className="member-form-col"
-              rules={[{ required: true, message: "Please enter phone number" }]}
-            >
+            <div className="member-form-row">
+              <Form.Item
+                name="phoneNumber"
+                label="Phone Number"
+                className="member-form-col"
+                rules={[
+                  { required: true, message: "Please enter phone number" },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                name="name"
+                label="Full Name"
+                className="member-form-col"
+                rules={[{ required: true, message: "Please enter full name" }]}
+              >
+                <Input />
+              </Form.Item>
+            </div>
+
+            <div className="member-form-row">
+              <Form.Item
+                name="gender"
+                label="Gender"
+                className="member-form-col"
+                rules={[{ required: true, message: "Please select gender" }]}
+              >
+                <Select>
+                  <Option value="Male">Male</Option>
+                  <Option value="Female">Female</Option>
+                  <Option value="Other">Other</Option>
+                </Select>
+              </Form.Item>
+
+              <Form.Item
+                name="dateOfBirth"
+                label="Date of Birth"
+                className="member-form-col"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select date of birth",
+                  },
+                ]}
+              >
+                <DatePicker
+                  format="DD/MM/YYYY"
+                  style={{ width: "100%" }}
+                  disabledDate={disabledDate}
+                  placeholder="Select date"
+                />
+              </Form.Item>
+            </div>
+
+            <Form.Item name="address" label="Address">
               <Input />
             </Form.Item>
-            <Form.Item
-              name="name"
-              label="Full Name"
-              className="member-form-col"
-              rules={[{ required: true, message: "Please enter full name" }]}
-            >
-              <Input />
-            </Form.Item>
-          </div>
 
-          <div className="member-form-row">
-            <Form.Item
-              name="gender"
-              label="Gender"
-              className="member-form-col"
-              rules={[{ required: true, message: "Please select gender" }]}
-            >
-              <Select>
-                <Option value="Male">Male</Option>
-                <Option value="Female">Female</Option>
-                <Option value="Other">Other</Option>
-              </Select>
+            <Form.Item name="profilePicture" label="Profile Picture">
+              <div className="member-avatar-upload">
+                <Upload
+                  name="profilePicture"
+                  listType="picture-card"
+                  className="avatar-uploader"
+                  showUploadList={false}
+                  beforeUpload={async (file) => {
+                    const isImage = /image\/(jpeg|png|jpg|gif)/.test(file.type);
+                    if (!isImage) {
+                      message.error("You can only upload image files!");
+                      return Upload.LIST_IGNORE;
+                    }
+
+                    const isLt2M = file.size / 1024 / 1024 < 2;
+                    if (!isLt2M) {
+                      message.error("Image must be smaller than 2MB!");
+                      return Upload.LIST_IGNORE;
+                    }
+
+                    setImageLoading(true);
+                    try {
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        setImageUrl(reader.result);
+                        userAccountForm.setFieldsValue({
+                          profilePicture: reader.result,
+                        });
+                        setImageLoading(false);
+                      };
+                      reader.readAsDataURL(file);
+                    } catch (error) {
+                      console.error("Error uploading image:", error);
+                      message.error("Unable to upload image");
+                      setImageLoading(false);
+                    }
+                    return false;
+                  }}
+                >
+                  {imageUrl ? (
+                    <div className="MemberAdmin-uploaded-image-preview">
+                      <img
+                        src={imageUrl}
+                        alt="Avatar"
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      {imageLoading ? (
+                        <div>Loading...</div>
+                      ) : (
+                        <div>
+                          <UploadOutlined />
+                          <div style={{ marginTop: 8 }}>Upload</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </Upload>
+                {imageUrl && (
+                  <Button
+                    onClick={() => {
+                      setImageUrl("");
+                      userAccountForm.setFieldsValue({ profilePicture: "" });
+                    }}
+                    size="small"
+                    style={{ marginTop: 8 }}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
             </Form.Item>
 
             <Form.Item
-              name="dateOfBirth"
-              label="Date of Birth"
-              className="member-form-col"
+              name="password"
+              label={
+                editingUserAccount
+                  ? "New Password (Leave blank if no change)"
+                  : "Password"
+              }
               rules={[
                 {
-                  required: true,
-                  message: "Please select date of birth",
+                  required: !editingUserAccount,
+                  message: "Please enter password",
                 },
               ]}
             >
-              <DatePicker
-                format="DD/MM/YYYY"
-                style={{ width: "100%" }}
-                disabledDate={disabledDate}
-                placeholder="Select date"
-              />
+              <Input.Password />
             </Form.Item>
-          </div>
 
-          <Form.Item name="address" label="Address">
-            <Input />
-          </Form.Item>
-
-          <Form.Item name="profilePicture" label="Profile Picture">
-            <div className="member-avatar-upload">
-              <Upload
-                name="profilePicture"
-                listType="picture-card"
-                className="avatar-uploader"
-                showUploadList={false}
-                beforeUpload={async (file) => {
-                  const isImage = /image\/(jpeg|png|jpg|gif)/.test(file.type);
-                  if (!isImage) {
-                    message.error("You can only upload image files!");
-                    return Upload.LIST_IGNORE;
-                  }
-
-                  const isLt2M = file.size / 1024 / 1024 < 2;
-                  if (!isLt2M) {
-                    message.error("Image must be smaller than 2MB!");
-                    return Upload.LIST_IGNORE;
-                  }
-
-                  setImageLoading(true);
-                  try {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                      setImageUrl(reader.result);
-                      userAccountForm.setFieldsValue({
-                        profilePicture: reader.result,
-                      });
-                      setImageLoading(false);
-                    };
-                    reader.readAsDataURL(file);
-                  } catch (error) {
-                    console.error("Error uploading image:", error);
-                    message.error("Unable to upload image");
-                    setImageLoading(false);
-                  }
-                  return false;
-                }}
+            <div className="member-form-row">
+              <Form.Item
+                name="status"
+                label="Status"
+                className="member-form-col"
+                initialValue="Active"
               >
-                {imageUrl ? (
-                  <div className="MemberAdmin-uploaded-image-preview">
-                    <img
-                      src={imageUrl}
-                      alt="Avatar"
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div>
-                    {imageLoading ? (
-                      <div>Loading...</div>
-                    ) : (
-                      <div>
-                        <UploadOutlined />
-                        <div style={{ marginTop: 8 }}>Upload</div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </Upload>
-              {imageUrl && (
-                <Button
-                  onClick={() => {
-                    setImageUrl("");
-                    userAccountForm.setFieldsValue({ profilePicture: "" });
-                  }}
-                  size="small"
-                  style={{ marginTop: 8 }}
-                >
-                  Remove
-                </Button>
-              )}
+                <Select>
+                  <Option value="Active">Active</Option>
+                  <Option value="Inactive">Inactive</Option>
+                  <Option value="Pending">Pending</Option>
+                </Select>
+              </Form.Item>
+
+              <Form.Item
+                name="roleId"
+                label="Role"
+                className="member-form-col"
+                rules={[{ required: true, message: "Please select role" }]}
+              >
+                <Select>
+                  <Option value={1}>Member</Option>
+                  <Option value={2}>Doctor</Option>
+                  <Option value={3}>Administrator</Option>
+                </Select>
+              </Form.Item>
             </div>
-          </Form.Item>
 
-          <Form.Item
-            name="password"
-            label={
-              editingUserAccount
-                ? "New Password (Leave blank if no change)"
-                : "Password"
-            }
-            rules={[
-              {
-                required: !editingUserAccount,
-                message: "Please enter password",
-              },
-            ]}
-          >
-            <Input.Password />
-          </Form.Item>
-
-          <div className="member-form-row">
-            <Form.Item
-              name="status"
-              label="Status"
-              className="member-form-col"
-              initialValue="Active"
-            >
-              <Select>
-                <Option value="Active">Active</Option>
-                <Option value="Inactive">Inactive</Option>
-                <Option value="Pending">Pending</Option>
-              </Select>
+            <Form.Item>
+              <Space>
+                <Button type="primary" htmlType="submit" loading={loading}>
+                  {editingUserAccount ? "Update" : "Next"}
+                </Button>
+                <Button onClick={handleModalCancel}>Cancel</Button>
+              </Space>
             </Form.Item>
-
-            <Form.Item
-              name="roleId"
-              label="Role"
-              className="member-form-col"
-              rules={[{ required: true, message: "Please select role" }]}
-              initialValue={1}
+          </Form>
+        ) : (
+          <>
+            <Steps
+              current={currentStep}
+              className="member-steps"
+              style={{ marginBottom: 24 }}
             >
-              <Select>
-                <Option value={1}>Member</Option>
-                <Option value={2}>Doctor</Option>
-                <Option value={3}>Administrator</Option>
-              </Select>
-            </Form.Item>
-          </div>
+              <Step title="Account Information" />
+              <Step
+                title={
+                  userAccountForm.getFieldValue("roleId") === 1
+                    ? "Member Information"
+                    : userAccountForm.getFieldValue("roleId") === 2
+                    ? "Doctor Information"
+                    : "Additional Information"
+                }
+              />
+            </Steps>
 
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit" loading={loading}>
-                {editingUserAccount ? "Update" : "Add"}
-              </Button>
-              <Button onClick={() => setUserAccountModalVisible(false)}>
-                Cancel
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
+            {userAccountForm.getFieldValue("roleId") === 1 ? (
+              <Form
+                form={memberForm}
+                layout="vertical"
+                onFinish={handleMemberSubmit}
+              >
+                <Form.Item
+                  name="emergencyContact"
+                  label="Emergency Contact"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter emergency contact",
+                    },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+
+                <Form.Item name="notes" label="Notes">
+                  <Input.TextArea />
+                </Form.Item>
+
+                <Form.Item>
+                  <Space>
+                    <Button onClick={() => setCurrentStep(0)}>Previous</Button>
+                    <Button type="primary" htmlType="submit" loading={loading}>
+                      Create Member
+                    </Button>
+                    <Button onClick={handleModalCancel}>Cancel</Button>
+                  </Space>
+                </Form.Item>
+              </Form>
+            ) : userAccountForm.getFieldValue("roleId") === 2 ? (
+              <Form
+                form={doctorForm}
+                layout="vertical"
+                onFinish={handleDoctorSubmit}
+              >
+                <Form.Item
+                  name="name"
+                  label="Full Name"
+                  rules={[
+                    { required: true, message: "Please enter full name" },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+
+                <Form.Item
+                  name="email"
+                  label="Email"
+                  rules={[
+                    { required: true, message: "Please enter email" },
+                    { type: "email", message: "Invalid email format" },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+
+                <Form.Item
+                  name="phoneNumber"
+                  label="Phone Number"
+                  rules={[
+                    { required: true, message: "Please enter phone number" },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+
+                <Form.Item
+                  name="degree"
+                  label="Degree"
+                  rules={[{ required: true, message: "Please enter degree" }]}
+                >
+                  <Input />
+                </Form.Item>
+
+                <Form.Item
+                  name="hospitalName"
+                  label="Hospital Name"
+                  rules={[
+                    { required: true, message: "Please enter hospital name" },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+
+                <Form.Item
+                  name="hospitalAddress"
+                  label="Hospital Address"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter hospital address",
+                    },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+
+                <Form.Item
+                  name="biography"
+                  label="Biography"
+                  rules={[
+                    { required: true, message: "Please enter biography" },
+                  ]}
+                >
+                  <TextArea rows={4} />
+                </Form.Item>
+
+                <Form.Item>
+                  <Space>
+                    <Button onClick={() => setCurrentStep(0)}>Previous</Button>
+                    <Button type="primary" htmlType="submit" loading={loading}>
+                      Create Doctor
+                    </Button>
+                    <Button onClick={handleModalCancel}>Cancel</Button>
+                  </Space>
+                </Form.Item>
+              </Form>
+            ) : null}
+          </>
+        )}
       </Modal>
     </>
   );
