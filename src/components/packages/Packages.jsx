@@ -290,84 +290,86 @@ function Packages() {
 
                 <div className="packages-container">
                   {/* Free Package */}
-                  <div className="package-card-homepage free">
-                    <h3>Free</h3>
-                    <p className="package-description">
-                      Free membership with basic features
-                    </p>
-                    <div className="feature-list">
-                      <div className="feature-item">
-                        <span className="feature-label">Support services</span>
-                        <span className="feature-value">Low</span>
-                      </div>
-                      <div className="feature-item">
-                        <span className="feature-label">
-                          Max children allowed
-                        </span>
-                        <span className="feature-value">  
-                          {packagesData
-                          .find((p) => p.packageName === "Free")
-                          ?.maxChildrenAllowed}
-                          </span>
-                      </div>
-                      <div className="feature-item">
-                        <span className="feature-label">
-                          Available to make consultation with AI
-                        </span>
-                        <span className="feature-value">Not allowed</span>
-                      </div>
-                      <div className="feature-item">
-                        <span className="feature-label">
-                          Tracking milestones of child
-                        </span>
-                        <span className="feature-value">
-                        Unlimited
-                        </span>
-                      </div>
-                      <div className="feature-item">
-                        <span className="feature-label">
-                          Early warning about child health
-                        </span>
-                        <span className="feature-value">Available</span>
-                      </div>
-                    </div>
+{/* Free Package */}
+<div className="package-card-homepage free">
+  <h3>Free</h3>
+  <p className="package-description">
+    Free membership with basic features
+  </p>
+  <div className="feature-list">
+    <div className="feature-item">
+      <span className="feature-label">Support services</span>
+      <span className="feature-value">Low</span>
+    </div>
+    <div className="feature-item">
+      <span className="feature-label">
+        Max children allowed
+      </span>
+      <span className="feature-value">
+        {packagesData
+          .find((p) => p.packageName === "Free")
+          ?.maxChildrenAllowed}
+      </span>
+    </div>
+    <div className="feature-item">
+      <span className="feature-label">
+        Available to make consultation with AI
+      </span>
+      <span className="feature-value">Not allowed</span>
+    </div>
+    <div className="feature-item">
+      <span className="feature-label">
+        Tracking milestones of child
+      </span>
+      <span className="feature-value">Unlimited</span>
+    </div>
+    <div className="feature-item">
+      <span className="feature-label">
+        Early warning about child health
+      </span>
+      <span className="feature-value">Available</span>
+    </div>
+  </div>
 
-                    <div className="package-price-homepage">
-                      <span className="price-amount-homepage Free">
-                        {packagesData
-                          .find((p) => p.packageName === "Free")
-                          ?.price.toLocaleString()}
-                        đ
-                      </span>
-                      <span className="price-duration-homepage Free">
-                        {
-                          packagesData.find((p) => p.packageName === "Free")
-                            ?.durationMonths
-                        }{" "}
-                      </span>
-                      <span className="price-duration-homepage Free"> Months</span>
-                    </div>
+  <div className="package-price-homepage">
+    <span className="price-amount-homepage Free">
+      {packagesData
+        .find((p) => p.packageName === "Free")
+        ?.price.toLocaleString()}
+      đ
+    </span>
+    <span className="price-duration-homepage Free">
+      {packagesData.find((p) => p.packageName === "Free")
+        ?.durationMonths}{" "}
+    </span>
+    <span className="price-duration-homepage Free"> Months</span>
+  </div>
 
-                    <button
-                      className={`package-btn-homepage ${
-                        currentPlan?.packageName === "Free"
-                          ? "current-plan"
-                          : "Free"
-                      }`}
-                      onClick={() =>
-                        currentPlan?.packageName !== "Free" &&
-                        handleBuyPackage(
-                          packagesData.find((p) => p.packageName === "Free")
-                        )
-                      }
-                      disabled={currentPlan?.packageName === "Free"}
-                    >
-                      {currentPlan?.packageName === "Free"
-                        ? "YOUR CURRENT PLAN"
-                        : "Free"}
-                    </button>
-                  </div>
-
+  {/* Chỉ hiển thị nút nếu người dùng chưa đăng nhập 
+      hoặc nếu đã đăng nhập mà currentPlan không tồn tại 
+      hoặc currentPlan là Free */}
+  {(!isLoggedIn || !currentPlan || currentPlan.packageName === "Free") && (
+    <button
+      className={`package-btn-homepage ${
+        currentPlan?.packageName === "Free"
+          ? "current-plan"
+          : "Free"
+      }`}
+      onClick={() =>
+        // Nếu currentPlan đã là Free thì không gọi handleBuyPackage
+        currentPlan?.packageName !== "Free" &&
+        handleBuyPackage(
+          packagesData.find((p) => p.packageName === "Free")
+        )
+      }
+      disabled={currentPlan?.packageName === "Free"}
+    >
+      {currentPlan?.packageName === "Free"
+        ? "YOUR CURRENT PLAN"
+        : "Free"}
+    </button>
+  )}
+</div>
                   {/* Standard Package */}
                   <div className="package-card-homepage standard">
                     <div className="best-service-badge">POPULAR</div>
