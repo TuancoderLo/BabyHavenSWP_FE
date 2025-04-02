@@ -16,7 +16,7 @@ function MilestonePage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAddMilestoneModal, setShowAddMilestoneModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(null);
-  const [customMilestone, setCustomMilestone] = useState({ milestoneName: "", age: "" }); // Update to match API field
+  const [customMilestone, setCustomMilestone] = useState({ milestoneName: "", age: "" });
   const [filterOption, setFilterOption] = useState("all");
   const [badges, setBadges] = useState([]);
   const milestoneListRef = useRef(null);
@@ -58,7 +58,7 @@ function MilestonePage() {
         // Fetch all system milestones
         const systemMilestonesResponse = await MilestoneApi.getAllMilestones();
         if (systemMilestonesResponse.data && systemMilestonesResponse.data.data) {
-          console.log("System Milestones:", systemMilestonesResponse.data.data); // Debug log
+          console.log("System Milestones:", systemMilestonesResponse.data.data);
           const sortedMilestones = systemMilestonesResponse.data.data.sort(
             (a, b) => a.minAge - b.minAge
           );
@@ -171,17 +171,17 @@ function MilestonePage() {
     if (!customMilestone.milestoneName || !customMilestone.age) return;
 
     const newMilestone = {
-      milestoneName: customMilestone.milestoneName, // Update to match API field
+      milestoneName: customMilestone.milestoneName,
       minAge: parseInt(customMilestone.age),
       maxAge: parseInt(customMilestone.age) + 1,
       description: "Custom milestone added by user.",
       isPersonal: true,
-      importance: "Medium", // Add default value
-      category: "custom", // Add default value
+      importance: "Medium",
+      category: "custom",
     };
 
     try {
-      const response = await MilestoneApi.createMilestone(newMilestone);
+      const response = await MilestoneApi.createChildMilestone(newMilestone);
       if (response.data && response.data.data) {
         const updatedMilestones = [...systemMilestones, response.data.data].sort(
           (a, b) => a.minAge - b.minAge
@@ -196,55 +196,50 @@ function MilestonePage() {
   };
 
   const handleToggleMilestone = async (milestoneId) => {
-    // Tìm ChildMilestone hiện có dựa trên milestoneId
-    const existingChildMilestone = childMilestones.find(
-      (cm) => cm.milestoneId === milestoneId
+    // Check if the milestone is already achieved
+    const isAlreadyAchieved = childMilestones.some(
+      (cm) => cm.milestoneId === milestoneId && cm.status === "Achieved"
     );
-  
-    // Nếu không tìm thấy ChildMilestone
-    if (!existingChildMilestone) {
-      console.error("No existing ChildMilestone found for milestoneId:", milestoneId);
-      alert("Milestone này chưa được liên kết với đứa trẻ.");
+
+    if (isAlreadyAchieved) {
+      return; // Do nothing if the milestone is already achieved
+    }
+
+    // Find the milestone details from systemMilestones
+    const milestone = systemMilestones.find((sm) => sm.milestoneId === milestoneId);
+    if (!milestone) {
+      console.error("Milestone not found:", milestoneId);
+      alert("Milestone not found.");
       return;
     }
-  
-    // Nếu milestone đã được đánh dấu là Achieved, không làm gì thêm
-    if (existingChildMilestone.status === "Achieved") {
-      return;
-    }
-  
-    // Lấy ngày hiện tại theo định dạng YYYY-MM-DD
+
+    // Get the current date in YYYY-MM-DD format
     const achievedDate = new Date().toISOString().split("T")[0];
-  
-    // Tạo đối tượng ChildMilestone đã cập nhật
-    const updatedChildMilestone = {
+
+    // Create the new ChildMilestone object
+    const newChildMilestone = {
       milestoneId: milestoneId,
-      name: selectedChild.name,
+      childName: selectedChild.name,
       dateOfBirth: selectedChild.dateOfBirth,
       memberId: memberId,
       achievedDate: achievedDate,
       status: "Achieved",
-      notes: existingChildMilestone.notes || "",
-      guidelines: existingChildMilestone.guidelines || "",
-      importance: existingChildMilestone.importance || "",
-      category: existingChildMilestone.category || "",
+      notes: "",
+      guidelines: milestone.description || "",
+      importance: milestone.importance || "Medium",
+      category: milestone.category || "General",
     };
-  
+
     try {
-      // Gọi API để cập nhật ChildMilestone với childMilestoneId
-      const updateResponse = await MilestoneApi.updateChildMilestone(
-        existingChildMilestone.milestoneId, // Giả sử id là childMilestoneId
-        updatedChildMilestone
-      );
-  
-      if (updateResponse.data && updateResponse.data.data) {
-        // Cập nhật state local với dữ liệu mới
-        const updatedChildMilestones = childMilestones.map((cm) =>
-          cm.id === existingChildMilestone.id ? updateResponse.data.data : cm
-        );
+      // Call the createChildMilestone API to create a new ChildMilestone
+      const createResponse = await MilestoneApi.createChildMilestone(newChildMilestone);
+
+      if (createResponse.data && createResponse.data.data) {
+        // Add the new ChildMilestone to the local state
+        const updatedChildMilestones = [...childMilestones, createResponse.data.data];
         setChildMilestones(updatedChildMilestones);
-  
-        // Tính toán badges (nếu có)
+
+        // Recalculate badges based on the updated childMilestones
         const completedCount = updatedChildMilestones.filter(
           (cm) => cm.status === "Achieved"
         ).length;
@@ -254,8 +249,8 @@ function MilestonePage() {
         setBadges(newBadges);
       }
     } catch (error) {
-      console.error("Lỗi khi cập nhật ChildMilestone:", error);
-      alert("Không thể cập nhật milestone. Vui lòng thử lại.");
+      console.error("Error creating ChildMilestone:", error);
+      alert("Failed to mark milestone as achieved. Please try again.");
     }
   };
 
@@ -432,16 +427,6 @@ function MilestonePage() {
           {/* Achieved Milestones (div8) */}
           <div className="achieved-milestones-milestone-page">
             <h2>Achieved Milestones</h2>
-            {badges.length > 0 && (
-              <div className="badges-milestone-page">
-                <h3>Badges Earned</h3>
-                {badges.map((badge, index) => (
-                  <span key={index} className="badge-item-milestone-page">
-                    {badge}
-                  </span>
-                ))}
-              </div>
-            )}
             <div className="achieved-list-milestone-page">
               {childMilestones.length > 0 ? (
                 childMilestones.map((cm) => {

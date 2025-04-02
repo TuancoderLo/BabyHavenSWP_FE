@@ -161,7 +161,7 @@ span.price-amount-homepage {
   color: #000000;
 }
 
-.price-duration {
+.price-duration-homepage {
   font-size: 0.9rem;
   color: #888;
 }
@@ -191,7 +191,6 @@ span.price-amount-homepage {
 }
 
 .package-btn-homepage.current-plan:disabled {
-  margin-top: 13px;
   padding: 0.6rem 1.2rem;
   background-color: #bcbcbc;
   color: #ffffff;
@@ -513,7 +512,7 @@ span.price-amount-homepage {
   margin-bottom: 4px;
 }
 
-.package-price {
+.package-price-homepage {
   color: #666;
   font-size: 14px;
 }
@@ -759,23 +758,23 @@ span.price-amount-homepage {
   font-size: 14px;
 }
 
-.package-price {
+.package-price-homepage {
   height: 30px;
   margin: 14px 0;
 }
 
-.price-amount {
+.price-amount-homepage {
   font-size: 20px;
   font-weight: bold;
 }
 
-.price-duration {
+.price-duration-homepage {
   font-size: 14px;
   color: #666;
 }
 
-.price-amount.Free,
-.price-duration.Free {
+.price-amount-homepage.Free,
+.price-duration-homepage.Free {
   visibility: hidden;
 }
 
@@ -799,7 +798,7 @@ span.price-amount-homepage {
   padding: 24px;
   max-width: 900px;
   width: 90%;
-  max-height: 95vh;
+  max-height: 97vh;
   position: relative;
 }
 
