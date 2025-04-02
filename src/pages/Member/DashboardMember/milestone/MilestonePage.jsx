@@ -427,16 +427,6 @@ function MilestonePage() {
           {/* Achieved Milestones (div8) */}
           <div className="achieved-milestones-milestone-page">
             <h2>Achieved Milestones</h2>
-            {badges.length > 0 && (
-              <div className="badges-milestone-page">
-                <h3>Badges Earned</h3>
-                {badges.map((badge, index) => (
-                  <span key={index} className="badge-item-milestone-page">
-                    {badge}
-                  </span>
-                ))}
-              </div>
-            )}
             <div className="achieved-list-milestone-page">
               {childMilestones.length > 0 ? (
                 childMilestones.map((cm) => {
