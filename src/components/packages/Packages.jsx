@@ -332,20 +332,20 @@ function Packages() {
                       </div>
                     </div>
 
-                    <div className="package-price">
-                      <span className="price-amount Free">
+                    <div className="package-price-homepage">
+                      <span className="price-amount-homepage Free">
                         {packagesData
                           .find((p) => p.packageName === "Free")
                           ?.price.toLocaleString()}
                         đ
                       </span>
-                      <span className="price-duration Free">
+                      <span className="price-duration-homepage Free">
                         {
                           packagesData.find((p) => p.packageName === "Free")
                             ?.durationMonths
                         }{" "}
                       </span>
-                      <span className="price-duration Free"> Months</span>
+                      <span className="price-duration-homepage Free"> Months</span>
                     </div>
 
                     <button
@@ -412,20 +412,20 @@ function Packages() {
                       </div>
                     </div>
 
-                    <div className="package-price">
+                    <div className="package-price-homepage">
                       <span className="price-amount-homepage">
                         {packagesData
                           .find((p) => p.packageName === "Standard")
                           ?.price.toLocaleString()}
                         đ
                       </span>
-                      <span className="price-duration">
-                        {
+                      <span className="price-duration-homepage">
+                        /{
                           packagesData.find((p) => p.packageName === "Standard")
                             ?.durationMonths
                         }
                       </span>
-                      <span className="price-duration"> Months</span>
+                      <span className="price-duration-homepage"> Months</span>
                     </div>
 
                     <button
@@ -494,20 +494,20 @@ function Packages() {
                       </div>
                     </div>
 
-                    <div className="package-price">
+                    <div className="package-price-homepage">
                       <span className="price-amount-homepage">
                         {packagesData
                           .find((p) => p.packageName === "Premium")
                           ?.price.toLocaleString()}
                         đ
                       </span>
-                      <span className="price-duration">
-                        {
+                      <span className="price-duration-homepage">
+                        /{
                           packagesData.find((p) => p.packageName === "Premium")
                             ?.durationMonths
                         }
                       </span>
-                      <span className="price-duration"> Months</span>
+                      <span className="price-duration-homepage"> Months</span>
                     </div>
 
                     <button
@@ -601,7 +601,7 @@ function Packages() {
                         <div className="package-name">
                           {selectedPackage?.packageName}
                         </div>
-                        <div className="package-price">
+                        <div className="package-price-homepage">
                           {selectedPackage
                             ? `${selectedPackage.price.toLocaleString()} ${
                                 selectedPackage.currency

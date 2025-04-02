@@ -181,7 +181,7 @@ function MilestonePage() {
     };
 
     try {
-      const response = await MilestoneApi.createMilestone(newMilestone);
+      const response = await MilestoneApi.createChildMilestone(newMilestone);
       if (response.data && response.data.data) {
         const updatedMilestones = [...systemMilestones, response.data.data].sort(
           (a, b) => a.minAge - b.minAge
