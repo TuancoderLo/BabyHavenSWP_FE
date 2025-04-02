@@ -223,13 +223,8 @@ const AccountCRUD = () => {
   };
 
   const handleModalCancel = () => {
-    if (currentStep === 0 && userAccountForm.getFieldValue("roleId") === 3) {
-      setUserAccountModalVisible(false);
-      resetForm();
-    } else if (currentStep === 1) {
-      setUserAccountModalVisible(false);
-      resetForm();
-    }
+    setUserAccountModalVisible(false);
+    resetForm();
   };
 
   const resetForm = () => {
@@ -492,12 +487,7 @@ const AccountCRUD = () => {
         width={700}
         destroyOnClose
         className="member-modal"
-        closable={
-          (currentStep === 0 &&
-            userAccountForm.getFieldValue("roleId") === 3) ||
-          currentStep === 1
-        }
-        maskClosable={false}
+        maskClosable={true}
       >
         {currentStep === 0 ? (
           <Form
