@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Register.css";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth } from "../../../config/firebase";
 import api from "../../../config/axios";
 import { sendRegistrationOTP } from "../../../services/VerifyOPT";
 
@@ -26,31 +24,21 @@ function Register() {
   const navigate = useNavigate();
 
   const handleGoogleRedirect = async () => {
+    setIsLoading(true);
+
     try {
-      const provider = new GoogleAuthProvider();
-      // Add parameters to optimize popup
-      provider.setCustomParameters({
-        prompt: "select_account",
-      });
-
-      const result = await signInWithPopup(auth, provider);
-
-      // Handle successful login result
-      const user = result.user;
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const token = credential.accessToken;
-
-      // Call your backend API with user information
-      const response = await api.post("google-auth", {
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-        uid: user.uid,
-      });
-
-      navigate("/login");
+      // Gửi yêu cầu đến backend để lấy URL Google login
+      // Redirect người dùng đến Google login
+      window.location.href =
+        "https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/GoogleAuth/signin-google";
     } catch (error) {
-      console.error("Google login error:", error);
+      // Xử lý lỗi nếu có
+      if (error.response) {
+        setError(error.response.data.message || "Error while Signing In");
+      } else {
+        setError("Sign in with Google failed. Please try again later.");
+      }
+      setIsLoading(false);
     }
   };
 
