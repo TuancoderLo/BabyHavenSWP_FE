@@ -198,10 +198,10 @@ const AccountCRUD = () => {
       setLoading(true);
       const doctorData = {
         userId: tempUserId,
-        name: values.name,
-        email: values.email,
-        phoneNumber: values.phoneNumber,
-        specializationIds: [], // Để trống theo yêu cầu
+        name: tempUserData.name,
+        email: tempUserData.email,
+        phoneNumber: tempUserData.phoneNumber,
+        specializationIds: [],
         degree: values.degree,
         hospitalName: values.hospitalName,
         hospitalAddress: values.hospitalAddress,
@@ -212,7 +212,7 @@ const AccountCRUD = () => {
       await userAccountsApi.createDoctor(doctorData);
       message.success("New doctor created successfully");
       setUserAccountModalVisible(false);
-      setCurrentStep(0);
+      resetForm();
       fetchUserAccounts();
     } catch (error) {
       console.error("Error creating doctor:", error);
@@ -223,7 +223,16 @@ const AccountCRUD = () => {
   };
 
   const handleModalCancel = () => {
-    setUserAccountModalVisible(false);
+    if (currentStep === 0 && userAccountForm.getFieldValue("roleId") === 3) {
+      setUserAccountModalVisible(false);
+      resetForm();
+    } else if (currentStep === 1) {
+      setUserAccountModalVisible(false);
+      resetForm();
+    }
+  };
+
+  const resetForm = () => {
     setCurrentStep(0);
     setTempUserId(null);
     setTempUserData(null);
@@ -483,6 +492,12 @@ const AccountCRUD = () => {
         width={700}
         destroyOnClose
         className="member-modal"
+        closable={
+          (currentStep === 0 &&
+            userAccountForm.getFieldValue("roleId") === 3) ||
+          currentStep === 1
+        }
+        maskClosable={false}
       >
         {currentStep === 0 ? (
           <Form
@@ -704,7 +719,6 @@ const AccountCRUD = () => {
                 <Button type="primary" htmlType="submit" loading={loading}>
                   {editingUserAccount ? "Update" : "Next"}
                 </Button>
-                <Button onClick={handleModalCancel}>Cancel</Button>
               </Space>
             </Form.Item>
           </Form>
@@ -720,9 +734,7 @@ const AccountCRUD = () => {
                 title={
                   userAccountForm.getFieldValue("roleId") === 1
                     ? "Member Information"
-                    : userAccountForm.getFieldValue("roleId") === 2
-                    ? "Doctor Information"
-                    : "Additional Information"
+                    : "Doctor Information"
                 }
               />
             </Steps>
@@ -752,51 +764,18 @@ const AccountCRUD = () => {
 
                 <Form.Item>
                   <Space>
-                    <Button onClick={() => setCurrentStep(0)}>Previous</Button>
                     <Button type="primary" htmlType="submit" loading={loading}>
                       Create Member
                     </Button>
-                    <Button onClick={handleModalCancel}>Cancel</Button>
                   </Space>
                 </Form.Item>
               </Form>
-            ) : userAccountForm.getFieldValue("roleId") === 2 ? (
+            ) : (
               <Form
                 form={doctorForm}
                 layout="vertical"
                 onFinish={handleDoctorSubmit}
               >
-                <Form.Item
-                  name="name"
-                  label="Full Name"
-                  rules={[
-                    { required: true, message: "Please enter full name" },
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
-
-                <Form.Item
-                  name="email"
-                  label="Email"
-                  rules={[
-                    { required: true, message: "Please enter email" },
-                    { type: "email", message: "Invalid email format" },
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
-
-                <Form.Item
-                  name="phoneNumber"
-                  label="Phone Number"
-                  rules={[
-                    { required: true, message: "Please enter phone number" },
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
-
                 <Form.Item
                   name="degree"
                   label="Degree"
@@ -840,15 +819,13 @@ const AccountCRUD = () => {
 
                 <Form.Item>
                   <Space>
-                    <Button onClick={() => setCurrentStep(0)}>Previous</Button>
                     <Button type="primary" htmlType="submit" loading={loading}>
                       Create Doctor
                     </Button>
-                    <Button onClick={handleModalCancel}>Cancel</Button>
                   </Space>
                 </Form.Item>
               </Form>
-            ) : null}
+            )}
           </>
         )}
       </Modal>
