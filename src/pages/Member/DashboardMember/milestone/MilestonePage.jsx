@@ -196,38 +196,57 @@ function MilestonePage() {
   };
 
   const handleToggleMilestone = async (milestoneId) => {
-    const isAchieved = childMilestones.some((cm) => cm.milestoneId === milestoneId);
-    if (isAchieved) {
-      return; // If already achieved, do nothing
+    // Tìm ChildMilestone hiện có dựa trên milestoneId
+    const existingChildMilestone = childMilestones.find(
+      (cm) => cm.milestoneId === milestoneId
+    );
+  
+    // Nếu không tìm thấy ChildMilestone
+    if (!existingChildMilestone) {
+      console.error("No existing ChildMilestone found for milestoneId:", milestoneId);
+      alert("Milestone này chưa được liên kết với đứa trẻ.");
+      return;
     }
-
-    const achievedDate = new Date().toISOString().split("T")[0]; // Current date in YYYY-MM-DD format
-
-    // Construct the request body for updateChildMilestone
+  
+    // Nếu milestone đã được đánh dấu là Achieved, không làm gì thêm
+    if (existingChildMilestone.status === "Achieved") {
+      return;
+    }
+  
+    // Lấy ngày hiện tại theo định dạng YYYY-MM-DD
+    const achievedDate = new Date().toISOString().split("T")[0];
+  
+    // Tạo đối tượng ChildMilestone đã cập nhật
     const updatedChildMilestone = {
-      milestoneId: milestoneId, // The milestoneId of the selected milestone
-      name: selectedChild.name, // Child's name
-      dateOfBirth: selectedChild.dateOfBirth, // Child's date of birth
-      memberId: memberId, // Member ID from localStorage
-      achievedDate: achievedDate, // Current date
-      status: "Achieved", // Set status to "Achieved"
-      notes: "", // Optional field
-      guidelines: "", // Optional field
-      importance: "", // Optional field
-      category: "", // Optional field
+      milestoneId: milestoneId,
+      name: selectedChild.name,
+      dateOfBirth: selectedChild.dateOfBirth,
+      memberId: memberId,
+      achievedDate: achievedDate,
+      status: "Achieved",
+      notes: existingChildMilestone.notes || "",
+      guidelines: existingChildMilestone.guidelines || "",
+      importance: existingChildMilestone.importance || "",
+      category: existingChildMilestone.category || "",
     };
-
+  
     try {
-      // Directly update the child milestone with the achieved status using PUT
-      const updateResponse = await MilestoneApi.updateChildMilestone(updatedChildMilestone);
+      // Gọi API để cập nhật ChildMilestone với childMilestoneId
+      const updateResponse = await MilestoneApi.updateChildMilestone(
+        existingChildMilestone.milestoneId, // Giả sử id là childMilestoneId
+        updatedChildMilestone
+      );
+  
       if (updateResponse.data && updateResponse.data.data) {
-        // Update the local state with the new child milestone data
-        const updatedChildMilestones = [...childMilestones, updateResponse.data.data];
+        // Cập nhật state local với dữ liệu mới
+        const updatedChildMilestones = childMilestones.map((cm) =>
+          cm.id === existingChildMilestone.id ? updateResponse.data.data : cm
+        );
         setChildMilestones(updatedChildMilestones);
-
-        // Calculate badges based on achieved milestones
-        const completedCount = updatedChildMilestones.filter((cm) =>
-          systemMilestones.some((sm) => sm.milestoneId === cm.milestoneId && !sm.isPersonal)
+  
+        // Tính toán badges (nếu có)
+        const completedCount = updatedChildMilestones.filter(
+          (cm) => cm.status === "Achieved"
         ).length;
         const newBadges = [];
         if (completedCount >= 2) newBadges.push("Early Achiever");
@@ -235,7 +254,8 @@ function MilestonePage() {
         setBadges(newBadges);
       }
     } catch (error) {
-      console.error("Error updating child milestone:", error);
+      console.error("Lỗi khi cập nhật ChildMilestone:", error);
+      alert("Không thể cập nhật milestone. Vui lòng thử lại.");
     }
   };
 
