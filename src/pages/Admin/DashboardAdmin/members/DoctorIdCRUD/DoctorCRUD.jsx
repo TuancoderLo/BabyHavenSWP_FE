@@ -26,6 +26,16 @@ import "./DoctorCRUD.css";
 const { Option } = Select;
 const { TextArea } = Input;
 
+const STATUS_MAPPING = {
+  Active: "Active",
+  Inactive: "Inactive",
+};
+
+const STATUS_MAPPING_REVERSE = {
+  Active: "Active",
+  Inactive: "Inactive",
+};
+
 const DoctorCRUD = () => {
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
@@ -72,26 +82,43 @@ const DoctorCRUD = () => {
 
   const handleEditDoctor = (record) => {
     setEditingDoctor(record);
-    setImageUrl(record.profilePicture || "");
     doctorForm.setFieldsValue({
-      ...record,
-      dateOfBirth: record.dateOfBirth ? moment(record.dateOfBirth) : null,
-      certificationDate: record.certificationDate
-        ? moment(record.certificationDate)
-        : null,
+      doctorId: record.doctorId,
+      userName: record.user.username,
+      name: record.name,
+      email: record.email,
+      phoneNumber: record.phoneNumber,
+      degree: record.degree,
+      hospitalName: record.hospitalName,
+      hospitalAddress: record.hospitalAddress,
+      biography: record.biography,
+      status: STATUS_MAPPING[record.status],
     });
     setDoctorModalVisible(true);
   };
 
-  const handleDeleteDoctor = async (doctorId) => {
+  const handleInactiveDoctor = async (record) => {
     try {
       setLoading(true);
-      await doctorApi.deleteDoctor(doctorId);
-      message.success("Doctor deleted successfully");
+      const doctorData = {
+        doctorId: record.doctorId,
+        userName: record.user.username,
+        name: record.name,
+        email: record.email,
+        phoneNumber: record.phoneNumber,
+        degree: record.degree,
+        hospitalName: record.hospitalName,
+        hospitalAddress: record.hospitalAddress,
+        biography: record.biography,
+        status: "Inactive",
+      };
+
+      await doctorApi.updateDoctor(record.doctorId, doctorData);
+      message.success("Doctor account has been deactivated successfully");
       fetchDoctors();
     } catch (error) {
-      console.error("Error deleting doctor:", error);
-      message.error("Unable to delete doctor");
+      console.error("Error deactivating doctor account:", error);
+      message.error("Unable to deactivate doctor account");
     } finally {
       setLoading(false);
     }
@@ -101,9 +128,16 @@ const DoctorCRUD = () => {
     try {
       setLoading(true);
       const doctorData = {
-        ...values,
-        dateOfBirth: values.dateOfBirth?.format("YYYY-MM-DD"),
-        certificationDate: values.certificationDate?.format("YYYY-MM-DD"),
+        doctorId: editingDoctor ? editingDoctor.doctorId : 0,
+        userName: values.userName,
+        name: values.name,
+        email: values.email,
+        phoneNumber: values.phoneNumber,
+        degree: values.degree,
+        hospitalName: values.hospitalName,
+        hospitalAddress: values.hospitalAddress,
+        biography: values.biography,
+        status: values.status,
       };
 
       if (editingDoctor) {
@@ -129,14 +163,14 @@ const DoctorCRUD = () => {
 
   const renderStatus = (status) => {
     let className = "";
-    if (status === "Active") {
+    const displayStatus = STATUS_MAPPING[status];
+
+    if (displayStatus === "Active") {
       className = "MemberAdmin-status-active";
-    } else if (status === "Inactive") {
+    } else if (displayStatus === "Inactive") {
       className = "MemberAdmin-status-inactive";
-    } else {
-      className = "MemberAdmin-status-pending";
     }
-    return <span className={className}>{status}</span>;
+    return <span className={className}>{displayStatus}</span>;
   };
 
   const doctorColumns = [
@@ -152,65 +186,41 @@ const DoctorCRUD = () => {
       key: "name",
     },
     {
-      title: "Specialization",
-      dataIndex: "specialization",
-      key: "specialization",
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
     },
     {
-      title: "Certificate No.",
-      dataIndex: "certificationNumber",
-      key: "certificationNumber",
+      title: "Phone Number",
+      dataIndex: "phoneNumber",
+      key: "phoneNumber",
     },
     {
-      title: "Certificate Date",
-      dataIndex: "certificationDate",
-      key: "certificationDate",
-      render: (date) => (date ? moment(date).format("DD/MM/YYYY") : "-"),
+      title: "Degree",
+      dataIndex: "degree",
+      key: "degree",
     },
     {
-      title: "Experience",
-      dataIndex: "experience",
-      key: "experience",
+      title: "Hospital",
+      dataIndex: "hospitalName",
+      key: "hospitalName",
+    },
+    {
+      title: "Address",
+      dataIndex: "hospitalAddress",
+      key: "hospitalAddress",
+    },
+    {
+      title: "Biography",
+      dataIndex: "biography",
+      key: "biography",
       ellipsis: true,
-    },
-    {
-      title: "Profile Picture",
-      dataIndex: "profilePicture",
-      key: "profilePicture",
-      render: (url) =>
-        url ? (
-          <img
-            src={url}
-            alt="Profile"
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: "50%",
-              objectFit: "cover",
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: "50%",
-              backgroundColor: "#f0f0f0",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#999",
-            }}
-          >
-            N/A
-          </div>
-        ),
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: renderStatus,
+      render: (status) => renderStatus(status),
     },
     {
       title: "Actions",
@@ -226,8 +236,9 @@ const DoctorCRUD = () => {
             className="MemberAdmin-action-button"
           />
           <Popconfirm
-            title="Are you sure you want to delete this doctor?"
-            onConfirm={() => handleDeleteDoctor(record.doctorId)}
+            title={`Are you sure you want to deactivate Dr. ${record.name}'s account?`}
+            description="The account will be deactivated and unable to login"
+            onConfirm={() => handleInactiveDoctor(record)}
             okText="Yes"
             cancelText="No"
           >
@@ -264,7 +275,7 @@ const DoctorCRUD = () => {
         <div className="member-actions">
           <div className="member-search">
             <Input
-              placeholder="Search by name, specialization, or certificate number"
+              placeholder="Search by name, degree, or hospital"
               value={searchText}
               onChange={handleSearchChange}
               allowClear
@@ -312,6 +323,26 @@ const DoctorCRUD = () => {
         <Form form={doctorForm} layout="vertical" onFinish={handleDoctorSubmit}>
           <div className="member-form-row">
             <Form.Item
+              name="userName"
+              label="Username"
+              className="member-form-col"
+            >
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="email" label="Email" className="member-form-col">
+              <Input disabled />
+            </Form.Item>
+          </div>
+
+          <div className="member-form-row">
+            <Form.Item
+              name="phoneNumber"
+              label="Phone Number"
+              className="member-form-col"
+            >
+              <Input disabled />
+            </Form.Item>
+            <Form.Item
               name="name"
               label="Full Name"
               className="member-form-col"
@@ -319,12 +350,23 @@ const DoctorCRUD = () => {
             >
               <Input />
             </Form.Item>
+          </div>
+
+          <div className="member-form-row">
             <Form.Item
-              name="specialization"
-              label="Specialization"
+              name="degree"
+              label="Degree"
+              className="member-form-col"
+              rules={[{ required: true, message: "Please enter degree" }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="hospitalName"
+              label="Hospital Name"
               className="member-form-col"
               rules={[
-                { required: true, message: "Please enter specialization" },
+                { required: true, message: "Please enter hospital name" },
               ]}
             >
               <Input />
@@ -333,127 +375,29 @@ const DoctorCRUD = () => {
 
           <div className="member-form-row">
             <Form.Item
-              name="certificationNumber"
-              label="Certificate Number"
+              name="hospitalAddress"
+              label="Hospital Address"
               className="member-form-col"
               rules={[
-                { required: true, message: "Please enter certificate number" },
+                { required: true, message: "Please enter hospital address" },
               ]}
             >
               <Input />
             </Form.Item>
-            <Form.Item
-              name="certificationDate"
-              label="Certificate Date"
-              className="member-form-col"
-              rules={[
-                {
-                  required: true,
-                  message: "Please select certificate date",
-                },
-              ]}
-            >
-              <DatePicker
-                format="DD/MM/YYYY"
-                style={{ width: "100%" }}
-                placeholder="Select date"
-                className="member-date-picker"
-              />
-            </Form.Item>
           </div>
 
           <Form.Item
-            name="experience"
-            label="Experience"
-            rules={[{ required: true, message: "Please enter experience" }]}
+            name="biography"
+            label="Biography"
+            rules={[{ required: true, message: "Please enter biography" }]}
           >
-            <TextArea rows={4} className="member-experience" />
-          </Form.Item>
-
-          <Form.Item name="profilePicture" label="Profile Picture">
-            <div className="member-avatar-upload">
-              <Upload
-                name="profilePicture"
-                listType="picture-card"
-                className="avatar-uploader"
-                showUploadList={false}
-                beforeUpload={async (file) => {
-                  const isImage = /image\/(jpeg|png|jpg|gif)/.test(file.type);
-                  if (!isImage) {
-                    message.error("You can only upload image files!");
-                    return Upload.LIST_IGNORE;
-                  }
-
-                  const isLt2M = file.size / 1024 / 1024 < 2;
-                  if (!isLt2M) {
-                    message.error("Image must be smaller than 2MB!");
-                    return Upload.LIST_IGNORE;
-                  }
-
-                  setImageLoading(true);
-                  try {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                      setImageUrl(reader.result);
-                      doctorForm.setFieldsValue({
-                        profilePicture: reader.result,
-                      });
-                      setImageLoading(false);
-                    };
-                    reader.readAsDataURL(file);
-                  } catch (error) {
-                    console.error("Error uploading image:", error);
-                    message.error("Unable to upload image");
-                    setImageLoading(false);
-                  }
-                  return false;
-                }}
-              >
-                {imageUrl ? (
-                  <div className="member-avatar-preview">
-                    <img
-                      src={imageUrl}
-                      alt="Avatar"
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div>
-                    {imageLoading ? (
-                      <div>Loading...</div>
-                    ) : (
-                      <div>
-                        <UploadOutlined />
-                        <div style={{ marginTop: 8 }}>Upload</div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </Upload>
-              {imageUrl && (
-                <Button
-                  onClick={() => {
-                    setImageUrl("");
-                    doctorForm.setFieldsValue({ profilePicture: "" });
-                  }}
-                  size="small"
-                  style={{ marginTop: 8 }}
-                >
-                  Remove
-                </Button>
-              )}
-            </div>
+            <TextArea rows={4} />
           </Form.Item>
 
           <Form.Item name="status" label="Status" initialValue="Active">
-            <Select className="member-select">
+            <Select>
               <Option value="Active">Active</Option>
               <Option value="Inactive">Inactive</Option>
-              <Option value="Pending">Pending</Option>
             </Select>
           </Form.Item>
 

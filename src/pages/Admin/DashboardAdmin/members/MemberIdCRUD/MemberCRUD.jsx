@@ -76,12 +76,22 @@ const MemberCRUD = () => {
   const handleDeleteMember = async (memberId) => {
     try {
       setLoading(true);
-      await deleteMember(memberId);
-      message.success("Member deleted successfully");
+      const memberToDelete = members.find((m) => m.memberId === memberId);
+      if (!memberToDelete) {
+        throw new Error("Member not found");
+      }
+
+      const updateData = {
+        ...memberToDelete,
+        status: "Inactive",
+      };
+
+      await updateMember(memberId, updateData);
+      message.success("Member deactivated successfully");
       fetchMembers();
     } catch (error) {
-      console.error("Error deleting member:", error);
-      message.error("Unable to delete member");
+      console.error("Error deactivating member:", error);
+      message.error("Unable to deactivate member");
     } finally {
       setLoading(false);
     }
@@ -92,8 +102,12 @@ const MemberCRUD = () => {
       setLoading(true);
       if (editingMember) {
         const updateData = {
-          ...values,
+          memberId: editingMember.memberId,
           userId: editingMember.userId,
+          memberName: values.memberName,
+          emergencyContact: values.emergencyContact,
+          status: values.status || "Active",
+          notes: values.notes || "",
         };
         await updateMember(editingMember.memberId, updateData);
         message.success("Member information updated successfully");
