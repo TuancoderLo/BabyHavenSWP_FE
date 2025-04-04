@@ -5,7 +5,7 @@ import axios from "axios";
 const api = axios.create({
   // baseURL: "https://localhost:7279/api/",
   baseURL:
-    "https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/",
+    "https://babyhaven-swp-web-emhrccb7hfh7bkf5.southeastasia-01.azurewebsites.net/api/",
   // timeout: 10000, // Thêm timeout
   headers: {
     "Content-Type": "application/json",

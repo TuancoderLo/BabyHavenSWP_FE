@@ -173,15 +173,17 @@ function MilestonePage() {
     const newMilestone = {
       milestoneName: customMilestone.milestoneName,
       minAge: parseInt(customMilestone.age),
-      maxAge: parseInt(customMilestone.age) + 1,
+      maxAge: parseInt(customMilestone.age),
       description: "Custom milestone added by user.",
       isPersonal: true,
       importance: "Medium",
       category: "custom",
     };
 
+    
+
     try {
-      const response = await MilestoneApi.createChildMilestone(newMilestone);
+      const response = await MilestoneApi.createMilestone(newMilestone);
       if (response.data && response.data.data) {
         const updatedMilestones = [...systemMilestones, response.data.data].sort(
           (a, b) => a.minAge - b.minAge
@@ -189,7 +191,32 @@ function MilestonePage() {
         setSystemMilestones(updatedMilestones);
         setCustomMilestone({ milestoneName: "", age: "" });
         setShowAddModal(false);
+
+        const childMilestonePayload = {
+          milestoneId: response.data.milestoneId,
+          childName: selectedChild?.name,
+          dateOfBirth: selectedChild?.dateOfBirth,
+          memberId,
+          notes,
+          guidelines,
+          importance,
+          category,
+          achievedDate: new Date().toISOString().split("T")[0],
+        };
+
+        const childMilestoneResponse = await MilestoneApi.createChildMilestone(
+          childMilestonePayload
+        );
+  
+        if (onSuccess) {
+          onSuccess({
+            milestone: response.data,
+            childMilestone: childMilestoneResponse.data,
+          });
+        }
       }
+      closeOverlay();
+
     } catch (error) {
       console.error("Error creating custom milestone:", error);
     }
