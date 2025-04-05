@@ -17,6 +17,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./RevenueChart.css";
 import transactionApi from "../../../../services/transactionApi";
+import axios from "axios";
 
 // Đăng ký các thành phần cần thiết cho Chart.js
 ChartJS.register(
@@ -44,7 +45,7 @@ const RevenueChart = () => {
   // Filters
   const [transactionType, setTransactionType] = useState("all"); // Filter by package type: all, standard, premium
   const [statusFilter, setStatusFilter] = useState("all"); // Filter by status: all, completed, pending, failed, cancelled
-  const [nameFilter, setNameFilter] = useState(""); // Tìm kiếm theo tên khách hàng
+  const [searchQuery, setSearchQuery] = useState(""); // Thay thế nameFilter và emailFilter
   const [startDate, setStartDate] = useState(null); // Ngày bắt đầu lọc
   const [endDate, setEndDate] = useState(null); // Ngày kết thúc lọc
   const [dateFilterType, setDateFilterType] = useState("transaction"); // Lọc theo ngày giao dịch (transaction) hoặc ngày thanh toán (payment)
@@ -56,6 +57,9 @@ const RevenueChart = () => {
   // Paging
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  const [userAccountDetail, setUserAccountDetail] = useState(null); // Thêm state lưu thông tin chi tiết tài khoản người dùng
+  const [isLoadingUserDetail, setIsLoadingUserDetail] = useState(false); // State loading khi đang lấy thông tin chi tiết
 
   useEffect(() => {
     const fetchData = async () => {
@@ -630,12 +634,13 @@ const RevenueChart = () => {
       );
     }
 
-    // Lọc theo tên
-    if (nameFilter.trim() !== "") {
+    // Lọc theo tên hoặc email (gộp lại)
+    if (searchQuery.trim() !== "") {
       filtered = filtered.filter(
         (t) =>
-          t.fullName &&
-          t.fullName.toLowerCase().includes(nameFilter.toLowerCase())
+          (t.fullName &&
+            t.fullName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          (t.email && t.email.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
 
@@ -786,16 +791,52 @@ const RevenueChart = () => {
     );
   };
 
-  // Mở modal xem chi tiết giao dịch
+  // Hàm lấy thông tin chi tiết người dùng từ API
+  const fetchUserAccountDetail = async (email) => {
+    if (!email) return null;
+
+    setIsLoadingUserDetail(true);
+    try {
+      const response = await axios.get(
+        "https://babyhaven-swp-web-emhrccb7hfh7bkf5.southeastasia-01.azurewebsites.net/api/UserAccounts/odata"
+      );
+
+      if (response.data && Array.isArray(response.data)) {
+        // Tìm người dùng theo email
+        const userDetail = response.data.find(
+          (user) => user.email.toLowerCase() === email.toLowerCase()
+        );
+
+        setUserAccountDetail(userDetail || null);
+      } else {
+        setUserAccountDetail(null);
+      }
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+      setUserAccountDetail(null);
+    } finally {
+      setIsLoadingUserDetail(false);
+    }
+  };
+
+  // Mở modal xem chi tiết giao dịch - Cập nhật để gọi API lấy thông tin người dùng
   const openTransactionDetail = (transaction) => {
     setSelectedTransaction(transaction);
     setShowTransactionDetail(true);
+
+    // Chỉ khi mở modal mới gọi API lấy thông tin người dùng
+    if (transaction && transaction.email) {
+      fetchUserAccountDetail(transaction.email);
+    } else {
+      setUserAccountDetail(null);
+    }
   };
 
-  // Đóng modal chi tiết
+  // Đóng modal chi tiết và reset thông tin người dùng
   const closeTransactionDetail = () => {
     setSelectedTransaction(null);
     setShowTransactionDetail(false);
+    setUserAccountDetail(null); // Reset thông tin người dùng khi đóng modal
   };
 
   // Hàm lấy ngày giao dịch đầu tiên của người dùng (thời điểm bắt đầu sử dụng dịch vụ)
@@ -1610,13 +1651,13 @@ const RevenueChart = () => {
 
                 <div className="filter-section">
                   <div className="filter-row">
-                    <label>Tên Khách Hàng:</label>
+                    <label>Tìm kiếm:</label>
                     <input
                       type="text"
-                      placeholder="Tìm kiếm theo tên..."
-                      value={nameFilter}
-                      onChange={(e) => setNameFilter(e.target.value)}
-                      className="name-filter-input"
+                      placeholder="Tìm kiếm theo tên hoặc email..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="search-filter-input"
                     />
                   </div>
                 </div>
@@ -1784,11 +1825,53 @@ const RevenueChart = () => {
                       <i className="fas fa-envelope"></i>{" "}
                       {selectedTransaction.email || "Không có thông tin email"}
                     </p>
-                    <p>
-                      <i className="fas fa-phone"></i>{" "}
-                      {selectedTransaction.phoneNumber ||
-                        "Không có thông tin điện thoại"}
-                    </p>
+                    {isLoadingUserDetail ? (
+                      <div className="loading-user-details">
+                        <div className="spinner"></div>
+                        <span>Đang tải thông tin chi tiết...</span>
+                      </div>
+                    ) : userAccountDetail ? (
+                      <>
+                        <p>
+                          <i className="fas fa-phone"></i>{" "}
+                          {userAccountDetail.phoneNumber ||
+                            "Không có số điện thoại"}
+                        </p>
+                        <p>
+                          <i className="fas fa-birthday-cake"></i>{" "}
+                          {userAccountDetail.dateOfBirth
+                            ? formatDate(userAccountDetail.dateOfBirth).split(
+                                " "
+                              )[0]
+                            : "Không có ngày sinh"}
+                        </p>
+                        <p>
+                          <i className="fas fa-venus-mars"></i>{" "}
+                          {userAccountDetail.gender === "Male"
+                            ? "Nam"
+                            : userAccountDetail.gender === "Female"
+                            ? "Nữ"
+                            : "Không xác định"}
+                        </p>
+                        <p>
+                          <i className="fas fa-map-marker-alt"></i>{" "}
+                          {userAccountDetail.address || "Không có địa chỉ"}
+                        </p>
+                        <p>
+                          <i className="fas fa-user-tag"></i>{" "}
+                          {userAccountDetail.roleName || "Không có vai trò"}
+                        </p>
+                        <p>
+                          <i className="fas fa-shield-alt"></i>{" "}
+                          {userAccountDetail.status || "Không xác định"}
+                        </p>
+                      </>
+                    ) : (
+                      <p>
+                        <i className="fas fa-exclamation-circle"></i> Không tìm
+                        thấy thông tin chi tiết người dùng
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>

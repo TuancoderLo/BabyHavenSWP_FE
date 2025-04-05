@@ -2117,46 +2117,75 @@
 
 .user-basic-info {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
+  flex-direction: column;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .user-name {
-  flex: 1;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #e6e6e6;
+  padding-bottom: 10px;
 }
 
 .user-name h4 {
-  margin: 0;
   font-size: 1.4rem;
-  color: #333;
+  margin: 0 0 5px 0;
+  color: #3a3a3a;
 }
 
 .user-since {
-  display: block;
-  margin-top: 5px;
   font-size: 0.9rem;
-  color: #666;
+  color: #6c757d;
   font-style: italic;
 }
 
 .user-contact {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
 }
 
 .user-contact p {
-  margin: 0;
-  color: #666;
+  margin: 5px 0;
   display: flex;
   align-items: center;
-  gap: 8px;
 }
 
 .user-contact i {
-  color: #4c6ef8;
+  margin-right: 10px;
+  width: 18px;
+  color: #4a6cf7;
+}
+
+/* Thêm loading state khi đang tải thông tin chi tiết */
+.loading-user-details {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  color: #666;
+}
+
+.loading-user-details .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3498db;
+  border-radius: 50%;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Thẻ thống kê */
@@ -2505,4 +2534,72 @@ canvas {
     height: 250px;
     padding: 5px;
   }
+}
+
+/* Điều chỉnh bộ lọc email */
+.email-filter-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.filter-row label {
+  margin-bottom: 5px;
+  font-weight: 500;
+  display: block;
+}
+
+/* Style cho trường tìm kiếm chung */
+.search-filter-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #2d3748;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.25s ease;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>');
+  background-repeat: no-repeat;
+  background-position: 12px center;
+  padding-left: 40px;
+}
+
+.search-filter-input:focus {
+  outline: none;
+  border-color: #4c6ef8;
+  box-shadow: 0 0 0 3px rgba(76, 110, 248, 0.15);
+}
+
+.search-filter-input::placeholder {
+  color: #a0aec0;
+}
+
+.filter-row {
+  margin-bottom: 15px;
+}
+
+.filter-row label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #4a5568;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .search-filter-input {
+    padding: 10px 12px 10px 36px;
+    background-position: 10px center;
+    font-size: 13px;
+  }
+}
+
+/* Loại bỏ các style không còn cần thiết */
+.name-filter-input,
+.email-filter-input {
+  /* Các style này sẽ được thay thế bởi .search-filter-input */
 }
