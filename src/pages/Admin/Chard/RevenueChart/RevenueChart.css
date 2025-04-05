@@ -1799,7 +1799,7 @@
   background-color: #fff;
   border-radius: 12px;
   width: 92%;
-  max-width: 650px;
+  max-width: 850px;
   max-height: 90%;
   overflow-y: auto;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
@@ -1821,7 +1821,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px;
+  padding: 20px 24px;
   border-bottom: 1px solid #eee;
 }
 
@@ -2006,5 +2006,437 @@
 
   .chart-area {
     height: 350px;
+  }
+}
+
+/* Styles cho Modal Chi Tiết Người Dùng */
+.transaction-detail-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+.modal-content {
+  background-color: #fff;
+  border-radius: 12px;
+  width: 92%;
+  max-width: 850px;
+  max-height: 90%;
+  overflow-y: auto;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  animation: modal-in 0.3s ease-out;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+}
+
+.modal-header h3 i {
+  margin-right: 12px;
+  color: #4c6ef8;
+}
+
+.close-modal {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.close-modal:hover {
+  color: #333;
+  transform: scale(1.1);
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #eee;
+  text-align: right;
+}
+
+.modal-btn {
+  padding: 10px 20px;
+  background-color: #4c6ef8;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  box-shadow: 0 2px 6px rgba(76, 110, 248, 0.2);
+}
+
+.modal-btn:hover {
+  background-color: #2a4cd7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(76, 110, 248, 0.3);
+}
+
+/* Phần profile người dùng */
+.user-profile-section {
+  padding: 20px;
+  background-color: #f8fafc;
+  border-radius: 10px;
+  margin-bottom: 24px;
+  border-left: 4px solid #4c6ef8;
+}
+
+.user-basic-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.user-name {
+  flex: 1;
+}
+
+.user-name h4 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #333;
+}
+
+.user-since {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+}
+
+.user-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.user-contact p {
+  margin: 0;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-contact i {
+  color: #4c6ef8;
+}
+
+/* Thẻ thống kê */
+.user-stats-section {
+  margin-bottom: 24px;
+}
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.user-stat-card {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.user-stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.total-spent {
+  border-left: 4px solid #4caf50;
+}
+
+.total-transactions {
+  border-left: 4px solid #2196f3;
+}
+
+.success-rate {
+  border-left: 4px solid #ff9800;
+}
+
+.stat-icon {
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: rgba(76, 110, 248, 0.1);
+  color: #4c6ef8;
+  font-size: 1.2rem;
+}
+
+.total-spent .stat-icon {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+}
+
+.total-transactions .stat-icon {
+  background-color: rgba(33, 150, 243, 0.1);
+  color: #2196f3;
+}
+
+.success-rate .stat-icon {
+  background-color: rgba(255, 152, 0, 0.1);
+  color: #ff9800;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-title {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Lịch sử gói dịch vụ */
+.purchase-history-section,
+.user-spending-chart,
+.package-analysis-section,
+.recent-transactions-section {
+  margin-bottom: 30px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+}
+
+.purchase-history-section h4,
+.user-spending-chart h4,
+.package-analysis-section h4,
+.recent-transactions-section h4 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+  color: #333;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.purchase-history-section h4 i,
+.user-spending-chart h4 i,
+.package-analysis-section h4 i,
+.recent-transactions-section h4 i {
+  color: #4c6ef8;
+}
+
+.package-history-container,
+.recent-transactions-container {
+  overflow-x: auto;
+}
+
+.package-history-table,
+.recent-transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.package-history-table th,
+.package-history-table td,
+.recent-transactions-table th,
+.recent-transactions-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.package-history-table th,
+.recent-transactions-table th {
+  background-color: #f8fafc;
+  color: #555;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.package-history-table tr:hover td,
+.recent-transactions-table tr:hover td {
+  background-color: #f8fafc;
+}
+
+/* Biểu đồ chi tiêu */
+.user-chart {
+  height: 300px;
+  margin-top: 20px;
+}
+
+/* Phân tích gói dịch vụ */
+.package-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.package-donut-chart {
+  height: 240px;
+}
+
+.package-stats-details {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  justify-content: center;
+}
+
+.package-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.package-stat-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.package-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background-color: rgba(76, 110, 248, 0.1);
+  color: #4c6ef8;
+  font-size: 1.1rem;
+}
+
+.package-stat-content {
+  flex: 1;
+}
+
+.package-stat-content h5 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: #444;
+}
+
+.package-stat-values {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.package-count {
+  color: #666;
+}
+
+.package-count span {
+  font-weight: bold;
+  color: #333;
+}
+
+.package-total {
+  font-weight: bold;
+  color: #4caf50;
+}
+
+/* Hiển thị khi không có dữ liệu */
+.no-data-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  color: #888;
+  font-style: italic;
+}
+
+.no-data-message i {
+  margin-right: 8px;
+}
+
+/* Responsive cho modal chi tiết người dùng */
+@media (max-width: 768px) {
+  .stats-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .package-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .package-donut-chart {
+    height: 200px;
+  }
+
+  .user-basic-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .user-chart {
+    height: 250px;
+  }
+}
+
+@media (max-width: 576px) {
+  .modal-content {
+    width: 95%;
+    max-height: 85%;
+  }
+
+  .modal-header {
+    padding: 15px;
+  }
+
+  .modal-body {
+    padding: 15px;
+  }
+
+  .purchase-history-section,
+  .user-spending-chart,
+  .package-analysis-section,
+  .recent-transactions-section {
+    padding: 15px;
   }
 }

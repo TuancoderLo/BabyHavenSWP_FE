@@ -798,6 +798,210 @@ const RevenueChart = () => {
     setShowTransactionDetail(false);
   };
 
+  // Hàm lấy ngày giao dịch đầu tiên của người dùng (thời điểm bắt đầu sử dụng dịch vụ)
+  const getUserFirstTransaction = (userId) => {
+    if (!userId) return null;
+
+    const userTransactions = transactions.filter((t) => t.userId === userId);
+    if (!userTransactions.length) return null;
+
+    // Sắp xếp theo ngày tăng dần để lấy giao dịch đầu tiên
+    userTransactions.sort(
+      (a, b) => new Date(a.transactionDate) - new Date(b.transactionDate)
+    );
+
+    return userTransactions[0].transactionDate;
+  };
+
+  // Hàm lấy danh sách tất cả giao dịch của người dùng
+  const getUserTransactions = (userId) => {
+    if (!userId) return [];
+    return transactions.filter((t) => t.userId === userId);
+  };
+
+  // Hàm tính tổng số tiền người dùng đã chi tiêu (chỉ tính giao dịch thành công)
+  const calculateUserTotalSpent = (userId) => {
+    if (!userId) return 0;
+
+    return getUserTransactions(userId)
+      .filter((t) => t.paymentStatus === "Completed")
+      .reduce((total, t) => total + (t.amount || 0), 0);
+  };
+
+  // Hàm tính tỷ lệ thành công trong các giao dịch của người dùng
+  const calculateUserSuccessRate = (userId) => {
+    const userTransactions = getUserTransactions(userId);
+    if (!userTransactions.length) return 0;
+
+    const successfulTransactions = userTransactions.filter(
+      (t) => t.paymentStatus === "Completed"
+    );
+    return Math.round(
+      (successfulTransactions.length / userTransactions.length) * 100
+    );
+  };
+
+  // Hàm lấy danh sách các gói dịch vụ đã mua
+  const getUserPackageHistory = (userId) => {
+    if (!userId) return [];
+
+    const userTransactions = getUserTransactions(userId);
+
+    // Sắp xếp theo ngày giao dịch gần nhất trước
+    return userTransactions.sort(
+      (a, b) => new Date(b.transactionDate) - new Date(a.transactionDate)
+    );
+  };
+
+  // Hàm lấy các giao dịch gần đây nhất của người dùng
+  const getUserRecentTransactions = (userId, limit = 5) => {
+    const userTransactions = getUserTransactions(userId);
+
+    // Sắp xếp theo ngày giao dịch gần nhất trước
+    return userTransactions
+      .sort((a, b) => new Date(b.transactionDate) - new Date(a.transactionDate))
+      .slice(0, limit);
+  };
+
+  // Hàm thống kê gói dịch vụ đã mua
+  const getUserPackageStats = (userId) => {
+    const userTransactions = getUserTransactions(userId);
+    if (!userTransactions.length) return [];
+
+    // Nhóm theo tên gói
+    const packageStats = {};
+
+    userTransactions.forEach((transaction) => {
+      const packageName = transaction.packageName;
+
+      if (!packageStats[packageName]) {
+        packageStats[packageName] = {
+          packageName,
+          count: 0,
+          total: 0,
+          successful: 0,
+        };
+      }
+
+      packageStats[packageName].count++;
+
+      if (transaction.paymentStatus === "Completed") {
+        packageStats[packageName].total += transaction.amount || 0;
+        packageStats[packageName].successful++;
+      }
+    });
+
+    return Object.values(packageStats);
+  };
+
+  // Hàm chuẩn bị dữ liệu cho biểu đồ chi tiêu theo thời gian
+  const prepareUserSpendingChartData = (userId) => {
+    const userTransactions = getUserTransactions(userId);
+    if (!userTransactions.length) return null;
+
+    // Chỉ lấy các giao dịch thành công
+    const completedTransactions = userTransactions.filter(
+      (t) => t.paymentStatus === "Completed"
+    );
+    if (!completedTransactions.length) return null;
+
+    // Nhóm các giao dịch theo tháng
+    const spendingByMonth = {};
+
+    // Sắp xếp giao dịch theo ngày
+    completedTransactions.sort(
+      (a, b) => new Date(a.transactionDate) - new Date(b.transactionDate)
+    );
+
+    // Lấy tháng đầu tiên và tháng cuối cùng
+    const firstDate = new Date(completedTransactions[0].transactionDate);
+    const lastDate = new Date(
+      completedTransactions[completedTransactions.length - 1].transactionDate
+    );
+
+    // Tạo mảng các tháng từ tháng đầu đến tháng cuối
+    const months = [];
+    let currentDate = new Date(
+      firstDate.getFullYear(),
+      firstDate.getMonth(),
+      1
+    );
+
+    while (currentDate <= lastDate) {
+      const monthKey = `${
+        currentDate.getMonth() + 1
+      }/${currentDate.getFullYear()}`;
+      months.push(monthKey);
+      spendingByMonth[monthKey] = 0;
+
+      currentDate.setMonth(currentDate.getMonth() + 1);
+    }
+
+    // Tính tổng chi tiêu cho mỗi tháng
+    completedTransactions.forEach((transaction) => {
+      const transactionDate = new Date(transaction.transactionDate);
+      const monthKey = `${
+        transactionDate.getMonth() + 1
+      }/${transactionDate.getFullYear()}`;
+
+      if (spendingByMonth[monthKey] !== undefined) {
+        spendingByMonth[monthKey] += transaction.amount || 0;
+      }
+    });
+
+    // Chuyển đổi dữ liệu cho biểu đồ
+    const labels = months;
+    const data = months.map((month) => spendingByMonth[month]);
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: "Chi Tiêu",
+          data,
+          borderColor: "rgba(75, 192, 192, 1)",
+          backgroundColor: "rgba(75, 192, 192, 0.5)",
+          tension: 0.4,
+          fill: true,
+        },
+      ],
+    };
+  };
+
+  // Hàm chuẩn bị dữ liệu biểu đồ phân bổ gói dịch vụ
+  const prepareUserPackageDistributionChart = (userId) => {
+    const packageStats = getUserPackageStats(userId);
+    if (!packageStats.length) return null;
+
+    const labels = packageStats.map((stat) => stat.packageName);
+    const data = packageStats.map((stat) => stat.successful);
+
+    // Màu sắc dựa trên tên gói
+    const backgroundColor = packageStats.map((stat) =>
+      stat.packageName === "Premium"
+        ? "rgba(153, 102, 255, 0.8)"
+        : "rgba(75, 192, 192, 0.8)"
+    );
+
+    const borderColor = packageStats.map((stat) =>
+      stat.packageName === "Premium"
+        ? "rgba(153, 102, 255, 1)"
+        : "rgba(75, 192, 192, 1)"
+    );
+
+    return {
+      labels,
+      datasets: [
+        {
+          data,
+          backgroundColor,
+          borderColor,
+          borderWidth: 1,
+        },
+      ],
+    };
+  };
+
   return (
     <div className="revenue-dashboard">
       {/* Tiêu đề */}
@@ -1514,7 +1718,8 @@ const RevenueChart = () => {
           <div className="modal-content">
             <div className="modal-header">
               <h3>
-                <i className="fas fa-file-invoice"></i> Chi Tiết Giao Dịch
+                <i className="fas fa-user-circle"></i> Thông Tin Chi Tiết Khách
+                Hàng
               </h3>
               <button className="close-modal" onClick={closeTransactionDetail}>
                 <i className="fas fa-times"></i>
@@ -1522,69 +1727,293 @@ const RevenueChart = () => {
             </div>
 
             <div className="modal-body">
-              <div className="transaction-detail-info">
-                <div className="detail-row">
-                  <div className="detail-label">ID Giao dịch:</div>
-                  <div className="detail-value">
-                    {selectedTransaction.gatewayTransactionId || "N/A"}
+              {/* Thông tin cơ bản của khách hàng */}
+              <div className="user-profile-section">
+                <div className="user-basic-info">
+                  <div className="user-name">
+                    <h4>{selectedTransaction.fullName}</h4>
+                    <span className="user-since">
+                      Khách hàng từ:{" "}
+                      {formatDate(
+                        getUserFirstTransaction(selectedTransaction.userId)
+                      )}
+                    </span>
+                  </div>
+                  <div className="user-contact">
+                    <p>
+                      <i className="fas fa-envelope"></i>{" "}
+                      {selectedTransaction.email || "Không có thông tin email"}
+                    </p>
+                    <p>
+                      <i className="fas fa-phone"></i>{" "}
+                      {selectedTransaction.phoneNumber ||
+                        "Không có thông tin điện thoại"}
+                    </p>
                   </div>
                 </div>
-                <div className="detail-row">
-                  <div className="detail-label">Khách hàng:</div>
-                  <div className="detail-value">
-                    {selectedTransaction.fullName}
+              </div>
+
+              {/* Tổng hợp và thống kê */}
+              <div className="user-stats-section">
+                <div className="stats-cards">
+                  <div className="user-stat-card total-spent">
+                    <div className="stat-icon">
+                      <i className="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-title">Tổng Chi Tiêu</div>
+                      <div className="stat-value">
+                        {formatAmount(
+                          calculateUserTotalSpent(selectedTransaction.userId)
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="user-stat-card total-transactions">
+                    <div className="stat-icon">
+                      <i className="fas fa-shopping-cart"></i>
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-title">Tổng Giao Dịch</div>
+                      <div className="stat-value">
+                        {getUserTransactions(selectedTransaction.userId).length}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="user-stat-card success-rate">
+                    <div className="stat-icon">
+                      <i className="fas fa-check-circle"></i>
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-title">Tỷ Lệ Thành Công</div>
+                      <div className="stat-value">
+                        {calculateUserSuccessRate(selectedTransaction.userId)}%
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="detail-row">
-                  <div className="detail-label">Gói dịch vụ:</div>
-                  <div className="detail-value">
-                    {renderPackageBadge(selectedTransaction.packageName)}
-                  </div>
+              </div>
+
+              {/* Lịch sử gói dịch vụ đã mua */}
+              <div className="purchase-history-section">
+                <h4>
+                  <i className="fas fa-history"></i> Lịch Sử Mua Gói Dịch Vụ
+                </h4>
+                <div className="package-history-container">
+                  <table className="package-history-table">
+                    <thead>
+                      <tr>
+                        <th>Gói Dịch Vụ</th>
+                        <th>Ngày Mua</th>
+                        <th>Số Tiền</th>
+                        <th>Trạng Thái</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {getUserPackageHistory(selectedTransaction.userId).map(
+                        (transaction, index) => (
+                          <tr key={index}>
+                            <td>
+                              {renderPackageBadge(transaction.packageName)}
+                            </td>
+                            <td>{formatDate(transaction.transactionDate)}</td>
+                            <td>{formatAmount(transaction.amount)}</td>
+                            <td>
+                              {renderPaymentStatus(transaction.paymentStatus)}
+                            </td>
+                          </tr>
+                        )
+                      )}
+                    </tbody>
+                  </table>
                 </div>
-                <div className="detail-row">
-                  <div className="detail-label">Số tiền:</div>
-                  <div className="detail-value">
-                    {formatAmount(
-                      selectedTransaction.amount,
-                      selectedTransaction.currency || "VND"
+              </div>
+
+              {/* Biểu đồ chi tiêu theo thời gian */}
+              <div className="user-spending-chart">
+                <h4>
+                  <i className="fas fa-chart-line"></i> Biểu Đồ Chi Tiêu Theo
+                  Thời Gian
+                </h4>
+                <div className="chart-area user-chart">
+                  {/* Biểu đồ chi tiêu được render tại đây */}
+                  {prepareUserSpendingChartData(selectedTransaction.userId) ? (
+                    <Line
+                      data={prepareUserSpendingChartData(
+                        selectedTransaction.userId
+                      )}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            position: "top",
+                          },
+                          title: {
+                            display: true,
+                            text: "Chi Tiêu Theo Thời Gian",
+                            font: {
+                              size: 14,
+                              weight: "bold",
+                            },
+                          },
+                          tooltip: {
+                            callbacks: {
+                              label: function (context) {
+                                let label = context.dataset.label || "";
+                                if (label) {
+                                  label += ": ";
+                                }
+                                if (context.parsed.y !== null) {
+                                  label += new Intl.NumberFormat("vi-VN", {
+                                    style: "currency",
+                                    currency: "VND",
+                                  }).format(context.parsed.y);
+                                }
+                                return label;
+                              },
+                            },
+                          },
+                        },
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                            ticks: {
+                              callback: function (value) {
+                                return new Intl.NumberFormat("vi-VN", {
+                                  style: "currency",
+                                  currency: "VND",
+                                  notation: "compact",
+                                  compactDisplay: "short",
+                                }).format(value);
+                              },
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  ) : (
+                    <div className="no-data-message">
+                      <i className="fas fa-info-circle"></i> Không đủ dữ liệu để
+                      hiển thị biểu đồ
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Phân tích gói dịch vụ */}
+              <div className="package-analysis-section">
+                <h4>
+                  <i className="fas fa-boxes"></i> Phân Tích Gói Dịch Vụ
+                </h4>
+                <div className="package-stats">
+                  <div className="package-donut-chart">
+                    {prepareUserPackageDistributionChart(
+                      selectedTransaction.userId
+                    ) ? (
+                      <Doughnut
+                        data={prepareUserPackageDistributionChart(
+                          selectedTransaction.userId
+                        )}
+                        options={{
+                          responsive: true,
+                          maintainAspectRatio: false,
+                          plugins: {
+                            legend: {
+                              position: "right",
+                            },
+                            title: {
+                              display: true,
+                              text: "Phân Bổ Gói Dịch Vụ",
+                              font: {
+                                size: 14,
+                                weight: "bold",
+                              },
+                            },
+                          },
+                        }}
+                      />
+                    ) : (
+                      <div className="no-data-message">
+                        <i className="fas fa-info-circle"></i> Không đủ dữ liệu
+                      </div>
+                    )}
+                  </div>
+                  <div className="package-stats-details">
+                    {getUserPackageStats(selectedTransaction.userId).map(
+                      (stat, index) => (
+                        <div key={index} className="package-stat-item">
+                          <div className="package-icon">
+                            <i
+                              className={
+                                stat.packageName === "Premium"
+                                  ? "fas fa-crown"
+                                  : "fas fa-box"
+                              }
+                            ></i>
+                          </div>
+                          <div className="package-stat-content">
+                            <h5>{stat.packageName}</h5>
+                            <div className="package-stat-values">
+                              <div className="package-count">
+                                <span>{stat.count}</span> gói
+                              </div>
+                              <div className="package-total">
+                                {formatAmount(stat.total)}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
                     )}
                   </div>
                 </div>
-                <div className="detail-row">
-                  <div className="detail-label">Loại giao dịch:</div>
-                  <div className="detail-value">
-                    {selectedTransaction.transactionType || "N/A"}
-                  </div>
-                </div>
-                <div className="detail-row">
-                  <div className="detail-label">Phương thức thanh toán:</div>
-                  <div className="detail-value">
-                    {selectedTransaction.paymentMethod || "N/A"}
-                  </div>
-                </div>
-                <div className="detail-row">
-                  <div className="detail-label">Ngày giao dịch:</div>
-                  <div className="detail-value">
-                    {formatDate(selectedTransaction.transactionDate)}
-                  </div>
-                </div>
-                <div className="detail-row">
-                  <div className="detail-label">Ngày thanh toán:</div>
-                  <div className="detail-value">
-                    {formatDate(selectedTransaction.paymentDate)}
-                  </div>
-                </div>
-                <div className="detail-row">
-                  <div className="detail-label">Trạng thái:</div>
-                  <div className="detail-value">
-                    {renderPaymentStatus(selectedTransaction.paymentStatus)}
-                  </div>
+              </div>
+
+              {/* Giao dịch gần đây */}
+              <div className="recent-transactions-section">
+                <h4>
+                  <i className="fas fa-clock"></i> Giao Dịch Gần Đây
+                </h4>
+                <div className="recent-transactions-container">
+                  <table className="recent-transactions-table">
+                    <thead>
+                      <tr>
+                        <th>ID Giao Dịch</th>
+                        <th>Gói</th>
+                        <th>Ngày Giao Dịch</th>
+                        <th>Số Tiền</th>
+                        <th>Trạng Thái</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {getUserRecentTransactions(
+                        selectedTransaction.userId,
+                        5
+                      ).map((transaction, index) => (
+                        <tr key={index}>
+                          <td>{transaction.gatewayTransactionId || "N/A"}</td>
+                          <td>{renderPackageBadge(transaction.packageName)}</td>
+                          <td>{formatDate(transaction.transactionDate)}</td>
+                          <td>{formatAmount(transaction.amount)}</td>
+                          <td>
+                            {renderPaymentStatus(transaction.paymentStatus)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
 
             <div className="modal-footer">
-              <button className="modal-btn" onClick={closeTransactionDetail}>
+              <button
+                className="modal-btn primary"
+                onClick={closeTransactionDetail}
+              >
                 Đóng
               </button>
             </div>
