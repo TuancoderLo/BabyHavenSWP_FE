@@ -327,6 +327,8 @@
 .chart-area {
   height: 400px;
   position: relative;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 /* Loading */
@@ -402,7 +404,8 @@
   }
 
   .chart-area {
-    height: 300px;
+    height: 350px;
+    padding: 10px;
   }
 
   .card-value {
@@ -1329,7 +1332,9 @@
 }
 
 .chart-card.half {
-  height: 420px;
+  height: auto;
+  min-height: 420px;
+  padding-bottom: 30px;
 }
 
 .chart-card h3 {
@@ -1349,6 +1354,8 @@
 .chart-area {
   height: 400px;
   position: relative;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .chart-controls {
@@ -2006,6 +2013,7 @@
 
   .chart-area {
     height: 350px;
+    padding: 10px;
   }
 }
 
@@ -2304,6 +2312,8 @@
 .user-chart {
   height: 300px;
   margin-top: 20px;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
 /* Phân tích gói dịch vụ */
@@ -2315,6 +2325,10 @@
 
 .package-donut-chart {
   height: 240px;
+  width: 100%;
+  position: relative;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
 .package-stats-details {
@@ -2407,6 +2421,7 @@
 
   .package-donut-chart {
     height: 200px;
+    padding: 5px;
   }
 
   .user-basic-info {
@@ -2416,6 +2431,7 @@
 
   .user-chart {
     height: 250px;
+    padding: 5px;
   }
 }
 
@@ -2438,5 +2454,55 @@
   .package-analysis-section,
   .recent-transactions-section {
     padding: 15px;
+  }
+}
+
+/* Đảm bảo biểu đồ tròn hiển thị đầy đủ */
+canvas {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Điều chỉnh riêng cho biểu đồ tròn */
+.pie-chart-container {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Đảm bảo biểu đồ tròn không bị cắt */
+.package-donut-chart {
+  height: 240px;
+  width: 100%;
+  position: relative;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/* Hiệu chỉnh chiều cao và padding cho các biểu đồ trong phần chi tiết khách hàng */
+.user-chart {
+  height: 300px;
+  margin-top: 20px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .chart-area {
+    height: 350px;
+    padding: 10px;
+  }
+
+  .package-donut-chart {
+    height: 200px;
+    padding: 5px;
+  }
+
+  .user-chart {
+    height: 250px;
+    padding: 5px;
   }
 }

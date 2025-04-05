@@ -1002,6 +1002,129 @@ const RevenueChart = () => {
     };
   };
 
+  // Thay thế đoạn code renderCharts() lỗi bằng cấu hình biểu đồ tròn trực tiếp
+  const renderDashboard = () => {
+    return (
+      <div className="chart-panel">
+        <div className="chart-row">
+          <div className="chart-card half">
+            <h3>
+              <i className="fas fa-chart-pie"></i> Tỷ Lệ Doanh Thu Theo Gói
+            </h3>
+            <div className="chart-controls">
+              <button
+                className={comparisonMetric === "revenue" ? "active" : ""}
+                onClick={() => setComparisonMetric("revenue")}
+              >
+                Doanh thu
+              </button>
+              <button
+                className={comparisonMetric === "transactions" ? "active" : ""}
+                onClick={() => setComparisonMetric("transactions")}
+              >
+                Số lượng
+              </button>
+            </div>
+            <div className="chart-area">
+              {packageComparisonPieChartData ? (
+                <div className="pie-chart-container">
+                  <Doughnut
+                    data={packageComparisonPieChartData}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      cutout: "65%",
+                      plugins: {
+                        legend: {
+                          position: "bottom",
+                          align: "center",
+                          labels: {
+                            padding: 20,
+                            boxWidth: 15,
+                            font: {
+                              size: 13,
+                            },
+                          },
+                        },
+                        tooltip: {
+                          callbacks: {
+                            label: function (context) {
+                              const value = context.raw;
+                              const total = context.dataset.data.reduce(
+                                (a, b) => a + b,
+                                0
+                              );
+                              const percentage = Math.round(
+                                (value / total) * 100
+                              );
+                              return `${context.label}: ${formatAmount(
+                                value
+                              )} (${percentage}%)`;
+                            },
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="no-data-message">
+                  <i className="fas fa-info-circle"></i> Không có dữ liệu để
+                  hiển thị
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Giữ nguyên phần code cho thẻ còn lại */}
+          <div className="chart-card half">
+            <h3>
+              <i className="fas fa-funnel-dollar"></i> Thống Kê Giao Dịch
+            </h3>
+            <div className="stats-container">
+              <div className="stat-item">
+                <div className="stat-label">Tổng số giao dịch:</div>
+                <div className="stat-value">{statusCounts.total}</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-label">Giao dịch thành công:</div>
+                <div className="stat-value success">
+                  {statusCounts.completed}
+                </div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-label">Đang chờ thanh toán:</div>
+                <div className="stat-value pending">{statusCounts.pending}</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-label">Giao dịch thất bại:</div>
+                <div className="stat-value failed">{statusCounts.failed}</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-label">Giao dịch đã hủy:</div>
+                <div className="stat-value cancelled">
+                  {statusCounts.cancelled}
+                </div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-label">Tỷ lệ thành công:</div>
+                <div className="stat-value">
+                  {statusCounts.total
+                    ? (
+                        (statusCounts.completed / statusCounts.total) *
+                        100
+                      ).toFixed(1)
+                    : 0}
+                  %
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="revenue-dashboard">
       {/* Tiêu đề */}
@@ -1259,90 +1382,7 @@ const RevenueChart = () => {
               </div>
             </div>
 
-            <div className="chart-row">
-              <div className="chart-card half">
-                <h3>
-                  <i className="fas fa-chart-pie"></i> Tỷ Lệ Doanh Thu Theo Gói
-                </h3>
-                <div className="chart-controls">
-                  <button
-                    className={comparisonMetric === "revenue" ? "active" : ""}
-                    onClick={() => setComparisonMetric("revenue")}
-                  >
-                    Doanh thu
-                  </button>
-                  <button
-                    className={
-                      comparisonMetric === "transactions" ? "active" : ""
-                    }
-                    onClick={() => setComparisonMetric("transactions")}
-                  >
-                    Số lượng
-                  </button>
-                </div>
-                <div className="chart-area">
-                  {packageComparisonPieChartData ? (
-                    <Doughnut
-                      data={packageComparisonPieChartData}
-                      options={pieChartOptions}
-                    />
-                  ) : (
-                    <div className="no-data-message">
-                      <i className="fas fa-info-circle"></i> Không có dữ liệu để
-                      hiển thị
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="chart-card half">
-                <h3>
-                  <i className="fas fa-funnel-dollar"></i> Thống Kê Giao Dịch
-                </h3>
-                <div className="stats-container">
-                  <div className="stat-item">
-                    <div className="stat-label">Tổng số giao dịch:</div>
-                    <div className="stat-value">{statusCounts.total}</div>
-                  </div>
-                  <div className="stat-item">
-                    <div className="stat-label">Giao dịch thành công:</div>
-                    <div className="stat-value success">
-                      {statusCounts.completed}
-                    </div>
-                  </div>
-                  <div className="stat-item">
-                    <div className="stat-label">Đang chờ thanh toán:</div>
-                    <div className="stat-value pending">
-                      {statusCounts.pending}
-                    </div>
-                  </div>
-                  <div className="stat-item">
-                    <div className="stat-label">Giao dịch thất bại:</div>
-                    <div className="stat-value failed">
-                      {statusCounts.failed}
-                    </div>
-                  </div>
-                  <div className="stat-item">
-                    <div className="stat-label">Giao dịch đã hủy:</div>
-                    <div className="stat-value cancelled">
-                      {statusCounts.cancelled}
-                    </div>
-                  </div>
-                  <div className="stat-item">
-                    <div className="stat-label">Tỷ lệ thành công:</div>
-                    <div className="stat-value">
-                      {statusCounts.total
-                        ? (
-                            (statusCounts.completed / statusCounts.total) *
-                            100
-                          ).toFixed(1)
-                        : 0}
-                      %
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <div className="chart-row">{renderDashboard()}</div>
           </div>
         )}
 
@@ -1892,6 +1932,14 @@ const RevenueChart = () => {
                             },
                           },
                         },
+                        layout: {
+                          padding: {
+                            left: 10,
+                            right: 10,
+                            top: 20,
+                            bottom: 10,
+                          },
+                        },
                       }}
                     />
                   ) : (
@@ -1920,9 +1968,18 @@ const RevenueChart = () => {
                         options={{
                           responsive: true,
                           maintainAspectRatio: false,
+                          cutout: "60%",
                           plugins: {
                             legend: {
                               position: "right",
+                              align: "center",
+                              labels: {
+                                padding: 15,
+                                boxWidth: 12,
+                                font: {
+                                  size: 12,
+                                },
+                              },
                             },
                             title: {
                               display: true,
@@ -1931,6 +1988,29 @@ const RevenueChart = () => {
                                 size: 14,
                                 weight: "bold",
                               },
+                            },
+                            tooltip: {
+                              callbacks: {
+                                label: function (context) {
+                                  const value = context.raw;
+                                  const total = context.dataset.data.reduce(
+                                    (a, b) => a + b,
+                                    0
+                                  );
+                                  const percentage = Math.round(
+                                    (value / total) * 100
+                                  );
+                                  return `${context.label}: ${value} gói (${percentage}%)`;
+                                },
+                              },
+                            },
+                          },
+                          layout: {
+                            padding: {
+                              left: 5,
+                              right: 5,
+                              top: 5,
+                              bottom: 5,
                             },
                           },
                         }}
