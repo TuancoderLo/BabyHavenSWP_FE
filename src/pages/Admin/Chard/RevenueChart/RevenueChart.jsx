@@ -1038,25 +1038,20 @@ const RevenueChart = () => {
         {/* Tab Tổng Quan */}
         {activeTab === "overview" && (
           <div className="chart-panel">
-            <div className="chart-row">
-              <div className="chart-card">
-                <h3>
-                  <i className="fas fa-chart-line"></i> Biểu Đồ Doanh Thu Hàng
-                  Tháng
-                </h3>
-                <div className="chart-area">
-                  {revenueChartData ? (
-                    <Line
-                      data={revenueChartData}
-                      options={revenueChartOptions}
-                    />
-                  ) : (
-                    <div className="no-data-message">
-                      <i className="fas fa-info-circle"></i> Không có dữ liệu
-                      doanh thu để hiển thị
-                    </div>
-                  )}
-                </div>
+            <div className="chart-card full-width">
+              <h3>
+                <i className="fas fa-chart-line"></i> Biểu Đồ Doanh Thu Hàng
+                Tháng
+              </h3>
+              <div className="chart-area">
+                {revenueChartData ? (
+                  <Line data={revenueChartData} options={revenueChartOptions} />
+                ) : (
+                  <div className="no-data-message">
+                    <i className="fas fa-info-circle"></i> Không có dữ liệu
+                    doanh thu để hiển thị
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1150,7 +1145,7 @@ const RevenueChart = () => {
         {/* Tab Phân Tích Gói Dịch Vụ */}
         {activeTab === "packages" && (
           <div className="chart-panel">
-            <div className="chart-card">
+            <div className="chart-card full-width">
               <h3>
                 <i className="fas fa-boxes"></i> So Sánh Doanh Thu Theo Gói Dịch
                 Vụ
@@ -1243,7 +1238,7 @@ const RevenueChart = () => {
         {/* Tab Báo Cáo Theo Quý */}
         {activeTab === "quarterly" && (
           <div className="chart-panel">
-            <div className="chart-card">
+            <div className="chart-card full-width">
               <h3>
                 <i className="fas fa-calendar-alt"></i> Doanh Thu Theo Quý
               </h3>
