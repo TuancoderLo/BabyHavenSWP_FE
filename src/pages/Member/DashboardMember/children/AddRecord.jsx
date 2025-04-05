@@ -600,7 +600,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                       />
                     </div>
                   </div>
-                  <div className="notes-section">
+                  {/* <div className="notes-section">
                     <label>Developmental milestones</label>
                     <input
                       type="text"
@@ -608,7 +608,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                       value={growthForm.developmentalMilestones}
                       onChange={handleChange}
                     />
-                  </div>
+                  </div> */}
                 </div>
               </details>
             </div>

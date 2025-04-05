@@ -23,17 +23,30 @@ export const WHO_GROWTH_REFERENCE = [
   { age: 216, weight: [58.0, 85.0], height: [164, 182] },
 ];
 
-export function calculateAgeInMonths(dateOfBirth) {
-  if (!dateOfBirth) return 0;
+export function getAgeStage(dateOfBirth) {
+  const months = calculateAgeInMonths(dateOfBirth);
+  if (months < 1) return "0–1 month";
+  if (months < 3) return "1–3 months old";
+  if (months < 6) return "3–6 months old";
+  if (months < 12) return "6–12 months old";
+
+  const years = Math.floor(months / 12);
+  if (years < 2) return "1–2 years old";
+  if (years < 5) return "2–5 years old";
+  if (years < 13) return "6–12 years old";
+  if (years < 19) return "13–18 years old";
+  return "Adult";
+}
+
+function calculateAgeInMonths(dateOfBirth) {
   const birthDate = new Date(dateOfBirth);
   const today = new Date();
-  let years = today.getFullYear() - birthDate.getFullYear();
-  let months = today.getMonth() - birthDate.getMonth();
-  if (months < 0) {
-    years--;
-    months += 12;
+  let months = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
+  // Adjust if the current day is less than the birth day
+  if (today.getDate() < birthDate.getDate()) {
+      months--;
   }
-  return years * 12 + months;
+  return months;
 }
 
 export function validateDateOfBirth(dateString) {
