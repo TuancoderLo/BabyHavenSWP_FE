@@ -1,21 +1,28 @@
 /* Alert Item */
 .alert-item {
-  padding: 8px 12px;
+  padding: 12px 16px;
   align-items: center;
-  min-height: 75px;
-  border-radius: 10px;
+  min-height: 85px;
+  border-radius: 12px;
   display: flex;
   flex-direction: row;
   background: #ffffff;
   border: 2px solid transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.alert-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Alert Icon */
 .alert-icon {
   padding: 4px;
-  font-size: 24px;
-  margin-right: 10px;
-  min-height: 24px;
+  font-size: 28px;
+  margin-right: 12px;
+  min-height: 28px;
   text-shadow: none;
 }
 
@@ -26,20 +33,22 @@
 
 .alert-message p {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 /* Severity Classes */
 .alert-item.healthy {
   border-color: #00d0bc;
   color: #006064;
+  background: #e6f7f5;
 }
 
 .alert-item.warning {
   border-color: #f4e800;
   color: #ef6c00;
+  background: #fff3cd;
 }
 
 .alert-item.warning.fadeable {
@@ -49,6 +58,7 @@
 .alert-item.danger {
   border-color: #ff6262;
   color: #c62828;
+  background: #ffe6e6;
 }
 
 .alert-item.danger.fadeable {
@@ -59,22 +69,53 @@
   animation: fade 1s infinite;
 }
 
+@keyframes fade {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
 /* Alert Buttons */
 .alert-close-btn {
   background: none;
   border: none;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   color: #999;
+  transition: color 0.2s ease;
+}
+
+.alert-close-btn:hover {
+  color: #666;
+}
+
+.alert-see-more, .alert-learn-more {
+  margin-right: 12px;
+  background: none;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .alert-see-more {
-  margin-right: 8px;
-  background: none;
-  font-size: 12px;
   color: #00d0bc;
-  cursor: pointer;
-  font-weight: 500;
+}
+
+.alert-see-more:hover {
+  background: #e6f7f5;
+  color: #006064;
+}
+
+.alert-learn-more {
+  color: #008cff;
+  border: 1px solid #008cff;
+}
+
+.alert-learn-more:hover {
+  background: #e6f0ff;
+  color: #005bb5;
 }
 
 /* Modal Overlay */
@@ -96,7 +137,7 @@
   background: #fff;
   padding: 20px;
   border-radius: 12px;
-  max-width: 600px; /* Tăng chiều rộng để chứa bảng */
+  max-width: 600px;
   max-height: 80vh;
   overflow-y: auto;
   position: relative;
@@ -218,6 +259,7 @@
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
+  transition: background 0.2s ease;
 }
 
 .export-pdf-btn:hover {
@@ -227,41 +269,43 @@
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .alert-item {
-      padding: 8px 10px;
+    padding: 8px 10px;
+    min-height: 70px;
   }
 
   .alert-icon {
-      font-size: 20px;
+    font-size: 24px;
   }
 
   .alert-message p {
-      font-size: 13px;
+    font-size: 14px;
   }
 
-  .alert-see-more {
-      font-size: 11px;
+  .alert-see-more, .alert-learn-more {
+    font-size: 12px;
+    padding: 4px 8px;
   }
 
   .alert-close-btn {
-      font-size: 13px;
+    font-size: 14px;
   }
 
   .modal-content {
-      padding: 16px;
-      max-width: 90%;
+    padding: 16px;
+    max-width: 90%;
   }
 
   .modal-content h2 {
-      font-size: 16px;
+    font-size: 16px;
   }
 
   .modal-content p {
-      font-size: 12px;
+    font-size: 12px;
   }
 
   .alert-history-table th,
   .alert-history-table td {
-      font-size: 12px;
-      padding: 6px;
+    font-size: 12px;
+    padding: 6px;
   }
 }

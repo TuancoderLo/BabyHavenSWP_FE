@@ -2,6 +2,17 @@ import React, { useState } from "react";
 import "./Alert.css";
 import HealthReportGenerator from "../../../../services/HealthReportGenerator";
 
+// Array of child care tips (can be extended)
+const careTips = [
+  "Ensure your child drinks enough water every day to stay healthy! 💧",
+  "Adequate sleep is the key to your child's healthy development, aim for 8-10 hours of sleep each day! 😴",
+  "As the weather changes, keep your child warm to prevent catching a cold! 🧣",
+  "Add more vegetables to your child's diet to boost vitamins and minerals! 🥕",
+  "Encourage your child to be active for at least 30 minutes each day for physical development! 🏃‍♂️",
+  "Regular outdoor play can improve your child's mood and overall health! 🌞",
+  "A balanced meal with fruits, proteins, and grains strengthens the immune system! 🍎"
+];
+
 const Alert = ({ alert, alerts, member, child, growthRecords }) => {
   const [expanded, setExpanded] = useState(false);
   const [visible, setVisible] = useState(true);
@@ -11,8 +22,58 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
   const closeOverlay = () => setExpanded(false);
   const closeAlert = () => setVisible(false);
 
-  const goodConditionMessage = "Your child's health is in great condition! Keep up the amazing care!";
   const hasAlert = !!alert;
+
+  // Calculate growth change (similar to Growth Analysis)
+  const calculateGrowthChange = () => {
+    if (!growthRecords || growthRecords.length < 2) return null;
+    const latest = growthRecords[0];
+    const previous = growthRecords[1];
+    const latestBMI = calculateBMI(latest.weight, latest.height);
+    const previousBMI = calculateBMI(previous.weight, previous.height);
+    return {
+      weight: {
+        change: (latest.weight - previous.weight).toFixed(1),
+        trend: latest.weight > previous.weight ? "increase" : "decrease",
+      },
+      height: {
+        change: (latest.height - previous.height).toFixed(1),
+        trend: latest.height > previous.height ? "increase" : "decrease",
+      },
+      bmi: {
+        change: latestBMI && previousBMI ? (latestBMI - previousBMI).toFixed(1) : "N/A",
+      },
+    };
+  };
+
+  const calculateBMI = (weight, height) => {
+    if (!weight || !height) return null;
+    const heightInMeters = height / 100;
+    return weight / (heightInMeters * heightInMeters);
+  };
+
+  // Get a random care tip
+  const getRandomCareTip = () => {
+    const randomIndex = Math.floor(Math.random() * careTips.length);
+    return careTips[randomIndex];
+  };
+
+  // Generate a personalized message based on growth changes
+  const getPersonalizedMessage = () => {
+    const changes = calculateGrowthChange();
+    if (!changes) {
+      return getRandomCareTip(); // If no growth data, return a random tip
+    }
+    const { weight, height } = changes;
+    if (weight.change > 0 && height.change > 0) {
+      return `Congratulations! ${child?.name} has gained ${weight.change} kg and grown ${height.change} cm. Keep up the good nutrition! 🥳`;
+    } else if (weight.change <= 0) {
+      return `${child?.name}'s weight has decreased by ${Math.abs(weight.change)} kg. Consider increasing nutritional intake and consult a doctor if needed! 🥗`;
+    } else if (height.change <= 0) {
+      return `${child?.name}'s height has not increased. Encourage more physical activity for better growth! 🏃‍♀️`;
+    }
+    return getRandomCareTip();
+  };
 
   function getSeverityClass(level) {
     if (!hasAlert) return "healthy";
@@ -28,18 +89,21 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
     }
   }
 
-  const additionalClass = hasAlert && ["medium", "high"].includes(alert?.severityLevel?.toLowerCase())
-    ? "fadeable"
-    : "";
+  const additionalClass =
+    hasAlert &&
+    ["medium", "high"].includes(alert?.severityLevel?.toLowerCase())
+      ? "fadeable"
+      : "";
 
   const alertIcon = hasAlert
     ? alert.severityLevel?.toLowerCase() === "high"
       ? "🚨"
       : "🔔"
     : "🌟";
+
   const alertMessage = hasAlert
-    ? `Your child's health has a ${alert.severityLevel} level alert`
-    : goodConditionMessage;
+    ? `Child's health shows a ${alert.severityLevel} level warning`
+    : getPersonalizedMessage();
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-GB", {
@@ -49,9 +113,7 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
     });
   };
 
-  // Improved parseAlertMessage function
   const parseAlertMessage = (message) => {
-    // Define the fields and their labels in order
     const fieldConfig = [
       { key: "alert", label: "Alert: " },
       { key: "diseaseType", label: "Disease Type: " },
@@ -62,8 +124,7 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
       { key: "notes", label: "Notes: " },
       { key: "trendAnalysis", label: "Trend Analysis: " },
     ];
-  
-    // Initialize the result object with default "N/A" values
+
     const fields = {
       alert: "N/A",
       diseaseType: "N/A",
@@ -74,50 +135,40 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
       notes: "N/A",
       trendAnalysis: "N/A",
     };
-  
-    // Return early if the message is empty or not a string
+
     if (!message || typeof message !== "string") {
       return fields;
     }
-  
-    // Find the start and end indices of each field
-    const indices = fieldConfig.map(({ label }) => ({
-      label,
-      index: message.indexOf(label),
-    }));
-  
-    // Process each field
+
     fieldConfig.forEach(({ key, label }, i) => {
       const startIndex = message.indexOf(label);
-      if (startIndex === -1) return; // Skip if label not found
-  
+      if (startIndex === -1) return;
+
       const contentStart = startIndex + label.length;
       let contentEnd;
-  
-      // Find the start of the next label
+
       const nextField = fieldConfig[i + 1];
       if (nextField) {
         const nextLabelIndex = message.indexOf(nextField.label, contentStart);
         contentEnd = nextLabelIndex !== -1 ? nextLabelIndex : message.length;
       } else {
-        // For the last field, take everything until the end (remove trailing period if present)
         contentEnd = message.endsWith(".") ? message.length - 1 : message.length;
       }
-  
-      // Extract and trim the content
+
       const content = message.slice(contentStart, contentEnd).trim();
       if (content) {
         fields[key] = content;
       }
     });
-  
+
     return fields;
   };
 
   const exportToPDF = () => {
-    const latestGrowthRecord = growthRecords && growthRecords.length > 0
-      ? growthRecords.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0]
-      : null;
+    const latestGrowthRecord =
+      growthRecords && growthRecords.length > 0
+        ? growthRecords.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0]
+        : null;
 
     const report = new HealthReportGenerator(member, child, alert, latestGrowthRecord);
     report.generatePDF();
@@ -127,9 +178,14 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
     setExpandedAlertIndex(expandedAlertIndex === index ? null : index);
   };
 
-  const sortedAlerts = alerts && alerts.length > 0
-    ? [...alerts].sort((a, b) => new Date(b.alertDate) - new Date(a.alertDate))
-    : [];
+  const sortedAlerts =
+    alerts && alerts.length > 0
+      ? [...alerts].sort((a, b) => new Date(b.alertDate) - new Date(a.alertDate))
+      : [];
+
+  const handleLearnMore = () => {
+    window.open("https://www.example.com/child-care-tips", "_blank");
+  };
 
   return (
     <>
@@ -144,7 +200,7 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
           {hasAlert ? (
             <>
               <button className="alert-see-more" onClick={openOverlay}>
-                See More
+                View Details
               </button>
               <button
                 className="alert-close-btn"
@@ -157,9 +213,14 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
               </button>
             </>
           ) : (
-            <button className="alert-see-more" onClick={openOverlay}>
-              View Alert History
-            </button>
+            <>
+              <button className="alert-see-more" onClick={openOverlay}>
+                View Alert History
+              </button>
+              <button className="alert-learn-more" onClick={handleLearnMore}>
+                Learn More
+              </button>
+            </>
           )}
         </div>
       )}
@@ -200,15 +261,33 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
                               <tr className="alert-details">
                                 <td colSpan="3">
                                   <div className="alert-details-content">
-                                    <p><strong>Date:</strong> {formatDate(item.alertDate)}</p>
-                                    <p><strong>Alert:</strong> {parsedMessage.alert}</p>
-                                    <p><strong>Disease Type:</strong> {parsedMessage.diseaseType}</p>
-                                    <p><strong>Symptoms:</strong> {parsedMessage.symptoms}</p>
-                                    <p><strong>Recommended Treatment:</strong> {parsedMessage.recommendedTreatment}</p>
-                                    <p><strong>Prevention Tips:</strong> {parsedMessage.preventionTips}</p>
-                                    <p><strong>Description:</strong> {parsedMessage.description}</p>
-                                    <p><strong>Notes:</strong> {parsedMessage.notes}</p>
-                                    <p><strong>Trend Analysis:</strong> {parsedMessage.trendAnalysis}</p>
+                                    <p>
+                                      <strong>Date:</strong> {formatDate(item.alertDate)}
+                                    </p>
+                                    <p>
+                                      <strong>Alert:</strong> {parsedMessage.alert}
+                                    </p>
+                                    <p>
+                                      <strong>Disease Type:</strong> {parsedMessage.diseaseType}
+                                    </p>
+                                    <p>
+                                      <strong>Symptoms:</strong> {parsedMessage.symptoms}
+                                    </p>
+                                    <p>
+                                      <strong>Recommended Treatment:</strong> {parsedMessage.recommendedTreatment}
+                                    </p>
+                                    <p>
+                                      <strong>Prevention Tips:</strong> {parsedMessage.preventionTips}
+                                    </p>
+                                    <p>
+                                      <strong>Description:</strong> {parsedMessage.description}
+                                    </p>
+                                    <p>
+                                      <strong>Notes:</strong> {parsedMessage.notes}
+                                    </p>
+                                    <p>
+                                      <strong>Trend Analysis:</strong> {parsedMessage.trendAnalysis}
+                                    </p>
                                   </div>
                                 </td>
                               </tr>
@@ -249,15 +328,33 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
                             <tr className="alert-details">
                               <td colSpan="3">
                                 <div className="alert-details-content">
-                                  <p><strong>Date:</strong> {formatDate(item.alertDate)}</p>
-                                  <p><strong>Alert:</strong> {parsedMessage.alert}</p>
-                                  <p><strong>Disease Type:</strong> {parsedMessage.diseaseType}</p>
-                                  <p><strong>Symptoms:</strong> {parsedMessage.symptoms}</p>
-                                  <p><strong>Recommended Treatment:</strong> {parsedMessage.recommendedTreatment}</p>
-                                  <p><strong>Prevention Tips:</strong> {parsedMessage.preventionTips}</p>
-                                  <p><strong>Description:</strong> {parsedMessage.description}</p>
-                                  <p><strong>Notes:</strong> {parsedMessage.notes}</p>
-                                  <p><strong>Trend Analysis:</strong> {parsedMessage.trendAnalysis}</p>
+                                  <p>
+                                    <strong>Date:</strong> {formatDate(item.alertDate)}
+                                  </p>
+                                  <p>
+                                    <strong>Alert:</strong> {parsedMessage.alert}
+                                  </p>
+                                  <p>
+                                    <strong>Disease Type:</strong> {parsedMessage.diseaseType}
+                                  </p>
+                                  <p>
+                                    <strong>Symptoms:</strong> {parsedMessage.symptoms}
+                                  </p>
+                                  <p>
+                                    <strong>Recommended Treatment:</strong> {parsedMessage.recommendedTreatment}
+                                  </p>
+                                  <p>
+                                    <strong>Prevention Tips:</strong> {parsedMessage.preventionTips}
+                                  </p>
+                                  <p>
+                                    <strong>Description:</strong> {parsedMessage.description}
+                                  </p>
+                                  <p>
+                                    <strong>Notes:</strong> {parsedMessage.notes}
+                                  </p>
+                                  <p>
+                                    <strong>Trend Analysis:</strong> {parsedMessage.trendAnalysis}
+                                  </p>
                                 </div>
                               </td>
                             </tr>
@@ -272,7 +369,7 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
               )
             )}
             <button className="export-pdf-btn" onClick={exportToPDF}>
-              Export to PDF
+              Export PDF
             </button>
           </div>
         </div>
