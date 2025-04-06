@@ -163,7 +163,16 @@ const Consultations = () => {
     }
   };
 
-  // Hàm fetch các tab new/completed/history
+  // Thêm hàm helper để sắp xếp theo thời gian mới nhất
+  const sortByDateDesc = (items) => {
+    return [...items].sort((a, b) => {
+      const dateA = new Date(a.requestDate);
+      const dateB = new Date(b.requestDate);
+      return dateB - dateA; // Sắp xếp giảm dần (mới nhất đầu tiên)
+    });
+  };
+
+  // Sửa lại hàm fetchConsultationsWithPagination để sắp xếp trước khi phân trang
   const fetchConsultationsWithPagination = async (page = 1, pageSize = 5) => {
     setLoading(true);
     try {
@@ -191,6 +200,9 @@ const Consultations = () => {
       } else if (activeTab === "history") {
         // hiển thị tất cả (nếu muốn)
       }
+
+      // Sắp xếp theo thời gian mới nhất
+      filteredData = sortByDateDesc(filteredData);
 
       const total = filteredData.length;
       const startIndex = (page - 1) * pageSize;
@@ -220,8 +232,7 @@ const Consultations = () => {
     }
   };
 
-  // [CHANGED] Xoá toàn bộ filter rating
-  // Chỉ còn filter searchText + historyFilterStatus
+  // Cập nhật hàm applyFilters để duy trì thứ tự sắp xếp
   const applyFilters = () => {
     let data = [...consultations];
 
@@ -246,6 +257,7 @@ const Consultations = () => {
       );
     }
 
+    // Dữ liệu đã được sắp xếp từ API, không cần sắp xếp lại ở đây
     setFilteredConsultations(data);
   };
 
