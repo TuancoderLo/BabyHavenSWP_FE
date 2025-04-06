@@ -732,7 +732,7 @@ const [popupType, setPopupType] = useState("success"); // "success" hoặc "erro
                     />
                   </div>
                 </div>
-                <div className="notes-section">
+                {/* <div className="notes-section">
                   <label>Developmental milestones</label>
                   <input
                     type="text"
@@ -740,7 +740,7 @@ const [popupType, setPopupType] = useState("success"); // "success" hoặc "erro
                     value={growthForm.developmentalMilestones}
                     onChange={handleGrowthChange}
                   />
-                </div>
+                </div> */}
               </div>
             </details>
               <button type="button" className="confirm-button-step1" 
