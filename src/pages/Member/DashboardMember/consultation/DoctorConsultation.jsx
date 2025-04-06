@@ -8,8 +8,15 @@ import PopupNotification from "../../../../layouts/Member/popUp/PopupNotificatio
 
 // Response Card
 function ExpandableResponseCard({ response, request, onClick }) {
-  const combinedText = `Date: ${response.responseDate} | Doctor: ${response.doctorName} | Child: ${request?.childName || "N/A"} | Category: ${request?.category || "N/A"}`;
-  const truncatedText = combinedText.length > 100 ? combinedText.slice(0, 100) + "..." : combinedText;
+  const combinedText = `Date: ${response.responseDate} | Doctor: ${
+    response.doctorName
+  } | Child: ${request?.childName || "N/A"} | Category: ${
+    request?.category || "N/A"
+  }`;
+  const truncatedText =
+    combinedText.length > 100
+      ? combinedText.slice(0, 100) + "..."
+      : combinedText;
 
   return (
     <div
@@ -21,8 +28,12 @@ function ExpandableResponseCard({ response, request, onClick }) {
         <span className="response-status">{response.status}</span>
       </div>
       <div className="response-summary">
-        <p><strong>Doctor:</strong> {response.doctorName}</p>
-        <p><strong>Child:</strong> {request?.childName || "N/A"}</p>
+        <p>
+          <strong>Doctor:</strong> {response.doctorName}
+        </p>
+        <p>
+          <strong>Child:</strong> {request?.childName || "N/A"}
+        </p>
       </div>
       <div className="truncated-content">{truncatedText}</div>
     </div>
@@ -32,17 +43,25 @@ function ExpandableResponseCard({ response, request, onClick }) {
 // Sent Request Card
 function ExpandableSentRequestCard({ request, onClick }) {
   const truncatedText =
-    `ID: ${request.requestId} | Child: ${request.childName} | Date: ${request.requestDate} | Description: ${request.description}`
-      .slice(0, 50) + "...";
+    `ID: ${request.requestId} | Child: ${request.childName} | Date: ${request.requestDate} | Description: ${request.description}`.slice(
+      0,
+      50
+    ) + "...";
   return (
     <div className="consultation-sent-card" onClick={() => onClick(request)}>
       <div className="sent-header">
-        <span className="sent-date">{moment(request.requestDate).format("DD/MM/YYYY HH:mm")}</span>
+        <span className="sent-date">
+          {moment(request.requestDate).format("DD/MM/YYYY HH:mm")}
+        </span>
         <span className="sent-status">{request.status}</span>
       </div>
       <div className="sent-summary">
-        <p><strong>Child:</strong> {request.childName}</p>
-        <p><strong>Description:</strong> {request.description.slice(0, 50)}...</p>
+        <p>
+          <strong>Child:</strong> {request.childName}
+        </p>
+        <p>
+          <strong>Description:</strong> {request.description.slice(0, 50)}...
+        </p>
       </div>
       <div className="truncated-content">{truncatedText}</div>
     </div>
@@ -50,21 +69,34 @@ function ExpandableSentRequestCard({ request, onClick }) {
 }
 
 // Feedback Card
-function ExpandableFeedbackEntry({ feedback, onClick, consultationResponses, consultationRequests }) {
-  const truncatedText = `Rating: ${feedback.rating} stars`.slice(0, 100) + "...";
+function ExpandableFeedbackEntry({
+  feedback,
+  onClick,
+  consultationResponses,
+  consultationRequests,
+}) {
+  const truncatedText =
+    `Rating: ${feedback.rating} stars`.slice(0, 100) + "...";
   const relatedResponse = consultationResponses.find(
     (resp) => resp.responseId === feedback.responseId
   );
-  const relatedRequest = relatedResponse ? consultationRequests[relatedResponse.requestId] : null;
+  const relatedRequest = relatedResponse
+    ? consultationRequests[relatedResponse.requestId]
+    : null;
 
   return (
-    <div className="consultation-feedback-card" onClick={() => onClick({ feedback, relatedResponse, relatedRequest })}>
+    <div
+      className="consultation-feedback-card"
+      onClick={() => onClick({ feedback, relatedResponse, relatedRequest })}
+    >
       <div className="feedback-header">
         <span className="feedback-date">{feedback.feedbackDate}</span>
         <span className="feedback-rating">{feedback.rating} ★</span>
       </div>
       <div className="feedback-summary">
-        <p><strong>Comment:</strong> {feedback.comment.slice(0, 50)}...</p>
+        <p>
+          <strong>Comment:</strong> {feedback.comment.slice(0, 50)}...
+        </p>
       </div>
       <div className="truncated-content">{truncatedText}</div>
     </div>
@@ -86,7 +118,7 @@ function DoctorConsultation() {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
-  const [popupType, setPopupType] = useState("success"); 
+  const [popupType, setPopupType] = useState("success");
   // Consultation Data
   const [consultationResponses, setConsultationResponses] = useState([]);
   const [consultationRequests, setConsultationRequests] = useState({});
@@ -156,7 +188,9 @@ function DoctorConsultation() {
           (doctor) => doctor.status && doctor.status.toLowerCase() === "active"
         );
         setDoctors(activeDoctors);
-        activeDoctors.forEach((doctor) => fetchDoctorSpecializations(doctor.doctorId));
+        activeDoctors.forEach((doctor) =>
+          fetchDoctorSpecializations(doctor.doctorId)
+        );
       }
     } catch (error) {
       console.error("Error fetching doctors:", error);
@@ -165,7 +199,6 @@ function DoctorConsultation() {
       setLoading(false);
     }
   };
-
 
   const fetchDoctorSpecializations = async (doctorId) => {
     try {
@@ -193,50 +226,58 @@ function DoctorConsultation() {
     }
   };
 
-// Hàm chỉ lấy danh sách consultation responses
-const fetchConsultationResponses = async () => {
-  try {
-    const memberId = localStorage.getItem("memberId");
-    if (!memberId) throw new Error("Please log in to fetch consultation responses");
-    const res = await doctorApi.getConsultationResponses(memberId);
-    const responses = Array.isArray(res?.data) ? res.data : [res.data];
-    const parsedResponses = responses.map((item) => ({
-      ...item,
-      content: typeof item.content === "string" ? parseContentToObject(item.content) : item.content,
-    }));
-    setConsultationResponses(parsedResponses);
-  } catch (error) {
-    console.error("Error fetching consultation responses:", error);
-  }
-};
-
-// Hàm lấy chi tiết consultation request dựa trên requestId
-const fetchConsultationRequestDetail = async (requestId) => {
-  try {
-    // Nếu chi tiết chưa có trong state thì mới gọi API
-    if (!consultationRequests[requestId]) {
-      const requestRes = await doctorApi.getConsultationRequestsById(requestId);
-      if (requestRes?.data) {
-        setConsultationRequests((prev) => ({ ...prev, [requestId]: requestRes.data }));
-      }
+  // Hàm chỉ lấy danh sách consultation responses
+  const fetchConsultationResponses = async () => {
+    try {
+      const memberId = localStorage.getItem("memberId");
+      if (!memberId)
+        throw new Error("Please log in to fetch consultation responses");
+      const res = await doctorApi.getConsultationResponses(memberId);
+      const responses = Array.isArray(res?.data) ? res.data : [res.data];
+      const parsedResponses = responses.map((item) => ({
+        ...item,
+        content:
+          typeof item.content === "string"
+            ? parseContentToObject(item.content)
+            : item.content,
+      }));
+      setConsultationResponses(parsedResponses);
+    } catch (error) {
+      console.error("Error fetching consultation responses:", error);
     }
-  } catch (error) {
-    console.error("Error fetching consultation request detail:", error);
-  }
-};
+  };
 
-// Handler khi người dùng click vào một response cụ thể
-const handleResponseClick = async (response) => {
-  if (response.requestId) {
-    await fetchConsultationRequestDetail(response.requestId);
-  }
-  // Sau khi fetch (hoặc nếu đã có), set state để hiển thị modal chi tiết
-  setSelectedResponse({
-    response,
-    request: consultationRequests[response.requestId],
-  });
-};
+  // Hàm lấy chi tiết consultation request dựa trên requestId
+  const fetchConsultationRequestDetail = async (requestId) => {
+    try {
+      // Nếu chi tiết chưa có trong state thì mới gọi API
+      if (!consultationRequests[requestId]) {
+        const requestRes = await doctorApi.getConsultationRequestsById(
+          requestId
+        );
+        if (requestRes?.data) {
+          setConsultationRequests((prev) => ({
+            ...prev,
+            [requestId]: requestRes.data,
+          }));
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching consultation request detail:", error);
+    }
+  };
 
+  // Handler khi người dùng click vào một response cụ thể
+  const handleResponseClick = async (response) => {
+    if (response.requestId) {
+      await fetchConsultationRequestDetail(response.requestId);
+    }
+    // Sau khi fetch (hoặc nếu đã có), set state để hiển thị modal chi tiết
+    setSelectedResponse({
+      response,
+      request: consultationRequests[response.requestId],
+    });
+  };
 
   const fetchSentRequests = async () => {
     try {
@@ -245,8 +286,8 @@ const handleResponseClick = async (response) => {
       const requestsData = Array.isArray(res.value)
         ? res.data.value
         : Array.isArray(res.data)
-          ? res.data
-          : [];
+        ? res.data
+        : [];
       setSentRequests(requestsData);
     } catch (error) {
       console.error("Error fetching sent requests:", error);
@@ -262,8 +303,8 @@ const handleResponseClick = async (response) => {
       const feedbackData = Array.isArray(res.data.value)
         ? res.data.value
         : Array.isArray(res.data)
-          ? res.data
-          : [];
+        ? res.data
+        : [];
       setUserFeedback(feedbackData);
     } catch (error) {
       console.error("Error fetching user feedback:", error);
@@ -272,8 +313,10 @@ const handleResponseClick = async (response) => {
   };
 
   const handleChildSelect = (child) => setSelectedChild(child);
-  const handleNextStep = () => currentStep < steps.length - 1 && setCurrentStep(currentStep + 1);
-  const handleBackStep = () => currentStep > 0 && setCurrentStep(currentStep - 1);
+  const handleNextStep = () =>
+    currentStep < steps.length - 1 && setCurrentStep(currentStep + 1);
+  const handleBackStep = () =>
+    currentStep > 0 && setCurrentStep(currentStep - 1);
   const stripHtml = (html) => {
     const tmp = document.createElement("div");
     tmp.innerHTML = html;
@@ -318,8 +361,16 @@ const handleResponseClick = async (response) => {
       if (!selectedDoctor) throw new Error("Please select a doctor");
 
       const currentDate = new Date();
-      const requestDate = `${currentDate.toISOString().slice(0, 10)} ${currentDate.toTimeString().slice(0, 8)}.${currentDate.getMilliseconds().toString().padEnd(3, "0")}`;
-      const plainDescription = consultationContent.replace(/<[^>]+>/g, ""); // Giả sử stripHtml đơn giản
+      const requestDate = `${currentDate
+        .toISOString()
+        .slice(0, 10)} ${currentDate.toTimeString().slice(0, 8)}.${currentDate
+        .getMilliseconds()
+        .toString()
+        .padEnd(3, "0")}`;
+
+      // Sử dụng hàm stripHtml thay vì regex đơn giản để loại bỏ các thẻ HTML và ký tự đặc biệt
+      const plainDescription = stripHtml(consultationContent).trim();
+
       const attachments = await Promise.all(
         selectedFiles.map(async (file) => {
           const base64Content = await new Promise((resolve) => {
@@ -352,7 +403,7 @@ const handleResponseClick = async (response) => {
       // Gọi lại fetch dữ liệu để cập nhật giao diện
       await fetchConsultationResponses();
       await fetchSentRequests();
-      
+
       // Thay vì hiển thị modal success cũ, sử dụng popup
       setPopupType("success");
       setPopupMessage("Consultation request sent successfully!");
@@ -366,8 +417,8 @@ const handleResponseClick = async (response) => {
     } catch (error) {
       setSubmitError(
         error.response?.data?.title ||
-        error.message ||
-        "Unable to send consultation request"
+          error.message ||
+          "Unable to send consultation request"
       );
       setPopupType("error");
       setPopupMessage("Failed to send consultation request. Please try again.");
@@ -407,8 +458,8 @@ const handleResponseClick = async (response) => {
       await fetchConsultationResponses();
       await fetchUserFeedback();
       setPopupType("success");
-setPopupMessage("Feedback submitted successfully!");
-setShowPopup(true);
+      setPopupMessage("Feedback submitted successfully!");
+      setShowPopup(true);
       setShowFeedbackForm(false);
     } catch (error) {
       setFeedbackSubmitError(error.message || "Unable to submit feedback");
@@ -447,26 +498,43 @@ setShowPopup(true);
                   <div key={doctor.doctorId} className="doctor-card-grid">
                     <div className="doctor-avatar-grid">
                       <img
-                        src={doctor.user?.profilePicture || `https://ui-avatars.com/api/?name=${doctor.name}&background=random`}
+                        src={
+                          doctor.user?.profilePicture ||
+                          `https://ui-avatars.com/api/?name=${doctor.name}&background=random`
+                        }
                         alt={doctor.name}
                       />
                     </div>
                     <div className="doctor-info-grid">
                       <h4>{doctor.name}</h4>
-                      <p><strong>Degree:</strong> {doctor.degree}</p>
-                      <p><strong>Hospital:</strong> {doctor.hospitalName}</p>
-                      {Array.isArray(doctorSpecializations[doctor.doctorId]) && (
+                      <p>
+                        <strong>Degree:</strong> {doctor.degree}
+                      </p>
+                      <p>
+                        <strong>Hospital:</strong> {doctor.hospitalName}
+                      </p>
+                      {Array.isArray(
+                        doctorSpecializations[doctor.doctorId]
+                      ) && (
                         <div className="doctor-specializations-grid">
                           <strong>Specializations:</strong>
-                          {doctorSpecializations[doctor.doctorId].map((spec, index) => (
-                            <p key={index} className="doctor-specialization-grid">
-                              {spec.name}
-                            </p>
-                          ))}
+                          {doctorSpecializations[doctor.doctorId].map(
+                            (spec, index) => (
+                              <p
+                                key={index}
+                                className="doctor-specialization-grid"
+                              >
+                                {spec.name}
+                              </p>
+                            )
+                          )}
                         </div>
                       )}
                     </div>
-                    <button className="message-button" onClick={() => handleMessageDoctor(doctor)}>
+                    <button
+                      className="message-button"
+                      onClick={() => handleMessageDoctor(doctor)}
+                    >
                       Send Message
                     </button>
                   </div>
@@ -518,7 +586,13 @@ setShowPopup(true);
               </div>
               <div className="input-group">
                 <label htmlFor="file-upload">Attach Files</label>
-                <input type="file" id="file-upload" multiple onChange={handleFileChange} className="doctor-file-upload" />
+                <input
+                  type="file"
+                  id="file-upload"
+                  multiple
+                  onChange={handleFileChange}
+                  className="doctor-file-upload"
+                />
                 {selectedFiles.length > 0 && (
                   <ul>
                     {selectedFiles.map((file, index) => (
@@ -546,7 +620,10 @@ setShowPopup(true);
               </div>
               <div className="review-item consultation-details">
                 <strong>Details:</strong>
-                <div className="consultation-details-content" dangerouslySetInnerHTML={{ __html: consultationContent }} />
+                <div
+                  className="consultation-details-content"
+                  dangerouslySetInnerHTML={{ __html: consultationContent }}
+                />
               </div>
               {selectedFiles.length > 0 && (
                 <div className="review-item">
@@ -565,12 +642,17 @@ setShowPopup(true);
                 <div className="doctor-profile-card selected">
                   <div className="doctor-profile-header">
                     <img
-                      src={selectedDoctor.user?.profilePicture || `https://ui-avatars.com/api/?name=${selectedDoctor.name}&background=random`}
+                      src={
+                        selectedDoctor.user?.profilePicture ||
+                        `https://ui-avatars.com/api/?name=${selectedDoctor.name}&background=random`
+                      }
                       alt={selectedDoctor.name}
                       className="doctor-profile-avatar"
                     />
                     <div className="doctor-profile-info">
-                      <h4 className="doctor-profile-name">{selectedDoctor.name}</h4>
+                      <h4 className="doctor-profile-name">
+                        {selectedDoctor.name}
+                      </h4>
                     </div>
                   </div>
                   <div className="doctor-profile-details">
@@ -627,12 +709,24 @@ setShowPopup(true);
             <div className="progress-bar">
               {steps.map((step, index) => (
                 <React.Fragment key={index}>
-                  <div className={`progress-step ${currentStep === index ? "active" : currentStep > index ? "completed" : ""}`}>
+                  <div
+                    className={`progress-step ${
+                      currentStep === index
+                        ? "active"
+                        : currentStep > index
+                        ? "completed"
+                        : ""
+                    }`}
+                  >
                     <div className="progress-step-circle">{index + 1}</div>
                     <span>{step}</span>
                   </div>
                   {index !== steps.length - 1 && (
-                    <div className={`progress-line ${currentStep > index ? "completed" : ""}`}></div>
+                    <div
+                      className={`progress-line ${
+                        currentStep > index ? "completed" : ""
+                      }`}
+                    ></div>
                   )}
                 </React.Fragment>
               ))}
@@ -649,7 +743,10 @@ setShowPopup(true);
                   </button>
                 )}
                 {currentStep < steps.length - 1 && currentStep > 0 && (
-                  <button className="doctor-next-button" onClick={handleNextStep}>
+                  <button
+                    className="doctor-next-button"
+                    onClick={handleNextStep}
+                  >
                     Next
                   </button>
                 )}
@@ -658,24 +755,28 @@ setShowPopup(true);
           </div>
         );
 
-        case "responses":
-          return consultationResponses.length > 0 ? (
-            consultationResponses.map((resp, index) => (
-              <ExpandableResponseCard
-                key={index}
-                response={resp}
-                request={consultationRequests[resp.requestId]}
-                onClick={handleResponseClick}
-              />
-            ))
-          ) : (
-            <p>No responses available.</p>
-          );
+      case "responses":
+        return consultationResponses.length > 0 ? (
+          consultationResponses.map((resp, index) => (
+            <ExpandableResponseCard
+              key={index}
+              response={resp}
+              request={consultationRequests[resp.requestId]}
+              onClick={handleResponseClick}
+            />
+          ))
+        ) : (
+          <p>No responses available.</p>
+        );
 
       case "sentRequests":
         return sentRequests.length > 0 ? (
           sentRequests.map((req, index) => (
-            <ExpandableSentRequestCard key={index} request={req} onClick={setSelectedSentRequest} />
+            <ExpandableSentRequestCard
+              key={index}
+              request={req}
+              onClick={setSelectedSentRequest}
+            />
           ))
         ) : (
           <p>No sent requests available.</p>
@@ -705,16 +806,36 @@ setShowPopup(true);
     <div className="doctor-consultation">
       {/* Top Tabs */}
       <div className="top-tab-container">
-        <button className={`top-tab-button ${currentTab === "consultation" ? "active" : ""}`} onClick={() => setCurrentTab("consultation")}>
+        <button
+          className={`top-tab-button ${
+            currentTab === "consultation" ? "active" : ""
+          }`}
+          onClick={() => setCurrentTab("consultation")}
+        >
           Consultation
         </button>
-        <button className={`top-tab-button ${currentTab === "responses" ? "active" : ""}`} onClick={() => setCurrentTab("responses")}>
+        <button
+          className={`top-tab-button ${
+            currentTab === "responses" ? "active" : ""
+          }`}
+          onClick={() => setCurrentTab("responses")}
+        >
           Responses
         </button>
-        <button className={`top-tab-button ${currentTab === "sentRequests" ? "active" : ""}`} onClick={() => setCurrentTab("sentRequests")}>
+        <button
+          className={`top-tab-button ${
+            currentTab === "sentRequests" ? "active" : ""
+          }`}
+          onClick={() => setCurrentTab("sentRequests")}
+        >
           Sent Requests
         </button>
-        <button className={`top-tab-button ${currentTab === "feedback" ? "active" : ""}`} onClick={() => setCurrentTab("feedback")}>
+        <button
+          className={`top-tab-button ${
+            currentTab === "feedback" ? "active" : ""
+          }`}
+          onClick={() => setCurrentTab("feedback")}
+        >
           Feedback
         </button>
       </div>
@@ -729,9 +850,18 @@ setShowPopup(true);
           onClick={() => setSelectedResponse(null)}
         >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedResponse(null)}>×</button>
+            <button
+              className="modal-close"
+              onClick={() => setSelectedResponse(null)}
+            >
+              ×
+            </button>
             <h3 className="modal-title">Response Details</h3>
-            <button className="feedback-button" onClick={() => setShowFeedbackForm(!showFeedbackForm)} style={{ marginBottom: "15px" }}>
+            <button
+              className="feedback-button"
+              onClick={() => setShowFeedbackForm(!showFeedbackForm)}
+              style={{ marginBottom: "15px" }}
+            >
               {showFeedbackForm ? "Hide Feedback" : "Submit Feedback"}
             </button>
             <div className="response-details">
@@ -739,10 +869,22 @@ setShowPopup(true);
                 <h4>Request Information</h4>
                 {selectedResponse.request ? (
                   <>
-                    <p><strong>Member:</strong> {selectedResponse.request.memberName}</p>
-                    <p><strong>Child:</strong> {selectedResponse.request.childName}</p>
-                    <p><strong>Description:</strong> {selectedResponse.request.description}</p>
-                    <p><strong>Request Date:</strong> {selectedResponse.request.requestDate}</p>
+                    <p>
+                      <strong>Member:</strong>{" "}
+                      {selectedResponse.request.memberName}
+                    </p>
+                    <p>
+                      <strong>Child:</strong>{" "}
+                      {selectedResponse.request.childName}
+                    </p>
+                    <p>
+                      <strong>Description:</strong>{" "}
+                      {selectedResponse.request.description}
+                    </p>
+                    <p>
+                      <strong>Request Date:</strong>{" "}
+                      {selectedResponse.request.requestDate}
+                    </p>
                   </>
                 ) : (
                   <p>No request details available.</p>
@@ -750,17 +892,32 @@ setShowPopup(true);
               </div>
               <div className="response-section">
                 <h4>Response Information</h4>
-                <p><strong>Date:</strong> {selectedResponse.response.responseDate}</p>
-                <p><strong>Doctor:</strong> {selectedResponse.response.doctorName}</p>
-                <p><strong>Status:</strong> {selectedResponse.response.status}</p>
-                <p><strong>Follow-up:</strong> {selectedResponse.response.content.followUp || "N/A"}</p>
+                <p>
+                  <strong>Date:</strong>{" "}
+                  {selectedResponse.response.responseDate}
+                </p>
+                <p>
+                  <strong>Doctor:</strong>{" "}
+                  {selectedResponse.response.doctorName}
+                </p>
+                <p>
+                  <strong>Status:</strong> {selectedResponse.response.status}
+                </p>
+                <p>
+                  <strong>Follow-up:</strong>{" "}
+                  {selectedResponse.response.content.followUp || "N/A"}
+                </p>
               </div>
               {showFeedbackForm && (
                 <div className="feedback-form">
                   <h4>Feedback</h4>
                   <div className="star-rating">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <span key={star} className={`star ${star <= rating ? "selected" : ""}`} onClick={() => setRating(star)}>
+                      <span
+                        key={star}
+                        className={`star ${star <= rating ? "selected" : ""}`}
+                        onClick={() => setRating(star)}
+                      >
                         ★
                       </span>
                     ))}
@@ -775,10 +932,16 @@ setShowPopup(true);
                       className="feedback-textarea"
                     />
                   </div>
-                  <button className="submit-feedback-button" onClick={handleSubmitFeedbackAndUpdateStatus} disabled={isSubmitting || rating < 1 || !comment.trim()}>
+                  <button
+                    className="submit-feedback-button"
+                    onClick={handleSubmitFeedbackAndUpdateStatus}
+                    disabled={isSubmitting || rating < 1 || !comment.trim()}
+                  >
                     {isSubmitting ? "Sending..." : "Submit Feedback"}
                   </button>
-                  {feedbackSubmitError && <p className="submit-error">{feedbackSubmitError}</p>}
+                  {feedbackSubmitError && (
+                    <p className="submit-error">{feedbackSubmitError}</p>
+                  )}
                 </div>
               )}
             </div>
@@ -793,29 +956,55 @@ setShowPopup(true);
           onClick={() => setSelectedSentRequest(null)}
         >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedSentRequest(null)}>×</button>
+            <button
+              className="modal-close"
+              onClick={() => setSelectedSentRequest(null)}
+            >
+              ×
+            </button>
             <h3 className="modal-title">Sent Request Details</h3>
             <div className="response-details">
               <div className="request-section">
                 <h4>Request Information</h4>
-                <p><strong>ID:</strong> {selectedSentRequest.requestId}</p>
-                <p><strong>Child:</strong> {selectedSentRequest.childName}</p>
-                <p><strong>Category:</strong> {selectedSentRequest.category}</p>
-                <p><strong>Urgency:</strong> {selectedSentRequest.urgency}</p>
-                <p><strong>Description:</strong> {selectedSentRequest.description}</p>
-                <p><strong>Request Date:</strong> {selectedSentRequest.requestDate}</p>
-                <p><strong>Status:</strong> {selectedSentRequest.status}</p>
+                <p>
+                  <strong>ID:</strong> {selectedSentRequest.requestId}
+                </p>
+                <p>
+                  <strong>Child:</strong> {selectedSentRequest.childName}
+                </p>
+                <p>
+                  <strong>Category:</strong> {selectedSentRequest.category}
+                </p>
+                <p>
+                  <strong>Urgency:</strong> {selectedSentRequest.urgency}
+                </p>
+                <p>
+                  <strong>Description:</strong>{" "}
+                  {selectedSentRequest.description}
+                </p>
+                <p>
+                  <strong>Request Date:</strong>{" "}
+                  {selectedSentRequest.requestDate}
+                </p>
+                <p>
+                  <strong>Status:</strong> {selectedSentRequest.status}
+                </p>
                 {selectedSentRequest.attachments && (
                   <div>
                     <h4>Attachments</h4>
-                    {JSON.parse(selectedSentRequest.attachments).map((attachment, index) => (
-                      <div key={index} style={{ marginBottom: "10px" }}>
-                        <p>{attachment.fileName}</p>
-                        <button className="download-button" onClick={() => downloadAttachment(attachment)}>
-                          Download
-                        </button>
-                      </div>
-                    ))}
+                    {JSON.parse(selectedSentRequest.attachments).map(
+                      (attachment, index) => (
+                        <div key={index} style={{ marginBottom: "10px" }}>
+                          <p>{attachment.fileName}</p>
+                          <button
+                            className="download-button"
+                            onClick={() => downloadAttachment(attachment)}
+                          >
+                            Download
+                          </button>
+                        </div>
+                      )
+                    )}
                   </div>
                 )}
               </div>
@@ -826,31 +1015,59 @@ setShowPopup(true);
 
       {/* Feedback Modal */}
       {selectedFeedback && (
-        <div className="modal-overlay" onClick={() => setSelectedFeedback(null)}>
+        <div
+          className="modal-overlay"
+          onClick={() => setSelectedFeedback(null)}
+        >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedFeedback(null)}>×</button>
+            <button
+              className="modal-close"
+              onClick={() => setSelectedFeedback(null)}
+            >
+              ×
+            </button>
             <h3 className="modal-title">Feedback Details</h3>
             <div className="response-details">
               <div className="feedback-section">
                 <h4>Feedback Information</h4>
-                <p><strong>Rating:</strong> {selectedFeedback.feedback.rating} ★</p>
-                <p><strong>Comment:</strong> {selectedFeedback.feedback.comment}</p>
-                <p><strong>Date:</strong> {selectedFeedback.feedback.feedbackDate}</p>
+                <p>
+                  <strong>Rating:</strong> {selectedFeedback.feedback.rating} ★
+                </p>
+                <p>
+                  <strong>Comment:</strong> {selectedFeedback.feedback.comment}
+                </p>
+                <p>
+                  <strong>Date:</strong>{" "}
+                  {selectedFeedback.feedback.feedbackDate}
+                </p>
               </div>
               {selectedFeedback.relatedResponse && (
                 <div className="response-section">
                   <h4>Response Information</h4>
-                  <p><strong>Date:</strong> {selectedFeedback.relatedResponse.responseDate || "N/A"}</p>
-                  <p><strong>Doctor:</strong> {selectedFeedback.relatedResponse.doctorName || "N/A"}</p>
-                  <p><strong>Status:</strong> {selectedFeedback.relatedResponse.status || "N/A"}</p>
-                  <p><strong>Follow-up:</strong> {selectedFeedback.relatedResponse.content?.followUp || "N/A"}</p>
+                  <p>
+                    <strong>Date:</strong>{" "}
+                    {selectedFeedback.relatedResponse.responseDate || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Doctor:</strong>{" "}
+                    {selectedFeedback.relatedResponse.doctorName || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Status:</strong>{" "}
+                    {selectedFeedback.relatedResponse.status || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Follow-up:</strong>{" "}
+                    {selectedFeedback.relatedResponse.content?.followUp ||
+                      "N/A"}
+                  </p>
                 </div>
               )}
             </div>
           </div>
         </div>
       )}
-        {showPopup && (
+      {showPopup && (
         <PopupNotification
           type={popupType}
           message={popupMessage}

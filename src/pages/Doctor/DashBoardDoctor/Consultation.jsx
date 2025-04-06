@@ -275,6 +275,14 @@ const Consultations = () => {
     setSearchText(e.target.value);
   };
 
+  // Thêm hàm helper để loại bỏ các entity HTML như &nbsp;
+  const decodeHtmlEntities = (text) => {
+    if (!text) return "";
+    const element = document.createElement("div");
+    element.innerHTML = text;
+    return element.textContent;
+  };
+
   // Khi xem chi tiết
   const handleViewDetail = async (record) => {
     try {
@@ -314,6 +322,10 @@ const Consultations = () => {
       }
 
       const attachmentsArray = parseAttachments(detailedData.attachments);
+      // Xử lý description để loại bỏ các HTML entities
+      const cleanDescription = decodeHtmlEntities(
+        detailedData.description || "N/A"
+      );
 
       setSelectedConsultation({
         ...record,
@@ -325,7 +337,7 @@ const Consultations = () => {
         childAllergies: detailedData.child?.allergies || "None",
         childNotes: detailedData.child?.notes || "None",
         childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
-        description: detailedData.description || "N/A",
+        description: cleanDescription,
         attachments: attachmentsArray,
         response: latestResponse.content || "",
         createdAt: detailedData.createdAt || moment().format(),
@@ -354,6 +366,10 @@ const Consultations = () => {
         record.requestId
       );
       const attachmentsArray = parseAttachments(detailedData.attachments);
+      // Xử lý description để loại bỏ các HTML entities
+      const cleanDescription = decodeHtmlEntities(
+        detailedData.description || "N/A"
+      );
 
       setSelectedConsultation({
         ...record,
@@ -365,7 +381,7 @@ const Consultations = () => {
         childAllergies: detailedData.child?.allergies || "None",
         childNotes: detailedData.child?.notes || "None",
         childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
-        description: detailedData.description || "N/A",
+        description: cleanDescription,
         attachments: attachmentsArray,
       });
     } catch (error) {
