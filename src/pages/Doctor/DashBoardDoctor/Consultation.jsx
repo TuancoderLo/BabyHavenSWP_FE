@@ -777,8 +777,6 @@ const Consultations = () => {
               >
                 <Option value="">All</Option>
                 <Option value="Pending">Pending</Option>
-                <Option value="Approved">Approved</Option>
-                <Option value="Rejected">Rejected</Option>
                 <Option value="Completed">Completed</Option>
               </Select>
             </div>
