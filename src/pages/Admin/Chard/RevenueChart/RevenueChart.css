@@ -233,7 +233,7 @@
   font-size: 22px;
   font-weight: 600;
   color: #2c3e50;
-  margin-bottom: 4px;
+  margin: 0;
 }
 
 .change-indicator {
@@ -1504,40 +1504,117 @@
   color: #4c6ef8;
 }
 
+/* Cải thiện bảng báo cáo theo quý để hiển thị dữ liệu nhiều năm */
 .quarterly-table-container {
-  overflow-x: auto;
+  max-height: 500px;
+  overflow-y: auto;
+  margin-top: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .quarterly-table {
   width: 100%;
   border-collapse: collapse;
-}
-
-.quarterly-table th,
-.quarterly-table td {
-  padding: 14px 18px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
+  font-size: 14px;
 }
 
 .quarterly-table th {
-  background-color: #f6f8fa;
-  color: #555;
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa;
+  padding: 12px 15px;
+  text-align: left;
+  color: #333;
   font-weight: 600;
+  border-bottom: 2px solid #e2e8f0;
+  z-index: 10;
 }
 
 .quarterly-table tbody tr {
-  transition: background-color 0.2s;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.quarterly-table tbody tr:nth-child(even) {
+  background-color: #f8fafc;
 }
 
 .quarterly-table tbody tr:hover {
-  background-color: #f8f9fb;
+  background-color: #edf2ff;
+}
+
+.quarterly-table td {
+  padding: 12px 15px;
+  vertical-align: middle;
+}
+
+.quarterly-table tfoot {
+  position: sticky;
+  bottom: 0;
+  background-color: #f8f9fa;
+  z-index: 10;
 }
 
 .quarterly-table tfoot td {
+  padding: 12px 15px;
   font-weight: 600;
-  border-top: 2px solid #ddd;
-  background-color: #f8f9fb;
+  border-top: 2px solid #e2e8f0;
+  color: #1a202c;
+}
+
+/* Hiển thị nhóm theo năm */
+.quarterly-table .year-group {
+  background-color: #edf2ff;
+  font-weight: 600;
+  color: #3a3a3a;
+}
+
+.quarterly-table .year-group td {
+  padding: 10px 15px;
+}
+
+/* Style cho phần lọc năm */
+.year-filter {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.year-filter button {
+  padding: 8px 16px;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  color: #4a5568;
+}
+
+.year-filter button:hover {
+  background-color: #e2e8f0;
+}
+
+.year-filter button.active {
+  background-color: #4c6ef8;
+  color: white;
+  border-color: #4c6ef8;
+}
+
+@media (max-width: 768px) {
+  .quarterly-table {
+    font-size: 12px;
+  }
+
+  .quarterly-table th,
+  .quarterly-table td {
+    padding: 8px 10px;
+  }
+
+  .quarterly-table-container {
+    max-height: 400px;
+  }
 }
 
 /* Advanced filter */
@@ -2602,4 +2679,131 @@ canvas {
 .name-filter-input,
 .email-filter-input {
   /* Các style này sẽ được thay thế bởi .search-filter-input */
+}
+
+/* Điều chỉnh vị trí và kiểu dáng của DatePicker để tránh xung đột */
+.react-datepicker-wrapper {
+  width: 100%;
+  position: relative;
+}
+
+.react-datepicker-popper {
+  z-index: 1000 !important; /* Đảm bảo datepicker hiển thị trên các phần tử khác */
+  position: absolute !important;
+}
+
+.react-datepicker {
+  font-family: "Inter", sans-serif !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.react-datepicker__header {
+  background-color: #f8fafc !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  border-top-left-radius: 8px !important;
+  border-top-right-radius: 8px !important;
+  padding-top: 10px !important;
+}
+
+.react-datepicker__month-container {
+  background-color: white !important;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: #4c6ef8 !important;
+  border-radius: 50% !important;
+}
+
+.date-range-inputs {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  position: relative;
+  z-index: 5; /* Đảm bảo các trường input hiển thị trên các phần tử khác */
+}
+
+.date-range-input {
+  flex: 1;
+  position: relative; /* Đảm bảo vị trí cho dropdown */
+}
+
+/* Điều chỉnh input datepicker */
+.date-picker {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+}
+
+/* Đảm bảo hiển thị phân biệt với các nội dung khác */
+.custom-date-range {
+  margin-bottom: 30px;
+  background-color: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  position: relative; /* Đảm bảo vị trí cho dropdown */
+}
+
+/* Đảm bảo vị trí hiển thị của popup lịch phù hợp */
+.time-filter-container {
+  position: relative;
+  z-index: 10; /* Cao hơn các phần tử khác */
+  margin-bottom: 40px; /* Tạo khoảng cách với nội dung phía dưới */
+}
+
+/* Thêm kiểu dáng cho dropdown chọn năm */
+.year-selector {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.year-selector label {
+  margin-right: 10px;
+  font-weight: 500;
+  color: #555;
+}
+
+.year-dropdown {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  min-width: 120px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.year-dropdown:hover {
+  border-color: #aaa;
+}
+
+.year-dropdown:focus {
+  border-color: #4a6cf7;
+  box-shadow: 0 0 0 2px rgba(74, 108, 247, 0.2);
+}
+
+/* Điều chỉnh bảng quarterly */
+.quarterly-summary {
+  margin-top: 20px;
+}
+
+.quarterly-summary h3 {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quarterly-summary h3 i {
+  color: #4a6cf7;
 }

@@ -44,12 +44,8 @@ const RevenueChart = () => {
 
   // Filters
   const [transactionType, setTransactionType] = useState("all"); // Filter by package type: all, standard, premium
-  const [statusFilter, setStatusFilter] = useState("all"); // Filter by status: all, completed, pending, failed, cancelled
+  const [statusFilter, setStatusFilter] = useState("completed"); // Mặc định hiển thị giao dịch thành công
   const [searchQuery, setSearchQuery] = useState(""); // Thay thế nameFilter và emailFilter
-  const [startDate, setStartDate] = useState(null); // Ngày bắt đầu lọc
-  const [endDate, setEndDate] = useState(null); // Ngày kết thúc lọc
-  const [dateFilterType, setDateFilterType] = useState("transaction"); // Lọc theo ngày giao dịch (transaction) hoặc ngày thanh toán (payment)
-  const [timeFrame, setTimeFrame] = useState("all"); // Khung thời gian: all, today, yesterday, thisWeek, thisMonth, thisQuarter, thisYear
   const [selectedTransaction, setSelectedTransaction] = useState(null); // Giao dịch được chọn để xem chi tiết
   const [showTransactionDetail, setShowTransactionDetail] = useState(false); // Hiển thị modal chi tiết giao dịch
   const [comparisonMetric, setComparisonMetric] = useState("revenue"); // Tiêu chí so sánh: revenue, transactions
@@ -60,6 +56,39 @@ const RevenueChart = () => {
 
   const [userAccountDetail, setUserAccountDetail] = useState(null); // Thêm state lưu thông tin chi tiết tài khoản người dùng
   const [isLoadingUserDetail, setIsLoadingUserDetail] = useState(false); // State loading khi đang lấy thông tin chi tiết
+
+  // Thêm lại state timeFrame
+  const [startDate, setStartDate] = useState(null); // Ngày bắt đầu lọc
+  const [endDate, setEndDate] = useState(null); // Ngày kết thúc lọc
+  const [timeFrame, setTimeFrame] = useState("all"); // Khung thời gian: all, today, yesterday, thisWeek, thisMonth, thisQuarter, thisYear
+
+  // Lấy danh sách các năm có dữ liệu từ quarterlyRevenueData
+  const getAvailableYears = () => {
+    if (!quarterlyRevenueData || quarterlyRevenueData.length === 0) {
+      return [new Date().getFullYear()];
+    }
+
+    const years = [...new Set(quarterlyRevenueData.map((q) => q.year))];
+    return years.sort((a, b) => b - a); // Sắp xếp giảm dần (năm mới nhất trước)
+  };
+
+  // Giới hạn số năm hiển thị trong bảng
+  const getDefaultYear = () => {
+    const years = getAvailableYears();
+    return years.length > 0
+      ? years[0].toString()
+      : new Date().getFullYear().toString();
+  };
+
+  // Cập nhật state selectedYear
+  const [selectedYear, setSelectedYear] = useState("current");
+
+  // Cập nhật selectedYear khi có dữ liệu
+  useEffect(() => {
+    if (quarterlyRevenueData && quarterlyRevenueData.length > 0) {
+      setSelectedYear(getDefaultYear());
+    }
+  }, [quarterlyRevenueData]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -225,35 +254,52 @@ const RevenueChart = () => {
     return packageRevenue;
   };
 
-  // Tính toán doanh thu theo quý
+  // Tính toán doanh thu theo quý - Cập nhật để hỗ trợ hiển thị đa năm
   const calculateRevenueByQuarter = (transactions) => {
-    // Khởi tạo dữ liệu cho 4 quý của năm hiện tại và năm trước
-    const currentYear = new Date().getFullYear();
+    // Tìm năm bắt đầu và năm kết thúc từ dữ liệu giao dịch
+    const years = {};
+
+    // Nếu không có dữ liệu giao dịch, trả về một mảng trống
+    if (!transactions || transactions.length === 0) {
+      return [];
+    }
+
+    // Duyệt qua tất cả giao dịch để xác định các năm có dữ liệu
+    transactions.forEach((transaction) => {
+      if (transaction.transactionDate) {
+        const transactionDate = new Date(transaction.transactionDate);
+        const year = transactionDate.getFullYear();
+        years[year] = true;
+      }
+    });
+
+    // Lấy danh sách các năm có dữ liệu, sắp xếp tăng dần
+    const yearsList = Object.keys(years)
+      .map((year) => parseInt(year))
+      .sort();
+
+    // Nếu không có năm nào, thêm năm hiện tại
+    if (yearsList.length === 0) {
+      yearsList.push(new Date().getFullYear());
+    }
+
+    // Danh sách các quý của tất cả các năm
     const quarters = [];
 
-    // Tạo dữ liệu cho 4 quý của năm hiện tại
-    for (let i = 1; i <= 4; i++) {
-      quarters.push({
-        quarter: `Q${i}/${currentYear}`,
-        year: currentYear,
-        quarterNumber: i,
-        revenue: 0,
-        standardRevenue: 0,
-        premiumRevenue: 0,
-        transactionCount: 0,
-      });
-
-      // Thêm quý của năm trước để so sánh
-      quarters.push({
-        quarter: `Q${i}/${currentYear - 1}`,
-        year: currentYear - 1,
-        quarterNumber: i,
-        revenue: 0,
-        standardRevenue: 0,
-        premiumRevenue: 0,
-        transactionCount: 0,
-      });
-    }
+    // Tạo dữ liệu cho 4 quý của mỗi năm
+    yearsList.forEach((year) => {
+      for (let i = 1; i <= 4; i++) {
+        quarters.push({
+          quarter: `Q${i}/${year}`,
+          year: year,
+          quarterNumber: i,
+          revenue: 0,
+          standardRevenue: 0,
+          premiumRevenue: 0,
+          transactionCount: 0,
+        });
+      }
+    });
 
     // Tính toán doanh thu cho mỗi quý
     transactions.forEach((transaction) => {
@@ -282,9 +328,9 @@ const RevenueChart = () => {
       }
     });
 
-    // Sắp xếp các quý theo năm và số thứ tự quý
+    // Sắp xếp các quý theo năm và số thứ tự quý (từ gần đến xa)
     return quarters.sort((a, b) =>
-      a.year !== b.year ? a.year - b.year : a.quarterNumber - b.quarterNumber
+      a.year !== b.year ? b.year - a.year : a.quarterNumber - b.quarterNumber
     );
   };
 
@@ -349,11 +395,27 @@ const RevenueChart = () => {
       (q) => q.year === currentYear
     );
 
-    const labels = currentYearQuarters.map((item) => item.quarter);
-    const standardData = currentYearQuarters.map(
-      (item) => item.standardRevenue
-    );
-    const premiumData = currentYearQuarters.map((item) => item.premiumRevenue);
+    // Nếu không có dữ liệu năm hiện tại, lấy năm gần nhất có dữ liệu
+    let quartersToDisplay = currentYearQuarters;
+    if (currentYearQuarters.length === 0) {
+      // Tìm năm gần nhất có dữ liệu
+      const years = [...new Set(quarterlyRevenueData.map((q) => q.year))].sort(
+        (a, b) => b - a
+      );
+      if (years.length > 0) {
+        const nearestYear = years[0];
+        quartersToDisplay = quarterlyRevenueData.filter(
+          (q) => q.year === nearestYear
+        );
+      }
+    }
+
+    // Sắp xếp theo thứ tự quý
+    quartersToDisplay.sort((a, b) => a.quarterNumber - b.quarterNumber);
+
+    const labels = quartersToDisplay.map((item) => item.quarter);
+    const standardData = quartersToDisplay.map((item) => item.standardRevenue);
+    const premiumData = quartersToDisplay.map((item) => item.premiumRevenue);
 
     return {
       labels,
@@ -616,7 +678,7 @@ const RevenueChart = () => {
     }
   };
 
-  // Lọc giao dịch theo các tiêu chí
+  // Lọc giao dịch theo các tiêu chí - Dùng cho tất cả các tab trừ tab Báo cáo theo Quý
   const getFilteredTransactions = () => {
     let filtered = [...transactions];
 
@@ -646,26 +708,35 @@ const RevenueChart = () => {
 
     // Lọc theo thời gian
     if (startDate) {
-      const filterDate =
-        dateFilterType === "transaction" ? "transactionDate" : "paymentDate";
       filtered = filtered.filter((t) => {
-        if (!t[filterDate]) return false;
-        const date = new Date(t[filterDate]);
+        if (!t.transactionDate) return false;
+        const date = new Date(t.transactionDate);
         return date >= startDate;
       });
     }
 
     if (endDate) {
-      const filterDate =
-        dateFilterType === "transaction" ? "transactionDate" : "paymentDate";
       filtered = filtered.filter((t) => {
-        if (!t[filterDate]) return false;
-        const date = new Date(t[filterDate]);
+        if (!t.transactionDate) return false;
+        const date = new Date(t.transactionDate);
         return date <= endDate;
       });
     }
 
+    // Sắp xếp giao dịch mới nhất lên đầu
+    filtered.sort(
+      (a, b) => new Date(b.transactionDate) - new Date(a.transactionDate)
+    );
+
     return filtered;
+  };
+
+  // Lọc dữ liệu quý theo năm được chọn - CHỈ dùng cho tab Báo cáo theo Quý
+  const getFilteredQuarterlyData = () => {
+    // Chỉ hiển thị dữ liệu của năm đã chọn, không bị ảnh hưởng bởi bộ lọc thời gian khác
+    return quarterlyRevenueData.filter(
+      (quarter) => quarter.year === parseInt(selectedYear)
+    );
   };
 
   // Phân trang
@@ -888,20 +959,52 @@ const RevenueChart = () => {
 
     const userTransactions = getUserTransactions(userId);
 
-    // Sắp xếp theo ngày giao dịch gần nhất trước
-    return userTransactions.sort(
-      (a, b) => new Date(b.transactionDate) - new Date(a.transactionDate)
-    );
+    // Chỉ hiển thị giao dịch thành công và sắp xếp theo ngày giao dịch gần nhất
+    return userTransactions
+      .filter((t) => t.paymentStatus.toLowerCase() === "completed")
+      .sort(
+        (a, b) => new Date(b.transactionDate) - new Date(a.transactionDate)
+      );
   };
 
   // Hàm lấy các giao dịch gần đây nhất của người dùng
   const getUserRecentTransactions = (userId, limit = 5) => {
     const userTransactions = getUserTransactions(userId);
 
-    // Sắp xếp theo ngày giao dịch gần nhất trước
+    // Chỉ lấy giao dịch thành công
     return userTransactions
+      .filter((t) => t.paymentStatus.toLowerCase() === "completed")
       .sort((a, b) => new Date(b.transactionDate) - new Date(a.transactionDate))
       .slice(0, limit);
+  };
+
+  // Hàm lấy danh sách tất cả giao dịch của người dùng trong quý hiện tại
+  const getUserTransactionsForCurrentQuarter = (userId) => {
+    if (!userId) return [];
+
+    // Lấy tất cả giao dịch của người dùng
+    const userTxs = transactions.filter((t) => t.userId === userId);
+
+    // Lấy quý hiện tại
+    const now = new Date();
+    const currentQuarter = Math.floor(now.getMonth() / 3);
+    const currentYear = now.getFullYear();
+
+    // Lọc giao dịch thành công trong quý hiện tại
+    const quarterTransactions = userTxs.filter((t) => {
+      if (t.paymentStatus.toLowerCase() !== "completed") return false;
+
+      const txDate = new Date(t.transactionDate);
+      const txQuarter = Math.floor(txDate.getMonth() / 3);
+      const txYear = txDate.getFullYear();
+
+      return txQuarter === currentQuarter && txYear === currentYear;
+    });
+
+    // Sắp xếp giao dịch mới nhất lên đầu
+    return quarterTransactions.sort(
+      (a, b) => new Date(b.transactionDate) - new Date(a.transactionDate)
+    );
   };
 
   // Hàm thống kê gói dịch vụ đã mua
@@ -1166,6 +1269,90 @@ const RevenueChart = () => {
     );
   };
 
+  // Tính toán doanh thu theo gói CÓ áp dụng bộ lọc thời gian
+  const calculateFilteredRevenueByPackage = () => {
+    // Lấy các giao dịch đã được lọc theo thời gian và trạng thái
+    const filteredTransactions = getFilteredTransactions().filter(
+      (t) => t.paymentStatus.toLowerCase() === "completed"
+    );
+
+    const packageRevenue = {
+      Standard: {
+        revenue: 0,
+        count: 0,
+        percentageOfTotal: 0,
+      },
+      Premium: {
+        revenue: 0,
+        count: 0,
+        percentageOfTotal: 0,
+      },
+    };
+
+    let totalRevenue = 0;
+    let totalCount = 0;
+
+    filteredTransactions.forEach((transaction) => {
+      const packageName = transaction.packageName;
+      const amount = transaction.amount || 0;
+      totalRevenue += amount;
+      totalCount += 1;
+
+      if (packageName === "Standard") {
+        packageRevenue.Standard.revenue += amount;
+        packageRevenue.Standard.count += 1;
+      } else if (packageName === "Premium") {
+        packageRevenue.Premium.revenue += amount;
+        packageRevenue.Premium.count += 1;
+      }
+    });
+
+    // Tính phần trăm của tổng doanh thu
+    if (totalRevenue > 0) {
+      packageRevenue.Standard.percentageOfTotal =
+        (packageRevenue.Standard.revenue / totalRevenue) * 100;
+      packageRevenue.Premium.percentageOfTotal =
+        (packageRevenue.Premium.revenue / totalRevenue) * 100;
+    }
+
+    // Thêm tổng doanh thu vào kết quả
+    packageRevenue.totalRevenue = totalRevenue;
+    packageRevenue.totalCount = totalCount;
+
+    return packageRevenue;
+  };
+
+  // Thêm hàm mới để chuẩn bị dữ liệu biểu đồ theo quý - không bị ảnh hưởng bởi bộ lọc thời gian
+  const prepareQuarterlyChartDataForSelectedYear = () => {
+    if (!quarterlyRevenueData.length) return null;
+
+    // Lọc theo năm đã chọn
+    const yearQuarters = getFilteredQuarterlyData();
+
+    // Sắp xếp theo thứ tự quý
+    yearQuarters.sort((a, b) => a.quarterNumber - b.quarterNumber);
+
+    const labels = yearQuarters.map((item) => item.quarter);
+    const standardData = yearQuarters.map((item) => item.standardRevenue);
+    const premiumData = yearQuarters.map((item) => item.premiumRevenue);
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: "Gói Standard",
+          data: standardData,
+          backgroundColor: "rgba(75, 192, 192, 0.8)",
+        },
+        {
+          label: "Gói Premium",
+          data: premiumData,
+          backgroundColor: "rgba(153, 102, 255, 0.8)",
+        },
+      ],
+    };
+  };
+
   return (
     <div className="revenue-dashboard">
       {/* Tiêu đề */}
@@ -1225,29 +1412,6 @@ const RevenueChart = () => {
         </div>
 
         <div className="custom-date-range">
-          <div className="date-filter-type">
-            <label>
-              <input
-                type="radio"
-                name="dateFilterType"
-                value="transaction"
-                checked={dateFilterType === "transaction"}
-                onChange={() => setDateFilterType("transaction")}
-              />
-              Ngày giao dịch
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="dateFilterType"
-                value="payment"
-                checked={dateFilterType === "payment"}
-                onChange={() => setDateFilterType("payment")}
-              />
-              Ngày thanh toán
-            </label>
-          </div>
-
           <div className="date-range-inputs">
             <div className="date-range-input">
               <label>Từ ngày:</label>
@@ -1281,7 +1445,7 @@ const RevenueChart = () => {
         </div>
       </div>
 
-      {/* Card summaries */}
+      {/* Card summaries - Cập nhật để sử dụng dữ liệu đã lọc */}
       <div className="summary-cards">
         <div className="summary-card total-revenue">
           <div className="card-icon">
@@ -1320,57 +1484,69 @@ const RevenueChart = () => {
           </div>
         </div>
 
-        <div className="summary-card standard-revenue">
-          <div className="card-icon">
-            <i className="fas fa-box"></i>
-          </div>
-          <div className="card-content">
-            <h4>Gói Standard</h4>
-            <div className="card-value">
-              {new Intl.NumberFormat("vi-VN", {
-                style: "currency",
-                currency: "VND",
-                maximumFractionDigits: 0,
-              }).format(packageRevenueData.Standard?.revenue || 0)}
-            </div>
-            <div className="package-percentage">
-              {packageRevenueData.Standard && packageRevenueData.totalRevenue
-                ? (
-                    (packageRevenueData.Standard.revenue /
-                      packageRevenueData.totalRevenue) *
-                    100
-                  ).toFixed(1)
-                : 0}
-              % doanh thu | {packageRevenueData.Standard?.count || 0} giao dịch
-            </div>
-          </div>
-        </div>
+        {/* Sử dụng dữ liệu đã lọc theo thời gian */}
+        {(() => {
+          const filteredPackageData = calculateFilteredRevenueByPackage();
+          return (
+            <>
+              <div className="summary-card standard-revenue">
+                <div className="card-icon">
+                  <i className="fas fa-box"></i>
+                </div>
+                <div className="card-content">
+                  <h4>Gói Standard</h4>
+                  <div className="card-value">
+                    {new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                      maximumFractionDigits: 0,
+                    }).format(filteredPackageData.Standard?.revenue || 0)}
+                  </div>
+                  <div className="package-percentage">
+                    {filteredPackageData.Standard &&
+                    filteredPackageData.totalRevenue > 0
+                      ? (
+                          (filteredPackageData.Standard.revenue /
+                            filteredPackageData.totalRevenue) *
+                          100
+                        ).toFixed(1)
+                      : "0"}
+                    % doanh thu | {filteredPackageData.Standard?.count || 0}{" "}
+                    giao dịch
+                  </div>
+                </div>
+              </div>
 
-        <div className="summary-card premium-revenue">
-          <div className="card-icon">
-            <i className="fas fa-crown"></i>
-          </div>
-          <div className="card-content">
-            <h4>Gói Premium</h4>
-            <div className="card-value">
-              {new Intl.NumberFormat("vi-VN", {
-                style: "currency",
-                currency: "VND",
-                maximumFractionDigits: 0,
-              }).format(packageRevenueData.Premium?.revenue || 0)}
-            </div>
-            <div className="package-percentage">
-              {packageRevenueData.Premium && packageRevenueData.totalRevenue
-                ? (
-                    (packageRevenueData.Premium.revenue /
-                      packageRevenueData.totalRevenue) *
-                    100
-                  ).toFixed(1)
-                : 0}
-              % doanh thu | {packageRevenueData.Premium?.count || 0} giao dịch
-            </div>
-          </div>
-        </div>
+              <div className="summary-card premium-revenue">
+                <div className="card-icon">
+                  <i className="fas fa-crown"></i>
+                </div>
+                <div className="card-content">
+                  <h4>Gói Premium</h4>
+                  <div className="card-value">
+                    {new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                      maximumFractionDigits: 0,
+                    }).format(filteredPackageData.Premium?.revenue || 0)}
+                  </div>
+                  <div className="package-percentage">
+                    {filteredPackageData.Premium &&
+                    filteredPackageData.totalRevenue > 0
+                      ? (
+                          (filteredPackageData.Premium.revenue /
+                            filteredPackageData.totalRevenue) *
+                          100
+                        ).toFixed(1)
+                      : "0"}
+                    % doanh thu | {filteredPackageData.Premium?.count || 0} giao
+                    dịch
+                  </div>
+                </div>
+              </div>
+            </>
+          );
+        })()}
       </div>
 
       {/* Điều hướng tab */}
@@ -1451,71 +1627,86 @@ const RevenueChart = () => {
             </div>
 
             <div className="chart-row">
-              <div className="chart-card half">
-                <h3>
-                  <i className="fas fa-box"></i> Chi Tiết Gói Standard
-                </h3>
-                <div className="package-details">
-                  <div className="package-detail-item">
-                    <div className="detail-label">Tổng doanh thu:</div>
-                    <div className="detail-value">
-                      {formatAmount(packageRevenueData.Standard?.revenue || 0)}
+              {(() => {
+                const filteredPackageData = calculateFilteredRevenueByPackage();
+                return (
+                  <>
+                    <div className="chart-card half">
+                      <h3>
+                        <i className="fas fa-box"></i> Chi Tiết Gói Standard
+                      </h3>
+                      <div className="package-details">
+                        <div className="package-detail-item">
+                          <div className="detail-label">Tổng doanh thu:</div>
+                          <div className="detail-value">
+                            {formatAmount(
+                              filteredPackageData.Standard?.revenue || 0
+                            )}
+                          </div>
+                        </div>
+                        <div className="package-detail-item">
+                          <div className="detail-label">
+                            Số lượng giao dịch:
+                          </div>
+                          <div className="detail-value">
+                            {filteredPackageData.Standard?.count || 0}
+                          </div>
+                        </div>
+                        <div className="package-detail-item">
+                          <div className="detail-label">Đơn giá:</div>
+                          <div className="detail-value">379.000 VNĐ</div>
+                        </div>
+                        <div className="package-detail-item">
+                          <div className="detail-label">Tỷ lệ doanh thu:</div>
+                          <div className="detail-value">
+                            {filteredPackageData.Standard?.percentageOfTotal.toFixed(
+                              1
+                            ) || "0"}
+                            %
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="package-detail-item">
-                    <div className="detail-label">Số lượng giao dịch:</div>
-                    <div className="detail-value">
-                      {packageRevenueData.Standard?.count || 0}
-                    </div>
-                  </div>
-                  <div className="package-detail-item">
-                    <div className="detail-label">Đơn giá:</div>
-                    <div className="detail-value">379.000 VNĐ</div>
-                  </div>
-                  <div className="package-detail-item">
-                    <div className="detail-label">Tỷ lệ doanh thu:</div>
-                    <div className="detail-value">
-                      {packageRevenueData.Standard?.percentageOfTotal.toFixed(
-                        1
-                      ) || 0}
-                      %
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              <div className="chart-card half">
-                <h3>
-                  <i className="fas fa-crown"></i> Chi Tiết Gói Premium
-                </h3>
-                <div className="package-details">
-                  <div className="package-detail-item">
-                    <div className="detail-label">Tổng doanh thu:</div>
-                    <div className="detail-value">
-                      {formatAmount(packageRevenueData.Premium?.revenue || 0)}
+                    <div className="chart-card half">
+                      <h3>
+                        <i className="fas fa-crown"></i> Chi Tiết Gói Premium
+                      </h3>
+                      <div className="package-details">
+                        <div className="package-detail-item">
+                          <div className="detail-label">Tổng doanh thu:</div>
+                          <div className="detail-value">
+                            {formatAmount(
+                              filteredPackageData.Premium?.revenue || 0
+                            )}
+                          </div>
+                        </div>
+                        <div className="package-detail-item">
+                          <div className="detail-label">
+                            Số lượng giao dịch:
+                          </div>
+                          <div className="detail-value">
+                            {filteredPackageData.Premium?.count || 0}
+                          </div>
+                        </div>
+                        <div className="package-detail-item">
+                          <div className="detail-label">Đơn giá:</div>
+                          <div className="detail-value">1.279.000 VNĐ</div>
+                        </div>
+                        <div className="package-detail-item">
+                          <div className="detail-label">Tỷ lệ doanh thu:</div>
+                          <div className="detail-value">
+                            {filteredPackageData.Premium?.percentageOfTotal.toFixed(
+                              1
+                            ) || "0"}
+                            %
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="package-detail-item">
-                    <div className="detail-label">Số lượng giao dịch:</div>
-                    <div className="detail-value">
-                      {packageRevenueData.Premium?.count || 0}
-                    </div>
-                  </div>
-                  <div className="package-detail-item">
-                    <div className="detail-label">Đơn giá:</div>
-                    <div className="detail-value">1.279.000 VNĐ</div>
-                  </div>
-                  <div className="package-detail-item">
-                    <div className="detail-label">Tỷ lệ doanh thu:</div>
-                    <div className="detail-value">
-                      {packageRevenueData.Premium?.percentageOfTotal.toFixed(
-                        1
-                      ) || 0}
-                      %
-                    </div>
-                  </div>
-                </div>
-              </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
         )}
@@ -1527,16 +1718,60 @@ const RevenueChart = () => {
               <h3>
                 <i className="fas fa-calendar-alt"></i> Doanh Thu Theo Quý
               </h3>
+              {/* Dropdown chọn năm cho báo cáo theo quý */}
+              <div
+                className="year-selector"
+                style={{
+                  marginBottom: "15px",
+                  display: "flex",
+                  alignItems: "center",
+                  background: "#f8f9fa",
+                  padding: "8px 15px",
+                  borderRadius: "6px",
+                }}
+              >
+                <label
+                  htmlFor="yearSelect"
+                  style={{ marginRight: "10px", fontWeight: "500" }}
+                >
+                  <i
+                    className="fas fa-calendar-year"
+                    style={{ marginRight: "5px" }}
+                  ></i>
+                  Chọn năm:
+                </label>
+                <select
+                  id="yearSelect"
+                  className="year-dropdown"
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  style={{
+                    padding: "5px 10px",
+                    borderRadius: "4px",
+                    border: "1px solid #ddd",
+                    backgroundColor: "#fff",
+                    fontWeight: "500",
+                    cursor: "pointer",
+                  }}
+                >
+                  {getAvailableYears().map((year) => (
+                    <option key={year} value={year}>
+                      Năm {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="chart-area">
-                {quarterlyRevenueChartData ? (
+                {getFilteredQuarterlyData().length > 0 ? (
                   <Bar
-                    data={quarterlyRevenueChartData}
+                    data={prepareQuarterlyChartDataForSelectedYear()}
                     options={quarterlyChartOptions}
                   />
                 ) : (
                   <div className="no-data-message">
                     <i className="fas fa-info-circle"></i> Không có dữ liệu
-                    doanh thu theo quý để hiển thị
+                    doanh thu theo quý để hiển thị cho năm {selectedYear}
                   </div>
                 )}
               </div>
@@ -1559,9 +1794,8 @@ const RevenueChart = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {quarterlyRevenueData
-                      .filter((q) => q.year === new Date().getFullYear())
-                      .map((quarter, index) => (
+                    {getFilteredQuarterlyData().length > 0 ? (
+                      getFilteredQuarterlyData().map((quarter, index) => (
                         <tr key={index}>
                           <td>{quarter.quarter}</td>
                           <td>{formatAmount(quarter.revenue)}</td>
@@ -1569,7 +1803,15 @@ const RevenueChart = () => {
                           <td>{formatAmount(quarter.premiumRevenue)}</td>
                           <td>{quarter.transactionCount}</td>
                         </tr>
-                      ))}
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" className="no-data-message">
+                          <i className="fas fa-info-circle"></i> Không có dữ
+                          liệu cho năm {selectedYear}
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                   <tfoot>
                     <tr>
@@ -1578,29 +1820,33 @@ const RevenueChart = () => {
                       </td>
                       <td>
                         {formatAmount(
-                          quarterlyRevenueData
-                            .filter((q) => q.year === new Date().getFullYear())
-                            .reduce((sum, q) => sum + q.revenue, 0)
+                          getFilteredQuarterlyData().reduce(
+                            (sum, q) => sum + q.revenue,
+                            0
+                          )
                         )}
                       </td>
                       <td>
                         {formatAmount(
-                          quarterlyRevenueData
-                            .filter((q) => q.year === new Date().getFullYear())
-                            .reduce((sum, q) => sum + q.standardRevenue, 0)
+                          getFilteredQuarterlyData().reduce(
+                            (sum, q) => sum + q.standardRevenue,
+                            0
+                          )
                         )}
                       </td>
                       <td>
                         {formatAmount(
-                          quarterlyRevenueData
-                            .filter((q) => q.year === new Date().getFullYear())
-                            .reduce((sum, q) => sum + q.premiumRevenue, 0)
+                          getFilteredQuarterlyData().reduce(
+                            (sum, q) => sum + q.premiumRevenue,
+                            0
+                          )
                         )}
                       </td>
                       <td>
-                        {quarterlyRevenueData
-                          .filter((q) => q.year === new Date().getFullYear())
-                          .reduce((sum, q) => sum + q.transactionCount, 0)}
+                        {getFilteredQuarterlyData().reduce(
+                          (sum, q) => sum + q.transactionCount,
+                          0
+                        )}
                       </td>
                     </tr>
                   </tfoot>
@@ -1686,39 +1932,53 @@ const RevenueChart = () => {
                       <th>Ngày Giao Dịch</th>
                       <th>Ngày Thanh Toán</th>
                       <th>Trạng Thái</th>
-                      <th>Hành Động</th>
+                      <th>Chi Tiết</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {getFilteredTransactions().length > 0 ? (
+                    {paginateTransactions(getFilteredTransactions()).length >
+                    0 ? (
                       paginateTransactions(getFilteredTransactions()).map(
                         (transaction, index) => (
                           <tr key={index}>
                             <td>{transaction.gatewayTransactionId || "N/A"}</td>
-                            <td>{transaction.fullName}</td>
+                            <td>
+                              {transaction.fullName || "Chưa có tên"}
+                              {transaction.email && (
+                                <div
+                                  style={{ fontSize: "0.85em", color: "#666" }}
+                                >
+                                  {transaction.email}
+                                </div>
+                              )}
+                            </td>
                             <td>
                               {renderPackageBadge(transaction.packageName)}
                             </td>
-                            <td>
-                              {formatAmount(
-                                transaction.amount,
-                                transaction.currency || "VND"
-                              )}
+                            <td className="amount-value">
+                              {formatAmount(transaction.amount)}
                             </td>
-                            <td>{transaction.paymentMethod || "N/A"}</td>
+                            <td>
+                              {transaction.paymentMethod || "Không xác định"}
+                            </td>
                             <td>{formatDate(transaction.transactionDate)}</td>
-                            <td>{formatDate(transaction.paymentDate)}</td>
+                            <td>
+                              {transaction.paymentDate
+                                ? formatDate(transaction.paymentDate)
+                                : "Chưa thanh toán"}
+                            </td>
                             <td>
                               {renderPaymentStatus(transaction.paymentStatus)}
                             </td>
                             <td>
                               <button
                                 className="view-detail-btn"
+                                title="Xem chi tiết"
                                 onClick={() =>
                                   openTransactionDetail(transaction)
                                 }
                               >
-                                <i className="fas fa-eye"></i>
+                                <i className="fas fa-info-circle"></i>
                               </button>
                             </td>
                           </tr>
@@ -1728,7 +1988,7 @@ const RevenueChart = () => {
                       <tr>
                         <td colSpan="9" className="no-data">
                           <i className="fas fa-info-circle"></i> Không có dữ
-                          liệu giao dịch phù hợp với tiêu chí lọc
+                          liệu giao dịch
                         </td>
                       </tr>
                     )}
@@ -2166,6 +2426,51 @@ const RevenueChart = () => {
                           </td>
                         </tr>
                       ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Giao dịch thành công trong quý hiện tại */}
+              <div className="recent-transactions-section">
+                <h4>
+                  <i className="fas fa-chart-line"></i> Giao Dịch Thành Công
+                  Trong Quý Hiện Tại
+                </h4>
+                <div className="recent-transactions-container">
+                  <table className="recent-transactions-table">
+                    <thead>
+                      <tr>
+                        <th>ID Giao Dịch</th>
+                        <th>Gói</th>
+                        <th>Ngày Giao Dịch</th>
+                        <th>Số Tiền</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {getUserTransactionsForCurrentQuarter(
+                        selectedTransaction.userId
+                      ).length > 0 ? (
+                        getUserTransactionsForCurrentQuarter(
+                          selectedTransaction.userId
+                        ).map((transaction, index) => (
+                          <tr key={index}>
+                            <td>{transaction.gatewayTransactionId || "N/A"}</td>
+                            <td>
+                              {renderPackageBadge(transaction.packageName)}
+                            </td>
+                            <td>{formatDate(transaction.transactionDate)}</td>
+                            <td>{formatAmount(transaction.amount)}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="4" className="no-data-message">
+                            <i className="fas fa-info-circle"></i> Không có giao
+                            dịch thành công nào trong quý này
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
