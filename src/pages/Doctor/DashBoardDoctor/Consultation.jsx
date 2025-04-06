@@ -45,7 +45,6 @@ const { Option } = Select;
 const Consultations = () => {
   const [loading, setLoading] = useState(false);
   const [consultations, setConsultations] = useState([]);
-  const [onGoingConsultations, setOnGoingConsultations] = useState([]);
   const [filteredConsultations, setFilteredConsultations] = useState([]);
   const [selectedConsultation, setSelectedConsultation] = useState(null);
   const [responseForm] = Form.useForm();
@@ -68,7 +67,6 @@ const Consultations = () => {
     consultationDetails: {},
     lastFetch: {
       consultations: null,
-      ongoingConsultations: null,
     },
   });
 
@@ -90,21 +88,14 @@ const Consultations = () => {
   };
 
   useEffect(() => {
-    if (activeTab === "ongoing") {
-      fetchOnGoingConsultationsWithPagination(
-        pagination.current,
-        pagination.pageSize
-      );
-    } else {
-      fetchConsultationsWithPagination(pagination.current, pagination.pageSize);
-    }
+    fetchConsultationsWithPagination(pagination.current, pagination.pageSize);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   useEffect(() => {
     applyFilters();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchText, historyFilterStatus, consultations, onGoingConsultations]);
+  }, [searchText, historyFilterStatus, consultations]);
 
   // Lấy chi tiết request (có cache)
   const fetchConsultationRequestsById = async (requestId) => {
@@ -229,105 +220,32 @@ const Consultations = () => {
     }
   };
 
-  // Hàm fetch tab "ongoing"
-  const fetchOnGoingConsultationsWithPagination = async (
-    page = 1,
-    pageSize = 5
-  ) => {
-    setLoading(true);
-    try {
-      const doctorId = localStorage.getItem("doctorId");
-      if (!doctorId) {
-        message.error("Doctor ID not found in localStorage!");
-        return;
-      }
-
-      const requests = await doctorApi.getConsultationRequestsByDoctorAndStatus(
-        doctorId,
-        "Approved"
-      );
-
-      const total = requests.length;
-      const startIndex = (page - 1) * pageSize;
-      const endIndex = Math.min(startIndex + pageSize, total);
-      const paginatedRequests = requests.slice(startIndex, endIndex);
-
-      const basicRequests = paginatedRequests.map((req) => ({
-        id: req.requestId,
-        requestId: req.requestId,
-        parentName: req.memberName || "N/A",
-        childName: req.childName || "N/A",
-        requestDate: req.requestDate || moment().format(),
-        status: req.status || "Approved",
-      }));
-
-      setOnGoingConsultations(basicRequests);
-      setPagination({
-        current: page,
-        pageSize,
-        total,
-      });
-    } catch (error) {
-      message.error("Failed to fetch ongoing consultations!");
-      console.error("Error fetching ongoing consultations:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // [CHANGED] Xoá toàn bộ filter rating
   // Chỉ còn filter searchText + historyFilterStatus
   const applyFilters = () => {
-    let data = [];
-    if (activeTab === "ongoing") {
-      data = onGoingConsultations.filter((item) => item.status === "Approved");
-      if (searchText) {
-        data = data.filter(
-          (item) =>
-            item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
-            (item.description &&
-              item.description.toLowerCase().includes(searchText.toLowerCase()))
-        );
-      }
-    } else if (activeTab === "completed") {
-      data = consultations.filter((item) => item.status === "Completed");
-      if (searchText) {
-        data = data.filter(
-          (item) =>
-            item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
-            (item.description &&
-              item.description.toLowerCase().includes(searchText.toLowerCase()))
-        );
-      }
+    let data = [...consultations];
+
+    if (activeTab === "completed") {
+      data = data.filter((item) => item.status === "Completed");
     } else if (activeTab === "history") {
-      data = [...consultations];
       if (historyFilterStatus) {
         data = data.filter((item) => item.status === historyFilterStatus);
       }
-      if (searchText) {
-        data = data.filter(
-          (item) =>
-            item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
-            (item.description &&
-              item.description.toLowerCase().includes(searchText.toLowerCase()))
-        );
-      }
     } else {
       // Tab "new" => Pending
-      data = consultations.filter((item) => item.status === "Pending");
-      if (searchText) {
-        data = data.filter(
-          (item) =>
-            item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
-            (item.description &&
-              item.description.toLowerCase().includes(searchText.toLowerCase()))
-        );
-      }
+      data = data.filter((item) => item.status === "Pending");
     }
+
+    if (searchText) {
+      data = data.filter(
+        (item) =>
+          item.parentName?.toLowerCase().includes(searchText.toLowerCase()) ||
+          item.childName?.toLowerCase().includes(searchText.toLowerCase()) ||
+          (item.description &&
+            item.description.toLowerCase().includes(searchText.toLowerCase()))
+      );
+    }
+
     setFilteredConsultations(data);
   };
 
@@ -470,17 +388,10 @@ const Consultations = () => {
         stringStatus
       );
 
-      if (activeTab === "ongoing") {
-        await fetchOnGoingConsultationsWithPagination(
-          pagination.current,
-          pagination.pageSize
-        );
-      } else {
-        await fetchConsultationsWithPagination(
-          pagination.current,
-          pagination.pageSize
-        );
-      }
+      await fetchConsultationsWithPagination(
+        pagination.current,
+        pagination.pageSize
+      );
 
       setResponseVisible(false);
       message.success(
@@ -507,19 +418,10 @@ const Consultations = () => {
         record.requestId,
         "Completed"
       );
-
-      if (activeTab === "ongoing") {
-        await fetchOnGoingConsultationsWithPagination(
-          pagination.current,
-          pagination.pageSize
-        );
-      } else {
-        await fetchConsultationsWithPagination(
-          pagination.current,
-          pagination.pageSize
-        );
-      }
-
+      await fetchConsultationsWithPagination(
+        pagination.current,
+        pagination.pageSize
+      );
       message.success("Consultation completed");
     } catch (error) {
       message.error("Failed to complete consultation!");
@@ -818,17 +720,10 @@ const Consultations = () => {
   }, []);
 
   const handleTableChange = (newPagination) => {
-    if (activeTab === "ongoing") {
-      fetchOnGoingConsultationsWithPagination(
-        newPagination.current,
-        newPagination.pageSize
-      );
-    } else {
-      fetchConsultationsWithPagination(
-        newPagination.current,
-        newPagination.pageSize
-      );
-    }
+    fetchConsultationsWithPagination(
+      newPagination.current,
+      newPagination.pageSize
+    );
   };
 
   return (
@@ -870,15 +765,10 @@ const Consultations = () => {
           <Button
             type="primary"
             onClick={() =>
-              activeTab === "ongoing"
-                ? fetchOnGoingConsultationsWithPagination(
-                    pagination.current,
-                    pagination.pageSize
-                  )
-                : fetchConsultationsWithPagination(
-                    pagination.current,
-                    pagination.pageSize
-                  )
+              fetchConsultationsWithPagination(
+                pagination.current,
+                pagination.pageSize
+              )
             }
             loading={loading}
             className="consult-refresh-btn"
@@ -905,17 +795,6 @@ const Consultations = () => {
           >
             <Table
               columns={newRequestColumns}
-              dataSource={filteredConsultations}
-              rowKey="id"
-              loading={loading}
-              pagination={pagination}
-              onChange={handleTableChange}
-            />
-          </Tabs.TabPane>
-
-          <Tabs.TabPane key="ongoing" tab="Ongoing">
-            <Table
-              columns={columns}
               dataSource={filteredConsultations}
               rowKey="id"
               loading={loading}
