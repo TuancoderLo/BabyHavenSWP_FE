@@ -70,6 +70,8 @@ const Consultations = () => {
     },
   });
 
+  const [totalNewRequestsCount, setTotalNewRequestsCount] = useState(0);
+
   const getConsultationDetailFromCache = (requestId) => {
     return cache.consultationDetails[requestId];
   };
@@ -188,6 +190,14 @@ const Consultations = () => {
       const allRequests = Array.isArray(response)
         ? response
         : response.data || [];
+
+      // Tính tổng số yêu cầu mới (Pending) từ tất cả yêu cầu
+      const totalPendingRequests = allRequests.filter(
+        (item) => item.status === "Pending"
+      ).length;
+
+      // Cập nhật state lưu tổng số yêu cầu mới
+      setTotalNewRequestsCount(totalPendingRequests);
 
       // Lọc theo tab
       let filteredData = allRequests;
@@ -586,10 +596,6 @@ const Consultations = () => {
     },
   ];
 
-  const newRequestsCount = consultations.filter(
-    (item) => item.status === "Pending"
-  ).length;
-
   const downloadAttachment = (attachment) => {
     try {
       const fileName =
@@ -799,9 +805,9 @@ const Consultations = () => {
             tab={
               <span>
                 New Requests{" "}
-                {newRequestsCount > 0 && (
+                {totalNewRequestsCount > 0 && (
                   <Badge
-                    count={newRequestsCount}
+                    count={totalNewRequestsCount}
                     style={{ backgroundColor: "#e92121" }}
                   />
                 )}
