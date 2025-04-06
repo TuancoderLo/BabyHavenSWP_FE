@@ -2807,3 +2807,192 @@ canvas {
 .quarterly-summary h3 i {
   color: #4a6cf7;
 }
+
+/* Kiểu dáng cho hàng trong bảng quý (có thể nhấp vào) */
+.quarterly-table .quarter-row:hover {
+  background-color: rgba(53, 162, 235, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.quarterly-table .quarter-row:active {
+  background-color: rgba(53, 162, 235, 0.2);
+}
+
+/* Thống kê quý */
+.quarter-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.quarter-stat-item {
+  text-align: center;
+  padding: 10px 15px;
+  flex: 1;
+  border-right: 1px solid #e9ecef;
+}
+
+.quarter-stat-item:last-child {
+  border-right: none;
+}
+
+.quarter-stat-item .stat-title {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-bottom: 5px;
+}
+
+.quarter-stat-item .stat-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #343a40;
+}
+
+/* Custom scrollbar cho bảng danh sách */
+.customer-table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.customer-table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.customer-table-container::-webkit-scrollbar-thumb {
+  background: #aaa;
+  border-radius: 10px;
+}
+
+.customer-table-container::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Thêm hiệu ứng hover cho hàng trong bảng chi tiết */
+.detailed-table tbody tr:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+.detailed-table th {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 10;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Nút xem chi tiết */
+.view-detail-btn {
+  background: transparent;
+  border: none;
+  color: #4a89dc;
+  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.view-detail-btn:hover {
+  background-color: rgba(74, 137, 220, 0.1);
+  color: #2a69bc;
+}
+
+.view-detail-btn:active {
+  background-color: rgba(74, 137, 220, 0.2);
+}
+
+/* Chi tiết giao dịch hiện tại */
+.current-transaction-section {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.transaction-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.transaction-row {
+  display: flex;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.detail-label {
+  font-weight: 500;
+  width: 150px;
+  color: #6c757d;
+}
+
+.detail-value {
+  flex: 1;
+  font-weight: 600;
+  color: #343a40;
+}
+
+@media (max-width: 768px) {
+  .transaction-details {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Hiệu ứng hover cho bảng */
+.package-history-table tr:hover,
+.recent-transactions-table tr:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Phân cách rõ ràng giữa các phần */
+.user-profile-section,
+.user-stats-section,
+.purchase-history-section,
+.user-spending-chart,
+.package-analysis-section,
+.recent-transactions-section {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.recent-transactions-section:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+/* Hiển thị nhiều hơn phần chi tiết người dùng */
+.user-basic-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.user-name h4 {
+  font-size: 1.4rem;
+  margin-bottom: 5px;
+  color: #1a237e;
+}
+
+.user-since {
+  font-size: 0.9rem;
+  color: #6c757d;
+  display: block;
+}
+
+.user-contact {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.user-contact p {
+  margin: 5px 0;
+}

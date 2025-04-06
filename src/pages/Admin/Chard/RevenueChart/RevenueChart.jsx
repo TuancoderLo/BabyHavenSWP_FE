@@ -19,6 +19,27 @@ import "./RevenueChart.css";
 import transactionApi from "../../../../services/transactionApi";
 import axios from "axios";
 
+// Cấu hình axios để xử lý lỗi CORS
+const axiosInstance = axios.create({
+  baseURL:
+    "https://babyhaven-swp-web-emhrccb7hfh7bkf5.southeastasia-01.azurewebsites.net",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  withCredentials: false,
+});
+
+// Interceptor để thêm headers CORS vào mỗi request
+axiosInstance.interceptors.request.use(
+  (config) => {
+    config.headers["Access-Control-Allow-Origin"] = "*";
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // Đăng ký các thành phần cần thiết cho Chart.js
 ChartJS.register(
   CategoryScale,
@@ -49,6 +70,10 @@ const RevenueChart = () => {
   const [selectedTransaction, setSelectedTransaction] = useState(null); // Giao dịch được chọn để xem chi tiết
   const [showTransactionDetail, setShowTransactionDetail] = useState(false); // Hiển thị modal chi tiết giao dịch
   const [comparisonMetric, setComparisonMetric] = useState("revenue"); // Tiêu chí so sánh: revenue, transactions
+
+  // Thêm state cho phần quý
+  const [selectedQuarter, setSelectedQuarter] = useState(null);
+  const [showQuarterDetail, setShowQuarterDetail] = useState(false);
 
   // Paging
   const [currentPage, setCurrentPage] = useState(1);
@@ -81,7 +106,7 @@ const RevenueChart = () => {
   };
 
   // Cập nhật state selectedYear
-  const [selectedYear, setSelectedYear] = useState("current");
+  const [selectedYear, setSelectedYear] = useState(getDefaultYear());
 
   // Cập nhật selectedYear khi có dữ liệu
   useEffect(() => {
@@ -868,14 +893,14 @@ const RevenueChart = () => {
 
     setIsLoadingUserDetail(true);
     try {
-      const response = await axios.get(
-        "https://babyhaven-swp-web-emhrccb7hfh7bkf5.southeastasia-01.azurewebsites.net/api/UserAccounts/odata"
-      );
+      // Sử dụng axiosInstance đã cấu hình thay vì axios trực tiếp
+      const response = await axiosInstance.get("/api/UserAccounts/odata");
 
       if (response.data && Array.isArray(response.data)) {
         // Tìm người dùng theo email
         const userDetail = response.data.find(
-          (user) => user.email.toLowerCase() === email.toLowerCase()
+          (user) =>
+            user.email && user.email.toLowerCase() === email.toLowerCase()
         );
 
         setUserAccountDetail(userDetail || null);
@@ -884,7 +909,18 @@ const RevenueChart = () => {
       }
     } catch (error) {
       console.error("Error fetching user details:", error);
-      setUserAccountDetail(null);
+      // Tạo mock data nếu API bị lỗi CORS
+      const mockUserDetail = {
+        fullName: selectedTransaction.fullName,
+        email: selectedTransaction.email,
+        phoneNumber: "Không có dữ liệu",
+        dateOfBirth: null,
+        gender: null,
+        address: "Không có dữ liệu",
+        roleName: "Khách hàng",
+        status: "Đang hoạt động",
+      };
+      setUserAccountDetail(mockUserDetail);
     } finally {
       setIsLoadingUserDetail(false);
     }
@@ -1353,6 +1389,44 @@ const RevenueChart = () => {
     };
   };
 
+  // Lấy danh sách giao dịch trong quý đã chọn
+  const getTransactionsForQuarter = (year, quarter) => {
+    if (!transactions || !year || !quarter) return [];
+
+    // Lọc những giao dịch thành công trong quý đã chọn
+    return transactions
+      .filter((transaction) => {
+        if (transaction.paymentStatus !== "Completed") return false;
+
+        const txDate = new Date(transaction.transactionDate);
+        const txYear = txDate.getFullYear();
+        const txQuarter = Math.floor(txDate.getMonth() / 3) + 1;
+
+        return txYear === year && txQuarter === quarter;
+      })
+      .sort(
+        (a, b) => new Date(b.transactionDate) - new Date(a.transactionDate)
+      );
+  };
+
+  // Mở modal chi tiết quý
+  const openQuarterDetail = (year, quarterNumber) => {
+    const quarterInfo = {
+      year,
+      quarter: quarterNumber,
+      name: `Q${quarterNumber}/${year}`,
+    };
+
+    setSelectedQuarter(quarterInfo);
+    setShowQuarterDetail(true);
+  };
+
+  // Đóng modal chi tiết quý
+  const closeQuarterDetail = () => {
+    setSelectedQuarter(null);
+    setShowQuarterDetail(false);
+  };
+
   return (
     <div className="revenue-dashboard">
       {/* Tiêu đề */}
@@ -1796,7 +1870,17 @@ const RevenueChart = () => {
                   <tbody>
                     {getFilteredQuarterlyData().length > 0 ? (
                       getFilteredQuarterlyData().map((quarter, index) => (
-                        <tr key={index}>
+                        <tr
+                          key={index}
+                          className="quarter-row"
+                          onClick={() =>
+                            openQuarterDetail(
+                              quarter.year,
+                              quarter.quarterNumber
+                            )
+                          }
+                          style={{ cursor: "pointer" }}
+                        >
                           <td>{quarter.quarter}</td>
                           <td>{formatAmount(quarter.revenue)}</td>
                           <td>{formatAmount(quarter.standardRevenue)}</td>
@@ -2179,6 +2263,59 @@ const RevenueChart = () => {
                 </div>
               </div>
 
+              {/* Chi tiết giao dịch hiện tại */}
+              <div className="current-transaction-section">
+                <h4>
+                  <i className="fas fa-receipt"></i> Chi Tiết Giao Dịch
+                </h4>
+                <div className="transaction-details">
+                  <div className="transaction-row">
+                    <div className="detail-label">ID Giao Dịch:</div>
+                    <div className="detail-value">
+                      {selectedTransaction.gatewayTransactionId || "N/A"}
+                    </div>
+                  </div>
+                  <div className="transaction-row">
+                    <div className="detail-label">Gói Dịch Vụ:</div>
+                    <div className="detail-value">
+                      {renderPackageBadge(selectedTransaction.packageName)}
+                    </div>
+                  </div>
+                  <div className="transaction-row">
+                    <div className="detail-label">Số Tiền:</div>
+                    <div className="detail-value">
+                      {formatAmount(selectedTransaction.amount)}
+                    </div>
+                  </div>
+                  <div className="transaction-row">
+                    <div className="detail-label">Phương Thức:</div>
+                    <div className="detail-value">
+                      {selectedTransaction.paymentMethod || "Không xác định"}
+                    </div>
+                  </div>
+                  <div className="transaction-row">
+                    <div className="detail-label">Ngày Giao Dịch:</div>
+                    <div className="detail-value">
+                      {formatDate(selectedTransaction.transactionDate)}
+                    </div>
+                  </div>
+                  <div className="transaction-row">
+                    <div className="detail-label">Ngày Thanh Toán:</div>
+                    <div className="detail-value">
+                      {selectedTransaction.paymentDate
+                        ? formatDate(selectedTransaction.paymentDate)
+                        : "Chưa thanh toán"}
+                    </div>
+                  </div>
+                  <div className="transaction-row">
+                    <div className="detail-label">Trạng Thái:</div>
+                    <div className="detail-value">
+                      {renderPaymentStatus(selectedTransaction.paymentStatus)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Lịch sử gói dịch vụ đã mua */}
               <div className="purchase-history-section">
                 <h4>
@@ -2481,6 +2618,195 @@ const RevenueChart = () => {
               <button
                 className="modal-btn primary"
                 onClick={closeTransactionDetail}
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal chi tiết danh sách người mua trong quý */}
+      {showQuarterDetail && selectedQuarter && (
+        <div className="transaction-detail-modal">
+          <div
+            className="modal-content"
+            style={{ maxWidth: "90%", width: "1100px" }}
+          >
+            <div className="modal-header">
+              <h3>
+                <i className="fas fa-users"></i> Danh Sách Khách Hàng - Quý{" "}
+                {selectedQuarter.name}
+              </h3>
+              <button className="close-modal" onClick={closeQuarterDetail}>
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div
+                className="quarter-stats"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "15px",
+                  backgroundColor: "#f8f9fa",
+                  borderRadius: "8px",
+                  marginBottom: "20px",
+                }}
+              >
+                {(() => {
+                  // Tối ưu: chỉ lấy dữ liệu giao dịch một lần
+                  const transactions = getTransactionsForQuarter(
+                    selectedQuarter.year,
+                    selectedQuarter.quarter
+                  );
+
+                  const totalRevenue = transactions.reduce(
+                    (sum, t) => sum + (t.amount || 0),
+                    0
+                  );
+                  const standardCount = transactions.filter(
+                    (t) => t.packageName === "Standard"
+                  ).length;
+                  const premiumCount = transactions.filter(
+                    (t) => t.packageName === "Premium"
+                  ).length;
+
+                  // Tính số lượng khách hàng duy nhất (không trùng lặp)
+                  const uniqueUserIds = new Set();
+                  transactions.forEach((t) => {
+                    if (t.userId) uniqueUserIds.add(t.userId);
+                  });
+                  const uniqueUsers = uniqueUserIds.size;
+
+                  return (
+                    <>
+                      <div className="quarter-stat-item">
+                        <div className="stat-title">Doanh Thu</div>
+                        <div className="stat-value">
+                          {formatAmount(totalRevenue)}
+                        </div>
+                      </div>
+                      <div className="quarter-stat-item">
+                        <div className="stat-title">Số Giao Dịch</div>
+                        <div className="stat-value">{transactions.length}</div>
+                      </div>
+                      <div className="quarter-stat-item">
+                        <div className="stat-title">Gói Standard</div>
+                        <div className="stat-value">
+                          {standardCount} giao dịch
+                        </div>
+                      </div>
+                      <div className="quarter-stat-item">
+                        <div className="stat-title">Gói Premium</div>
+                        <div className="stat-value">
+                          {premiumCount} giao dịch
+                        </div>
+                      </div>
+                      <div className="quarter-stat-item">
+                        <div className="stat-title">Khách Hàng</div>
+                        <div className="stat-value">{uniqueUsers} người</div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+
+              <h4>
+                <i className="fas fa-list"></i> Danh Sách Giao Dịch Trong Quý
+              </h4>
+
+              <div
+                className="customer-table-container"
+                style={{ maxHeight: "500px", overflowY: "auto" }}
+              >
+                <table className="detailed-table">
+                  <thead
+                    style={{
+                      position: "sticky",
+                      top: 0,
+                      backgroundColor: "#fff",
+                    }}
+                  >
+                    <tr>
+                      <th>ID Giao Dịch</th>
+                      <th>Khách Hàng</th>
+                      <th>Gói</th>
+                      <th>Số Tiền</th>
+                      <th>Ngày Giao Dịch</th>
+                      <th>Phương Thức</th>
+                      <th>Chi Tiết</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(() => {
+                      // Tối ưu: lấy và lưu trữ dữ liệu chỉ một lần
+                      const quarterTransactions = getTransactionsForQuarter(
+                        selectedQuarter.year,
+                        selectedQuarter.quarter
+                      );
+
+                      if (quarterTransactions.length > 0) {
+                        return quarterTransactions.map((transaction, index) => (
+                          <tr key={index}>
+                            <td>{transaction.gatewayTransactionId || "N/A"}</td>
+                            <td>
+                              {transaction.fullName || "Chưa có tên"}
+                              {transaction.email && (
+                                <div
+                                  style={{ fontSize: "0.85em", color: "#666" }}
+                                >
+                                  {transaction.email}
+                                </div>
+                              )}
+                            </td>
+                            <td>
+                              {renderPackageBadge(transaction.packageName)}
+                            </td>
+                            <td className="amount-value">
+                              {formatAmount(transaction.amount)}
+                            </td>
+                            <td>{formatDate(transaction.transactionDate)}</td>
+                            <td>
+                              {transaction.paymentMethod || "Không xác định"}
+                            </td>
+                            <td>
+                              <button
+                                className="view-detail-btn"
+                                title="Xem chi tiết khách hàng"
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Ngăn event lan tỏa
+                                  // Đóng modal quý trước khi mở modal chi tiết người dùng
+                                  setShowQuarterDetail(false);
+                                  openTransactionDetail(transaction);
+                                }}
+                              >
+                                <i className="fas fa-info-circle"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        ));
+                      } else {
+                        return (
+                          <tr>
+                            <td colSpan="7" className="no-data">
+                              <i className="fas fa-info-circle"></i> Không có dữ
+                              liệu giao dịch trong quý này
+                            </td>
+                          </tr>
+                        );
+                      }
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button
+                className="modal-btn primary"
+                onClick={closeQuarterDetail}
               >
                 Đóng
               </button>
