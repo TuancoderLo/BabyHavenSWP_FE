@@ -368,8 +368,11 @@ const Consultations = () => {
         completed: "Completed",
       };
 
-      // Nếu đang ở tab "new", luôn sử dụng "completed" bất kể giá trị action là gì
-      const action = activeTab === "new" ? "completed" : values.action;
+      // Nếu đang ở tab "new" hoặc status là "Pending", luôn sử dụng "completed"
+      const action =
+        activeTab === "new" || selectedConsultation.status === "Pending"
+          ? "completed"
+          : values.action;
 
       const numericStatus = statusMapForResponse[action];
       const stringStatus = statusMapForRequest[action];
@@ -395,7 +398,7 @@ const Consultations = () => {
 
       setResponseVisible(false);
       message.success(
-        activeTab === "new"
+        activeTab === "new" || selectedConsultation.status === "Pending"
           ? "Consultation completed successfully"
           : action === "approved"
           ? "Consultation request approved"
@@ -847,7 +850,11 @@ const Consultations = () => {
               layout="vertical"
               onFinish={handleResponseSubmit}
               initialValues={{
-                action: activeTab === "new" ? "completed" : "approved",
+                action:
+                  activeTab === "new" ||
+                  selectedConsultation.status === "Pending"
+                    ? "completed"
+                    : "approved",
               }}
             >
               <Divider orientation="left">Consultation Information</Divider>
@@ -898,21 +905,22 @@ const Consultations = () => {
 
               <Divider orientation="left">Response</Divider>
 
-              {/* Chỉ hiển thị lựa chọn Action khi KHÔNG phải ở tab "new" */}
-              {activeTab !== "new" && (
-                <Form.Item
-                  name="action"
-                  label="Action"
-                  rules={[
-                    { required: true, message: "Please select an action" },
-                  ]}
-                >
-                  <Select>
-                    <Option value="approved">Approve Request</Option>
-                    <Option value="rejected">Reject Request</Option>
-                  </Select>
-                </Form.Item>
-              )}
+              {/* Chỉ hiển thị lựa chọn Action khi KHÔNG phải ở tab "new" và status KHÔNG phải là "Pending" */}
+              {activeTab !== "new" &&
+                selectedConsultation.status !== "Pending" && (
+                  <Form.Item
+                    name="action"
+                    label="Action"
+                    rules={[
+                      { required: true, message: "Please select an action" },
+                    ]}
+                  >
+                    <Select>
+                      <Option value="approved">Approve Request</Option>
+                      <Option value="rejected">Reject Request</Option>
+                    </Select>
+                  </Form.Item>
+                )}
 
               <Form.Item noStyle shouldUpdate>
                 {({ getFieldValue }) =>
@@ -944,7 +952,8 @@ const Consultations = () => {
                     Cancel
                   </Button>
                   <Button type="primary" htmlType="submit" loading={loading}>
-                    {activeTab === "new"
+                    {activeTab === "new" ||
+                    selectedConsultation.status === "Pending"
                       ? "Complete Consultation"
                       : "Send Response"}
                   </Button>
