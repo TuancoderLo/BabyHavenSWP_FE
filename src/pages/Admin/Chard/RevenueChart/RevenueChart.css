@@ -233,7 +233,7 @@
   font-size: 22px;
   font-weight: 600;
   color: #2c3e50;
-  margin-bottom: 4px;
+  margin: 0;
 }
 
 .change-indicator {
@@ -327,6 +327,8 @@
 .chart-area {
   height: 400px;
   position: relative;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 /* Loading */
@@ -402,7 +404,8 @@
   }
 
   .chart-area {
-    height: 300px;
+    height: 350px;
+    padding: 10px;
   }
 
   .card-value {
@@ -905,4 +908,2091 @@
   .name-filter-input {
     width: 100%;
   }
+}
+
+/* RevenueChart.css */
+
+.revenue-dashboard {
+  background-color: #f9fafc;
+  padding: 24px;
+  min-height: calc(100vh - 100px);
+  width: 100%;
+  max-width: 100%;
+  font-family: "Roboto", "Segoe UI", Arial, sans-serif;
+}
+
+/* Header */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.dashboard-header h2 {
+  color: #333;
+  margin: 0;
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+}
+
+.dashboard-header h2 i {
+  margin-right: 12px;
+  color: #4c6ef8;
+}
+
+.header-actions .refresh-btn {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #555;
+  font-weight: 500;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.header-actions .refresh-btn:hover {
+  background-color: #f0f0f0;
+  border-color: #bbb;
+}
+
+.header-actions .refresh-btn i {
+  margin-right: 8px;
+}
+
+/* Bộ lọc thời gian */
+.time-filter-container {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.time-frame-selector {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.time-frame-selector button {
+  background-color: #f0f2f5;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 24px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #555;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.time-frame-selector button:hover {
+  background-color: #e4e6eb;
+  transform: translateY(-1px);
+}
+
+.time-frame-selector button.active {
+  background-color: #4c6ef8;
+  color: white;
+  box-shadow: 0 3px 6px rgba(76, 110, 248, 0.2);
+}
+
+.custom-date-range {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.date-filter-type {
+  display: flex;
+  gap: 24px;
+}
+
+.date-filter-type label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #555;
+  font-weight: 500;
+}
+
+.date-range-inputs {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.date-range-input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.date-range-input label {
+  white-space: nowrap;
+  color: #555;
+  font-weight: 500;
+}
+
+.date-picker {
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  width: 160px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Cards */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.summary-card {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  transition: transform 0.25s, box-shadow 0.25s;
+  overflow: hidden;
+  position: relative;
+}
+
+.summary-card::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0),
+    rgba(76, 110, 248, 0.5)
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.summary-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.summary-card:hover::after {
+  opacity: 1;
+}
+
+.total-revenue::after {
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0),
+    rgba(76, 110, 248, 0.5)
+  );
+}
+
+.transaction-counts::after {
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0),
+    rgba(238, 125, 49, 0.5)
+  );
+}
+
+.standard-revenue::after {
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0),
+    rgba(75, 192, 192, 0.5)
+  );
+}
+
+.premium-revenue::after {
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0),
+    rgba(153, 102, 255, 0.5)
+  );
+}
+
+.card-icon {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  margin-right: 20px;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+
+.summary-card:hover .card-icon {
+  transform: scale(1.1);
+}
+
+.card-icon i {
+  font-size: 1.7rem;
+}
+
+.total-revenue .card-icon {
+  background-color: rgba(76, 110, 248, 0.15);
+  color: #4c6ef8;
+}
+
+.transaction-counts .card-icon {
+  background-color: rgba(238, 125, 49, 0.15);
+  color: #ee7d31;
+}
+
+.standard-revenue .card-icon {
+  background-color: rgba(75, 192, 192, 0.15);
+  color: #4bc0c0;
+}
+
+.premium-revenue .card-icon {
+  background-color: rgba(153, 102, 255, 0.15);
+  color: #9966ff;
+}
+
+.card-content {
+  flex-grow: 1;
+}
+
+.card-content h4 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  color: #555;
+  font-weight: 600;
+}
+
+.card-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-subtitle,
+.package-percentage {
+  font-size: 0.9rem;
+  color: #777;
+}
+
+.change-indicator {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  margin-top: 8px;
+}
+
+.change-indicator i {
+  margin-right: 5px;
+}
+
+.change-indicator.positive {
+  color: #4caf50;
+}
+
+.change-indicator.negative {
+  color: #f44336;
+}
+
+.transaction-status-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 8px;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+  margin-left: 8px;
+}
+
+.status-dot.completed {
+  background-color: #4caf50;
+}
+
+.status-dot.pending {
+  background-color: #ff9800;
+}
+
+.status-dot.failed {
+  background-color: #f44336;
+}
+
+/* Navigation */
+.chart-navigation {
+  display: flex;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  margin-bottom: 30px;
+  overflow: hidden;
+}
+
+.chart-navigation button {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 16px;
+  cursor: pointer;
+  color: #666;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+}
+
+.chart-navigation button::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 3px;
+  background-color: #4c6ef8;
+  transition: width 0.3s;
+}
+
+.chart-navigation button i {
+  font-size: 1rem;
+}
+
+.chart-navigation button:hover {
+  background-color: #f6f8fa;
+  color: #333;
+}
+
+.chart-navigation button:hover::after {
+  width: 30%;
+}
+
+.chart-navigation button.active {
+  background-color: #4c6ef8;
+  color: white;
+}
+
+.chart-navigation button.active::after {
+  width: 70%;
+  background-color: #fff;
+}
+
+/* Chart panels */
+.chart-panel {
+  margin-bottom: 30px;
+}
+
+.chart-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.chart-card {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  margin-bottom: 24px;
+  transition: box-shadow 0.3s;
+}
+
+.chart-card:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.chart-card.half {
+  height: auto;
+  min-height: 420px;
+  padding-bottom: 30px;
+}
+
+.chart-card h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.chart-card h3 i {
+  margin-right: 10px;
+  color: #4c6ef8;
+}
+
+.chart-area {
+  height: 400px;
+  position: relative;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.chart-controls {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+
+.chart-controls button {
+  padding: 8px 16px;
+  background-color: #f0f2f5;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #555;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.chart-controls button:hover {
+  background-color: #e4e6eb;
+  transform: translateY(-1px);
+}
+
+.chart-controls button.active {
+  background-color: #4c6ef8;
+  color: white;
+  box-shadow: 0 2px 5px rgba(76, 110, 248, 0.2);
+}
+
+/* Override for full-width chart */
+.chart-card.full-width {
+  grid-column: span 2;
+}
+
+.chart-card.full-width .chart-area {
+  height: 450px;
+}
+
+/* Stats container */
+.stats-container {
+  padding: 20px;
+  height: calc(100% - 60px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+
+.stat-item:hover {
+  background-color: #f9fafc;
+}
+
+.stat-item:last-child {
+  border-bottom: none;
+}
+
+.stat-label {
+  color: #666;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-weight: 600;
+  color: #333;
+}
+
+.stat-value.success {
+  color: #4caf50;
+}
+
+.stat-value.pending {
+  color: #ff9800;
+}
+
+.stat-value.failed {
+  color: #f44336;
+}
+
+.stat-value.cancelled {
+  color: #9e9e9e;
+}
+
+/* Package details */
+.package-details {
+  padding: 20px;
+  height: calc(100% - 60px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.package-detail-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+
+.package-detail-item:hover {
+  background-color: #f9fafc;
+}
+
+.package-detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  color: #666;
+  font-weight: 500;
+}
+
+.detail-value {
+  font-weight: 600;
+  color: #333;
+}
+
+/* Quarterly summary */
+.quarterly-summary {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.quarterly-summary h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.quarterly-summary h3 i {
+  margin-right: 10px;
+  color: #4c6ef8;
+}
+
+/* Cải thiện bảng báo cáo theo quý để hiển thị dữ liệu nhiều năm */
+.quarterly-table-container {
+  max-height: 500px;
+  overflow-y: auto;
+  margin-top: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.quarterly-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.quarterly-table th {
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa;
+  padding: 12px 15px;
+  text-align: left;
+  color: #333;
+  font-weight: 600;
+  border-bottom: 2px solid #e2e8f0;
+  z-index: 10;
+}
+
+.quarterly-table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.quarterly-table tbody tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+.quarterly-table tbody tr:hover {
+  background-color: #edf2ff;
+}
+
+.quarterly-table td {
+  padding: 12px 15px;
+  vertical-align: middle;
+}
+
+.quarterly-table tfoot {
+  position: sticky;
+  bottom: 0;
+  background-color: #f8f9fa;
+  z-index: 10;
+}
+
+.quarterly-table tfoot td {
+  padding: 12px 15px;
+  font-weight: 600;
+  border-top: 2px solid #e2e8f0;
+  color: #1a202c;
+}
+
+/* Hiển thị nhóm theo năm */
+.quarterly-table .year-group {
+  background-color: #edf2ff;
+  font-weight: 600;
+  color: #3a3a3a;
+}
+
+.quarterly-table .year-group td {
+  padding: 10px 15px;
+}
+
+/* Style cho phần lọc năm */
+.year-filter {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.year-filter button {
+  padding: 8px 16px;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  color: #4a5568;
+}
+
+.year-filter button:hover {
+  background-color: #e2e8f0;
+}
+
+.year-filter button.active {
+  background-color: #4c6ef8;
+  color: white;
+  border-color: #4c6ef8;
+}
+
+@media (max-width: 768px) {
+  .quarterly-table {
+    font-size: 12px;
+  }
+
+  .quarterly-table th,
+  .quarterly-table td {
+    padding: 8px 10px;
+  }
+
+  .quarterly-table-container {
+    max-height: 400px;
+  }
+}
+
+/* Advanced filter */
+.advanced-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background-color: #f9fafc;
+  border-radius: 8px;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.05);
+}
+
+.filter-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  flex: 1;
+}
+
+.filter-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 220px;
+}
+
+.filter-row label {
+  font-size: 0.95rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.filter-row select,
+.filter-row input {
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s;
+}
+
+.filter-row select:hover,
+.filter-row input:hover {
+  border-color: #bbb;
+}
+
+.filter-row select:focus,
+.filter-row input:focus {
+  outline: none;
+  border-color: #4c6ef8;
+  box-shadow: 0 0 0 3px rgba(76, 110, 248, 0.1);
+}
+
+.name-filter-input {
+  width: 100%;
+}
+
+.filter-summary {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #eee;
+  font-size: 0.95rem;
+}
+
+.result-count {
+  color: #666;
+}
+
+.filtered-revenue {
+  font-weight: 600;
+  color: #4c6ef8;
+}
+
+/* Detailed table */
+.detailed-table-container {
+  overflow-x: auto;
+  margin-bottom: 24px;
+}
+
+.detailed-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.detailed-table th,
+.detailed-table td {
+  padding: 14px 18px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.detailed-table th {
+  background-color: #f6f8fa;
+  color: #555;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.detailed-table tbody tr {
+  transition: background-color 0.2s;
+}
+
+.detailed-table tbody tr:hover {
+  background-color: #f8f9fb;
+}
+
+.detailed-table .no-data {
+  text-align: center;
+  color: #888;
+  padding: 40px;
+  font-size: 1rem;
+}
+
+.detailed-table .no-data i {
+  margin-right: 10px;
+  color: #aaa;
+}
+
+/* Status and package badges */
+.status-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.status-badge.completed {
+  background-color: rgba(76, 175, 80, 0.15);
+  color: #4caf50;
+}
+
+.status-badge.pending {
+  background-color: rgba(255, 152, 0, 0.15);
+  color: #ff9800;
+}
+
+.status-badge.failed {
+  background-color: rgba(244, 67, 54, 0.15);
+  color: #f44336;
+}
+
+.status-badge.cancelled {
+  background-color: rgba(158, 158, 158, 0.15);
+  color: #9e9e9e;
+}
+
+.package-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.package-badge i {
+  margin-right: 6px;
+}
+
+.package-badge.standard {
+  background-color: rgba(75, 192, 192, 0.15);
+  color: #4bc0c0;
+}
+
+.package-badge.premium {
+  background-color: rgba(153, 102, 255, 0.15);
+  color: #9966ff;
+}
+
+.amount-value {
+  font-weight: 500;
+  color: #333;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.pagination-btn {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #f6f8fa;
+  border-color: #bbb;
+  transform: translateY(-1px);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  margin: 0 18px;
+  color: #666;
+  font-weight: 500;
+}
+
+.items-per-page {
+  margin-left: 24px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  color: #555;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Actions */
+.view-detail-btn {
+  background-color: transparent;
+  border: none;
+  color: #4c6ef8;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 6px;
+  transition: all 0.2s;
+}
+
+.view-detail-btn:hover {
+  color: #2a4cd7;
+  transform: scale(1.1);
+}
+
+/* Transaction detail modal */
+.transaction-detail-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+.modal-content {
+  background-color: #fff;
+  border-radius: 12px;
+  width: 92%;
+  max-width: 850px;
+  max-height: 90%;
+  overflow-y: auto;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  animation: modal-in 0.3s ease-out;
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+}
+
+.modal-header h3 i {
+  margin-right: 12px;
+  color: #4c6ef8;
+}
+
+.close-modal {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.close-modal:hover {
+  color: #333;
+  transform: scale(1.1);
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.transaction-detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-row {
+  display: flex;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+.detail-label {
+  flex: 1;
+  color: #666;
+  font-weight: 500;
+}
+
+.detail-value {
+  flex: 2;
+  color: #333;
+  font-weight: 500;
+}
+
+.modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #eee;
+  text-align: right;
+}
+
+.modal-btn {
+  padding: 10px 20px;
+  background-color: #4c6ef8;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  box-shadow: 0 2px 6px rgba(76, 110, 248, 0.2);
+}
+
+.modal-btn:hover {
+  background-color: #2a4cd7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(76, 110, 248, 0.3);
+}
+
+/* Loading & Error states */
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #666;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4c6ef8;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.error-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #f44336;
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+.error-container i {
+  margin-right: 12px;
+}
+
+.no-data-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #888;
+  font-size: 1rem;
+}
+
+.no-data-message i {
+  margin-right: 10px;
+  color: #aaa;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .chart-row {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-card.full-width {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-section {
+    flex-direction: column;
+  }
+
+  .date-range-inputs {
+    flex-direction: column;
+  }
+
+  .chart-navigation button {
+    font-size: 0.9rem;
+    padding: 12px 10px;
+  }
+
+  .chart-navigation button i {
+    margin-right: 0;
+  }
+
+  .chart-card.half {
+    height: auto;
+  }
+
+  .chart-area {
+    height: 350px;
+    padding: 10px;
+  }
+}
+
+/* Styles cho Modal Chi Tiết Người Dùng */
+.transaction-detail-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+.modal-content {
+  background-color: #fff;
+  border-radius: 12px;
+  width: 92%;
+  max-width: 850px;
+  max-height: 90%;
+  overflow-y: auto;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  animation: modal-in 0.3s ease-out;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+}
+
+.modal-header h3 i {
+  margin-right: 12px;
+  color: #4c6ef8;
+}
+
+.close-modal {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.close-modal:hover {
+  color: #333;
+  transform: scale(1.1);
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #eee;
+  text-align: right;
+}
+
+.modal-btn {
+  padding: 10px 20px;
+  background-color: #4c6ef8;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  box-shadow: 0 2px 6px rgba(76, 110, 248, 0.2);
+}
+
+.modal-btn:hover {
+  background-color: #2a4cd7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(76, 110, 248, 0.3);
+}
+
+/* Phần profile người dùng */
+.user-profile-section {
+  padding: 20px;
+  background-color: #f8fafc;
+  border-radius: 10px;
+  margin-bottom: 24px;
+  border-left: 4px solid #4c6ef8;
+}
+
+.user-basic-info {
+  display: flex;
+  flex-direction: column;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.user-name {
+  margin-bottom: 15px;
+  border-bottom: 1px solid #e6e6e6;
+  padding-bottom: 10px;
+}
+
+.user-name h4 {
+  font-size: 1.4rem;
+  margin: 0 0 5px 0;
+  color: #3a3a3a;
+}
+
+.user-since {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.user-contact {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+}
+
+.user-contact p {
+  margin: 5px 0;
+  display: flex;
+  align-items: center;
+}
+
+.user-contact i {
+  margin-right: 10px;
+  width: 18px;
+  color: #4a6cf7;
+}
+
+/* Thêm loading state khi đang tải thông tin chi tiết */
+.loading-user-details {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  color: #666;
+}
+
+.loading-user-details .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3498db;
+  border-radius: 50%;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Thẻ thống kê */
+.user-stats-section {
+  margin-bottom: 24px;
+}
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.user-stat-card {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.user-stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.total-spent {
+  border-left: 4px solid #4caf50;
+}
+
+.total-transactions {
+  border-left: 4px solid #2196f3;
+}
+
+.success-rate {
+  border-left: 4px solid #ff9800;
+}
+
+.stat-icon {
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: rgba(76, 110, 248, 0.1);
+  color: #4c6ef8;
+  font-size: 1.2rem;
+}
+
+.total-spent .stat-icon {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+}
+
+.total-transactions .stat-icon {
+  background-color: rgba(33, 150, 243, 0.1);
+  color: #2196f3;
+}
+
+.success-rate .stat-icon {
+  background-color: rgba(255, 152, 0, 0.1);
+  color: #ff9800;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-title {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Lịch sử gói dịch vụ */
+.purchase-history-section,
+.user-spending-chart,
+.package-analysis-section,
+.recent-transactions-section {
+  margin-bottom: 30px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+}
+
+.purchase-history-section h4,
+.user-spending-chart h4,
+.package-analysis-section h4,
+.recent-transactions-section h4 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+  color: #333;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.purchase-history-section h4 i,
+.user-spending-chart h4 i,
+.package-analysis-section h4 i,
+.recent-transactions-section h4 i {
+  color: #4c6ef8;
+}
+
+.package-history-container,
+.recent-transactions-container {
+  overflow-x: auto;
+}
+
+.package-history-table,
+.recent-transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.package-history-table th,
+.package-history-table td,
+.recent-transactions-table th,
+.recent-transactions-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.package-history-table th,
+.recent-transactions-table th {
+  background-color: #f8fafc;
+  color: #555;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.package-history-table tr:hover td,
+.recent-transactions-table tr:hover td {
+  background-color: #f8fafc;
+}
+
+/* Biểu đồ chi tiêu */
+.user-chart {
+  height: 300px;
+  margin-top: 20px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/* Phân tích gói dịch vụ */
+.package-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.package-donut-chart {
+  height: 240px;
+  width: 100%;
+  position: relative;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.package-stats-details {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  justify-content: center;
+}
+
+.package-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.package-stat-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.package-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background-color: rgba(76, 110, 248, 0.1);
+  color: #4c6ef8;
+  font-size: 1.1rem;
+}
+
+.package-stat-content {
+  flex: 1;
+}
+
+.package-stat-content h5 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: #444;
+}
+
+.package-stat-values {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.package-count {
+  color: #666;
+}
+
+.package-count span {
+  font-weight: bold;
+  color: #333;
+}
+
+.package-total {
+  font-weight: bold;
+  color: #4caf50;
+}
+
+/* Hiển thị khi không có dữ liệu */
+.no-data-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  color: #888;
+  font-style: italic;
+}
+
+.no-data-message i {
+  margin-right: 8px;
+}
+
+/* Responsive cho modal chi tiết người dùng */
+@media (max-width: 768px) {
+  .stats-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .package-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .package-donut-chart {
+    height: 200px;
+    padding: 5px;
+  }
+
+  .user-basic-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .user-chart {
+    height: 250px;
+    padding: 5px;
+  }
+}
+
+@media (max-width: 576px) {
+  .modal-content {
+    width: 95%;
+    max-height: 85%;
+  }
+
+  .modal-header {
+    padding: 15px;
+  }
+
+  .modal-body {
+    padding: 15px;
+  }
+
+  .purchase-history-section,
+  .user-spending-chart,
+  .package-analysis-section,
+  .recent-transactions-section {
+    padding: 15px;
+  }
+}
+
+/* Đảm bảo biểu đồ tròn hiển thị đầy đủ */
+canvas {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Điều chỉnh riêng cho biểu đồ tròn */
+.pie-chart-container {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Đảm bảo biểu đồ tròn không bị cắt */
+.package-donut-chart {
+  height: 240px;
+  width: 100%;
+  position: relative;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/* Hiệu chỉnh chiều cao và padding cho các biểu đồ trong phần chi tiết khách hàng */
+.user-chart {
+  height: 300px;
+  margin-top: 20px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .chart-area {
+    height: 350px;
+    padding: 10px;
+  }
+
+  .package-donut-chart {
+    height: 200px;
+    padding: 5px;
+  }
+
+  .user-chart {
+    height: 250px;
+    padding: 5px;
+  }
+}
+
+/* Điều chỉnh bộ lọc email */
+.email-filter-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.filter-row label {
+  margin-bottom: 5px;
+  font-weight: 500;
+  display: block;
+}
+
+/* Style cho trường tìm kiếm chung */
+.search-filter-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #2d3748;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.25s ease;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>');
+  background-repeat: no-repeat;
+  background-position: 12px center;
+  padding-left: 40px;
+}
+
+.search-filter-input:focus {
+  outline: none;
+  border-color: #4c6ef8;
+  box-shadow: 0 0 0 3px rgba(76, 110, 248, 0.15);
+}
+
+.search-filter-input::placeholder {
+  color: #a0aec0;
+}
+
+.filter-row {
+  margin-bottom: 15px;
+}
+
+.filter-row label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #4a5568;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .search-filter-input {
+    padding: 10px 12px 10px 36px;
+    background-position: 10px center;
+    font-size: 13px;
+  }
+}
+
+/* Loại bỏ các style không còn cần thiết */
+.name-filter-input,
+.email-filter-input {
+  /* Các style này sẽ được thay thế bởi .search-filter-input */
+}
+
+/* Điều chỉnh vị trí và kiểu dáng của DatePicker để tránh xung đột */
+.react-datepicker-wrapper {
+  width: 100%;
+  position: relative;
+}
+
+.react-datepicker-popper {
+  z-index: 1000 !important; /* Đảm bảo datepicker hiển thị trên các phần tử khác */
+  position: absolute !important;
+}
+
+.react-datepicker {
+  font-family: "Inter", sans-serif !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.react-datepicker__header {
+  background-color: #f8fafc !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  border-top-left-radius: 8px !important;
+  border-top-right-radius: 8px !important;
+  padding-top: 10px !important;
+}
+
+.react-datepicker__month-container {
+  background-color: white !important;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: #4c6ef8 !important;
+  border-radius: 50% !important;
+}
+
+.date-range-inputs {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  position: relative;
+  z-index: 5; /* Đảm bảo các trường input hiển thị trên các phần tử khác */
+}
+
+.date-range-input {
+  flex: 1;
+  position: relative; /* Đảm bảo vị trí cho dropdown */
+}
+
+/* Điều chỉnh input datepicker */
+.date-picker {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+}
+
+/* Đảm bảo hiển thị phân biệt với các nội dung khác */
+.custom-date-range {
+  margin-bottom: 30px;
+  background-color: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  position: relative; /* Đảm bảo vị trí cho dropdown */
+}
+
+/* Đảm bảo vị trí hiển thị của popup lịch phù hợp */
+.time-filter-container {
+  position: relative;
+  z-index: 10; /* Cao hơn các phần tử khác */
+  margin-bottom: 40px; /* Tạo khoảng cách với nội dung phía dưới */
+}
+
+/* Thêm kiểu dáng cho dropdown chọn năm */
+.year-selector {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.year-selector label {
+  margin-right: 10px;
+  font-weight: 500;
+  color: #555;
+}
+
+.year-dropdown {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  min-width: 120px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.year-dropdown:hover {
+  border-color: #aaa;
+}
+
+.year-dropdown:focus {
+  border-color: #4a6cf7;
+  box-shadow: 0 0 0 2px rgba(74, 108, 247, 0.2);
+}
+
+/* Điều chỉnh bảng quarterly */
+.quarterly-summary {
+  margin-top: 20px;
+}
+
+.quarterly-summary h3 {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quarterly-summary h3 i {
+  color: #4a6cf7;
+}
+
+/* Kiểu dáng cho hàng trong bảng quý (có thể nhấp vào) */
+.quarterly-table .quarter-row:hover {
+  background-color: rgba(53, 162, 235, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.quarterly-table .quarter-row:active {
+  background-color: rgba(53, 162, 235, 0.2);
+}
+
+/* Thống kê quý */
+.quarter-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.quarter-stat-item {
+  text-align: center;
+  padding: 10px 15px;
+  flex: 1;
+  border-right: 1px solid #e9ecef;
+}
+
+.quarter-stat-item:last-child {
+  border-right: none;
+}
+
+.quarter-stat-item .stat-title {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-bottom: 5px;
+}
+
+.quarter-stat-item .stat-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #343a40;
+}
+
+/* Custom scrollbar cho bảng danh sách */
+.customer-table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.customer-table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.customer-table-container::-webkit-scrollbar-thumb {
+  background: #aaa;
+  border-radius: 10px;
+}
+
+.customer-table-container::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Thêm hiệu ứng hover cho hàng trong bảng chi tiết */
+.detailed-table tbody tr:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+.detailed-table th {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 10;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Nút xem chi tiết */
+.view-detail-btn {
+  background: transparent;
+  border: none;
+  color: #4a89dc;
+  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.view-detail-btn:hover {
+  background-color: rgba(74, 137, 220, 0.1);
+  color: #2a69bc;
+}
+
+.view-detail-btn:active {
+  background-color: rgba(74, 137, 220, 0.2);
+}
+
+/* Chi tiết giao dịch hiện tại */
+.current-transaction-section {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.transaction-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.transaction-row {
+  display: flex;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.detail-label {
+  font-weight: 500;
+  width: 150px;
+  color: #6c757d;
+}
+
+.detail-value {
+  flex: 1;
+  font-weight: 600;
+  color: #343a40;
+}
+
+@media (max-width: 768px) {
+  .transaction-details {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Hiệu ứng hover cho bảng */
+.package-history-table tr:hover,
+.recent-transactions-table tr:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Phân cách rõ ràng giữa các phần */
+.user-profile-section,
+.user-stats-section,
+.purchase-history-section,
+.user-spending-chart,
+.package-analysis-section,
+.recent-transactions-section {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.recent-transactions-section:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+/* Hiển thị nhiều hơn phần chi tiết người dùng */
+.user-basic-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.user-name h4 {
+  font-size: 1.4rem;
+  margin-bottom: 5px;
+  color: #1a237e;
+}
+
+.user-since {
+  font-size: 0.9rem;
+  color: #6c757d;
+  display: block;
+}
+
+.user-contact {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.user-contact p {
+  margin: 5px 0;
 }

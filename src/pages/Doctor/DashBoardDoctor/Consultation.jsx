@@ -45,7 +45,6 @@ const { Option } = Select;
 const Consultations = () => {
   const [loading, setLoading] = useState(false);
   const [consultations, setConsultations] = useState([]);
-  const [onGoingConsultations, setOnGoingConsultations] = useState([]);
   const [filteredConsultations, setFilteredConsultations] = useState([]);
   const [selectedConsultation, setSelectedConsultation] = useState(null);
   const [responseForm] = Form.useForm();
@@ -68,9 +67,10 @@ const Consultations = () => {
     consultationDetails: {},
     lastFetch: {
       consultations: null,
-      ongoingConsultations: null,
     },
   });
+
+  const [totalNewRequestsCount, setTotalNewRequestsCount] = useState(0);
 
   const getConsultationDetailFromCache = (requestId) => {
     return cache.consultationDetails[requestId];
@@ -90,18 +90,14 @@ const Consultations = () => {
   };
 
   useEffect(() => {
-    if (activeTab === "ongoing") {
-      fetchOnGoingConsultationsWithPagination(pagination.current, pagination.pageSize);
-    } else {
-      fetchConsultationsWithPagination(pagination.current, pagination.pageSize);
-    }
+    fetchConsultationsWithPagination(pagination.current, pagination.pageSize);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   useEffect(() => {
     applyFilters();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchText, historyFilterStatus, consultations, onGoingConsultations]);
+  }, [searchText, historyFilterStatus, consultations]);
 
   // Lấy chi tiết request (có cache)
   const fetchConsultationRequestsById = async (requestId) => {
@@ -169,7 +165,16 @@ const Consultations = () => {
     }
   };
 
-  // Hàm fetch các tab new/completed/history
+  // Thêm hàm helper để sắp xếp theo thời gian mới nhất
+  const sortByDateDesc = (items) => {
+    return [...items].sort((a, b) => {
+      const dateA = new Date(a.requestDate);
+      const dateB = new Date(b.requestDate);
+      return dateB - dateA; // Sắp xếp giảm dần (mới nhất đầu tiên)
+    });
+  };
+
+  // Sửa lại hàm fetchConsultationsWithPagination để sắp xếp trước khi phân trang
   const fetchConsultationsWithPagination = async (page = 1, pageSize = 5) => {
     setLoading(true);
     try {
@@ -179,18 +184,35 @@ const Consultations = () => {
         return;
       }
 
-      const response = await doctorApi.getConsultationRequestsByDoctorOData(doctorId);
-      const allRequests = Array.isArray(response) ? response : response.data || [];
+      const response = await doctorApi.getConsultationRequestsByDoctorOData(
+        doctorId
+      );
+      const allRequests = Array.isArray(response)
+        ? response
+        : response.data || [];
+
+      // Tính tổng số yêu cầu mới (Pending) từ tất cả yêu cầu
+      const totalPendingRequests = allRequests.filter(
+        (item) => item.status === "Pending"
+      ).length;
+
+      // Cập nhật state lưu tổng số yêu cầu mới
+      setTotalNewRequestsCount(totalPendingRequests);
 
       // Lọc theo tab
       let filteredData = allRequests;
       if (activeTab === "new") {
         filteredData = allRequests.filter((item) => item.status === "Pending");
       } else if (activeTab === "completed") {
-        filteredData = allRequests.filter((item) => item.status === "Completed");
+        filteredData = allRequests.filter(
+          (item) => item.status === "Completed"
+        );
       } else if (activeTab === "history") {
         // hiển thị tất cả (nếu muốn)
       }
+
+      // Sắp xếp theo thời gian mới nhất
+      filteredData = sortByDateDesc(filteredData);
 
       const total = filteredData.length;
       const startIndex = (page - 1) * pageSize;
@@ -220,100 +242,45 @@ const Consultations = () => {
     }
   };
 
-  // Hàm fetch tab "ongoing"
-  const fetchOnGoingConsultationsWithPagination = async (page = 1, pageSize = 5) => {
-    setLoading(true);
-    try {
-      const doctorId = localStorage.getItem("doctorId");
-      if (!doctorId) {
-        message.error("Doctor ID not found in localStorage!");
-        return;
-      }
-
-      const requests = await doctorApi.getConsultationRequestsByDoctorAndStatus(doctorId, "Approved");
-
-      const total = requests.length;
-      const startIndex = (page - 1) * pageSize;
-      const endIndex = Math.min(startIndex + pageSize, total);
-      const paginatedRequests = requests.slice(startIndex, endIndex);
-
-      const basicRequests = paginatedRequests.map((req) => ({
-        id: req.requestId,
-        requestId: req.requestId,
-        parentName: req.memberName || "N/A",
-        childName: req.childName || "N/A",
-        requestDate: req.requestDate || moment().format(),
-        status: req.status || "Approved",
-      }));
-
-      setOnGoingConsultations(basicRequests);
-      setPagination({
-        current: page,
-        pageSize,
-        total,
-      });
-    } catch (error) {
-      message.error("Failed to fetch ongoing consultations!");
-      console.error("Error fetching ongoing consultations:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // [CHANGED] Xoá toàn bộ filter rating
-  // Chỉ còn filter searchText + historyFilterStatus
+  // Cập nhật hàm applyFilters để duy trì thứ tự sắp xếp
   const applyFilters = () => {
-    let data = [];
-    if (activeTab === "ongoing") {
-      data = onGoingConsultations.filter((item) => item.status === "Approved");
-      if (searchText) {
-        data = data.filter(
-          (item) =>
-            item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
-            (item.description && item.description.toLowerCase().includes(searchText.toLowerCase()))
-        );
-      }
-    } else if (activeTab === "completed") {
-      data = consultations.filter((item) => item.status === "Completed");
-      if (searchText) {
-        data = data.filter(
-          (item) =>
-            item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
-            (item.description && item.description.toLowerCase().includes(searchText.toLowerCase()))
-        );
-      }
+    let data = [...consultations];
+
+    if (activeTab === "completed") {
+      data = data.filter((item) => item.status === "Completed");
     } else if (activeTab === "history") {
-      data = [...consultations];
       if (historyFilterStatus) {
         data = data.filter((item) => item.status === historyFilterStatus);
       }
-      if (searchText) {
-        data = data.filter(
-          (item) =>
-            item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
-            (item.description && item.description.toLowerCase().includes(searchText.toLowerCase()))
-        );
-      }
     } else {
       // Tab "new" => Pending
-      data = consultations.filter((item) => item.status === "Pending");
-      if (searchText) {
-        data = data.filter(
-          (item) =>
-            item.parentName.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.childName.toLowerCase().includes(searchText.toLowerCase()) ||
-            (item.description && item.description.toLowerCase().includes(searchText.toLowerCase()))
-        );
-      }
+      data = data.filter((item) => item.status === "Pending");
     }
+
+    if (searchText) {
+      data = data.filter(
+        (item) =>
+          item.parentName?.toLowerCase().includes(searchText.toLowerCase()) ||
+          item.childName?.toLowerCase().includes(searchText.toLowerCase()) ||
+          (item.description &&
+            item.description.toLowerCase().includes(searchText.toLowerCase()))
+      );
+    }
+
+    // Dữ liệu đã được sắp xếp từ API, không cần sắp xếp lại ở đây
     setFilteredConsultations(data);
   };
 
   const handleSearch = (e) => {
     setSearchText(e.target.value);
+  };
+
+  // Thêm hàm helper để loại bỏ các entity HTML như &nbsp;
+  const decodeHtmlEntities = (text) => {
+    if (!text) return "";
+    const element = document.createElement("div");
+    element.innerHTML = text;
+    return element.textContent;
   };
 
   // Khi xem chi tiết
@@ -322,7 +289,9 @@ const Consultations = () => {
       setSelectedConsultation({ ...record, isLoading: true });
       setDetailVisible(true);
 
-      const detailedData = await fetchConsultationRequestsById(record.requestId);
+      const detailedData = await fetchConsultationRequestsById(
+        record.requestId
+      );
 
       // Lấy responses
       const responses = await doctorApi.getConsultationResponsesOData(
@@ -336,19 +305,27 @@ const Consultations = () => {
       let feedbackDate = "";
       if (latestResponse.responseId) {
         try {
-          const feedbackResponse = await doctorApi.getRatingFeedbackByResponseId(
-            latestResponse.responseId
-          );
+          const feedbackResponse =
+            await doctorApi.getRatingFeedbackByResponseId(
+              latestResponse.responseId
+            );
           const feedbackData = feedbackResponse.data[0] || {};
           rating = feedbackData.rating || 0;
           comment = feedbackData.comment || "";
           feedbackDate = feedbackData.feedbackDate || "";
         } catch (error) {
-          console.error(`Error fetching feedback for responseId=${latestResponse.responseId}:`, error);
+          console.error(
+            `Error fetching feedback for responseId=${latestResponse.responseId}:`,
+            error
+          );
         }
       }
 
       const attachmentsArray = parseAttachments(detailedData.attachments);
+      // Xử lý description để loại bỏ các HTML entities
+      const cleanDescription = decodeHtmlEntities(
+        detailedData.description || "N/A"
+      );
 
       setSelectedConsultation({
         ...record,
@@ -360,12 +337,13 @@ const Consultations = () => {
         childAllergies: detailedData.child?.allergies || "None",
         childNotes: detailedData.child?.notes || "None",
         childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
-        description: detailedData.description || "N/A",
+        description: cleanDescription,
         attachments: attachmentsArray,
         response: latestResponse.content || "",
         createdAt: detailedData.createdAt || moment().format(),
         updatedAt: detailedData.updatedAt || moment().format(),
-        completedDate: detailedData.status === "Completed" ? detailedData.updatedAt : null,
+        completedDate:
+          detailedData.status === "Completed" ? detailedData.updatedAt : null,
 
         // [CHANGED] Lưu thêm rating, comment, feedbackDate trong selectedConsultation
         rating,
@@ -384,8 +362,14 @@ const Consultations = () => {
       responseForm.resetFields();
       setResponseVisible(true);
 
-      const detailedData = await fetchConsultationRequestsById(record.requestId);
+      const detailedData = await fetchConsultationRequestsById(
+        record.requestId
+      );
       const attachmentsArray = parseAttachments(detailedData.attachments);
+      // Xử lý description để loại bỏ các HTML entities
+      const cleanDescription = decodeHtmlEntities(
+        detailedData.description || "N/A"
+      );
 
       setSelectedConsultation({
         ...record,
@@ -397,7 +381,7 @@ const Consultations = () => {
         childAllergies: detailedData.child?.allergies || "None",
         childNotes: detailedData.child?.notes || "None",
         childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
-        description: detailedData.description || "N/A",
+        description: cleanDescription,
         attachments: attachmentsArray,
       });
     } catch (error) {
@@ -422,8 +406,14 @@ const Consultations = () => {
         completed: "Completed",
       };
 
-      const numericStatus = statusMapForResponse[values.action];
-      const stringStatus = statusMapForRequest[values.action];
+      // Nếu đang ở tab "new" hoặc status là "Pending", luôn sử dụng "completed"
+      const action =
+        activeTab === "new" || selectedConsultation.status === "Pending"
+          ? "completed"
+          : values.action;
+
+      const numericStatus = statusMapForResponse[action];
+      const stringStatus = statusMapForRequest[action];
 
       const responsePayload = {
         requestId: selectedConsultation.requestId,
@@ -439,23 +429,18 @@ const Consultations = () => {
         stringStatus
       );
 
-      if (activeTab === "ongoing") {
-        await fetchOnGoingConsultationsWithPagination(
-          pagination.current,
-          pagination.pageSize
-        );
-      } else {
-        await fetchConsultationsWithPagination(
-          pagination.current,
-          pagination.pageSize
-        );
-      }
+      await fetchConsultationsWithPagination(
+        pagination.current,
+        pagination.pageSize
+      );
 
       setResponseVisible(false);
       message.success(
-        values.action === "approved"
+        activeTab === "new" || selectedConsultation.status === "Pending"
+          ? "Consultation completed successfully"
+          : action === "approved"
           ? "Consultation request approved"
-          : values.action === "rejected"
+          : action === "rejected"
           ? "Consultation request rejected"
           : "Response submitted successfully"
       );
@@ -470,20 +455,14 @@ const Consultations = () => {
   const handleComplete = async (record) => {
     setLoading(true);
     try {
-      await doctorApi.updateConsultationRequestsStatus(record.requestId, "Completed");
-
-      if (activeTab === "ongoing") {
-        await fetchOnGoingConsultationsWithPagination(
-          pagination.current,
-          pagination.pageSize
-        );
-      } else {
-        await fetchConsultationsWithPagination(
-          pagination.current,
-          pagination.pageSize
-        );
-      }
-
+      await doctorApi.updateConsultationRequestsStatus(
+        record.requestId,
+        "Completed"
+      );
+      await fetchConsultationsWithPagination(
+        pagination.current,
+        pagination.pageSize
+      );
       message.success("Consultation completed");
     } catch (error) {
       message.error("Failed to complete consultation!");
@@ -543,7 +522,10 @@ const Consultations = () => {
       key: "action",
       render: (_, record) => (
         <Space>
-          <Button icon={<EyeOutlined />} onClick={() => handleViewDetail(record)}>
+          <Button
+            icon={<EyeOutlined />}
+            onClick={() => handleViewDetail(record)}
+          >
             Details
           </Button>
           {record.status === "Pending" && (
@@ -601,7 +583,10 @@ const Consultations = () => {
       key: "action",
       render: (_, record) => (
         <Space>
-          <Button icon={<EyeOutlined />} onClick={() => handleViewDetail(record)}>
+          <Button
+            icon={<EyeOutlined />}
+            onClick={() => handleViewDetail(record)}
+          >
             Details
           </Button>
           {record.status === "Pending" && (
@@ -627,14 +612,15 @@ const Consultations = () => {
     },
   ];
 
-  const newRequestsCount = consultations.filter((item) => item.status === "Pending").length;
-
   const downloadAttachment = (attachment) => {
     try {
-      const fileName = attachment.fileName || attachment.FileName || "download.file";
+      const fileName =
+        attachment.fileName || attachment.FileName || "download.file";
       const content = attachment.content || attachment.Content || "";
       const mimeType =
-        attachment.mimeType || attachment.MimeType || "application/octet-stream";
+        attachment.mimeType ||
+        attachment.MimeType ||
+        "application/octet-stream";
 
       if (!content) {
         message.error(`Missing attachment content for "${fileName}"`);
@@ -668,21 +654,29 @@ const Consultations = () => {
     if (!mimeType) return <FileOutlined />;
     if (mimeType.includes("pdf")) return <FilePdfOutlined />;
     if (mimeType.includes("image")) return <FileImageOutlined />;
-    if (mimeType.includes("word") || mimeType.includes("doc")) return <FileWordOutlined />;
+    if (mimeType.includes("word") || mimeType.includes("doc"))
+      return <FileWordOutlined />;
     return <FileTextOutlined />;
   };
 
   const renderAttachments = (attachments) => {
-    if (!attachments || !Array.isArray(attachments) || attachments.length === 0) {
+    if (
+      !attachments ||
+      !Array.isArray(attachments) ||
+      attachments.length === 0
+    ) {
       return <p>No attachments</p>;
     }
 
     return attachments.map((attachment, index) => {
       if (!attachment) return null;
 
-      const fileName = attachment.fileName || attachment.FileName || `File ${index + 1}`;
+      const fileName =
+        attachment.fileName || attachment.FileName || `File ${index + 1}`;
       const mimeType =
-        attachment.mimeType || attachment.MimeType || "application/octet-stream";
+        attachment.mimeType ||
+        attachment.MimeType ||
+        "application/octet-stream";
 
       return (
         <div key={index} className="attachment-item">
@@ -763,11 +757,10 @@ const Consultations = () => {
   }, []);
 
   const handleTableChange = (newPagination) => {
-    if (activeTab === "ongoing") {
-      fetchOnGoingConsultationsWithPagination(newPagination.current, newPagination.pageSize);
-    } else {
-      fetchConsultationsWithPagination(newPagination.current, newPagination.pageSize);
-    }
+    fetchConsultationsWithPagination(
+      newPagination.current,
+      newPagination.pageSize
+    );
   };
 
   return (
@@ -777,7 +770,10 @@ const Consultations = () => {
           Consultations
         </Title>
 
-        <div className="consult-header" style={{ display: "flex", alignItems: "center" }}>
+        <div
+          className="consult-header"
+          style={{ display: "flex", alignItems: "center" }}
+        >
           <Input
             placeholder="Search by parent, child, or description"
             prefix={<SearchOutlined />}
@@ -797,8 +793,6 @@ const Consultations = () => {
               >
                 <Option value="">All</Option>
                 <Option value="Pending">Pending</Option>
-                <Option value="Approved">Approved</Option>
-                <Option value="Rejected">Rejected</Option>
                 <Option value="Completed">Completed</Option>
               </Select>
             </div>
@@ -806,9 +800,10 @@ const Consultations = () => {
           <Button
             type="primary"
             onClick={() =>
-              activeTab === "ongoing"
-                ? fetchOnGoingConsultationsWithPagination(pagination.current, pagination.pageSize)
-                : fetchConsultationsWithPagination(pagination.current, pagination.pageSize)
+              fetchConsultationsWithPagination(
+                pagination.current,
+                pagination.pageSize
+              )
             }
             loading={loading}
             className="consult-refresh-btn"
@@ -824,25 +819,17 @@ const Consultations = () => {
             tab={
               <span>
                 New Requests{" "}
-                {newRequestsCount > 0 && (
-                  <Badge count={newRequestsCount} style={{ backgroundColor: "#e92121" }} />
+                {totalNewRequestsCount > 0 && (
+                  <Badge
+                    count={totalNewRequestsCount}
+                    style={{ backgroundColor: "#e92121" }}
+                  />
                 )}
               </span>
             }
           >
             <Table
               columns={newRequestColumns}
-              dataSource={filteredConsultations}
-              rowKey="id"
-              loading={loading}
-              pagination={pagination}
-              onChange={handleTableChange}
-            />
-          </Tabs.TabPane>
-
-          <Tabs.TabPane key="ongoing" tab="Ongoing">
-            <Table
-              columns={columns}
               dataSource={filteredConsultations}
               rowKey="id"
               loading={loading}
@@ -894,7 +881,13 @@ const Consultations = () => {
               form={responseForm}
               layout="vertical"
               onFinish={handleResponseSubmit}
-              initialValues={{ action: "approved" }}
+              initialValues={{
+                action:
+                  activeTab === "new" ||
+                  selectedConsultation.status === "Pending"
+                    ? "completed"
+                    : "approved",
+              }}
             >
               <Divider orientation="left">Consultation Information</Divider>
               <Descriptions bordered size="small" column={1}>
@@ -902,10 +895,13 @@ const Consultations = () => {
                   {selectedConsultation.parentName}
                 </Descriptions.Item>
                 <Descriptions.Item label="Child">
-                  {selectedConsultation.childName} ({selectedConsultation.childAge})
+                  {selectedConsultation.childName} (
+                  {selectedConsultation.childAge})
                 </Descriptions.Item>
                 <Descriptions.Item label="Request Date">
-                  {moment(selectedConsultation.requestDate).format("DD/MM/YYYY HH:mm")}
+                  {moment(selectedConsultation.requestDate).format(
+                    "DD/MM/YYYY HH:mm"
+                  )}
                 </Descriptions.Item>
                 <Descriptions.Item label="Description">
                   {selectedConsultation.description}
@@ -924,7 +920,9 @@ const Consultations = () => {
               <Divider orientation="left">Child Information</Divider>
               <Descriptions bordered size="small" column={1}>
                 <Descriptions.Item label="Date of Birth">
-                  {moment(selectedConsultation.childDateOfBirth).format("DD/MM/YYYY")}
+                  {moment(selectedConsultation.childDateOfBirth).format(
+                    "DD/MM/YYYY"
+                  )}
                 </Descriptions.Item>
                 <Descriptions.Item label="Gender">
                   {selectedConsultation.childGender}
@@ -938,16 +936,23 @@ const Consultations = () => {
               </Descriptions>
 
               <Divider orientation="left">Response</Divider>
-              <Form.Item
-                name="action"
-                label="Action"
-                rules={[{ required: true, message: "Please select an action" }]}
-              >
-                <Select>
-                  <Option value="approved">Approve Request</Option>
-                  <Option value="rejected">Reject Request</Option>
-                </Select>
-              </Form.Item>
+
+              {/* Chỉ hiển thị lựa chọn Action khi KHÔNG phải ở tab "new" và status KHÔNG phải là "Pending" */}
+              {activeTab !== "new" &&
+                selectedConsultation.status !== "Pending" && (
+                  <Form.Item
+                    name="action"
+                    label="Action"
+                    rules={[
+                      { required: true, message: "Please select an action" },
+                    ]}
+                  >
+                    <Select>
+                      <Option value="approved">Approve Request</Option>
+                      <Option value="rejected">Reject Request</Option>
+                    </Select>
+                  </Form.Item>
+                )}
 
               <Form.Item noStyle shouldUpdate>
                 {({ getFieldValue }) =>
@@ -955,7 +960,9 @@ const Consultations = () => {
                     <Form.Item
                       name="rejectReason"
                       label="Reject Reason"
-                      rules={[{ required: true, message: "Please enter reason" }]}
+                      rules={[
+                        { required: true, message: "Please enter reason" },
+                      ]}
                     >
                       <TextArea rows={4} placeholder="Enter reject reason" />
                     </Form.Item>
@@ -973,9 +980,14 @@ const Consultations = () => {
 
               <Form.Item>
                 <div className="consult-modal-buttons">
-                  <Button onClick={() => setResponseVisible(false)}>Cancel</Button>
+                  <Button onClick={() => setResponseVisible(false)}>
+                    Cancel
+                  </Button>
                   <Button type="primary" htmlType="submit" loading={loading}>
-                    Send Response
+                    {activeTab === "new" ||
+                    selectedConsultation.status === "Pending"
+                      ? "Complete Consultation"
+                      : "Send Response"}
                   </Button>
                 </div>
               </Form.Item>
@@ -1012,10 +1024,13 @@ const Consultations = () => {
                   </div>
                 </Descriptions.Item>
                 <Descriptions.Item label="Child">
-                  {selectedConsultation.childName} ({selectedConsultation.childAge})
+                  {selectedConsultation.childName} (
+                  {selectedConsultation.childAge})
                 </Descriptions.Item>
                 <Descriptions.Item label="Request Date">
-                  {moment(selectedConsultation.requestDate).format("DD/MM/YYYY HH:mm")}
+                  {moment(selectedConsultation.requestDate).format(
+                    "DD/MM/YYYY HH:mm"
+                  )}
                 </Descriptions.Item>
                 <Descriptions.Item label="Description">
                   {selectedConsultation.description}
@@ -1034,7 +1049,9 @@ const Consultations = () => {
               <Divider orientation="left">Child Information</Divider>
               <Descriptions bordered column={1}>
                 <Descriptions.Item label="Date of Birth">
-                  {moment(selectedConsultation.childDateOfBirth).format("DD/MM/YYYY")}
+                  {moment(selectedConsultation.childDateOfBirth).format(
+                    "DD/MM/YYYY"
+                  )}
                 </Descriptions.Item>
                 <Descriptions.Item label="Gender">
                   {selectedConsultation.childGender}
@@ -1050,10 +1067,14 @@ const Consultations = () => {
               <Divider orientation="left">System Information</Divider>
               <Descriptions bordered column={1}>
                 <Descriptions.Item label="Created At">
-                  {moment(selectedConsultation.createdAt).format("DD/MM/YYYY HH:mm")}
+                  {moment(selectedConsultation.createdAt).format(
+                    "DD/MM/YYYY HH:mm"
+                  )}
                 </Descriptions.Item>
                 <Descriptions.Item label="Updated At">
-                  {moment(selectedConsultation.updatedAt).format("DD/MM/YYYY HH:mm")}
+                  {moment(selectedConsultation.updatedAt).format(
+                    "DD/MM/YYYY HH:mm"
+                  )}
                 </Descriptions.Item>
               </Descriptions>
 
@@ -1062,7 +1083,9 @@ const Consultations = () => {
                 <Timeline.Item>
                   <p>
                     <strong>Request</strong> -{" "}
-                    {moment(selectedConsultation.requestDate).format("DD/MM/YYYY HH:mm")}
+                    {moment(selectedConsultation.requestDate).format(
+                      "DD/MM/YYYY HH:mm"
+                    )}
                   </p>
                   <Card size="small">
                     <p>{selectedConsultation.description}</p>
@@ -1072,7 +1095,9 @@ const Consultations = () => {
                   <Timeline.Item>
                     <p>
                       <strong>Response</strong> -{" "}
-                      {moment(selectedConsultation.updatedAt).format("DD/MM/YYYY HH:mm")}
+                      {moment(selectedConsultation.updatedAt).format(
+                        "DD/MM/YYYY HH:mm"
+                      )}
                     </p>
                     <Card size="small">
                       <p>{selectedConsultation.response}</p>
@@ -1093,7 +1118,9 @@ const Consultations = () => {
                   <Timeline.Item color="green">
                     <p>
                       <strong>Completed</strong> -{" "}
-                      {moment(selectedConsultation.completedDate).format("DD/MM/YYYY HH:mm")}
+                      {moment(selectedConsultation.completedDate).format(
+                        "DD/MM/YYYY HH:mm"
+                      )}
                     </p>
                   </Timeline.Item>
                 )}
@@ -1114,7 +1141,9 @@ const Consultations = () => {
                 </Descriptions.Item>
                 <Descriptions.Item label="Feedback Date">
                   {selectedConsultation.feedbackDate
-                    ? moment(selectedConsultation.feedbackDate).format("DD/MM/YYYY HH:mm")
+                    ? moment(selectedConsultation.feedbackDate).format(
+                        "DD/MM/YYYY HH:mm"
+                      )
                     : "N/A"}
                 </Descriptions.Item>
               </Descriptions>
