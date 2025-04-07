@@ -824,6 +824,33 @@ const Consultations = () => {
               </Select>
             </div>
           )}
+
+          {totalNewRequestsCount > 0 && (
+            <div
+              style={{
+                marginLeft: "auto",
+                marginRight: "10px",
+                backgroundColor: "#fff2f0",
+                border: "1px solid #ffccc7",
+                padding: "5px 12px",
+                borderRadius: "4px",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <span
+                style={{
+                  color: "#f5222d",
+                  fontWeight: "bold",
+                  marginRight: "5px",
+                }}
+              >
+                {totalNewRequestsCount}
+              </span>
+              <span>pending requests</span>
+            </div>
+          )}
+
           <Button
             type="primary"
             onClick={() =>
@@ -834,7 +861,6 @@ const Consultations = () => {
             }
             loading={loading}
             className="consult-refresh-btn"
-            style={{ marginLeft: "auto" }}
           >
             Refresh
           </Button>
