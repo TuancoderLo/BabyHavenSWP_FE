@@ -247,144 +247,146 @@ const GrowthChart = ({
         </div>
       );
     }
-
+  
+    const primaryName = childName || "Primary Child";
+    const compareName = compareChild?.name || "Compare Child";
+  
     switch (selectedTool) {
       case "BMI":
         return (
-<ResponsiveContainer width="100%" height={320}>
-  <LineChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-    <XAxis
-      dataKey="x"
-      type="number"
-      domain={[0, 11]}
-      ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
-      tickFormatter={(value) => {
-        const months = [
-          "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-        ];
-        return months[Math.floor(value)];
-      }}
-      stroke="#666"
-      tick={{ fill: "#666", fontSize: 10 }}
-      label={{ value: "Month", position: "insideBottom", offset: -5 }}
-    />
-    <YAxis
-      yAxisId="bmi"
-      orientation="left"
-      stroke="#FF9AA2"
-      tick={{ fill: "#666", fontSize: 11 }}
-      domain={[0, 50]}
-      ticks={[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]}
-      label={{ value: "BMI (kg/m²)", angle: -90, position: "insideLeft" }}
-    />
-    <Tooltip
-      contentStyle={{
-        backgroundColor: "rgba(255, 255, 255, 0.9)",
-        border: "1px solid #ccc",
-        borderRadius: "8px",
-        padding: "10px",
-      }}
-      formatter={(value, name) => {
-        if (name === "bmi") return [`${value}`, "BMI (kg/m²)"];
-        if (name.includes("Percentile")) return [`${value}`, name];
-        return [value, name];
-      }}
-      labelFormatter={(label, payload) => {
-        if (payload && payload.length > 0 && payload[0].payload) {
-          const record = payload[0].payload;
-          if (record.timestamp) {
-            return `Date: ${new Date(record.timestamp).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            })}`;
-          }
-        }
-        return "";
-      }}
-    />
-    <Legend verticalAlign="top" height={30} wrapperStyle={{ paddingTop: "5px", fontSize: "12px" }} />
-    {/* Primary child's BMI */}
-    <Line
-      yAxisId="bmi"
-      data={allRecords}
-      type="monotone"
-      dataKey="bmi"
-      stroke="#FF9AA2"
-      strokeWidth={2}
-      dot={{ fill: "#FF9AA2", r: 4 }}
-      activeDot={{ r: 6, fill: "#FF9AA2" }}
-      name="Primary BMI"
-      connectNulls={true}
-      onClick={(point) => {
-        if (onRecordSelect && point) onRecordSelect(point);
-      }}
-    />
-    {/* WHO BMI Percentile lines */}
-    <Line
-      yAxisId="bmi"
-      type="monotone"
-      dataKey="p01"
-      stroke="#ff4040"
-      strokeWidth={1}
-      dot={false}
-      name="1st Percentile"
-      connectNulls={true}
-    />
-    <Line
-      yAxisId="bmi"
-      type="monotone"
-      dataKey="p50"
-      stroke="#82ca9d"
-      strokeWidth={1}
-      dot={false}
-      name="50th Percentile"
-      connectNulls={true}
-    />
-    <Line
-      yAxisId="bmi"
-      type="monotone"
-      dataKey="p75"
-      stroke="#ffa500"
-      strokeWidth={1}
-      dot={false}
-      name="75th Percentile"
-      connectNulls={true}
-    />
-    <Line
-      yAxisId="bmi"
-      type="monotone"
-      dataKey="p99"
-      stroke="#ff7300"
-      strokeWidth={1}
-      dot={false}
-      name="99th Percentile"
-      connectNulls={true}
-    />
-    {/* Compare child's BMI (nếu có) */}
-    {compareRecords && compareRecords.length > 0 && (
-      <Line
-        yAxisId="bmi"
-        data={compareRecords}
-        type="monotone"
-        dataKey="bmi"
-        stroke="#0000FF"
-        strokeWidth={2}
-        dot={{ fill: "#0000FF", r: 4 }}
-        activeDot={{ r: 6, fill: "#0000FF" }}
-        name="Compare BMI"
-        connectNulls={true}
-        onClick={(point) => {
-          if (onRecordSelect && point) onRecordSelect(point);
-        }}
-      />
-    )}
-  </LineChart>
-</ResponsiveContainer>
+          <ResponsiveContainer width="100%" height={320}>
+            <LineChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis
+                dataKey="x"
+                type="number"
+                domain={[0, 11]}
+                ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
+                tickFormatter={(value) => {
+                  const months = [
+                    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+                  ];
+                  return months[Math.floor(value)];
+                }}
+                stroke="#666"
+                tick={{ fill: "#666", fontSize: 10 }}
+                label={{ value: "Month", position: "insideBottom", offset: -5 }}
+              />
+              <YAxis
+                yAxisId="bmi"
+                orientation="left"
+                stroke="#FF9AA2"
+                tick={{ fill: "#666", fontSize: 11 }}
+                domain={[0, 50]}
+                ticks={[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]}
+                label={{ value: "BMI (kg/m²)", angle: -90, position: "insideLeft" }}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "rgba(255, 255, 255, 0.9)",
+                  border: "1px solid #ccc",
+                  borderRadius: "8px",
+                  padding: "10px",
+                }}
+                formatter={(value, name) => {
+                  if (name.includes("BMI")) return [`${value}`, "BMI (kg/m²)"];
+                  if (name.includes("Percentile")) return [`${value}`, name];
+                  return [value, name];
+                }}
+                labelFormatter={(label, payload) => {
+                  if (payload && payload.length > 0 && payload[0].payload) {
+                    const record = payload[0].payload;
+                    if (record.timestamp) {
+                      return `Date: ${new Date(record.timestamp).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}`;
+                    }
+                  }
+                  return "";
+                }}
+              />
+              <Legend verticalAlign="top" height={30} wrapperStyle={{ paddingTop: "5px", fontSize: "12px" }} />
+              {/* Primary child's BMI */}
+              <Line
+                yAxisId="bmi"
+                data={allRecords}
+                type="monotone"
+                dataKey="bmi"
+                stroke="#FF9AA2" // Pink for primary
+                strokeWidth={2}
+                dot={{ fill: "#FF9AA2", r: 4 }}
+                activeDot={{ r: 6, fill: "#FF9AA2" }}
+                name={`${primaryName} BMI`}
+                connectNulls={true}
+                onClick={(point) => {
+                  if (onRecordSelect && point) onRecordSelect(point);
+                }}
+              />
+              {/* WHO BMI Percentile lines */}
+              <Line
+                yAxisId="bmi"
+                type="monotone"
+                dataKey="p01"
+                stroke="#ff4040"
+                strokeWidth={1}
+                dot={false}
+                name="1st Percentile"
+                connectNulls={true}
+              />
+              <Line
+                yAxisId="bmi"
+                type="monotone"
+                dataKey="p50"
+                stroke="#82ca9d"
+                strokeWidth={1}
+                dot={false}
+                name="50th Percentile"
+                connectNulls={true}
+              />
+              <Line
+                yAxisId="bmi"
+                type="monotone"
+                dataKey="p75"
+                stroke="#ffa500"
+                strokeWidth={1}
+                dot={false}
+                name="75th Percentile"
+                connectNulls={true}
+              />
+              <Line
+                yAxisId="bmi"
+                type="monotone"
+                dataKey="p99"
+                stroke="#ff7300"
+                strokeWidth={1}
+                dot={false}
+                name="99th Percentile"
+                connectNulls={true}
+              />
+              {/* Compare child's BMI */}
+              {compareRecords && compareRecords.length > 0 && (
+                <Line
+                  yAxisId="bmi"
+                  data={compareRecords}
+                  type="monotone"
+                  dataKey="bmi"
+                  stroke="#008cff" // Blue for compare
+                  strokeWidth={2}
+                  dot={{ fill: "#008cff", r: 4 }}
+                  activeDot={{ r: 6, fill: "#008cff" }}
+                  name={`${compareName} BMI`}
+                  connectNulls={true}
+                  onClick={(point) => {
+                    if (onRecordSelect && point) onRecordSelect(point);
+                  }}
+                />
+              )}
+            </LineChart>
+          </ResponsiveContainer>
         );
-      // Tương tự, bạn có thể thêm các trường hợp Height, Weight, ALL với việc hiển thị đường cho bé so sánh.
       case "Height":
         return (
           <ResponsiveContainer width="100%" height={320}>
@@ -397,18 +399,8 @@ const GrowthChart = ({
                 ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
                 tickFormatter={(value) => {
                   const months = [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "May",
-                    "Jun",
-                    "Jul",
-                    "Aug",
-                    "Sep",
-                    "Oct",
-                    "Nov",
-                    "Dec",
+                    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
                   ];
                   return months[Math.floor(value)];
                 }}
@@ -429,7 +421,7 @@ const GrowthChart = ({
                   borderRadius: "8px",
                   padding: "10px",
                 }}
-                formatter={(value, name) => [`${value}`, name]}
+                formatter={(value, name) => [`${value} cm`, name]}
                 labelFormatter={(label, payload) => {
                   if (payload && payload.length > 0 && payload[0].payload) {
                     const record = payload[0].payload;
@@ -449,11 +441,11 @@ const GrowthChart = ({
                 data={allRecords}
                 type="monotone"
                 dataKey="height"
-                stroke="#008cff"
+                stroke="#FF9AA2" // Pink for primary
                 strokeWidth={2}
-                dot={{ r: 4, fill: "#008cff" }}
-                activeDot={{ r: 6, fill: "#008cff" }}
-                name="Primary Height"
+                dot={{ r: 4, fill: "#FF9AA2" }}
+                activeDot={{ r: 6, fill: "#FF9AA2" }}
+                name={`${primaryName} Height`}
                 connectNulls={true}
                 onClick={(point) => {
                   if (onRecordSelect && point) onRecordSelect(point);
@@ -464,11 +456,11 @@ const GrowthChart = ({
                   data={compareRecords}
                   type="monotone"
                   dataKey="height"
-                  stroke="#0000FF"
+                  stroke="#008cff" // Blue for compare
                   strokeWidth={2}
-                  dot={{ r: 4, fill: "#0000FF" }}
-                  activeDot={{ r: 6, fill: "#0000FF" }}
-                  name="Compare Height"
+                  dot={{ r: 4, fill: "#008cff" }}
+                  activeDot={{ r: 6, fill: "#008cff" }}
+                  name={`${compareName} Height`}
                   connectNulls={true}
                   onClick={(point) => {
                     if (onRecordSelect && point) onRecordSelect(point);
@@ -490,18 +482,8 @@ const GrowthChart = ({
                 ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
                 tickFormatter={(value) => {
                   const months = [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "May",
-                    "Jun",
-                    "Jul",
-                    "Aug",
-                    "Sep",
-                    "Oct",
-                    "Nov",
-                    "Dec",
+                    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
                   ];
                   return months[Math.floor(value)];
                 }}
@@ -522,7 +504,7 @@ const GrowthChart = ({
                   borderRadius: "8px",
                   padding: "10px",
                 }}
-                formatter={(value, name) => [`${value}`, name]}
+                formatter={(value, name) => [`${value} kg`, name]}
                 labelFormatter={(label, payload) => {
                   if (payload && payload.length > 0 && payload[0].payload) {
                     const record = payload[0].payload;
@@ -542,11 +524,11 @@ const GrowthChart = ({
                 data={allRecords}
                 type="monotone"
                 dataKey="weight"
-                stroke="#ff7300"
+                stroke="#FF9AA2" // Pink for primary
                 strokeWidth={2}
-                dot={{ r: 4, fill: "#ff7300" }}
-                activeDot={{ r: 6, fill: "#ff7300" }}
-                name="Primary Weight"
+                dot={{ r: 4, fill: "#FF9AA2" }}
+                activeDot={{ r: 6, fill: "#FF9AA2" }}
+                name={`${primaryName} Weight`}
                 connectNulls={true}
                 onClick={(point) => {
                   if (onRecordSelect && point) onRecordSelect(point);
@@ -557,12 +539,12 @@ const GrowthChart = ({
                   data={compareRecords}
                   type="monotone"
                   dataKey="weight"
-                  stroke="#0000FF"
+                  stroke="#008cff" // Blue for compare
                   strokeWidth={2}
-                  dot={{ r: 4, fill: "#0000FF" }}
-                  activeDot={{ r: 6, fill: "#0000FF" }}
-                  name="Compare Weight"
-                  connectNulls={true}
+                  dot={{ r: 4, fill: "#008cff" }}
+                  activeDot={{ r: 6, fill: "#008cff" }}
+                  name={`${compareName} Weight`}
+                connectNulls={true}
                   onClick={(point) => {
                     if (onRecordSelect && point) onRecordSelect(point);
                   }}
@@ -583,18 +565,8 @@ const GrowthChart = ({
                 ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
                 tickFormatter={(value) => {
                   const months = [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "May",
-                    "Jun",
-                    "Jul",
-                    "Aug",
-                    "Sep",
-                    "Oct",
-                    "Nov",
-                    "Dec",
+                    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
                   ];
                   return months[Math.floor(value)];
                 }}
@@ -624,7 +596,7 @@ const GrowthChart = ({
                 stroke="#008cff"
                 domain={[0, 180]}
                 tick={{ fill: "#666", fontSize: 11 }}
-                label={{ value: "Height (cm)", angle: -90, position: "insideRight", offset: 20 }}
+                label={{ value: "Height (cm)", angle: -90, position: "insideRight", offset: -20 }}
               />
               <Tooltip
                 contentStyle={{
@@ -633,7 +605,12 @@ const GrowthChart = ({
                   borderRadius: "8px",
                   padding: "10px",
                 }}
-                formatter={(value, name) => [`${value}`, name]}
+                formatter={(value, name) => {
+                  if (name.includes("BMI")) return [`${value} kg/m²`, name];
+                  if (name.includes("Weight")) return [`${value} kg`, name];
+                  if (name.includes("Height")) return [`${value} cm`, name];
+                  return [value, name];
+                }}
                 labelFormatter={(label, payload) => {
                   if (payload && payload.length > 0 && payload[0].payload) {
                     const record = payload[0].payload;
@@ -648,11 +625,7 @@ const GrowthChart = ({
                   return "";
                 }}
               />
-              <Legend
-                verticalAlign="top"
-                height={30}
-                wrapperStyle={{ paddingTop: "5px", fontSize: "12px", display: "flex" }}
-              />
+              <Legend verticalAlign="top" height={30} wrapperStyle={{ paddingTop: "5px", fontSize: "12px" }} />
               <Line
                 type="monotone"
                 data={allRecords}
@@ -661,8 +634,8 @@ const GrowthChart = ({
                 stroke="#FF9AA2"
                 strokeWidth={2}
                 dot={{ r: 4, fill: "#FF9AA2" }}
-                activeDot={{ r: 4, fill: "#FF9AA2" }}
-                name="Primary BMI"
+                activeDot={{ r: 6, fill: "#FF9AA2" }}
+                name={`${primaryName} BMI`}
                 connectNulls={true}
                 onClick={(point) => {
                   if (onRecordSelect && point) onRecordSelect(point);
@@ -674,11 +647,11 @@ const GrowthChart = ({
                   data={compareRecords}
                   dataKey="bmi"
                   yAxisId="bmi"
-                  stroke="#0000FF"
+                  stroke="#008cff"
                   strokeWidth={2}
-                  dot={{ r: 4, fill: "#0000FF" }}
-                  activeDot={{ r: 4, fill: "#0000FF" }}
-                  name="Compare BMI"
+                  dot={{ r: 4, fill: "#008cff" }}
+                  activeDot={{ r: 6, fill: "#008cff" }}
+                  name={`${compareName} BMI`}
                   connectNulls={true}
                   onClick={(point) => {
                     if (onRecordSelect && point) onRecordSelect(point);
@@ -694,7 +667,7 @@ const GrowthChart = ({
                 strokeWidth={2}
                 dot={{ r: 4, fill: "#ff7300" }}
                 activeDot={{ r: 6, fill: "#ff7300" }}
-                name="Primary Weight"
+                name={`${primaryName} Weight`}
                 connectNulls={true}
                 onClick={(point) => {
                   if (onRecordSelect && point) onRecordSelect(point);
@@ -706,11 +679,11 @@ const GrowthChart = ({
                   data={compareRecords}
                   dataKey="weight"
                   yAxisId="weight"
-                  stroke="#0000FF"
+                  stroke="#008cff"
                   strokeWidth={2}
-                  dot={{ r: 4, fill: "#0000FF" }}
-                  activeDot={{ r: 6, fill: "#0000FF" }}
-                  name="Compare Weight"
+                  dot={{ r: 4, fill: "#008cff" }}
+                  activeDot={{ r: 6, fill: "#008cff" }}
+                  name={`${compareName} Weight`}
                   connectNulls={true}
                   onClick={(point) => {
                     if (onRecordSelect && point) onRecordSelect(point);
@@ -726,7 +699,7 @@ const GrowthChart = ({
                 strokeWidth={2}
                 dot={{ r: 4, fill: "#008cff" }}
                 activeDot={{ r: 6, fill: "#008cff" }}
-                name="Primary Height"
+                name={`${primaryName} Height`}
                 connectNulls={true}
                 onClick={(point) => {
                   if (onRecordSelect && point) onRecordSelect(point);
@@ -738,11 +711,11 @@ const GrowthChart = ({
                   data={compareRecords}
                   dataKey="height"
                   yAxisId="height"
-                  stroke="#0000FF"
+                  stroke="#FF9AA2"
                   strokeWidth={2}
-                  dot={{ r: 4, fill: "#0000FF" }}
-                  activeDot={{ r: 6, fill: "#0000FF" }}
-                  name="Compare Height"
+                  dot={{ r: 4, fill: "#FF9AA2" }}
+                  activeDot={{ r: 6, fill: "#FF9AA2" }}
+                  name={`${compareName} Height`}
                   connectNulls={true}
                   onClick={(point) => {
                     if (onRecordSelect && point) onRecordSelect(point);

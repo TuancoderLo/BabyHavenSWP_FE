@@ -1,0 +1,100 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .compare-modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    width: 350px;
+    max-width: 90%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: fadeIn 0.3s ease;
+  }
+  
+  .compare-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 15px;
+  }
+  
+  .compare-modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #333;
+  }
+  
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+  }
+  
+  .compare-modal-body {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .compare-child-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .compare-child-item {
+    padding: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  
+  .compare-child-item:hover {
+    background: #f8f9fa;
+  }
+  
+  .compare-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+  }
+  
+  .compare-modal-button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  .compare-modal-button.cancel {
+    background: #f44336;
+    color: #fff;
+    border: none;
+  }
+  
+  .compare-modal-button.cancel:hover {
+    background: #d32f2f;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
