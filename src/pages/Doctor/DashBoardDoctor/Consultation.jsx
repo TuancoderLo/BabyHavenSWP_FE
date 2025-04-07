@@ -423,10 +423,10 @@ const Consultations = () => {
         completed: "Completed",
       };
 
-      // Nếu đang ở tab "new" hoặc status là "Pending", luôn sử dụng "completed"
+      // Nếu đang ở tab "new" hoặc status là "Pending", luôn sử dụng "Pending"
       const action =
         activeTab === "new" || selectedConsultation.status === "Pending"
-          ? "completed"
+          ? "Pending"
           : values.action;
 
       const numericStatus = statusMapForResponse[action];
@@ -472,10 +472,10 @@ const Consultations = () => {
   const handleComplete = async (record) => {
     setLoading(true);
     try {
-      await doctorApi.updateConsultationRequestsStatus(
-        record.requestId,
-        "Completed"
-      );
+      // await doctorApi.updateConsultationRequestsStatus(
+      //   record.requestId,
+      //   "Completed"
+      // );
       await fetchConsultationsWithPagination(
         pagination.current,
         pagination.pageSize

@@ -256,48 +256,8 @@ function ChildrenPage() {
   const getAgeInYears = (ageInMonths) => {
     return Math.floor(ageInMonths / 12);
   };
-  const calculateGrowthChange = () => {
-    if (!growthRecords || growthRecords.length < 2) return null;
-    const latest = growthRecords[0];
-    const previous = growthRecords[1];
-    const latestBMI = calculateBMI(latest.weight, latest.height);
-    const previousBMI = calculateBMI(previous.weight, previous.height);
-    return {
-      weight: {
-        change: (latest.weight - previous.weight).toFixed(1),
-        trend: latest.weight > previous.weight ? "increase" : "decrease",
-      },
-      height: {
-        change: (latest.height - previous.height).toFixed(1),
-        trend: latest.height > previous.height ? "increase" : "decrease",
-      },
-      bmi: {
-        change: latestBMI && previousBMI ? (latestBMI - previousBMI).toFixed(1) : "N/A",
-      },
-    };
-  };
+
   
-  const calculateBMI = (weight, height) => {
-    if (!weight || !height) return null;
-    const heightInMeters = height / 100;
-    return weight / (heightInMeters * heightInMeters);
-  };
-  
-  const getPersonalizedMessage = () => {
-    const changes = calculateGrowthChange();
-    if (!changes) {
-      return "Keep tracking your child's growth to see personalized updates! 🌱";
-    }
-    const { weight, height } = changes;
-    if (weight.change > 0 && height.change > 0) {
-      return `Yay! ${selectedChild.name} has gained ${weight.change} kg and grown ${height.change} cm. Great job keeping them healthy! 🥳`;
-    } else if (weight.change <= 0) {
-      return `${selectedChild.name}'s weight has dropped by ${Math.abs(weight.change)} kg. Consider a nutrient-rich diet and check with a doctor if needed! 🥗`;
-    } else if (height.change <= 0) {
-      return `${selectedChild.name}'s height hasn’t increased. More playtime might help them grow taller! 🏃‍♀️`;
-    }
-    return "Keep up the good work nurturing your little one! 🌟";
-  };
 
   const getGrowthTip = (changes) => {
     if (!changes) return "Start tracking your child's growth for personalized tips! 🌱";
@@ -311,6 +271,105 @@ function ChildrenPage() {
     }
     return "Tip: Regular check-ins keep your little one on track! 🌟";
   };
+
+  const calculateBMI = (weight, height) => {
+    // Logic giữ nguyên
+    if (!weight || !height) return null;
+    const heightInMeters = height / 100;
+    return weight / (heightInMeters * heightInMeters);
+  };
+
+  const calculateGrowthChange = (records) => {
+    // Logic giữ nguyên
+    if (!records || records.length < 2) return null;
+    const latest = records[0];
+    const previous = records[1];
+    const latestBMI = calculateBMI(latest.weight, latest.height);
+    const previousBMI = calculateBMI(previous.weight, previous.height);
+    return {
+      weight: {
+        change: (latest.weight - previous.weight).toFixed(1),
+        trend: latest.weight > previous.weight ? "increase" : "decrease",
+      },
+      height: {
+        change: (latest.height - previous.height).toFixed(1),
+        trend: latest.height > previous.height ? "increase" : "decrease",
+      },
+      bmi: {
+        change:
+          latestBMI && previousBMI
+            ? (latestBMI - previousBMI).toFixed(1)
+            : "N/A",
+        trend: latestBMI > previousBMI ? "increase" : "decrease",
+      },
+    };
+  };
+
+  const renderGrowthAnalysis = () => {
+    // Logic giữ nguyên
+    const records = growthRecords.slice(0, 2);
+    let changes = calculateGrowthChange(records);
+    if (!changes) {
+      changes = {
+        weight: { change: "N/A", trend: null },
+        height: { change: "N/A", trend: null },
+        bmi: { change: "N/A", trend: null },
+      };
+    }
+    return (
+      <div className="growth-analysis-section">
+        <h3>Growth Analysis</h3>
+        <div className="analysis-content">
+          <div
+            className={`analysis-item ${
+              changes.weight.trend !== null ? changes.weight.trend : "--"
+            }`}
+          >
+            <span className="analysis-label">Weight Change:</span>
+            <span className="analysis-value">
+              {changes.weight.change !== "N/A" && changes.weight.change > 0
+                ? "+"
+                : ""}
+              {changes.weight.change} kg
+            </span>
+          </div>
+          <div
+            className={`analysis-item ${
+              changes.height.trend !== null ? changes.height.trend : "--"
+            }`}
+          >
+            <span className="analysis-label">Height Change:</span>
+            <span className="analysis-value">
+              {changes.height.change !== "N/A" && changes.height.change > 0
+                ? "+"
+                : ""}
+              {changes.height.change} cm
+            </span>
+          </div>
+          <div
+            className={`analysis-item ${
+              changes.bmi.trend !== null ? changes.bmi.trend : "--"
+            }`}
+          >
+            <span className="analysis-label">BMI Change:</span>
+            <span className="analysis-value">
+              {changes.bmi.change !== "N/A"
+                ? (changes.bmi.change > 0 ? "+" : "") + changes.bmi.change
+                : "N/A"}
+            </span>
+          </div>
+        </div>
+        <button
+          className="connect-doctor-button"
+          onClick={() => navigate("/member/doctor-consultation")}
+        >
+          <i className="fas fa-stethoscope"></i>
+          Connect to doctor
+        </button>
+      </div>
+    );
+  };
+
 // Hàm hiển thị nút "Compare" và dropdown chọn bé so sánh
 /* Updated renderCompareControl function */
 const renderCompareControl = () => {
@@ -588,12 +647,13 @@ const renderCompareControl = () => {
                 View Milestones
               </button>
             </div>
-             {/* Hiển thị nút Compare */}
-             {renderCompareControl()}
-          </div>
 
-          {/* Growth Chart separated outside of the "parent" container */}
-          <div className="growth-chart-section" style={{ margin: "20px auto", width: "90%" }}>
+            <div className="growth-analysis">
+              {renderGrowthAnalysis()}
+            </div>
+
+            
+            <div className="growth-chart-section">
             <h2>
               Growth Chart
               <div className="chart-filters">
@@ -626,21 +686,24 @@ const renderCompareControl = () => {
             <div className="chart-area">
               {selectedChild ? (
                 <GrowthChart
-  childName={selectedChild.name}
-  selectedTool={selectedTool}
-  onRecordSelect={setSelectedRecord}
-  refreshTrigger={refreshTrigger}
-  gender={selectedChild.gender}
-  ageInMonths={getAgeInMonths(selectedChild.dateOfBirth)}
-  ageInYears={getAgeInYears(getAgeInMonths(selectedChild.dateOfBirth))}
-  compareChild={compareChild}
-/>
+                  childName={selectedChild.name}
+                  selectedTool={selectedTool}
+                  onRecordSelect={setSelectedRecord}
+                  refreshTrigger={refreshTrigger}
+                  gender={selectedChild.gender}
+                  ageInMonths={getAgeInMonths(selectedChild.dateOfBirth)}
+                  ageInYears={getAgeInYears(getAgeInMonths(selectedChild.dateOfBirth))}
+                  compareChild={compareChild}
+                />
               ) : (
                 <div className="no-child-selected">
                   <p>Please select a child to view the growth chart</p>
                 </div>
               )}
             </div>
+          </div>
+             {/* Hiển thị nút Compare */}
+             {renderCompareControl()}
           </div>
         </>
       )}
