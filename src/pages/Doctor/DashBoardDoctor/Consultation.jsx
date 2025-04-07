@@ -90,7 +90,12 @@ const Consultations = () => {
   };
 
   useEffect(() => {
-    fetchConsultationsWithPagination(pagination.current, pagination.pageSize);
+    // Reset pagination về trang 1 khi thay đổi tab
+    setPagination((prev) => ({
+      ...prev,
+      current: 1,
+    }));
+    fetchConsultationsWithPagination(1, pagination.pageSize);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
@@ -775,6 +780,16 @@ const Consultations = () => {
     );
   };
 
+  // Cập nhật hàm setActiveTab để đảm bảo reset pagination khi chuyển tab
+  const handleTabChange = (newTab) => {
+    setActiveTab(newTab);
+    // Reset pagination về trang 1
+    setPagination((prev) => ({
+      ...prev,
+      current: 1,
+    }));
+  };
+
   return (
     <div className="consult-container">
       <Card className="consult-card">
@@ -825,7 +840,7 @@ const Consultations = () => {
           </Button>
         </div>
 
-        <Tabs activeKey={activeTab} onChange={setActiveTab}>
+        <Tabs activeKey={activeTab} onChange={handleTabChange}>
           <Tabs.TabPane
             key="new"
             tab={
