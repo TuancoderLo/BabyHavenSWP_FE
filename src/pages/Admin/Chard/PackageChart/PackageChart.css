@@ -154,15 +154,15 @@
 /* Charts Container */
 .charts-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
 }
 
 .chart-card {
   background-color: var(--white);
   border-radius: var(--border-radius);
   box-shadow: var(--card-shadow);
-  padding: 1.5rem;
+  padding: 1.2rem;
   transition: var(--transition-normal);
   position: relative;
   overflow: hidden;
@@ -197,13 +197,11 @@
 .chart-header {
   display: flex;
   align-items: center;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.8rem;
-  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 1rem;
 }
 
 .chart-icon {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   color: var(--primary-color);
   margin-right: 0.8rem;
   transition: var(--transition-normal);
@@ -215,16 +213,16 @@
 
 .chart-header h2 {
   margin: 0;
-  font-size: 1.2rem;
-  color: var(--text-color);
+  font-size: 1rem;
   font-weight: 600;
+  color: var(--text-color);
 }
 
 .pie-chart-container,
 .line-chart-container {
-  height: 380px;
-  width: 100%;
+  height: 280px;
   position: relative;
+  margin-top: 10px;
 }
 
 /* Stats Card */

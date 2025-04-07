@@ -43,7 +43,7 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
 
           // Use direct API URL
           const response = await fetch(
-            "https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/MemberMemberships"
+            "https://babyhaven-swp-web-emhrccb7hfh7bkf5.southeastasia-01.azurewebsites.net/api/MemberMemberships"
           );
           const responseData = await response.json();
           const memberships = responseData.data || [];
@@ -534,10 +534,44 @@ const PackageChart = ({ onDataLoaded, period = "all" }) => {
             <h2>Member Package Distribution</h2>
           </div>
           {packageDistributionData && (
-            <div className="pie-chart-container">
+            <div className="pie-chart-container" style={{ height: "250px" }}>
               <Pie
                 data={packageDistributionData}
-                options={packageDistributionOptions}
+                options={{
+                  ...packageDistributionOptions,
+                  plugins: {
+                    ...packageDistributionOptions.plugins,
+                    legend: {
+                      position: "bottom",
+                      labels: {
+                        font: {
+                          size: 10,
+                        },
+                        boxWidth: 10,
+                        padding: 5,
+                      },
+                    },
+                    title: {
+                      font: {
+                        size: 12,
+                      },
+                      padding: {
+                        top: 5,
+                        bottom: 5,
+                      },
+                    },
+                    tooltip: {
+                      bodyFont: {
+                        size: 10,
+                      },
+                      titleFont: {
+                        size: 10,
+                      },
+                      padding: 6,
+                    },
+                  },
+                  maintainAspectRatio: false,
+                }}
               />
             </div>
           )}

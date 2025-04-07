@@ -612,7 +612,14 @@ const RevenueChart = () => {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: "top",
+        position: "bottom",
+        labels: {
+          font: {
+            size: 10,
+          },
+          boxWidth: 10,
+          padding: 5,
+        },
       },
       title: {
         display: true,
@@ -620,9 +627,30 @@ const RevenueChart = () => {
           comparisonMetric === "revenue" ? "Doanh Thu" : "Số Lượng"
         })`,
         font: {
-          size: 16,
+          size: 12,
           weight: "bold",
         },
+        padding: {
+          top: 5,
+          bottom: 5,
+        },
+      },
+      tooltip: {
+        titleFont: {
+          size: 10,
+        },
+        bodyFont: {
+          size: 10,
+        },
+        padding: 6,
+      },
+    },
+    layout: {
+      padding: {
+        top: 5,
+        bottom: 5,
+        left: 5,
+        right: 5,
       },
     },
   };
@@ -1205,7 +1233,7 @@ const RevenueChart = () => {
                 Số lượng
               </button>
             </div>
-            <div className="chart-area">
+            <div className="chart-area" style={{ height: "250px" }}>
               {packageComparisonPieChartData ? (
                 <div className="pie-chart-container">
                   <Doughnut
@@ -1213,20 +1241,27 @@ const RevenueChart = () => {
                     options={{
                       responsive: true,
                       maintainAspectRatio: false,
-                      cutout: "65%",
+                      cutout: "60%",
                       plugins: {
                         legend: {
                           position: "bottom",
                           align: "center",
                           labels: {
-                            padding: 20,
-                            boxWidth: 15,
+                            padding: 10,
+                            boxWidth: 10,
                             font: {
-                              size: 13,
+                              size: 10,
                             },
                           },
                         },
                         tooltip: {
+                          bodyFont: {
+                            size: 10,
+                          },
+                          titleFont: {
+                            size: 10,
+                          },
+                          padding: 6,
                           callbacks: {
                             label: function (context) {
                               const value = context.raw;
@@ -1249,8 +1284,7 @@ const RevenueChart = () => {
                 </div>
               ) : (
                 <div className="no-data-message">
-                  <i className="fas fa-info-circle"></i> Không có dữ liệu để
-                  hiển thị
+                  <i className="fas fa-info-circle"></i> Không có dữ liệu
                 </div>
               )}
             </div>
