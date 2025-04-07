@@ -8,98 +8,63 @@ import PopupNotification from "../../../../layouts/Member/popUp/PopupNotificatio
 
 // Response Card
 function ExpandableResponseCard({ response, request, onClick }) {
-  const combinedText = `Date: ${response.responseDate} | Doctor: ${
-    response.doctorName
-  } | Child: ${request?.childName || "N/A"} | Category: ${
-    request?.category || "N/A"
-  }`;
-  const truncatedText =
-    combinedText.length > 100
-      ? combinedText.slice(0, 100) + "..."
-      : combinedText;
+  const combinedText = `Date: ${response.responseDate} | Doctor: ${response.doctorName} | Child: ${request?.childName || "N/A"} | Category: ${request?.category || "N/A"}`;
+  const truncatedText = combinedText.length > 100 ? combinedText.slice(0, 100) + "..." : combinedText;
 
   return (
-    <div
-      className="consultation-response-card"
-      onClick={() => onClick(response)}
-    >
-      <div className="response-header">
+    <article className="consultation-response-card" onClick={() => onClick(response)}>
+      <header className="response-header">
         <span className="response-date">{response.responseDate}</span>
         <span className="response-status">{response.status}</span>
-      </div>
-      <div className="response-summary">
-        <p>
-          <strong>Doctor:</strong> {response.doctorName}
-        </p>
-        <p>
-          <strong>Child:</strong> {request?.childName || "N/A"}
-        </p>
-      </div>
-      <div className="truncated-content">{truncatedText}</div>
-    </div>
+      </header>
+      <section className="response-summary">
+        <p><strong>Doctor:</strong> {response.doctorName}</p>
+        <p><strong>Child:</strong> {request?.childName || "N/A"}</p>
+      </section>
+      <footer className="truncated-content">{truncatedText}</footer>
+    </article>
   );
 }
 
 // Sent Request Card
 function ExpandableSentRequestCard({ request, onClick }) {
   const truncatedText =
-    `ID: ${request.requestId} | Child: ${request.childName} | Date: ${request.requestDate} | Description: ${request.description}`.slice(
-      0,
-      50
-    ) + "...";
+    `ID: ${request.requestId} | Child: ${request.childName} | Date: ${request.requestDate} | Description: ${request.description}`
+      .slice(0, 50) + "...";
   return (
-    <div className="consultation-sent-card" onClick={() => onClick(request)}>
-      <div className="sent-header">
-        <span className="sent-date">
-          {moment(request.requestDate).format("DD/MM/YYYY HH:mm")}
-        </span>
+    <article className="consultation-sent-card" onClick={() => onClick(request)}>
+      <header className="sent-header">
+        <span className="sent-date">{moment(request.requestDate).format("DD/MM/YYYY HH:mm")}</span>
         <span className="sent-status">{request.status}</span>
-      </div>
-      <div className="sent-summary">
-        <p>
-          <strong>Child:</strong> {request.childName}
-        </p>
-        <p>
-          <strong>Description:</strong> {request.description.slice(0, 50)}...
-        </p>
-      </div>
-      <div className="truncated-content">{truncatedText}</div>
-    </div>
+      </header>
+      <section className="sent-summary">
+        <p><strong>Child:</strong> {request.childName}</p>
+        <p><strong>Description:</strong> {request.description.slice(0, 50)}...</p>
+      </section>
+      <footer className="truncated-content">{truncatedText}</footer>
+    </article>
   );
 }
 
 // Feedback Card
-function ExpandableFeedbackEntry({
-  feedback,
-  onClick,
-  consultationResponses,
-  consultationRequests,
-}) {
-  const truncatedText =
-    `Rating: ${feedback.rating} stars`.slice(0, 100) + "...";
+function ExpandableFeedbackEntry({ feedback, onClick, consultationResponses, consultationRequests }) {
+  const truncatedText = `Rating: ${feedback.rating} stars`.slice(0, 100) + "...";
   const relatedResponse = consultationResponses.find(
     (resp) => resp.responseId === feedback.responseId
   );
-  const relatedRequest = relatedResponse
-    ? consultationRequests[relatedResponse.requestId]
-    : null;
+  const relatedRequest = relatedResponse ? consultationRequests[relatedResponse.requestId] : null;
 
   return (
-    <div
-      className="consultation-feedback-card"
-      onClick={() => onClick({ feedback, relatedResponse, relatedRequest })}
-    >
-      <div className="feedback-header">
+    <article className="consultation-feedback-card" onClick={() => onClick({ feedback, relatedResponse, relatedRequest })}>
+      <header className="feedback-header">
         <span className="feedback-date">{feedback.feedbackDate}</span>
         <span className="feedback-rating">{feedback.rating} ★</span>
-      </div>
-      <div className="feedback-summary">
-        <p>
-          <strong>Comment:</strong> {feedback.comment.slice(0, 50)}...
-        </p>
-      </div>
-      <div className="truncated-content">{truncatedText}</div>
-    </div>
+      </header>
+      <section className="feedback-summary">
+        <p><strong>Comment:</strong> {feedback.comment.slice(0, 50)}...</p>
+      </section>
+      <footer className="truncated-content">{truncatedText}</footer>
+    </article>
   );
 }
 
@@ -119,12 +84,9 @@ function DoctorConsultation() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [popupType, setPopupType] = useState("success");
-  // Consultation Data
   const [consultationResponses, setConsultationResponses] = useState([]);
   const [consultationRequests, setConsultationRequests] = useState({});
   const [sentRequests, setSentRequests] = useState([]);
-
-  // Modal / Feedback Data
   const [selectedResponse, setSelectedResponse] = useState(null);
   const [selectedSentRequest, setSelectedSentRequest] = useState(null);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
@@ -136,7 +98,6 @@ function DoctorConsultation() {
   const [userFeedback, setUserFeedback] = useState([]);
   const [currentTab, setCurrentTab] = useState("consultation");
 
-  // Steps
   const steps = ["Select Doctor", "Enter Information", "Confirm"];
 
   useEffect(() => {
@@ -183,14 +144,12 @@ function DoctorConsultation() {
       setLoading(true);
       const response = await doctorApi.getAllDoctors();
       if (response?.data) {
-        // Lọc ra những bác sĩ có status "Active" (không phân biệt hoa thường)
         const activeDoctors = response.data.filter(
           (doctor) => doctor.status && doctor.status.toLowerCase() === "active"
         );
         setDoctors(activeDoctors);
-        activeDoctors.forEach((doctor) =>
-          fetchDoctorSpecializations(doctor.doctorId)
-        );
+        // Gọi fetchDoctorSpecializations sau khi có danh sách bác sĩ
+        await fetchDoctorSpecializations();
       }
     } catch (error) {
       console.error("Error fetching doctors:", error);
@@ -200,17 +159,36 @@ function DoctorConsultation() {
     }
   };
 
-  const fetchDoctorSpecializations = async (doctorId) => {
+  const fetchDoctorSpecializations = async () => {
     try {
-      const response = await doctorApi.getDoctorSpecializations(doctorId);
+      setLoading(true);
+      const response = await doctorApi.getAllDoctorSpecialization();
       if (response?.data) {
-        setDoctorSpecializations((prev) => ({
-          ...prev,
-          [doctorId]: response.data || [],
-        }));
+        const specializationsMap = {};
+
+        // Duyệt qua response từ API DoctorSpecializations
+        response.data.forEach((item) => {
+          const { doctorName, specializationName, status } = item;
+          // Chỉ xử lý nếu status là "Active"
+          if (status.toLowerCase() === "active") {
+            if (!specializationsMap[doctorName]) {
+              specializationsMap[doctorName] = [];
+            }
+            // Thêm specializationName vào mảng của doctorName
+            if (!specializationsMap[doctorName].includes(specializationName)) {
+              specializationsMap[doctorName].push(specializationName);
+            }
+          }
+        });
+
+        // Cập nhật state doctorSpecializations
+        setDoctorSpecializations(specializationsMap);
       }
     } catch (error) {
-      setDoctorSpecializations((prev) => ({ ...prev, [doctorId]: [] }));
+      console.error("Error fetching doctor specializations:", error);
+      setError("Unable to load doctor specializations");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -226,20 +204,15 @@ function DoctorConsultation() {
     }
   };
 
-  // Hàm chỉ lấy danh sách consultation responses
   const fetchConsultationResponses = async () => {
     try {
       const memberId = localStorage.getItem("memberId");
-      if (!memberId)
-        throw new Error("Please log in to fetch consultation responses");
+      if (!memberId) throw new Error("Please log in to fetch consultation responses");
       const res = await doctorApi.getConsultationResponses(memberId);
       const responses = Array.isArray(res?.data) ? res.data : [res.data];
       const parsedResponses = responses.map((item) => ({
         ...item,
-        content:
-          typeof item.content === "string"
-            ? parseContentToObject(item.content)
-            : item.content,
+        content: typeof item.content === "string" ? parseContentToObject(item.content) : item.content,
       }));
       setConsultationResponses(parsedResponses);
     } catch (error) {
@@ -247,32 +220,24 @@ function DoctorConsultation() {
     }
   };
 
-  // Hàm lấy chi tiết consultation request dựa trên requestId
   const fetchConsultationRequestDetail = async (requestId) => {
     try {
-      // Nếu chi tiết chưa có trong state thì mới gọi API
       if (!consultationRequests[requestId]) {
-        const requestRes = await doctorApi.getConsultationRequestsById(
-          requestId
-        );
+        const requestRes = await doctorApi.getConsultationRequestsById(requestId);
         if (requestRes?.data) {
-          setConsultationRequests((prev) => ({
-            ...prev,
-            [requestId]: requestRes.data,
-          }));
+          setConsultationRequests((prev) => ({ ...prev, [requestId]: requestRes.data }));
         }
       }
+      console.log("Consultation request detail:", consultationRequests[requestId]);
     } catch (error) {
       console.error("Error fetching consultation request detail:", error);
     }
   };
 
-  // Handler khi người dùng click vào một response cụ thể
   const handleResponseClick = async (response) => {
     if (response.requestId) {
       await fetchConsultationRequestDetail(response.requestId);
     }
-    // Sau khi fetch (hoặc nếu đã có), set state để hiển thị modal chi tiết
     setSelectedResponse({
       response,
       request: consultationRequests[response.requestId],
@@ -286,8 +251,8 @@ function DoctorConsultation() {
       const requestsData = Array.isArray(res.value)
         ? res.data.value
         : Array.isArray(res.data)
-        ? res.data
-        : [];
+          ? res.data
+          : [];
       setSentRequests(requestsData);
     } catch (error) {
       console.error("Error fetching sent requests:", error);
@@ -303,8 +268,8 @@ function DoctorConsultation() {
       const feedbackData = Array.isArray(res.data.value)
         ? res.data.value
         : Array.isArray(res.data)
-        ? res.data
-        : [];
+          ? res.data
+          : [];
       setUserFeedback(feedbackData);
     } catch (error) {
       console.error("Error fetching user feedback:", error);
@@ -313,10 +278,8 @@ function DoctorConsultation() {
   };
 
   const handleChildSelect = (child) => setSelectedChild(child);
-  const handleNextStep = () =>
-    currentStep < steps.length - 1 && setCurrentStep(currentStep + 1);
-  const handleBackStep = () =>
-    currentStep > 0 && setCurrentStep(currentStep - 1);
+  const handleNextStep = () => currentStep < steps.length - 1 && setCurrentStep(currentStep + 1);
+  const handleBackStep = () => currentStep > 0 && setCurrentStep(currentStep - 1);
   const stripHtml = (html) => {
     const tmp = document.createElement("div");
     tmp.innerHTML = html;
@@ -361,16 +324,8 @@ function DoctorConsultation() {
       if (!selectedDoctor) throw new Error("Please select a doctor");
 
       const currentDate = new Date();
-      const requestDate = `${currentDate
-        .toISOString()
-        .slice(0, 10)} ${currentDate.toTimeString().slice(0, 8)}.${currentDate
-        .getMilliseconds()
-        .toString()
-        .padEnd(3, "0")}`;
-
-      // Sử dụng hàm stripHtml thay vì regex đơn giản để loại bỏ các thẻ HTML và ký tự đặc biệt
-      const plainDescription = stripHtml(consultationContent).trim();
-
+      const requestDate = `${currentDate.toISOString().slice(0, 10)} ${currentDate.toTimeString().slice(0, 8)}.${currentDate.getMilliseconds().toString().padEnd(3, "0")}`;
+      const plainDescription = consultationContent.replace(/<[^>]+>/g, "");
       const attachments = await Promise.all(
         selectedFiles.map(async (file) => {
           const base64Content = await new Promise((resolve) => {
@@ -400,16 +355,13 @@ function DoctorConsultation() {
       };
 
       await doctorApi.createConsultationRequest(payload);
-      // Gọi lại fetch dữ liệu để cập nhật giao diện
       await fetchConsultationResponses();
       await fetchSentRequests();
 
-      // Thay vì hiển thị modal success cũ, sử dụng popup
       setPopupType("success");
       setPopupMessage("Consultation request sent successfully!");
       setShowPopup(true);
 
-      // Reset các trạng thái liên quan
       setCurrentStep(0);
       setConsultationContent("");
       setSelectedDoctor(null);
@@ -417,8 +369,8 @@ function DoctorConsultation() {
     } catch (error) {
       setSubmitError(
         error.response?.data?.title ||
-          error.message ||
-          "Unable to send consultation request"
+        error.message ||
+        "Unable to send consultation request"
       );
       setPopupType("error");
       setPopupMessage("Failed to send consultation request. Please try again.");
@@ -470,14 +422,14 @@ function DoctorConsultation() {
 
   const handleMessageDoctor = (doctor) => {
     setSelectedDoctor(doctor);
-    setCurrentStep(1); // Move to "Enter Information" step
+    setCurrentStep(1);
   };
 
   const renderStepContent = () => {
     switch (currentStep) {
       case 0: // Select Doctor
         return (
-          <div className="doctor-selection-container">
+          <section className="doctor-selection-container">
             {loading ? (
               <div className="loading-state">
                 <span className="loading-spinner"></span>
@@ -486,69 +438,55 @@ function DoctorConsultation() {
             ) : error ? (
               <div className="error-state">
                 <p>{error}</p>
-                <button onClick={fetchDoctors} className="retry-button">
+                <button onClick={fetchDoctors} className="doctor-action-button">
                   Retry
                 </button>
               </div>
             ) : doctors.length === 0 ? (
               <p>No doctors found.</p>
             ) : (
-              <div className="doctor-selection-grid">
+              <article className="doctor-selection-grid">
                 {doctors.map((doctor) => (
-                  <div key={doctor.doctorId} className="doctor-card-grid">
-                    <div className="doctor-avatar-grid">
-                      <img
-                        src={
-                          doctor.user?.profilePicture ||
-                          `https://ui-avatars.com/api/?name=${doctor.name}&background=random`
-                        }
-                        alt={doctor.name}
-                      />
-                    </div>
-                    <div className="doctor-info-grid">
-                      <h4>{doctor.name}</h4>
-                      <p>
-                        <strong>Degree:</strong> {doctor.degree}
-                      </p>
-                      <p>
-                        <strong>Hospital:</strong> {doctor.hospitalName}
-                      </p>
-                      {Array.isArray(
-                        doctorSpecializations[doctor.doctorId]
-                      ) && (
+                  <section key={doctor.doctorId} className="doctor-card-grid">
+                    <div className="doctor-card-header">
+                      <div className="doctor-avatar-grid">
+                        <img
+                          src={doctor.user?.profilePicture || `https://ui-avatars.com/api/?name=${doctor.name}&background=random`}
+                          alt={doctor.name}
+                        />
+                        <h4>{doctor.name}</h4>
+                        <button className="message-button" onClick={() => handleMessageDoctor(doctor)}>
+                        Send Message
+                      </button>
+                      </div>
+                    <article className="doctor-info-grid">
+                      <p><strong>Degree:</strong> {doctor.degree}</p>
+                      <p><strong>Hospital:</strong> {doctor.hospitalName}</p>
+                      {Array.isArray(doctorSpecializations[doctor.name]) && (
                         <div className="doctor-specializations-grid">
-                          <strong>Specializations:</strong>
-                          {doctorSpecializations[doctor.doctorId].map(
-                            (spec, index) => (
-                              <p
-                                key={index}
-                                className="doctor-specialization-grid"
-                              >
-                                {spec.name}
-                              </p>
-                            )
-                          )}
+                          <p><strong>Specializations:</strong>
+                          {doctorSpecializations[doctor.name].map((spec, index) => (
+                            <p key={index} className="doctor-specialization-grid">
+                              {spec}
+                            </p>
+                          ))}
+                          </p>
                         </div>
                       )}
+                    </article>
                     </div>
-                    <button
-                      className="message-button"
-                      onClick={() => handleMessageDoctor(doctor)}
-                    >
-                      Send Message
-                    </button>
-                  </div>
+                  </section>
                 ))}
-              </div>
+              </article>
             )}
-          </div>
+          </section>
         );
 
       case 1: // Enter Information
         return (
-          <div className="doctor-consultation-form">
-            <div className="form-container">
-              <div className="input-group">
+          <section className="doctor-consultation-form">
+            <article className="form-container">
+              <section className="input-group">
                 <label htmlFor="child-select">Select Child</label>
                 {loading ? (
                   <div className="loading-state">
@@ -558,7 +496,7 @@ function DoctorConsultation() {
                 ) : error ? (
                   <div className="error-state">
                     <p>{error}</p>
-                    <button onClick={fetchChildren} className="retry-button">
+                    <button onClick={fetchChildren} className="doctor-action-button">
                       Retry
                     </button>
                   </div>
@@ -583,8 +521,8 @@ function DoctorConsultation() {
                     ))}
                   </select>
                 )}
-              </div>
-              <div className="input-group">
+              </section>
+              <section className="input-group">
                 <label htmlFor="file-upload">Attach Files</label>
                 <input
                   type="file"
@@ -600,47 +538,48 @@ function DoctorConsultation() {
                     ))}
                   </ul>
                 )}
-              </div>
-            </div>
-            <div className="editor-wrapper">
+              </section>
+            </article>
+            <article className="editor-wrapper">
               <TextEditor
                 value={consultationContent}
                 onChange={setConsultationContent}
               />
-            </div>
-          </div>
+            </article>
+          </section>
         );
+
       case 2: // Confirm
         return (
-          <div className="doctor-review-container">
-            <div className="review-section">
+          <section className="doctor-review-container">
+            <article className="review-section">
               <h3 className="doctor-section-title">Review Information</h3>
-              <div className="review-item">
+              <section className="review-item">
                 <strong>Child:</strong> {selectedChild?.name || "Not selected"}
-              </div>
-              <div className="review-item consultation-details">
+              </section>
+              <section className="review-item consultation-details">
                 <strong>Details:</strong>
                 <div
                   className="consultation-details-content"
                   dangerouslySetInnerHTML={{ __html: consultationContent }}
                 />
-              </div>
+              </section>
               {selectedFiles.length > 0 && (
-                <div className="review-item">
+                <section className="review-item">
                   <strong>Attached Files:</strong>
                   <ul>
                     {selectedFiles.map((file, index) => (
                       <li key={index}>{file.name}</li>
                     ))}
                   </ul>
-                </div>
+                </section>
               )}
-            </div>
+            </article>
             {selectedDoctor && (
-              <div className="doctor-review-section">
+              <article className="doctor-review-section">
                 <h4 className="doctor-section-title">Selected Doctor</h4>
-                <div className="doctor-profile-card selected">
-                  <div className="doctor-profile-header">
+                <section className="doctor-profile-card">
+                  <header className="doctor-profile-header">
                     <img
                       src={
                         selectedDoctor.user?.profilePicture ||
@@ -649,40 +588,27 @@ function DoctorConsultation() {
                       alt={selectedDoctor.name}
                       className="doctor-profile-avatar"
                     />
-                    <div className="doctor-profile-info">
-                      <h4 className="doctor-profile-name">
-                        {selectedDoctor.name}
-                      </h4>
-                    </div>
-                  </div>
-                  <div className="doctor-profile-details">
-                    <p className="doctor-profile-degree">
-                      {selectedDoctor.degree}
-                    </p>
-                    <p className="doctor-profile-hospital">
-                      {selectedDoctor.hospitalName}
-                    </p>
-                    {Array.isArray(
-                      doctorSpecializations[selectedDoctor.doctorId]
-                    ) && (
+                    <article className="doctor-profile-info">
+                      <h4 className="doctor-profile-name">{selectedDoctor.name}</h4>
+                    </article>
+                  </header>
+                  <section className="doctor-profile-details">
+                    <p>{selectedDoctor.degree}</p>
+                    <p>{selectedDoctor.hospitalName}</p>
+                    {Array.isArray(doctorSpecializations[selectedDoctor.name]) && (
                       <div className="doctor-specializations">
-                        {doctorSpecializations[selectedDoctor.doctorId].map(
-                          (spec, index) => (
-                            <p
-                              key={index}
-                              className="doctor-profile-specialization"
-                            >
-                              {spec.name}
-                            </p>
-                          )
-                        )}
+                        {doctorSpecializations[selectedDoctor.name].map((spec, index) => (
+                          <p key={index} className="doctor-profile-specialization">
+                            {spec}
+                          </p>
+                        ))}
                       </div>
                     )}
-                  </div>
-                </div>
-              </div>
+                  </section>
+                </section>
+              </article>
             )}
-            <div className="submit-section">
+            <footer className="submit-section">
               {submitError && <div className="submit-error">{submitError}</div>}
               <button
                 className="doctor-action-button"
@@ -691,8 +617,8 @@ function DoctorConsultation() {
               >
                 {submitLoading ? "Sending..." : "Complete"}
               </button>
-            </div>
-          </div>
+            </footer>
+          </section>
         );
 
       default:
@@ -700,99 +626,86 @@ function DoctorConsultation() {
     }
   };
 
-  // Render Tab Content
   const renderTabContent = () => {
     switch (currentTab) {
       case "consultation":
         return (
-          <div className="doctor-request-column">
-            <div className="progress-bar">
+          <section className="doctor-request-column">
+            <header className="progress-bar">
               {steps.map((step, index) => (
                 <React.Fragment key={index}>
-                  <div
+                  <article
                     className={`progress-step ${
-                      currentStep === index
-                        ? "active"
-                        : currentStep > index
-                        ? "completed"
-                        : ""
+                      currentStep === index ? "active" : currentStep > index ? "completed" : ""
                     }`}
                   >
                     <div className="progress-step-circle">{index + 1}</div>
                     <span>{step}</span>
-                  </div>
+                  </article>
                   {index !== steps.length - 1 && (
-                    <div
-                      className={`progress-line ${
-                        currentStep > index ? "completed" : ""
-                      }`}
-                    ></div>
+                    <div className={`progress-line ${currentStep > index ? "completed" : ""}`}></div>
                   )}
                 </React.Fragment>
               ))}
-            </div>
-            <section className="doctor-form-content">
+            </header>
+            <article className="doctor-form-content">
               {renderStepContent()}
-              <div className="doctor-navigation-buttons">
+              <footer className="doctor-navigation-buttons">
                 {currentStep > 0 && (
-                  <button
-                    className="doctor-back-button"
-                    onClick={handleBackStep}
-                  >
+                  <button className="doctor-back-button" onClick={handleBackStep}>
                     Back
                   </button>
                 )}
                 {currentStep < steps.length - 1 && currentStep > 0 && (
-                  <button
-                    className="doctor-next-button"
-                    onClick={handleNextStep}
-                  >
+                  <button className="doctor-next-button" onClick={handleNextStep}>
                     Next
                   </button>
                 )}
-              </div>
-            </section>
-          </div>
+              </footer>
+            </article>
+          </section>
         );
 
       case "responses":
         return consultationResponses.length > 0 ? (
-          consultationResponses.map((resp, index) => (
-            <ExpandableResponseCard
-              key={index}
-              response={resp}
-              request={consultationRequests[resp.requestId]}
-              onClick={handleResponseClick}
-            />
-          ))
+          <section className="tab-content">
+            {consultationResponses.map((resp, index) => (
+              <ExpandableResponseCard
+                key={index}
+                response={resp}
+                request={consultationRequests[resp.requestId]}
+                onClick={handleResponseClick}
+              />
+            ))}
+          </section>
         ) : (
           <p>No responses available.</p>
         );
 
       case "sentRequests":
         return sentRequests.length > 0 ? (
-          sentRequests.map((req, index) => (
-            <ExpandableSentRequestCard
-              key={index}
-              request={req}
-              onClick={setSelectedSentRequest}
-            />
-          ))
+          <section className="tab-content">
+            {sentRequests.map((req, index) => (
+              <ExpandableSentRequestCard key={index} request={req} onClick={setSelectedSentRequest} />
+            ))}
+          </section>
         ) : (
           <p>No sent requests available.</p>
         );
 
       case "feedback":
         return userFeedback.length > 0 ? (
-          userFeedback.map((fb, index) => (
-            <ExpandableFeedbackEntry
-              key={index}
-              feedback={fb}
-              consultationResponses={consultationResponses || []}
-              consultationRequests={consultationRequests || {}}
-              onClick={(data) => setSelectedFeedback(data)}
-            />
-          ))
+          <section className="tab-content">
+            {userFeedback.map((fb, index) => (
+              <ExpandableFeedbackEntry
+                key={index}
+                feedback={fb}
+                consultationResponses={consultationResponses || []}
+                consultationRequests={consultationRequests || {}}
+                onClick={(data) => setSelectedFeedback(data)}
+              />
+            ))}
+          </section>
         ) : (
           <p>No feedback available.</p>
         );
@@ -802,116 +715,126 @@ function DoctorConsultation() {
     }
   };
 
+  // Hàm xử lý khi nhấn "Send Another Request" (giữ nguyên logic cũ)
+  const handleSendAnotherRequest = () => {
+    setCurrentStep(0); // Quay lại bước chọn bác sĩ
+    setSelectedChild(null); // Đặt lại child đã chọn
+    setConsultationContent(""); // Đặt lại nội dung tư vấn
+    setSelectedDoctor(null); // Đặt lại bác sĩ đã chọn
+    setSelectedFiles([]); // Đặt lại danh sách file đính kèm
+    setSelectedResponse(null); // Đóng modal
+    setCurrentTab("consultation"); // Chuyển về tab Consultation
+  };
+
+  // Hàm xử lý khi nhấn "Complete" (chỉ cập nhật trạng thái request)
+  const handleCompleteRequest = async () => {
+    try {
+      // Kiểm tra nếu có selectedResponse và requestId để cập nhật trạng thái request
+      console.log("Selected response:", selectedResponse);
+      if (selectedResponse?.response?.requestId) {
+        const requestId = selectedResponse.response.requestId;
+        console.log("Completing request with ID:", requestId);
+        
+        await doctorApi.updateConsultationRequestsStatus(requestId, "Completed");
+        // Sau khi cập nhật trạng thái thành công, cập nhật lại danh sách sent requests
+        await fetchSentRequests();
+        setPopupType("success");
+        setPopupMessage("Request marked as completed successfully!");
+        setShowPopup(true);
+      } else {
+        throw new Error("No request ID found to complete.");
+      }
+    } catch (error) {
+      console.error("Error updating request status:", error);
+      setPopupType("error");
+      setPopupMessage("Failed to complete the request. Please try again.");
+      setShowPopup(true);
+    }
+  };
+
   return (
-    <div className="doctor-consultation">
-      {/* Top Tabs */}
-      <div className="top-tab-container">
+    <main className="doctor-consultation">
+      <header className="top-tab-container">
         <button
-          className={`top-tab-button ${
-            currentTab === "consultation" ? "active" : ""
-          }`}
+          className={`top-tab-button ${currentTab === "consultation" ? "active" : ""}`}
           onClick={() => setCurrentTab("consultation")}
         >
           Consultation
         </button>
         <button
-          className={`top-tab-button ${
-            currentTab === "responses" ? "active" : ""
-          }`}
+          className={`top-tab-button ${currentTab === "responses" ? "active" : ""}`}
           onClick={() => setCurrentTab("responses")}
         >
           Responses
         </button>
         <button
-          className={`top-tab-button ${
-            currentTab === "sentRequests" ? "active" : ""
-          }`}
+          className={`top-tab-button ${currentTab === "sentRequests" ? "active" : ""}`}
           onClick={() => setCurrentTab("sentRequests")}
         >
           Sent Requests
         </button>
         <button
-          className={`top-tab-button ${
-            currentTab === "feedback" ? "active" : ""
-          }`}
+          className={`top-tab-button ${currentTab === "feedback" ? "active" : ""}`}
           onClick={() => setCurrentTab("feedback")}
         >
           Feedback
         </button>
-      </div>
+      </header>
 
-      {/* Main Content */}
-      <div className="tab-content">{renderTabContent()}</div>
+      <section className="tab-content">{renderTabContent()}</section>
 
-      {/* Response Modal */}
       {selectedResponse && (
-        <div
-          className="modal-overlay"
-          onClick={() => setSelectedResponse(null)}
-        >
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="modal-close"
-              onClick={() => setSelectedResponse(null)}
-            >
+        <aside className="modal-overlay" onClick={() => setSelectedResponse(null)}>
+          <article className="modal-response-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setSelectedResponse(null)}>
               ×
             </button>
-            <h3 className="modal-title">Response Details</h3>
-            <button
-              className="feedback-button"
-              onClick={() => setShowFeedbackForm(!showFeedbackForm)}
-              style={{ marginBottom: "15px" }}
-            >
-              {showFeedbackForm ? "Hide Feedback" : "Submit Feedback"}
-            </button>
-            <div className="response-details">
-              <div className="request-section">
+            <header className="modal-response-title">Response Details</header>
+            <section className="response-details">
+              <div className="response-header-button">
+                <button
+                  className="feedback-button"
+                  onClick={() => setShowFeedbackForm(!showFeedbackForm)}
+                >
+                  {showFeedbackForm ? "Hide Feedback" : "Feedback"}
+                </button>
+                <button
+                  className="send-another-button"
+                  onClick={handleSendAnotherRequest}
+                >
+                  Send Another Request
+                </button>
+                <button
+                  className="complete-request-button"
+                  onClick={handleCompleteRequest} // Gọi hàm mới
+                >
+                  Complete
+                </button>
+              </div>
+              <article className="request-section">
                 <h4>Request Information</h4>
                 {selectedResponse.request ? (
                   <>
-                    <p>
-                      <strong>Member:</strong>{" "}
-                      {selectedResponse.request.memberName}
-                    </p>
-                    <p>
-                      <strong>Child:</strong>{" "}
-                      {selectedResponse.request.childName}
-                    </p>
-                    <p>
-                      <strong>Description:</strong>{" "}
-                      {selectedResponse.request.description}
-                    </p>
-                    <p>
-                      <strong>Request Date:</strong>{" "}
-                      {selectedResponse.request.requestDate}
-                    </p>
+                    <p><strong>Member:</strong> {selectedResponse.request.memberName}</p>
+                    <p><strong>Child:</strong> {selectedResponse.request.childName}</p>
+                    <p><strong>Description:</strong> {selectedResponse.request.description}</p>
+                    <p><strong>Request Date:</strong> {selectedResponse.request.requestDate}</p>
                   </>
                 ) : (
                   <p>No request details available.</p>
                 )}
-              </div>
-              <div className="response-section">
+              </article>
+              <article className="response-section">
                 <h4>Response Information</h4>
-                <p>
-                  <strong>Date:</strong>{" "}
-                  {selectedResponse.response.responseDate}
-                </p>
-                <p>
-                  <strong>Doctor:</strong>{" "}
-                  {selectedResponse.response.doctorName}
-                </p>
-                <p>
-                  <strong>Status:</strong> {selectedResponse.response.status}
-                </p>
-                <p>
-                  <strong>Follow-up:</strong>{" "}
-                  {selectedResponse.response.content.followUp || "N/A"}
-                </p>
-              </div>
+                <p><strong>Date:</strong> {selectedResponse.response.responseDate}</p>
+                <p><strong>Doctor:</strong> {selectedResponse.response.doctorName}</p>
+                <p><strong>Status:</strong> {selectedResponse.response.status}</p>
+                <p><strong>Follow-up:</strong> {selectedResponse.response.content.followUp || "N/A"}</p>
+              </article>
               {showFeedbackForm && (
-                <div className="feedback-form">
+                <article className="feedback-form">
                   <h4>Feedback</h4>
-                  <div className="star-rating">
+                  <section className="star-rating">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <span
                         key={star}
@@ -921,8 +844,8 @@ function DoctorConsultation() {
                         ★
                       </span>
                     ))}
-                  </div>
-                  <div className="input-group">
+                  </section>
+                  <section className="input-group">
                     <label>Comment</label>
                     <textarea
                       value={comment}
@@ -931,142 +854,91 @@ function DoctorConsultation() {
                       rows="4"
                       className="feedback-textarea"
                     />
-                  </div>
-                  <button
-                    className="submit-feedback-button"
-                    onClick={handleSubmitFeedbackAndUpdateStatus}
-                    disabled={isSubmitting || rating < 1 || !comment.trim()}
-                  >
-                    {isSubmitting ? "Sending..." : "Submit Feedback"}
-                  </button>
-                  {feedbackSubmitError && (
-                    <p className="submit-error">{feedbackSubmitError}</p>
-                  )}
-                </div>
+                  </section>
+                  <footer>
+                    <button
+                      className="submit-feedback-button"
+                      onClick={handleSubmitFeedbackAndUpdateStatus}
+                      disabled={isSubmitting || rating < 1 || !comment.trim()}
+                    >
+                      {isSubmitting ? "Sending..." : "Submit Feedback"}
+                    </button>
+                    {feedbackSubmitError && <p className="submit-error">{feedbackSubmitError}</p>}
+                  </footer>
+                </article>
               )}
-            </div>
-          </div>
-        </div>
+            </section>
+          </article>
+        </aside>
       )}
 
-      {/* Sent Request Modal */}
       {selectedSentRequest && (
-        <div
-          className="modal-overlay"
-          onClick={() => setSelectedSentRequest(null)}
-        >
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="modal-close"
-              onClick={() => setSelectedSentRequest(null)}
-            >
+        <aside className="modal-overlay" onClick={() => setSelectedSentRequest(null)}>
+          <article className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setSelectedSentRequest(null)}>
               ×
             </button>
-            <h3 className="modal-title">Sent Request Details</h3>
-            <div className="response-details">
-              <div className="request-section">
+            <header className="modal-title">Sent Request Details</header>
+            <section className="response-details">
+              <article className="request-section">
                 <h4>Request Information</h4>
-                <p>
-                  <strong>ID:</strong> {selectedSentRequest.requestId}
-                </p>
-                <p>
-                  <strong>Child:</strong> {selectedSentRequest.childName}
-                </p>
-                <p>
-                  <strong>Category:</strong> {selectedSentRequest.category}
-                </p>
-                <p>
-                  <strong>Urgency:</strong> {selectedSentRequest.urgency}
-                </p>
-                <p>
-                  <strong>Description:</strong>{" "}
-                  {selectedSentRequest.description}
-                </p>
-                <p>
-                  <strong>Request Date:</strong>{" "}
-                  {selectedSentRequest.requestDate}
-                </p>
-                <p>
-                  <strong>Status:</strong> {selectedSentRequest.status}
-                </p>
+                <p><strong>ID:</strong> {selectedSentRequest.requestId}</p>
+                <p><strong>Child:</strong> {selectedSentRequest.childName}</p>
+                <p><strong>Category:</strong> {selectedSentRequest.category}</p>
+                <p><strong>Urgency:</strong> {selectedSentRequest.urgency}</p>
+                <p><strong>Description:</strong> {selectedSentRequest.description}</p>
+                <p><strong>Request Date:</strong> {selectedSentRequest.requestDate}</p>
+                <p><strong>Status:</strong> {selectedSentRequest.status}</p>
                 {selectedSentRequest.attachments && (
-                  <div>
+                  <section>
                     <h4>Attachments</h4>
-                    {JSON.parse(selectedSentRequest.attachments).map(
-                      (attachment, index) => (
-                        <div key={index} style={{ marginBottom: "10px" }}>
-                          <p>{attachment.fileName}</p>
-                          <button
-                            className="download-button"
-                            onClick={() => downloadAttachment(attachment)}
-                          >
-                            Download
-                          </button>
-                        </div>
-                      )
-                    )}
-                  </div>
+                    {JSON.parse(selectedSentRequest.attachments).map((attachment, index) => (
+                      <article key={index} style={{ marginBottom: "10px" }}>
+                        <p>{attachment.fileName}</p>
+                        <button
+                          className="doctor-action-button"
+                          onClick={() => downloadAttachment(attachment)}
+                        >
+                          Download
+                        </button>
+                      </article>
+                    ))}
+                  </section>
                 )}
-              </div>
-            </div>
-          </div>
-        </div>
+              </article>
+            </section>
+          </article>
+        </aside>
       )}
 
-      {/* Feedback Modal */}
       {selectedFeedback && (
-        <div
-          className="modal-overlay"
-          onClick={() => setSelectedFeedback(null)}
-        >
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="modal-close"
-              onClick={() => setSelectedFeedback(null)}
-            >
+        <aside className="modal-overlay" onClick={() => setSelectedFeedback(null)}>
+          <article className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setSelectedFeedback(null)}>
               ×
             </button>
-            <h3 className="modal-title">Feedback Details</h3>
-            <div className="response-details">
-              <div className="feedback-section">
+            <header className="modal-title">Feedback Details</header>
+            <section className="response-details">
+              <article className="feedback-section">
                 <h4>Feedback Information</h4>
-                <p>
-                  <strong>Rating:</strong> {selectedFeedback.feedback.rating} ★
-                </p>
-                <p>
-                  <strong>Comment:</strong> {selectedFeedback.feedback.comment}
-                </p>
-                <p>
-                  <strong>Date:</strong>{" "}
-                  {selectedFeedback.feedback.feedbackDate}
-                </p>
-              </div>
+                <p><strong>Rating:</strong> {selectedFeedback.feedback.rating} ★</p>
+                <p><strong>Comment:</strong> {selectedFeedback.feedback.comment}</p>
+                <p><strong>Date:</strong> {selectedFeedback.feedback.feedbackDate}</p>
+              </article>
               {selectedFeedback.relatedResponse && (
-                <div className="response-section">
+                <article className="response-section">
                   <h4>Response Information</h4>
-                  <p>
-                    <strong>Date:</strong>{" "}
-                    {selectedFeedback.relatedResponse.responseDate || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Doctor:</strong>{" "}
-                    {selectedFeedback.relatedResponse.doctorName || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Status:</strong>{" "}
-                    {selectedFeedback.relatedResponse.status || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Follow-up:</strong>{" "}
-                    {selectedFeedback.relatedResponse.content?.followUp ||
-                      "N/A"}
-                  </p>
-                </div>
+                  <p><strong>Date:</strong> {selectedFeedback.relatedResponse.responseDate || "N/A"}</p>
+                  <p><strong>Doctor:</strong> {selectedFeedback.relatedResponse.doctorName || "N/A"}</p>
+                  <p><strong>Status:</strong> {selectedFeedback.relatedResponse.status || "N/A"}</p>
+                  <p><strong>Follow-up:</strong> {selectedFeedback.relatedResponse.content?.followUp || "N/A"}</p>
+                </article>
               )}
-            </div>
-          </div>
-        </div>
+            </section>
+          </article>
+        </aside>
       )}
+
       {showPopup && (
         <PopupNotification
           type={popupType}
@@ -1074,7 +946,7 @@ function DoctorConsultation() {
           onClose={() => setShowPopup(false)}
         />
       )}
-    </div>
+    </main>
   );
 }
 

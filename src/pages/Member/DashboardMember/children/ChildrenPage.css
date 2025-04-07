@@ -471,50 +471,35 @@
   background: #f8f9fa;
   border-radius: 8px;
 }
+.compare-control {
+  grid-area: 2 / 2 / 3 / 3; /* Move it below child details */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px;
+}
 
-/* Responsive Adjustments
-@media (max-width: 768px) {
-  .parent {
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(8, 1fr);
-    padding: 10px;
-  }
+.compare-btn {
+  background: #00d0bc;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 208, 188, 0.2);
+  transition: all 0.3s ease;
+}
 
-  .child-slots-container {
-    grid-area: 1 / 1 / 3 / 5;
-    flex-direction: row;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 10px;
-  }
+.compare-btn:hover {
+  background: linear-gradient(45deg, #00d0bc, #008cff);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 208, 188, 0.3);
+}
 
-  .child-slot {
-    min-width: 150px;
-    height: 100px;
-  }
-
-  .child-details-section {
-    grid-area: 3 / 1 / 5 / 5;
-  }
-
-  .latest-record-section {
-    grid-area: 5 / 1 / 6 / 5;
-  }
-
-  .alert-item-section {
-    grid-area: 6 / 1 / 7 / 5;
-  }
-
-  .analyze-ai-section {
-    grid-area: 7 / 1 / 8 / 3;
-  }
-
-  .milestone-section {
-    grid-area: 7 / 3 / 8 / 5;
-  }
-
-  .growth-chart-section {
-    width: 100%;
-    margin: 10px auto;
-  }
-} */
+.compare-selected {
+  font-size: 14px;
+  color: #333;
+}

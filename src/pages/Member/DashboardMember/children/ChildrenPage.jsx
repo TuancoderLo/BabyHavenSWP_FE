@@ -14,6 +14,7 @@ import alertApi from "../../../../services/alertApi";
 import AIChat from "./AIChat.jsx";
 import Alert from "./Alert.jsx";
 import PopupNotification from "../../../../layouts/Member/popUp/PopupNotification";
+import CompareChildPopup from"../../../../layouts/Member/popUp/CompareChildPopup";
 
 function ChildrenPage() {
   const navigate = useNavigate();
@@ -29,6 +30,7 @@ function ChildrenPage() {
   const [showAddRecordModal, setShowAddRecordModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
+  const [showComparePopup, setShowComparePopup] = useState(false);
   const [selectedTool, setSelectedTool] = useState("BMI");
   const [latestAlert, setLatestAlert] = useState(null);
   const [alerts, setAlerts] = useState(null);
@@ -255,46 +257,47 @@ function ChildrenPage() {
     return Math.floor(ageInMonths / 12);
   };
 // Hàm hiển thị nút "Compare" và dropdown chọn bé so sánh
-// const renderCompareControl = () => {
-//   // Nếu chỉ có một bé hoặc bé so sánh đã được chọn, không hiện dropdown nữa.
-//   if (childrenList.length < 2) return null;
-//   return (
-//     <div className="compare-control">
-//       <button
-//         className="compare-btn"
-//         onClick={() => {
-//           // Nếu đã chọn bé so sánh rồi, bỏ chọn (cancel compare)
-//           if (compareChild) {
-//             setCompareChild(null);
-//           } else {
-//             // Hiển thị dropdown để chọn bé so sánh (loại bỏ bé chính)
-//             // Ví dụ đơn giản: dùng window.prompt để nhập chỉ số của bé so sánh
-//             const otherChildren = childrenList.filter(
-//               (child) => child.name !== selectedChild.name
-//             );
-//             const options = otherChildren
-//               .map((child, index) => `${index + 1}. ${child.name}`)
-//               .join("\n");
-//             const input = window.prompt(
-//               `Select a child to compare:\n${options}\nEnter the number:`
-//             );
-//             const index = parseInt(input, 10) - 1;
-//             if (index >= 0 && index < otherChildren.length) {
-//               setCompareChild(otherChildren[index]);
-//             }
-//           }
-//         }}
-//       >
-//         {compareChild ? "Cancel Compare" : "Compare"}
-//       </button>
-//       {compareChild && (
-//         <div className="compare-selected">
-//           Comparing with: <strong>{compareChild.name}</strong>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
+/* Updated renderCompareControl function */
+const renderCompareControl = () => {
+  if (childrenList.length < 2) return null;
+
+  return (
+    <div className="compare-control">
+      <button
+        className="compare-btn"
+        onClick={() => {
+          if (compareChild) {
+            setCompareChild(null);
+          } else if (!selectedChild) {
+            setPopupType("error");
+            setPopupMessage("Please select the main child before comparing.");
+            setShowPopup(true);
+          } else {
+            setShowComparePopup(true);
+          }
+        }}
+      >
+        {compareChild ? "Cancel Comparison" : "Compare with Another Child"}
+      </button>
+      {compareChild && (
+        <div className="compare-selected">
+          Comparing with: <strong>{compareChild.name}</strong>
+        </div>
+      )}
+      {showComparePopup && (
+        <CompareChildPopup
+          childrenList={childrenList}
+          selectedChild={selectedChild}
+          onSelect={(child) => {
+            setCompareChild(child);
+            setShowComparePopup(false);
+          }}
+          onClose={() => setShowComparePopup(false)}
+        />
+      )}
+    </div>
+  );
+};
 
   const renderAnalyzeWithAI = () => {
     return (
@@ -505,8 +508,8 @@ function ChildrenPage() {
                 View Milestones
               </button>
             </div>
-             {/* Hiển thị nút Compare
-             {renderCompareControl()} */}
+             {/* Hiển thị nút Compare */}
+             {renderCompareControl()}
           </div>
 
           {/* Growth Chart separated outside of the "parent" container */}
@@ -543,14 +546,15 @@ function ChildrenPage() {
             <div className="chart-area">
               {selectedChild ? (
                 <GrowthChart
-                  childName={selectedChild.name}
-                  selectedTool={selectedTool}
-                  onRecordSelect={setSelectedRecord}
-                  refreshTrigger={refreshTrigger}
-                  gender={selectedChild.gender}
-                  ageInMonths={getAgeInMonths(selectedChild.dateOfBirth)}
-                  ageInYears={getAgeInYears(getAgeInMonths(selectedChild.dateOfBirth))}
-                />
+  childName={selectedChild.name}
+  selectedTool={selectedTool}
+  onRecordSelect={setSelectedRecord}
+  refreshTrigger={refreshTrigger}
+  gender={selectedChild.gender}
+  ageInMonths={getAgeInMonths(selectedChild.dateOfBirth)}
+  ageInYears={getAgeInYears(getAgeInMonths(selectedChild.dateOfBirth))}
+  compareChild={compareChild}
+/>
               ) : (
                 <div className="no-child-selected">
                   <p>Please select a child to view the growth chart</p>
