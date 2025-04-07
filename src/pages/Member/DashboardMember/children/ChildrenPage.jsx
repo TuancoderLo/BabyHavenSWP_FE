@@ -608,7 +608,7 @@ const renderCompareControl = () => {
               </button>
             </div>
 
-            <div className="growth-analysis-section">
+            <div className="growth-analysis">
               {renderGrowthAnalysis()}
             </div>
 

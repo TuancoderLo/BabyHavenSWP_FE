@@ -392,6 +392,86 @@
   border-radius: 2px;
 }
 
+/* Growth Analysis Section */
+.growth-analysis-section {
+  grid-area: 3 / 6 / 4 / 7;
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.growth-analysis-section h3 {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.analysis-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.connect-doctor-button {
+  background: rgb(64, 0, 255);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(0, 208, 188, 0.2);
+  margin-top: auto;
+  margin-bottom: 10px;
+}
+
+.connect-doctor-button:hover {
+  background: linear-gradient(45deg, #00d0bc, #7112ff);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(6, 130, 255, 0.4);
+}
+
+.analysis-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #f8f9fa;
+}
+
+.analysis-label {
+  color: #666;
+  font-size: 13px;
+  font-weight: 500;
+  min-width: 95px;
+}
+
+.analysis-value {
+  font-weight: 600;
+  font-size: 13px;
+  text-align: right;
+  min-width: 60px;
+}
+
+.analysis-item.increase .analysis-value {
+  color: #00d0bc;
+}
+
+.analysis-item.decrease .analysis-value {
+  color: #ff9aa2;
+}
+
 /* Child slot content styling */
 .child-info {
   display: flex;
