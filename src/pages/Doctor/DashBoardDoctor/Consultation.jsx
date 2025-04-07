@@ -174,6 +174,15 @@ const Consultations = () => {
     });
   };
 
+  // Thêm hàm helper để sắp xếp theo thời gian cũ nhất
+  const sortByDateAsc = (items) => {
+    return [...items].sort((a, b) => {
+      const dateA = new Date(a.requestDate);
+      const dateB = new Date(b.requestDate);
+      return dateA - dateB; // Sắp xếp tăng dần (cũ nhất đầu tiên)
+    });
+  };
+
   // Sửa lại hàm fetchConsultationsWithPagination để sắp xếp trước khi phân trang
   const fetchConsultationsWithPagination = async (page = 1, pageSize = 5) => {
     setLoading(true);
@@ -203,16 +212,19 @@ const Consultations = () => {
       let filteredData = allRequests;
       if (activeTab === "new") {
         filteredData = allRequests.filter((item) => item.status === "Pending");
+        // Sắp xếp request cũ lên trên (tăng dần theo ngày) với tab "new"
+        filteredData = sortByDateAsc(filteredData);
       } else if (activeTab === "completed") {
         filteredData = allRequests.filter(
           (item) => item.status === "Completed"
         );
+        // Mặc định sắp xếp cho tab completed - giữ nguyên
+        filteredData = sortByDateDesc(filteredData);
       } else if (activeTab === "history") {
         // hiển thị tất cả (nếu muốn)
+        // Cho tab history sắp xếp luôn theo mới nhất (giảm dần)
+        filteredData = sortByDateDesc(filteredData);
       }
-
-      // Sắp xếp theo thời gian mới nhất
-      filteredData = sortByDateDesc(filteredData);
 
       const total = filteredData.length;
       const startIndex = (page - 1) * pageSize;
