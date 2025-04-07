@@ -108,8 +108,6 @@ const AddChild = ({ closeOverlay }) => {
         }
         return updated;
       });
-
-      // Cập nhật lỗi và gợi ý nếu có thông tin ngày sinh và giới tính
       if (childForm.dateOfBirth) {
         const newErrors = validateGrowthRecordErrors({ ...growthForm, [name]: value });
         const newSuggestions = validateGrowthRecordSuggestions(
@@ -164,10 +162,10 @@ const AddChild = ({ closeOverlay }) => {
       setWarnings(growthSuggestions);
       if (Object.keys(growthErrors).length > 0) return;
       if (Object.keys(growthSuggestions).length > 0) {
-        const confirm = window.confirm(
+        const confirmProceed = window.confirm(
           "Some entered values are outside the reference range. Are you sure you want to proceed?"
         );
-        if (!confirm) return;
+        if (!confirmProceed) return;
       }
     }
 
@@ -269,7 +267,6 @@ const AddChild = ({ closeOverlay }) => {
         <button className="close-button-record" onClick={closeOverlay}>
           ×
         </button>
-
         <div className="wizard-left">
           <div className="blue-bar" />
           <div className="wizard-left-content">
@@ -279,7 +276,6 @@ const AddChild = ({ closeOverlay }) => {
             <img src={BabyGrowth} alt="Baby Growth" />
           </div>
         </div>
-
         <div className="wizard-right">
           <div className="step-form">
             {/* Baby's Name Section */}
@@ -300,7 +296,6 @@ const AddChild = ({ closeOverlay }) => {
                 {errors.name && <p className="error-text">{errors.name}</p>}
               </div>
             </div>
-
             {/* Gender Section */}
             <div className="form-section gender-card">
               <h3>Baby’s Gender</h3>
@@ -333,7 +328,6 @@ const AddChild = ({ closeOverlay }) => {
                 {errors.gender && <p className="error-text">{errors.gender}</p>}
               </div>
             </div>
-
             {/* Date of Birth Section */}
             <div className="form-section date-section">
               <h3>Baby’s Date of Birth</h3>
@@ -365,7 +359,6 @@ const AddChild = ({ closeOverlay }) => {
                 <p className="stage-info">Stage: {stageInfo.label}</p>
               )}
             </div>
-
             {/* Basic Measurements Section */}
             <div className="form-section measurements-card">
               <h3>Basic Measurements</h3>
@@ -420,7 +413,6 @@ const AddChild = ({ closeOverlay }) => {
                 />
               </div>
             </div>
-
             {/* Growth Record Section - Render dynamic fields */}
             <details>
               <summary>Growth Record (click to expand)</summary>
@@ -512,7 +504,7 @@ const AddChild = ({ closeOverlay }) => {
                         )}
                       </div>
                     ))}
-                  {/* Hiển thị BMI */}
+                  {/* BMI */}
                   <div>
                     <label>{getFieldLabel("bmi") || "BMI (kg/m²)"}</label>
                     <input
@@ -533,7 +525,6 @@ const AddChild = ({ closeOverlay }) => {
                 </div>
               </div>
             </details>
-
             <button type="button" className="confirm-button-step1" onClick={handleSubmit}>
               Submit
             </button>
