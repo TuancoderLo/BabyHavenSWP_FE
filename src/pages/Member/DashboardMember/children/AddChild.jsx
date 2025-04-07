@@ -141,7 +141,27 @@ const AddChild = ({ closeOverlay }) => {
 
   const handleSubmit = async () => {
     const childErrors = validateChildForm();
-    setErrors(childErrors);
+ // Validate birthWeight if a value is entered
+ if (childForm.birthWeight) {
+  const birthWeight = Number(childForm.birthWeight);
+  if (birthWeight > 10) {
+    childErrors.birthWeight = "Birth weight must not exceed 10 kg";
+  } else if (birthWeight < 0) {
+    childErrors.birthWeight = "Birth weight cannot be negative";
+  }
+}
+
+// Validate birthHeight if a value is entered
+if (childForm.birthHeight) {
+  const birthHeight = Number(childForm.birthHeight);
+  if (birthHeight > 40) {
+    childErrors.birthHeight = "Birth height must not exceed 40 cm";
+  } else if (birthHeight < 0) {
+    childErrors.birthHeight = "Birth height cannot be negative";
+  }
+}
+
+setErrors(childErrors);
     if (Object.keys(childErrors).length > 0) return;
 
     let hasGrowthData = false;
@@ -362,46 +382,40 @@ const AddChild = ({ closeOverlay }) => {
             {/* Basic Measurements Section */}
             <div className="form-section measurements-card">
               <h3>Basic Measurements</h3>
-              <div className="measurements-section">
-                <div>
-                  <label>Birth weight (kg)</label>
-                  <input
-                    type="number"
-                    placeholder={
-                      stageInfo?.reference?.weight?.[childForm.gender?.toLowerCase()]?.avg?.join("–") ||
-                      stageInfo?.reference?.weight?.both?.avg?.join("–") ||
-                      "kg"
-                    }
-                    name="birthWeight"
-                    value={childForm.birthWeight}
-                    onChange={handleChildChange}
-                    min="0"
-                    className={errors.birthWeight ? "error-input" : ""}
-                  />
-                  {errors.birthWeight && (
-                    <p className="error-text">{errors.birthWeight}</p>
-                  )}
-                </div>
-                <div>
-                  <label>Birth height (cm)</label>
-                  <input
-                    type="number"
-                    placeholder={
-                      stageInfo?.reference?.height?.[childForm.gender?.toLowerCase()]?.avg?.join("–") ||
-                      stageInfo?.reference?.height?.both?.avg?.join("–") ||
-                      "cm"
-                    }
-                    name="birthHeight"
-                    value={childForm.birthHeight}
-                    onChange={handleChildChange}
-                    min="0"
-                    className={errors.birthHeight ? "error-input" : ""}
-                  />
-                  {errors.birthHeight && (
-                    <p className="error-text">{errors.birthHeight}</p>
-                  )}
-                </div>
-              </div>
+           <div className="measurements-section">
+  <div className="input-group">
+    <label htmlFor="birthWeight">Birth Weight (kg)</label>
+    <input
+      type="number"
+      id="birthWeight"
+      placeholder="Enter birth weight"
+      name="birthWeight"
+      value={childForm.birthWeight}
+      onChange={handleChildChange}
+      min="0"
+      max="10"
+      step="0.1"
+      className={errors.birthWeight ? "error-input" : ""}
+    />
+    {errors.birthWeight && <p className="error-text">{errors.birthWeight}</p>}
+  </div>
+  <div className="input-group">
+    <label htmlFor="birthHeight">Birth Height (cm)</label>
+    <input
+      type="number"
+      id="birthHeight"
+      placeholder="Enter birth height"
+      name="birthHeight"
+      value={childForm.birthHeight}
+      onChange={handleChildChange}
+      min="0"
+      max="40"
+      step="0.1"
+      className={errors.birthHeight ? "error-input" : ""}
+    />
+    {errors.birthHeight && <p className="error-text">{errors.birthHeight}</p>}
+  </div>
+</div>
               <div className="notes-section">
                 <label>Notes</label>
                 <input

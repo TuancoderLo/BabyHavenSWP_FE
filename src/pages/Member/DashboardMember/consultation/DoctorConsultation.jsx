@@ -4,6 +4,7 @@ import childApi from "../../../../services/childApi";
 import doctorApi from "../../../../services/DoctorApi";
 import TextEditor from "../../../../pages/Admin/DashboardAdmin/blog/textEditor";
 import moment from "moment";
+import doctorImage from "../../../../data/doctorImages";
 import PopupNotification from "../../../../layouts/Member/popUp/PopupNotification";
 
 // Response Card
@@ -428,59 +429,59 @@ function DoctorConsultation() {
   const renderStepContent = () => {
     switch (currentStep) {
       case 0: // Select Doctor
-        return (
-          <section className="doctor-selection-container">
-            {loading ? (
-              <div className="loading-state">
-                <span className="loading-spinner"></span>
-                <p>Loading doctor list...</p>
-              </div>
-            ) : error ? (
-              <div className="error-state">
-                <p>{error}</p>
-                <button onClick={fetchDoctors} className="doctor-action-button">
-                  Retry
-                </button>
-              </div>
-            ) : doctors.length === 0 ? (
-              <p>No doctors found.</p>
-            ) : (
-              <article className="doctor-selection-grid">
-                {doctors.map((doctor) => (
-                  <section key={doctor.doctorId} className="doctor-card-grid">
-                    <div className="doctor-card-header">
-                      <div className="doctor-avatar-grid">
-                        <img
-                          src={doctor.user?.profilePicture || `https://ui-avatars.com/api/?name=${doctor.name}&background=random`}
-                          alt={doctor.name}
-                        />
-                        <h4>{doctor.name}</h4>
-                        <button className="message-button" onClick={() => handleMessageDoctor(doctor)}>
-                        Send Message
-                      </button>
-                      </div>
-                    <article className="doctor-info-grid">
-                      <p><strong>Degree:</strong> {doctor.degree}</p>
-                      <p><strong>Hospital:</strong> {doctor.hospitalName}</p>
-                      {Array.isArray(doctorSpecializations[doctor.name]) && (
-                        <div className="doctor-specializations-grid">
-                          <p><strong>Specializations:</strong>
-                          {doctorSpecializations[doctor.name].map((spec, index) => (
-                            <p key={index} className="doctor-specialization-grid">
-                              {spec}
-                            </p>
-                          ))}
+      return (
+        <section className="doctor-selection-container">
+          {loading ? (
+            <div className="loading-state">
+              <span className="loading-spinner"></span>
+              <p>Loading doctor list...</p>
+            </div>
+          ) : error ? (
+            <div className="error-state">
+              <p>{error}</p>
+              <button onClick={fetchDoctors} className="doctor-action-button">
+                Retry
+              </button>
+            </div>
+          ) : doctors.length === 0 ? (
+            <p>No doctors found.</p>
+          ) : (
+            <article className="doctor-selection-grid">
+              {doctors.map((doctor) => (
+                <section key={doctor.doctorId} className="doctor-card-grid">
+                  <div className="doctor-avatar-grid">
+                    <img
+                      src={doctorImage[doctor.doctorId] || "/assets/default-doctor.jpg"}
+                      alt={doctor.name}
+                    />
+                  </div>
+                  <article className="doctor-info-grid">
+                    <h4>{doctor.name}</h4>
+                    <p><strong>Degree:</strong> {doctor.degree}</p>
+                    <p><strong>Hospital:</strong> {doctor.hospitalName}</p>
+                    {Array.isArray(doctorSpecializations[doctor.name]) && (
+                      <div className="doctor-specializations-grid">
+                        <p><strong>Specializations:</strong></p>
+                        {doctorSpecializations[doctor.name].map((spec, index) => (
+                          <p key={index} className="doctor-specialization-grid">
+                            {spec}
                           </p>
-                        </div>
-                      )}
-                    </article>
-                    </div>
-                  </section>
-                ))}
-              </article>
-            )}
-          </section>
-        );
+                        ))}
+                      </div>
+                    )}
+                    <button
+                      className="message-button"
+                      onClick={() => handleMessageDoctor(doctor)}
+                    >
+                      Send Message
+                    </button>
+                  </article>
+                </section>
+              ))}
+            </article>
+          )}
+        </section>
+      );
 
       case 1: // Enter Information
         return (
