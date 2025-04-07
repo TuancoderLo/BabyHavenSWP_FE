@@ -3,9 +3,9 @@ import axios from "axios";
 
 // Tạo instance của axios với cấu hình mặc định
 const api = axios.create({
-  baseURL: "https://localhost:7279/api/",
-  // baseURL:
-  //   "https://babyhaven-swp-web-emhrccb7hfh7bkf5.southeastasia-01.azurewebsites.net/api/",
+  // baseURL: "https://localhost:7279/api/",
+  baseURL:
+    "https://babyhaven-swp-web-emhrccb7hfh7bkf5.southeastasia-01.azurewebsites.net/api/",
   // timeout: 10000, // Thêm timeout
   headers: {
     "Content-Type": "application/json",
