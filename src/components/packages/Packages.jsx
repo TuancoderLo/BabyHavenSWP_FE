@@ -728,9 +728,9 @@ function Packages() {
                   Your <strong>{selectedPackage.packageName}</strong> features
                   is available successfully
                 </p>
-                <button className="follow-btn">
+                {/* <button className="follow-btn">
                   Follow your children growth here &rarr;
-                </button>
+                </button> */}
 
                 <button className="close-overlay" onClick={handleFinish}>
                   Close
