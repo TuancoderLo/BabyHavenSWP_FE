@@ -255,46 +255,46 @@ function ChildrenPage() {
     return Math.floor(ageInMonths / 12);
   };
 // Hàm hiển thị nút "Compare" và dropdown chọn bé so sánh
-const renderCompareControl = () => {
-  // Nếu chỉ có một bé hoặc bé so sánh đã được chọn, không hiện dropdown nữa.
-  if (childrenList.length < 2) return null;
-  return (
-    <div className="compare-control">
-      <button
-        className="compare-btn"
-        onClick={() => {
-          // Nếu đã chọn bé so sánh rồi, bỏ chọn (cancel compare)
-          if (compareChild) {
-            setCompareChild(null);
-          } else {
-            // Hiển thị dropdown để chọn bé so sánh (loại bỏ bé chính)
-            // Ví dụ đơn giản: dùng window.prompt để nhập chỉ số của bé so sánh
-            const otherChildren = childrenList.filter(
-              (child) => child.name !== selectedChild.name
-            );
-            const options = otherChildren
-              .map((child, index) => `${index + 1}. ${child.name}`)
-              .join("\n");
-            const input = window.prompt(
-              `Select a child to compare:\n${options}\nEnter the number:`
-            );
-            const index = parseInt(input, 10) - 1;
-            if (index >= 0 && index < otherChildren.length) {
-              setCompareChild(otherChildren[index]);
-            }
-          }
-        }}
-      >
-        {compareChild ? "Cancel Compare" : "Compare"}
-      </button>
-      {compareChild && (
-        <div className="compare-selected">
-          Comparing with: <strong>{compareChild.name}</strong>
-        </div>
-      )}
-    </div>
-  );
-};
+// const renderCompareControl = () => {
+//   // Nếu chỉ có một bé hoặc bé so sánh đã được chọn, không hiện dropdown nữa.
+//   if (childrenList.length < 2) return null;
+//   return (
+//     <div className="compare-control">
+//       <button
+//         className="compare-btn"
+//         onClick={() => {
+//           // Nếu đã chọn bé so sánh rồi, bỏ chọn (cancel compare)
+//           if (compareChild) {
+//             setCompareChild(null);
+//           } else {
+//             // Hiển thị dropdown để chọn bé so sánh (loại bỏ bé chính)
+//             // Ví dụ đơn giản: dùng window.prompt để nhập chỉ số của bé so sánh
+//             const otherChildren = childrenList.filter(
+//               (child) => child.name !== selectedChild.name
+//             );
+//             const options = otherChildren
+//               .map((child, index) => `${index + 1}. ${child.name}`)
+//               .join("\n");
+//             const input = window.prompt(
+//               `Select a child to compare:\n${options}\nEnter the number:`
+//             );
+//             const index = parseInt(input, 10) - 1;
+//             if (index >= 0 && index < otherChildren.length) {
+//               setCompareChild(otherChildren[index]);
+//             }
+//           }
+//         }}
+//       >
+//         {compareChild ? "Cancel Compare" : "Compare"}
+//       </button>
+//       {compareChild && (
+//         <div className="compare-selected">
+//           Comparing with: <strong>{compareChild.name}</strong>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
 
   const renderAnalyzeWithAI = () => {
     return (
@@ -505,8 +505,8 @@ const renderCompareControl = () => {
                 View Milestones
               </button>
             </div>
-             {/* Hiển thị nút Compare */}
-             {renderCompareControl()}
+             {/* Hiển thị nút Compare
+             {renderCompareControl()} */}
           </div>
 
           {/* Growth Chart separated outside of the "parent" container */}

@@ -146,6 +146,50 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     },
     [growthForm, child.dateOfBirth, child.gender]
   );
+  const formatDateToYYYYMMDD = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toISOString().slice(0, 10);
+  };
+
+  // Kiểm tra record date không được trước ngày sinh của bé
+  const checkRecordDateValid = () => {
+    const recordDate = new Date(growthForm.createdAt);
+    const birthDate = new Date(child.dateOfBirth);
+    if (recordDate < birthDate) {
+      setPopupType("error");
+      setPopupMessage("Record date cannot be before the baby's birth date.");
+      setShowPopup(true);
+      return false;
+    }
+    return true;
+  };
+  
+  // Sử dụng API getGrowthRecords để kiểm tra duplicate record trong 1 ngày
+  const checkDuplicateRecord = async () => {
+    try {
+      const res = await childApi.getGrowthRecords(child.name, child.parentName);
+      if (res.data && res.data.data) {
+        const formattedRecordDate = formatDateToYYYYMMDD(growthForm.createdAt);
+        // In ra console để kiểm tra giá trị sau khi định dạng (debug)
+        console.log("Form record date:", formattedRecordDate);
+        const duplicates = res.data.data.filter(
+          (record) => formatDateToYYYYMMDD(record.createdAt) === formattedRecordDate
+        );
+        console.log("Duplicate records:", duplicates);
+        if (duplicates.length > 0) {
+          return window.confirm(
+            "A record for this date already exists. Do you want to replace it?"
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Error checking duplicate record:", err);
+    }
+    return true;
+  };
+  
+  
 
   const handleSubmit = useCallback(async () => {
     const growthErrors = validateGrowthRecordErrors(growthForm);
@@ -156,15 +200,16 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     );
     setErrors(growthErrors);
     setWarnings(growthSuggestions);
-
     if (Object.keys(growthErrors).length > 0) return;
-
     if (Object.keys(growthSuggestions).length > 0) {
       const confirmProceed = window.confirm(
         "Some entered values are outside the reference range. Are you sure you want to proceed?"
       );
       if (!confirmProceed) return;
     }
+    if (!checkRecordDateValid()) return;
+    const duplicateOk = await checkDuplicateRecord();
+    if (!duplicateOk) return;
 
     setIsLoading(true);
     const growthPayload = {
@@ -266,7 +311,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
             </div>
           </div>
         </div>
-
         <div className="wizard-content">
           {errorMessage && (
             <div className="error-message">
@@ -376,7 +420,6 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
                 />
               </div>
             </div>
-
             <button
               type="button"
               className="confirm-button-step1"
