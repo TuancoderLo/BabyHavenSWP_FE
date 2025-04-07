@@ -509,24 +509,27 @@
 }
 
 
-.detail-row {
+.detail-child-row {
   display: flex;
   justify-content: space-between;
   padding: 5px 0;
+  margin-top: 10px;
+  margin-bottom: 10px;
   gap: 40px;
 }
 
-.detail-row:last-child {
+.detail-child-row:last-child {
   border-bottom: none;
 }
 
-.detail-label {
+.detail-child-label {
   color: #666;
-  font-weight: bold;
+  font-weight: 700;
   font-size: 14px;
+  min-width: 100px;
 }
 
-.detail-value {
+.detail-child-value {
   color: #333;
   font-weight: 600;
   font-size: 14px;

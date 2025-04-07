@@ -257,7 +257,21 @@ function ChildrenPage() {
     return Math.floor(ageInMonths / 12);
   };
 
-  
+  const getPersonalizedMessage = () => {
+    const changes = calculateGrowthChange();
+    if (!changes) {
+      return "Keep tracking your child's growth to see personalized updates! 🌱";
+    }
+    const { weight, height } = changes;
+    if (weight.change > 0 && height.change > 0) {
+      return `Yay! ${selectedChild.name} has gained ${weight.change} kg and grown ${height.change} cm. Great job keeping them healthy! 🥳`;
+    } else if (weight.change <= 0) {
+      return `${selectedChild.name}'s weight has dropped by ${Math.abs(weight.change)} kg. Consider a nutrient-rich diet and check with a doctor if needed! 🥗`;
+    } else if (height.change <= 0) {
+      return `${selectedChild.name}'s height hasn’t increased. More playtime might help them grow taller! 🏃‍♀️`;
+    }
+    return "Keep up the good work nurturing your little one! 🌟";
+  };
 
   const getGrowthTip = (changes) => {
     if (!changes) return "Start tracking your child's growth for personalized tips! 🌱";
@@ -517,15 +531,15 @@ const renderCompareControl = () => {
                     {selectedChild.name}
                   </h2>
                   <div className="child-details-content">
-                    <div className="detail-row">
-                      <span className="detail-label">Age:</span>
-                      <span className="detail-value">
+                    <div className="detail-child-row">
+                      <span className="detail-child-label">Age:</span>
+                      <span className="detail-child-value">
                         {calculateAge(selectedChild.dateOfBirth)}
                       </span>
                     </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Date of Birth:</span>
-                      <span className="detail-value">
+                    <div className="detail-child-row">
+                      <span className="detail-child-label">Date of Birth:</span>
+                      <span className="detail-child-value">
                         {selectedChild.dateOfBirth
                           ? new Date(selectedChild.dateOfBirth).toLocaleDateString("en-GB", {
                               day: "2-digit",
@@ -535,9 +549,9 @@ const renderCompareControl = () => {
                           : "Not set"}
                       </span>
                     </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Gender:</span>
-                      <span className="detail-value">
+                    <div className="detail-child-row">
+                      <span className="detail-child-label">Gender:</span>
+                      <span className="detail-child-value">
                         {selectedChild.gender || "Not set"}
                       </span>
                     </div>
