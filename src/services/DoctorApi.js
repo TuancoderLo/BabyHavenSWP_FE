@@ -5,6 +5,12 @@ const doctorApi = {
     const response = await api.get("/Doctors");
     return response.data;
   },
+
+  getAllDoctorSpecialization: async () => {
+    const response = await api.get("/DoctorSpecializations");
+    return response.data;
+  },
+
   //Api doctor
   getDoctorByUserId: async (userId) => {
     const response = await api.get(`/Doctors/doctor/${userId}`);
