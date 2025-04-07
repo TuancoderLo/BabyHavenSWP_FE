@@ -735,7 +735,8 @@ function DoctorConsultation() {
         const requestId = selectedResponse.response.requestId;
         console.log("Completing request with ID:", requestId);
         
-        await doctorApi.updateConsultationRequestsStatus(requestId, "Completed");
+        const response = await doctorApi.updateConsultationRequestsStatus(requestId, "Completed");
+        console.log("Update response:", response);
         // Sau khi cập nhật trạng thái thành công, cập nhật lại danh sách sent requests
         await fetchSentRequests();
         setPopupType("success");

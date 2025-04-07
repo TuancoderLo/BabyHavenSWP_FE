@@ -508,12 +508,7 @@ const renderCompareControl = () => {
                 View Milestones
               </button>
             </div>
-             {/* Hiển thị nút Compare */}
-             {renderCompareControl()}
-          </div>
-
-          {/* Growth Chart separated outside of the "parent" container */}
-          <div className="growth-chart-section" style={{ margin: "20px auto", width: "90%" }}>
+            <div className="growth-chart-section">
             <h2>
               Growth Chart
               <div className="chart-filters">
@@ -546,21 +541,24 @@ const renderCompareControl = () => {
             <div className="chart-area">
               {selectedChild ? (
                 <GrowthChart
-  childName={selectedChild.name}
-  selectedTool={selectedTool}
-  onRecordSelect={setSelectedRecord}
-  refreshTrigger={refreshTrigger}
-  gender={selectedChild.gender}
-  ageInMonths={getAgeInMonths(selectedChild.dateOfBirth)}
-  ageInYears={getAgeInYears(getAgeInMonths(selectedChild.dateOfBirth))}
-  compareChild={compareChild}
-/>
+                  childName={selectedChild.name}
+                  selectedTool={selectedTool}
+                  onRecordSelect={setSelectedRecord}
+                  refreshTrigger={refreshTrigger}
+                  gender={selectedChild.gender}
+                  ageInMonths={getAgeInMonths(selectedChild.dateOfBirth)}
+                  ageInYears={getAgeInYears(getAgeInMonths(selectedChild.dateOfBirth))}
+                  compareChild={compareChild}
+                />
               ) : (
                 <div className="no-child-selected">
                   <p>Please select a child to view the growth chart</p>
                 </div>
               )}
             </div>
+          </div>
+             {/* Hiển thị nút Compare */}
+             {renderCompareControl()}
           </div>
         </>
       )}

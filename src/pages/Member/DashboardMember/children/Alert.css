@@ -2,9 +2,9 @@
 .alert-item {
   padding: 12px 16px;
   align-items: center;
-  min-height: 85px;
   border-radius: 12px;
   display: flex;
+  min-height: 150px;
   flex-direction: row;
   background: #ffffff;
   border: 2px solid transparent;
