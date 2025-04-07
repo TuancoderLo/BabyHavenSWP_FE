@@ -2,15 +2,15 @@ import React, { useState } from "react";
 import "./Alert.css";
 import HealthReportGenerator from "../../../../services/HealthReportGenerator";
 
-// Array of child care tips (can be extended)
+// Array of child care tips
 const careTips = [
   "Ensure your child drinks enough water every day to stay healthy! 💧",
-  "Adequate sleep is the key to your child's healthy development, aim for 8-10 hours of sleep each day! 😴",
-  "As the weather changes, keep your child warm to prevent catching a cold! 🧣",
-  "Add more vegetables to your child's diet to boost vitamins and minerals! 🥕",
-  "Encourage your child to be active for at least 30 minutes each day for physical development! 🏃‍♂️",
-  "Regular outdoor play can improve your child's mood and overall health! 🌞",
-  "A balanced meal with fruits, proteins, and grains strengthens the immune system! 🍎"
+  "Adequate sleep is key to your child's healthy development—aim for 8-10 hours! 😴",
+  "As the weather changes, keep your child warm to prevent colds! 🧣",
+  "Add more veggies to your child's diet for vitamins and minerals! 🥕",
+  "Encourage 30 minutes of daily activity for physical development! 🏃‍♂️",
+  "Outdoor play boosts mood and health! 🌞",
+  "A balanced meal with fruits, proteins, and grains strengthens immunity! 🍎",
 ];
 
 const Alert = ({ alert, alerts, member, child, growthRecords }) => {
@@ -24,55 +24,10 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
 
   const hasAlert = !!alert;
 
-  // Calculate growth change (similar to Growth Analysis)
-  const calculateGrowthChange = () => {
-    if (!growthRecords || growthRecords.length < 2) return null;
-    const latest = growthRecords[0];
-    const previous = growthRecords[1];
-    const latestBMI = calculateBMI(latest.weight, latest.height);
-    const previousBMI = calculateBMI(previous.weight, previous.height);
-    return {
-      weight: {
-        change: (latest.weight - previous.weight).toFixed(1),
-        trend: latest.weight > previous.weight ? "increase" : "decrease",
-      },
-      height: {
-        change: (latest.height - previous.height).toFixed(1),
-        trend: latest.height > previous.height ? "increase" : "decrease",
-      },
-      bmi: {
-        change: latestBMI && previousBMI ? (latestBMI - previousBMI).toFixed(1) : "N/A",
-      },
-    };
-  };
-
-  const calculateBMI = (weight, height) => {
-    if (!weight || !height) return null;
-    const heightInMeters = height / 100;
-    return weight / (heightInMeters * heightInMeters);
-  };
-
   // Get a random care tip
   const getRandomCareTip = () => {
     const randomIndex = Math.floor(Math.random() * careTips.length);
     return careTips[randomIndex];
-  };
-
-  // Generate a personalized message based on growth changes
-  const getPersonalizedMessage = () => {
-    const changes = calculateGrowthChange();
-    if (!changes) {
-      return getRandomCareTip(); // If no growth data, return a random tip
-    }
-    const { weight, height } = changes;
-    if (weight.change > 0 && height.change > 0) {
-      return `Congratulations! ${child?.name} has gained ${weight.change} kg and grown ${height.change} cm. Keep up the good nutrition! 🥳`;
-    } else if (weight.change <= 0) {
-      return `${child?.name}'s weight has decreased by ${Math.abs(weight.change)} kg. Consider increasing nutritional intake and consult a doctor if needed! 🥗`;
-    } else if (height.change <= 0) {
-      return `${child?.name}'s height has not increased. Encourage more physical activity for better growth! 🏃‍♀️`;
-    }
-    return getRandomCareTip();
   };
 
   function getSeverityClass(level) {
@@ -90,8 +45,7 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
   }
 
   const additionalClass =
-    hasAlert &&
-    ["medium", "high"].includes(alert?.severityLevel?.toLowerCase())
+    hasAlert && ["medium", "high"].includes(alert?.severityLevel?.toLowerCase())
       ? "fadeable"
       : "";
 
@@ -103,7 +57,7 @@ const Alert = ({ alert, alerts, member, child, growthRecords }) => {
 
   const alertMessage = hasAlert
     ? `Child's health shows a ${alert.severityLevel} level warning`
-    : getPersonalizedMessage();
+    : getRandomCareTip();
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-GB", {

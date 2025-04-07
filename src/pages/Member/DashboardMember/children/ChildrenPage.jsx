@@ -257,6 +257,21 @@ function ChildrenPage() {
     return Math.floor(ageInMonths / 12);
   };
 
+  
+
+  const getGrowthTip = (changes) => {
+    if (!changes) return "Start tracking your child's growth for personalized tips! 🌱";
+    const { weight, height } = changes;
+    if (weight.change > 0 && height.change > 0) {
+      return "Tip: Keep up the balanced diet to support this great growth! 🍎";
+    } else if (weight.change <= 0) {
+      return "Tip: Try adding protein-rich foods like eggs or beans to boost weight! 🥚";
+    } else if (height.change <= 0) {
+      return "Tip: Encourage outdoor play to help with height growth! ☀️";
+    }
+    return "Tip: Regular check-ins keep your little one on track! 🌟";
+  };
+
   const calculateBMI = (weight, height) => {
     // Logic giữ nguyên
     if (!weight || !height) return null;
@@ -359,7 +374,6 @@ function ChildrenPage() {
 /* Updated renderCompareControl function */
 const renderCompareControl = () => {
   if (childrenList.length < 2) return null;
-
   return (
     <div className="compare-control">
       <button
@@ -574,7 +588,33 @@ const renderCompareControl = () => {
                 />
               </div>
             </div>
-
+          
+            <div className="personalized-growth-section">
+  <h3 className="personalized-growth-title">Growth Update</h3>
+  <div className="personalized-growth-content">
+    {selectedChild && growthRecords.length >= 2 ? (
+      <>
+        <p className="growth-message">{getPersonalizedMessage()}</p>
+        <div className="growth-details">
+          <span className="growth-detail">
+            <i className="fas fa-ruler-vertical"></i> Height Change: {calculateGrowthChange()?.height.change || "N/A"} cm
+          </span>
+          <span className="growth-detail">
+            <i className="fas fa-weight"></i> Weight Change: {calculateGrowthChange()?.weight.change || "N/A"} kg
+          </span>
+          <span className="growth-detail">
+            <i className="fas fa-chart-line"></i> BMI Change: {calculateGrowthChange()?.bmi.change || "N/A"}
+          </span>
+        </div>
+        <p className="growth-tip">
+          {getGrowthTip(calculateGrowthChange())}
+        </p>
+      </>
+    ) : (
+      <p>No growth updates available yet. Add more records to see trends!</p>
+    )}
+  </div>
+</div>
             <div className="alert-item-section">
               <Alert
                 alert={latestAlert}
