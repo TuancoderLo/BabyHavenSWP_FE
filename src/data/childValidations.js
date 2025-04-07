@@ -1,79 +1,34 @@
-export const WHO_GROWTH_REFERENCE = [
-  { age: 0, weight: [3.3, 5.0], height: [49, 55] },
-  { age: 3, weight: [5.0, 7.9], height: [58, 67] },
-  { age: 6, weight: [6.4, 9.7], height: [64, 72] },
-  { age: 9, weight: [7.2, 11.0], height: [67, 76] },
-  { age: 12, weight: [8.5, 12.5], height: [72, 82] },
-  { age: 24, weight: [10.5, 15.5], height: [82, 95] },
-  { age: 36, weight: [12.0, 18.0], height: [90, 105] },
-  { age: 48, weight: [13.5, 21.0], height: [96, 112] },
-  { age: 60, weight: [15.0, 24.0], height: [102, 118] },
-  { age: 72, weight: [17.5, 28.0], height: [108, 125] },
-  { age: 84, weight: [20.0, 32.0], height: [113, 130] },
-  { age: 96, weight: [22.5, 36.0], height: [118, 136] },
-  { age: 108, weight: [25.0, 41.0], height: [123, 141] },
-  { age: 120, weight: [28.0, 45.0], height: [128, 147] },
-  { age: 132, weight: [31.0, 50.0], height: [134, 153] },
-  { age: 144, weight: [34.0, 55.0], height: [140, 160] },
-  { age: 156, weight: [38.0, 61.0], height: [145, 166] },
-  { age: 168, weight: [42.0, 67.0], height: [150, 171] },
-  { age: 180, weight: [47.0, 73.0], height: [155, 175] },
-  { age: 192, weight: [51.0, 78.0], height: [160, 178] },
-  { age: 204, weight: [55.0, 82.0], height: [162, 180] },
-  { age: 216, weight: [58.0, 85.0], height: [164, 182] },
-];
+/* childValidations.js */
 
-export function getAgeStage(dateOfBirth) {
-  const months = calculateAgeInMonths(dateOfBirth);
-  if (months < 1) return "0–1 month";
-  if (months < 3) return "1–3 months old";
-  if (months < 6) return "3–6 months old";
-  if (months < 12) return "6–12 months old";
-
-  const years = Math.floor(months / 12);
-  if (years < 2) return "1–2 years old";
-  if (years < 5) return "2–5 years old";
-  if (years < 13) return "6–12 years old";
-  if (years < 19) return "13–18 years old";
-  return "Adult";
-}
-
-function calculateAgeInMonths(dateOfBirth) {
-  const birthDate = new Date(dateOfBirth);
-  const today = new Date();
-  let months = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
-  // Adjust if the current day is less than the birth day
-  if (today.getDate() < birthDate.getDate()) {
-      months--;
-  }
-  return months;
-}
+// ====================
+// Basic validation functions for child information
+// ====================
 
 export function validateDateOfBirth(dateString) {
-  if (!dateString) return "Please select date of birth";
+  if (!dateString) return "Please select the baby's date of birth";
   const birthDate = new Date(dateString);
   const today = new Date();
   const eighteenYearsAgo = new Date();
   eighteenYearsAgo.setFullYear(today.getFullYear() - 18);
   if (birthDate < eighteenYearsAgo) {
-    return "Child must be under 18 years old";
+    return "The baby must be under 18 years old";
   }
   return "";
 }
 
 export function validateName(name) {
   if (!name.trim()) {
-    return "Please enter baby's name";
+    return "Please enter the baby's name";
   }
   if (name.trim().length > 30) {
-    return "Name cannot exceed 30 characters";
+    return "Name must not exceed 30 characters";
   }
   return "";
 }
 
 export function validateGender(gender) {
   if (!gender) {
-    return "Please select gender";
+    return "Please select the baby's gender";
   }
   return "";
 }
@@ -103,130 +58,282 @@ export function addChildForm(childForm) {
   return newErrors;
 }
 
-// Hàm kiểm tra lỗi của dữ liệu growth record
-export function validateGrowthRecordErrors(growthForm, childDateOfBirth) {
+// ====================
+// Reference data for each growth stage
+// ====================
+
+export const growthStages = {
+  "0-1m": {
+    label: "Newborn Stage (0–1 month)",
+    requiredFields: ["weight", "height", "createdAt"],
+    optionalFields: [
+      "headCircumference",
+      "chestCircumference",
+      "bodyTemperature",
+      "heartRate",
+      "oxygenSaturation",
+      "sleepDuration",
+    ],
+    reference: {
+      weight: {
+        male: { avg: [3.4, 4.5], range: [3.2, 4.8] },
+        female: { avg: [3.2, 4.2], range: [3.0, 4.5] },
+        note: "Increases ~30 g/day in the first month",
+      },
+      height: {
+        male: { avg: [49.9, 54.7], range: [49, 55] },
+        female: { avg: [49.2, 53.7], range: [48, 54] },
+        note: "Increases ~3–4 cm in the first month",
+      },
+      headCircumference: { both: { avg: [34, 37], range: [33, 38] }, note: "Increases ~1 cm/week" },
+      chestCircumference: { both: { avg: [32, 33], range: [31, 34] } },
+      bodyTemperature: { both: { avg: [36.5, 37.5], range: [36, 38] }, note: "Fever ≥38°C is serious" },
+      heartRate: { both: { avg: [100, 160], range: [90, 170] } },
+      oxygenSaturation: { both: { avg: [95, 100], range: [92, 100] } },
+      sleepDuration: { both: { avg: [14, 18], range: [12, 20] }, note: "Divided into short 2–4 hour naps" },
+    },
+  },
+  "1-3m": {
+    label: "1–3 Months Stage",
+    requiredFields: ["weight", "height", "createdAt"],
+    optionalFields: ["headCircumference", "bodyTemperature", "heartRate", "sleepDuration"],
+    reference: {
+      weight: {
+        male: { avg: [5.8, 6.4], range: [5.5, 6.8] },
+        female: { avg: [5.5, 5.9], range: [5.2, 6.2] },
+        note: "Increases ~0.8–1 kg per month",
+      },
+      height: {
+        male: { avg: [59, 61.4], range: [58, 63] },
+        female: { avg: [58, 59.8], range: [57, 61] },
+        note: "Increases ~3 cm/month",
+      },
+      headCircumference: { both: { avg: [38, 41], range: [37, 42] }, note: "Increases ~2 cm/month" },
+      bodyTemperature: { both: { avg: [36.5, 37.5], range: [36, 38] }, note: "Fever ≥38°C requires a check-up" },
+      heartRate: { both: { avg: [100, 150], range: [90, 160] } },
+      sleepDuration: { both: { avg: [14, 16], range: [12, 18] }, note: "Longer night sleep" },
+    },
+  },
+  "3-6m": {
+    label: "3–6 Months Stage",
+    requiredFields: ["weight", "height", "createdAt"],
+    optionalFields: ["headCircumference", "bodyTemperature", "heartRate", "sleepDuration"],
+    reference: {
+      weight: {
+        male: { avg: [7.5, 7.9], range: [7.0, 8.5] },
+        female: { avg: [7.0, 7.3], range: [6.5, 8.0] },
+        note: "Doubles birth weight",
+      },
+      height: {
+        male: { avg: [66, 67.6], range: [65, 69] },
+        female: { avg: [64, 65.7], range: [63, 67] },
+        note: "Increases ~2.5 cm/month",
+      },
+      headCircumference: { both: { avg: [42, 43], range: [41, 44] }, note: "Slows down (~0.5 cm/month)" },
+      bodyTemperature: { both: { avg: [36.5, 37.5], range: [36, 38] } },
+      heartRate: { both: { avg: [90, 130], range: [80, 140] } },
+      sleepDuration: { both: { avg: [14, 15], range: [12, 16] }, note: "Night sleep ~8–10 hours" },
+    },
+  },
+  "6-12m": {
+    label: "Sitting and Standing Stage (6–12 months)",
+    requiredFields: ["weight", "height", "createdAt"],
+    optionalFields: ["headCircumference", "bodyTemperature", "heartRate", "sleepDuration"],
+    reference: {
+      weight: {
+        male: { avg: [8.5, 9.7], range: [7.7, 11.5] },
+        female: { avg: [8.0, 9.0], range: [7.0, 10.7] },
+        note: "Triples birth weight by 12 months",
+      },
+      height: {
+        male: { avg: [70, 75.8], range: [68, 78] },
+        female: { avg: [68, 74.0], range: [65, 76] },
+        note: "Increases ~1–1.5 cm/month",
+      },
+      headCircumference: { both: { avg: [45, 46], range: [43, 49] }, note: "Slows after 6 months" },
+      bodyTemperature: { both: { avg: [36.5, 37.5], range: [36, 38] } },
+      heartRate: { both: { avg: [90, 120], range: [80, 130] } },
+      sleepDuration: { both: { avg: [13, 15], range: [12, 16] }, note: "Night sleep ~10–12 hours" },
+    },
+  },
+  "1-2y": {
+    label: "Toddler Stage (1–2 years)",
+    requiredFields: ["weight", "height", "createdAt"],
+    optionalFields: ["headCircumference", "bodyTemperature", "heartRate", "sleepDuration"],
+    reference: {
+      weight: {
+        male: { avg: [10.9, 12.7], range: [10, 15.4] },
+        female: { avg: [10.0, 12.1], range: [9, 14.5] },
+        note: "Increases ~2–3 kg in the second year",
+      },
+      height: {
+        male: { avg: [78, 86.5], range: [76, 90] },
+        female: { avg: [76, 85.0], range: [74, 88] },
+        note: "Increases ~12–13 cm in the second year",
+      },
+      headCircumference: { both: { avg: [47, 49], range: [45, 50] }, note: "Typically stops being measured after 2 years" },
+      bodyTemperature: { both: { avg: [36.5, 37.5], range: [36, 38] } },
+      heartRate: { both: { avg: [80, 130], range: [70, 140] } },
+      sleepDuration: { both: { avg: [11, 14], range: [10, 15] }, note: "May still have 1 nap" },
+    },
+  },
+  "2-5y": {
+    label: "Preschool Stage (2–5 years)",
+    requiredFields: ["weight", "height", "createdAt"],
+    optionalFields: [
+      "bodyTemperature",
+      "heartRate",
+      "sleepDuration",
+      "bloodPressureSystolic",
+      "bloodPressureDiastolic",
+    ],
+    reference: {
+      weight: {
+        male: { avg: [12.7, 18.5], range: [11, 24] },
+        female: { avg: [12.1, 18.0], range: [10, 23] },
+        note: "Increases ~2 kg per year",
+      },
+      height: {
+        male: { avg: [86.5, 109.2], range: [83, 115] },
+        female: { avg: [85.0, 108.0], range: [82, 113] },
+        note: "Increases ~6–8 cm per year",
+      },
+      bodyTemperature: { both: { avg: [36.5, 37.5], range: [36, 38] } },
+      heartRate: { both: { avg: [80, 110], range: [70, 120] } },
+      sleepDuration: { both: { avg: [10, 13], range: [9, 14] }, note: "May stop napping by age 5" },
+      bloodPressureSystolic: { both: { avg: [95, 100], range: [90, 110] } },
+      bloodPressureDiastolic: { both: { avg: [60, 65], range: [55, 70] } },
+    },
+  },
+  "6-12y": {
+    label: "Childhood Stage (6–12 years)",
+    requiredFields: ["weight", "height", "createdAt"],
+    optionalFields: [
+      "bodyTemperature",
+      "heartRate",
+      "sleepDuration",
+      "bloodPressureSystolic",
+      "bloodPressureDiastolic",
+    ],
+    reference: {
+      weight: {
+        male: { avg: [20, 40], range: [18, 59] },
+        female: { avg: [20, 42], range: [18, 62] },
+        note: "Increases ~2–3 kg per year",
+      },
+      height: {
+        male: { avg: [115, 150], range: [110, 161] },
+        female: { avg: [115, 155], range: [110, 163] },
+        note: "Increases ~5–6 cm per year",
+      },
+      bodyTemperature: { both: { avg: [36.5, 37.5], range: [36, 38] } },
+      heartRate: { both: { avg: [70, 110], range: [60, 120] } },
+      sleepDuration: { both: { avg: [9, 12], range: [8, 13] } },
+      bloodPressureSystolic: { both: { avg: [100, 120], range: [90, 130] } },
+      bloodPressureDiastolic: { both: { avg: [60, 80], range: [50, 85] } },
+    },
+  },
+  "13-18y": {
+    label: "Adolescent Stage (13–18 years)",
+    requiredFields: ["weight", "height", "createdAt"],
+    optionalFields: [
+      "bodyTemperature",
+      "heartRate",
+      "sleepDuration",
+      "bloodPressureSystolic",
+      "bloodPressureDiastolic",
+    ],
+    reference: {
+      weight: {
+        male: { avg: [52, 72], range: [45, 92] },
+        female: { avg: [45, 60], range: [40, 80] },
+        note: "Significant increase during puberty",
+      },
+      height: {
+        male: { avg: [160, 175], range: [150, 188] },
+        female: { avg: [155, 165], range: [145, 174] },
+        note: "Rapid increase during puberty, then slows",
+      },
+      bodyTemperature: { both: { avg: [36.5, 37.5], range: [36, 38] } },
+      heartRate: { both: { avg: [60, 100], range: [50, 110] } },
+      sleepDuration: { both: { avg: [8, 10], range: [7, 11] } },
+      bloodPressureSystolic: { both: { avg: [110, 120], range: [100, 130] } },
+      bloodPressureDiastolic: { both: { avg: [70, 80], range: [60, 85] } },
+    },
+  },
+};
+
+// ====================
+// Function to calculate age in months
+// ====================
+export function calculateAgeInMonths(dateString) {
+  const birthDate = new Date(dateString);
+  const today = new Date();
+  let months = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
+  if (today.getDate() < birthDate.getDate()) months--;
+  return months < 0 ? 0 : months;
+}
+
+// ====================
+// Function to determine growth stage based on age in months
+// ====================
+export function getGrowthStage(ageInMonths) {
+  if (ageInMonths < 1) return "0-1m";
+  if (ageInMonths < 3) return "1-3m";
+  if (ageInMonths < 6) return "3-6m";
+  if (ageInMonths < 12) return "6-12m";
+  if (ageInMonths < 24) return "1-2y";
+  if (ageInMonths < 60) return "2-5y";
+  if (ageInMonths < 144) return "6-12y";
+  return "13-18y";
+}
+
+// ====================
+// Basic validation: Check for critical errors in growth record
+// ====================
+export function validateGrowthRecordErrors(growthForm) {
   const errors = {};
-
-  // Kiểm tra ngày ghi nhận
-  if (!growthForm.createdAt) {
-    errors.createdAt = "Please select date";
-  } else {
-    const recordDate = new Date(growthForm.createdAt);
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-    if (recordDate < sixMonthsAgo) {
-      errors.createdAt = "Record date cannot be older than 6 months";
-    }
-  }
-
-  // Kiểm tra trọng lượng
-  if (growthForm.weight === "") {
-    errors.weight = "Please enter weight";
-  } else if (parseFloat(growthForm.weight) < 0) {
-    errors.weight = "Weight must not be less than 0";
-  }
-
-  // Kiểm tra chiều cao
-  if (growthForm.height === "") {
-    errors.height = "Please enter height";
-  } else if (parseFloat(growthForm.height) < 0) {
-    errors.height = "Height must not be less than 0";
-  }
-
-  // Kiểm tra nhiệt độ cơ thể
-  if (growthForm.bodyTemperature !== "" && growthForm.bodyTemperature != null) {
-    const bt = parseFloat(growthForm.bodyTemperature);
-    if (bt < 0) {
-      errors.bodyTemperature = "Body temperature must not be less than 0";
-    }
-  }
-
-  // Kiểm tra oxy trong máu
-  if (growthForm.oxygenSaturation !== "" && growthForm.oxygenSaturation != null) {
-    const ox = parseFloat(growthForm.oxygenSaturation);
-    if (ox < 0) {
-      errors.oxygenSaturation = "Oxygen saturation must not be less than 0";
-    }
-  }
-
-  // Kiểm tra thời gian ngủ
-  if (growthForm.sleepDuration !== "" && growthForm.sleepDuration != null) {
-    const sd = parseFloat(growthForm.sleepDuration);
-    if (sd < 0) {
-      errors.sleepDuration = "Sleep duration must not be less than 0";
-    }
-  }
-
-  // Kiểm tra mức độ hormone tăng trưởng
-  if (growthForm.growthHormoneLevel !== "" && growthForm.growthHormoneLevel != null) {
-    const gh = parseFloat(growthForm.growthHormoneLevel);
-    if (isNaN(gh) || gh < 0) {
-      errors.growthHormoneLevel = "Growth hormone level must not be less than 0";
-    }
-  }
-
+  if (!growthForm.createdAt) errors.createdAt = "Please enter the record date";
+  if (!growthForm.weight) errors.weight = "Please enter the weight";
+  else if (parseFloat(growthForm.weight) < 0) errors.weight = "Weight must not be less than 0";
+  if (!growthForm.height) errors.height = "Please enter the height";
+  else if (parseFloat(growthForm.height) < 0) errors.height = "Height must not be less than 0";
   return errors;
 }
 
-// Hàm kiểm tra cảnh báo cho dữ liệu growth record (không chặn submit)
-export function validateGrowthRecordWarnings(growthForm, childDateOfBirth) {
-  const warnings = {};
+// ====================
+// Suggestion validation: Check metrics outside reference ranges and return suggestions (warnings)
+// ====================
+export function validateGrowthRecordSuggestions(growthForm, dateOfBirth, gender) {
+  const ageInMonths = calculateAgeInMonths(dateOfBirth);
+  const stage = getGrowthStage(ageInMonths);
+  const ref = growthStages[stage]?.reference;
+  const suggestions = {};
 
-  // Cảnh báo cho trọng lượng và chiều cao dựa trên tuổi
-  if (childDateOfBirth && (growthForm.weight !== "" || growthForm.height !== "")) {
-    const ageInMonths = calculateAgeInMonths(childDateOfBirth);
-    const ageGroup =
-      WHO_GROWTH_REFERENCE.find((entry) => ageInMonths <= entry.age) ||
-      WHO_GROWTH_REFERENCE[WHO_GROWTH_REFERENCE.length - 1];
-    if (ageGroup) {
-      const [minWeight, maxWeight] = ageGroup.weight;
-      const [minHeight, maxHeight] = ageGroup.height;
-      if (
-        growthForm.weight !== "" &&
-        (parseFloat(growthForm.weight) < minWeight ||
-          parseFloat(growthForm.weight) > maxWeight)
-      ) {
-        warnings.weight = `Warning: Weight should be between ${minWeight}kg and ${maxWeight}kg for age ${ageGroup.age} months`;
-      }
-      if (
-        growthForm.height !== "" &&
-        (parseFloat(growthForm.height) < minHeight ||
-          parseFloat(growthForm.height) > maxHeight)
-      ) {
-        warnings.height = `Warning: Height should be between ${minHeight}cm and ${maxHeight}cm for age ${ageGroup.age} months`;
+  if (!ref) return suggestions;
+
+  Object.keys(ref).forEach((field) => {
+    if (growthForm[field] && ref[field]) {
+      // Use gender value, fallback to "both" if gender is not provided
+      const genderKey = (gender && gender.toLowerCase()) || "both";
+      const refValue = ref[field][genderKey] || ref[field].both;
+      const value = parseFloat(growthForm[field]);
+      if (refValue && (value < refValue.range[0] || value > refValue.range[1])) {
+        suggestions[field] = `${
+          field === "weight" ? "Weight" : field === "height" ? "Height" : field
+        } average for ${growthStages[stage].label}: ${refValue.avg[0]}–${refValue.avg[1]} ${
+          field === "weight" ? "kg" : field === "height" ? "cm" : ""
+        }. Would you like to review it?`;
       }
     }
-  }
-
-  // Cảnh báo nhiệt độ cơ thể
-  if (growthForm.bodyTemperature !== "" && growthForm.bodyTemperature != null) {
-    const bt = parseFloat(growthForm.bodyTemperature);
-    if (bt >= 45) {
-      warnings.bodyTemperature = "Warning: Body temperature is unusually high (should be below 45°C)";
-    } else if (bt < 35 || bt > 38) {
-      warnings.bodyTemperature = "Warning: Normal body temperature is typically between 35°C and 38°C";
-    }
-  }
-
-  // Cảnh báo oxy trong máu
-  if (growthForm.oxygenSaturation !== "" && growthForm.oxygenSaturation != null) {
-    const ox = parseFloat(growthForm.oxygenSaturation);
-    if (ox > 100) {
-      warnings.oxygenSaturation = "Warning: Oxygen saturation cannot exceed 100%";
-    } else if (ox < 95) {
-      warnings.oxygenSaturation = "Warning: Oxygen saturation is typically 95-100%";
-    }
-  }
-
-  // Cảnh báo thời gian ngủ
-  if (growthForm.sleepDuration !== "" && growthForm.sleepDuration != null) {
-    const sd = parseFloat(growthForm.sleepDuration);
-    if (sd >= 24) {
-      warnings.sleepDuration = "Warning: Sleep duration cannot exceed 24 hours";
-    } else if (sd < 10) {
-      warnings.sleepDuration = "Warning: Typical sleep duration for infants is 10-18 hours";
-    }
-  }
-
-  return warnings;
+  });
+  return suggestions;
 }
+
+export default {
+  growthStages,
+  calculateAgeInMonths,
+  getGrowthStage,
+  validateGrowthRecordErrors,
+  validateGrowthRecordSuggestions,
+};
