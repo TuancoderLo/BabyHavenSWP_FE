@@ -319,7 +319,7 @@ const GrowthChart = ({
                 strokeWidth={2}
                 dot={{ fill: "#FF9AA2", r: 4 }}
                 activeDot={{ r: 6, fill: "#FF9AA2" }}
-                name={`BMI`}
+                name={`${primaryName} BMI`}
                 connectNulls={true}
                 onClick={(point) => {
                   if (onRecordSelect && point) onRecordSelect(point);
