@@ -228,6 +228,7 @@ function DoctorConsultation() {
           setConsultationRequests((prev) => ({ ...prev, [requestId]: requestRes.data }));
         }
       }
+      console.log("Consultation request detail:", consultationRequests[requestId]);
     } catch (error) {
       console.error("Error fetching consultation request detail:", error);
     }
@@ -459,7 +460,6 @@ function DoctorConsultation() {
                       </button>
                       </div>
                     <article className="doctor-info-grid">
-                      
                       <p><strong>Degree:</strong> {doctor.degree}</p>
                       <p><strong>Hospital:</strong> {doctor.hospitalName}</p>
                       {Array.isArray(doctorSpecializations[doctor.name]) && (
@@ -715,6 +715,43 @@ function DoctorConsultation() {
     }
   };
 
+  // Hàm xử lý khi nhấn "Send Another Request" (giữ nguyên logic cũ)
+  const handleSendAnotherRequest = () => {
+    setCurrentStep(0); // Quay lại bước chọn bác sĩ
+    setSelectedChild(null); // Đặt lại child đã chọn
+    setConsultationContent(""); // Đặt lại nội dung tư vấn
+    setSelectedDoctor(null); // Đặt lại bác sĩ đã chọn
+    setSelectedFiles([]); // Đặt lại danh sách file đính kèm
+    setSelectedResponse(null); // Đóng modal
+    setCurrentTab("consultation"); // Chuyển về tab Consultation
+  };
+
+  // Hàm xử lý khi nhấn "Complete" (chỉ cập nhật trạng thái request)
+  const handleCompleteRequest = async () => {
+    try {
+      // Kiểm tra nếu có selectedResponse và requestId để cập nhật trạng thái request
+      console.log("Selected response:", selectedResponse);
+      if (selectedResponse?.response?.requestId) {
+        const requestId = selectedResponse.response.requestId;
+        console.log("Completing request with ID:", requestId);
+        
+        await doctorApi.updateConsultationRequestsStatus(requestId, "Completed");
+        // Sau khi cập nhật trạng thái thành công, cập nhật lại danh sách sent requests
+        await fetchSentRequests();
+        setPopupType("success");
+        setPopupMessage("Request marked as completed successfully!");
+        setShowPopup(true);
+      } else {
+        throw new Error("No request ID found to complete.");
+      }
+    } catch (error) {
+      console.error("Error updating request status:", error);
+      setPopupType("error");
+      setPopupMessage("Failed to complete the request. Please try again.");
+      setShowPopup(true);
+    }
+  };
+
   return (
     <main className="doctor-consultation">
       <header className="top-tab-container">
@@ -748,18 +785,32 @@ function DoctorConsultation() {
 
       {selectedResponse && (
         <aside className="modal-overlay" onClick={() => setSelectedResponse(null)}>
-          <article className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <article className="modal-response-content" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setSelectedResponse(null)}>
               ×
             </button>
-            <header className="modal-title">Response Details</header>
+            <header className="modal-response-title">Response Details</header>
             <section className="response-details">
-              <button
-                className="feedback-button"
-                onClick={() => setShowFeedbackForm(!showFeedbackForm)}
-              >
-                {showFeedbackForm ? "Hide Feedback" : "Submit Feedback"}
-              </button>
+              <div className="response-header-button">
+                <button
+                  className="feedback-button"
+                  onClick={() => setShowFeedbackForm(!showFeedbackForm)}
+                >
+                  {showFeedbackForm ? "Hide Feedback" : "Feedback"}
+                </button>
+                <button
+                  className="send-another-button"
+                  onClick={handleSendAnotherRequest}
+                >
+                  Send Another Request
+                </button>
+                <button
+                  className="complete-request-button"
+                  onClick={handleCompleteRequest} // Gọi hàm mới
+                >
+                  Complete
+                </button>
+              </div>
               <article className="request-section">
                 <h4>Request Information</h4>
                 {selectedResponse.request ? (

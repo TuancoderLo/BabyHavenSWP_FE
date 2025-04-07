@@ -407,6 +407,45 @@
   font-weight: 600;
 }
 
+.modal-response-content {
+  background: #f9fbff;
+  padding: 15px;
+  border: 1px solid #d9e4f5;
+  border-radius: 10px;
+  width: 900px;
+  max-height: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  overflow-y: auto;
+}
+
+.modal-response-title {
+  font-size: 24px;
+  color: #000000;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.response-header-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.send-another-button {
+  padding: 8px 16px;
+  background: #4a90e2;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  margin-left: 10px;
+}
+
 .response-details {
   display: flex;
   flex-direction: column;
@@ -479,7 +518,9 @@
 .feedback-button, .submit-feedback-button {
   padding: 8px 16px;
   background: #4a90e2;
+  font-weight: 600;
   color: #fff;
+  width: 140px;
   border: none;
   border-radius: 10px;
   cursor: pointer;
@@ -490,7 +531,7 @@
 
 .feedback-button:hover, .submit-feedback-button:hover {
   background: #357abd;
-  transform: scale(1.05);
+  transition: all 0.3s ease;
 }
 
 .submit-feedback-button:disabled {
