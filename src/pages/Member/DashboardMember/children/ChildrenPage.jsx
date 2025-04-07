@@ -257,6 +257,39 @@ function ChildrenPage() {
     return Math.floor(ageInMonths / 12);
   };
 
+  const calculateBMI = (weight, height) => {
+    // Logic giữ nguyên
+    if (!weight || !height) return null;
+    const heightInMeters = height / 100;
+    return weight / (heightInMeters * heightInMeters);
+  };
+
+  const calculateGrowthChange = (records) => {
+    // Logic giữ nguyên
+    if (!records || records.length < 2) return null;
+    const latest = records[0];
+    const previous = records[1];
+    const latestBMI = calculateBMI(latest.weight, latest.height);
+    const previousBMI = calculateBMI(previous.weight, previous.height);
+    return {
+      weight: {
+        change: (latest.weight - previous.weight).toFixed(1),
+        trend: latest.weight > previous.weight ? "increase" : "decrease",
+      },
+      height: {
+        change: (latest.height - previous.height).toFixed(1),
+        trend: latest.height > previous.height ? "increase" : "decrease",
+      },
+      bmi: {
+        change:
+          latestBMI && previousBMI
+            ? (latestBMI - previousBMI).toFixed(1)
+            : "N/A",
+        trend: latestBMI > previousBMI ? "increase" : "decrease",
+      },
+    };
+  };
+
   const renderGrowthAnalysis = () => {
     // Logic giữ nguyên
     const records = growthRecords.slice(0, 2);
