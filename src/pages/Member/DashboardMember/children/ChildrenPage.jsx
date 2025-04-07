@@ -256,6 +256,72 @@ function ChildrenPage() {
   const getAgeInYears = (ageInMonths) => {
     return Math.floor(ageInMonths / 12);
   };
+
+  const renderGrowthAnalysis = () => {
+    // Logic giữ nguyên
+    const records = growthRecords.slice(0, 2);
+    let changes = calculateGrowthChange(records);
+    if (!changes) {
+      changes = {
+        weight: { change: "N/A", trend: null },
+        height: { change: "N/A", trend: null },
+        bmi: { change: "N/A", trend: null },
+      };
+    }
+    return (
+      <div className="growth-analysis-section">
+        <h3>Growth Analysis</h3>
+        <div className="analysis-content">
+          <div
+            className={`analysis-item ${
+              changes.weight.trend !== null ? changes.weight.trend : "--"
+            }`}
+          >
+            <span className="analysis-label">Weight Change:</span>
+            <span className="analysis-value">
+              {changes.weight.change !== "N/A" && changes.weight.change > 0
+                ? "+"
+                : ""}
+              {changes.weight.change} kg
+            </span>
+          </div>
+          <div
+            className={`analysis-item ${
+              changes.height.trend !== null ? changes.height.trend : "--"
+            }`}
+          >
+            <span className="analysis-label">Height Change:</span>
+            <span className="analysis-value">
+              {changes.height.change !== "N/A" && changes.height.change > 0
+                ? "+"
+                : ""}
+              {changes.height.change} cm
+            </span>
+          </div>
+          <div
+            className={`analysis-item ${
+              changes.bmi.trend !== null ? changes.bmi.trend : "--"
+            }`}
+          >
+            <span className="analysis-label">BMI Change:</span>
+            <span className="analysis-value">
+              {changes.bmi.change !== "N/A"
+                ? (changes.bmi.change > 0 ? "+" : "") + changes.bmi.change
+                : "N/A"}
+            </span>
+          </div>
+        </div>
+        <button
+          className="connect-doctor-button"
+          onClick={() => navigate("/member/doctor-consultation")}
+        >
+          <i className="fas fa-stethoscope"></i>
+          Connect to doctor
+        </button>
+      </div>
+    );
+  };
+
 // Hàm hiển thị nút "Compare" và dropdown chọn bé so sánh
 /* Updated renderCompareControl function */
 const renderCompareControl = () => {
@@ -508,6 +574,12 @@ const renderCompareControl = () => {
                 View Milestones
               </button>
             </div>
+
+            <div className="growth-analysis-section">
+              {renderGrowthAnalysis()}
+            </div>
+
+            
             <div className="growth-chart-section">
             <h2>
               Growth Chart
