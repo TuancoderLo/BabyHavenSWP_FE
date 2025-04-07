@@ -2,7 +2,6 @@
 .doctor-consultation {
   padding: 24px;
   min-height: 100vh;
-  background: #e6f0fa; /* Soft blue background like Consultation */
 }
 
 /* Top Tab Container */
@@ -44,6 +43,7 @@
   padding: 20px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
   max-width: 1200px;
+  min-height: 550px;
   margin: 0 auto;
 }
 
@@ -102,7 +102,6 @@
 .doctor-form-content {
   display: flex;
   flex-direction: column;
-  gap: 20px;
 }
 
 /* Step 1: Enter Information */
@@ -148,13 +147,6 @@
   box-shadow: 0 0 0 3px rgba(74, 193, 226, 0.2);
 }
 
-.editor-wrapper {
-  border: 1px solid #d9e4f5;
-  border-radius: 10px;
-  padding: 10px;
-  background: #f9fbff;
-}
-
 /* Step 2: Select Doctor */
 .doctor-selection-container {
   max-height: 600px;
@@ -168,34 +160,55 @@
 }
 
 .doctor-card-grid {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   padding: 15px;
   background: #f9fbff;
   border: 1px solid #d9e4f5;
   border-radius: 15px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  height: 200px;
   transition: all 0.3s ease;
 }
 
 .doctor-card-grid:hover {
-  background: #a3cffa;
+  border: 1px solid #0066ff;
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+.doctor-card-header {
+  display: flex;
+  flex-direction: column;
+}
+
+.doctor-avatar-grid {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+}
+
 .doctor-avatar-grid img {
-  width: 70px;
-  height: 70px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   margin-bottom: 10px;
+  margin-right: 15px;
   border: 2px solid #4a90e2;
 }
 
+.doctor-avatar-grid h4 {
+  font-size: 18px;
+  color: #333;
+  font-weight: 600;
+  width: 180px;
+}
+
 .doctor-info-grid {
-  text-align: center;
+  display: flex;
+  flex-direction: row;
+  text-align: left;
   margin-bottom: 10px;
+  gap: 15px;
 }
 
 .doctor-info-grid h4 {
@@ -211,9 +224,6 @@
   margin: 3px 0;
 }
 
-.doctor-specializations-grid {
-  margin-top: 5px;
-}
 
 .doctor-specialization-grid {
   font-size: 11px;
@@ -222,15 +232,16 @@
 }
 
 .message-button {
-  padding: 8px 16px;
   background: #4a90e2;
+  width: 90px;
+  height: 30px;
   color: #fff;
   border: none;
   border-radius: 10px;
+  margin-right: 10px;
+  margin-bottom: 20px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 14px;
-  margin-top: 10px;
+  font-size: 9px;
 }
 
 .message-button:hover {
@@ -305,6 +316,7 @@
 /* Tab Content */
 .tab-content {
   max-width: 1200px;
+  height: 900px;
   margin: 0 auto;
 }
 
@@ -367,7 +379,7 @@
   align-items: center;
 }
 
-.modal-content {
+.success-modal-content {
   background: #ffffff;
   padding: 20px;
   border-radius: 16px;
@@ -506,8 +518,9 @@
 
 .doctor-navigation-buttons {
   display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: right;
 }
 
 /* Misc */
