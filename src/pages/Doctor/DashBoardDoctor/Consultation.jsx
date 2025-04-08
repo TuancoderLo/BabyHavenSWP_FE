@@ -301,77 +301,188 @@ const Consultations = () => {
   };
 
   // Khi xem chi tiết
-  const handleViewDetail = async (record) => {
-    try {
-      setSelectedConsultation({ ...record, isLoading: true });
-      setDetailVisible(true);
+  // const handleViewDetail = async (record) => {
+  //   try {
+  //     setSelectedConsultation({ ...record, isLoading: true });
+  //     setDetailVisible(true);
 
-      const detailedData = await fetchConsultationRequestsById(
-        record.requestId
-      );
+  //     const detailedData = await fetchConsultationRequestsById(
+  //       record.requestId
+  //     );
 
-      // Lấy responses
-      const responses = await doctorApi.getConsultationResponsesOData(
-        `?$filter=requestId eq ${record.requestId}`
-      );
-      const latestResponse = responses.data[0] || {};
+  //     // Lấy responses
+  //     const responses = await doctorApi.getConsultationResponsesOData(
+  //       `?$filter=requestId eq ${record.requestId}`
+  //     );
+  //     const latestResponse = responses.data[0] || {};
 
-      // Lấy rating, comment, feedbackDate
-      let rating = 0;
-      let comment = "";
-      let feedbackDate = "";
-      if (latestResponse.responseId) {
-        try {
-          const feedbackResponse =
-            await doctorApi.getRatingFeedbackByResponseId(
-              latestResponse.responseId
-            );
-          const feedbackData = feedbackResponse.data[0] || {};
-          rating = feedbackData.rating || 0;
-          comment = feedbackData.comment || "";
-          feedbackDate = feedbackData.feedbackDate || "";
-        } catch (error) {
-          console.error(
-            `Error fetching feedback for responseId=${latestResponse.responseId}:`,
-            error
-          );
-        }
-      }
+  //     // Lấy rating, comment, feedbackDate
+  //     let rating = 0;
+  //     let comment = "";
+  //     let feedbackDate = "";
+  //     if (latestResponse.responseId) {
+  //       try {
+  //         const feedbackResponse =
+  //           await doctorApi.getRatingFeedbackByResponseId(
+  //             latestResponse.responseId
+  //           );
+  //         const feedbackData = feedbackResponse.data[0] || {};
+  //         rating = feedbackData.rating || 0;
+  //         comment = feedbackData.comment || "";
+  //         feedbackDate = feedbackData.feedbackDate || "";
+  //       } catch (error) {
+  //         console.error(
+  //           `Error fetching feedback for responseId=${latestResponse.responseId}:`,
+  //           error
+  //         );
+  //       }
+  //     }
 
-      const attachmentsArray = parseAttachments(detailedData.attachments);
-      // Xử lý description để loại bỏ các HTML entities
-      const cleanDescription = decodeHtmlEntities(
-        detailedData.description || "N/A"
-      );
+  //     const attachmentsArray = parseAttachments(detailedData.attachments);
+  //     // Xử lý description để loại bỏ các HTML entities
+  //     const cleanDescription = decodeHtmlEntities(
+  //       detailedData.description || "N/A"
+  //     );
 
-      setSelectedConsultation({
-        ...record,
-        isLoading: false,
-        childAge: detailedData.child?.age
-          ? `${detailedData.child.age} years old`
-          : "N/A",
-        childGender: detailedData.child?.gender || "N/A",
-        childAllergies: detailedData.child?.allergies || "None",
-        childNotes: detailedData.child?.notes || "None",
-        childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
-        description: cleanDescription,
-        attachments: attachmentsArray,
-        response: latestResponse.content || "",
-        createdAt: detailedData.createdAt || moment().format(),
-        updatedAt: detailedData.updatedAt || moment().format(),
-        completedDate:
-          detailedData.status === "Completed" ? detailedData.updatedAt : null,
+  //     setSelectedConsultation({
+  //       ...record,
+  //       isLoading: false,
+  //       childAge: detailedData.child?.age
+  //         ? `${detailedData.child.age} years old`
+  //         : "N/A",
+  //       childGender: detailedData.child?.gender || "N/A",
+  //       childAllergies: detailedData.child?.allergies || "None",
+  //       childNotes: detailedData.child?.notes || "None",
+  //       childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
+  //       description: cleanDescription,
+  //       attachments: attachmentsArray,
+  //       response: latestResponse.content || "",
+  //       createdAt: detailedData.createdAt || moment().format(),
+  //       updatedAt: detailedData.updatedAt || moment().format(),
+  //       completedDate:
+  //         detailedData.status === "Completed" ? detailedData.updatedAt : null,
 
-        // [CHANGED] Lưu thêm rating, comment, feedbackDate trong selectedConsultation
-        rating,
-        comment,
-        feedbackDate,
-      });
-    } catch (error) {
-      message.error("Unable to load details");
-      console.error("Error fetching consultation detail:", error);
+  //       // [CHANGED] Lưu thêm rating, comment, feedbackDate trong selectedConsultation
+  //       rating,
+  //       comment,
+  //       feedbackDate,
+  //     });
+  //   } catch (error) {
+  //     message.error("Unable to load details");
+  //     console.error("Error fetching consultation detail:", error);
+  //   }
+  // };
+
+  // Khi xem chi tiết
+const handleViewDetail = async (record) => {
+  try {
+    setSelectedConsultation({ ...record, isLoading: true });
+    setDetailVisible(true);
+
+    const detailedData = await fetchConsultationRequestsById(record.requestId);
+
+    // Log để kiểm tra dữ liệu từ detailedData
+    console.log("Detailed Data:", detailedData);
+
+    // Kiểm tra xem detailedData có memberId và childId không
+    if (!detailedData.child.memberId || !detailedData.child.childId) {
+      console.error("memberId hoặc childId không tồn tại trong detailedData:", detailedData);
+      throw new Error("Không thể lấy memberId hoặc childId từ chi tiết request");
     }
-  };
+
+    // Lấy responses cho request hiện tại
+    const responses = await doctorApi.getConsultationResponsesOData(
+      `?$filter=requestId eq ${record.requestId}`
+    );
+    const latestResponse = responses.data[0] || {};
+
+    // Lấy tất cả các request "Pending" liên quan đến memberId và childId bằng OData query
+    const doctorId = localStorage.getItem("doctorId");
+    if (!doctorId) {
+      throw new Error("Doctor ID not found in localStorage!");
+    }
+
+    // Sử dụng OData query để lọc trực tiếp từ API
+    const odataQuery = `${doctorId} and status eq 'Pending' and memberId eq ${detailedData.child.memberId} and childName eq '${detailedData.childName}'`;
+    const relatedRequestsResponse = await doctorApi.getConsultationRequestsByDoctorOData(odataQuery);
+    const relatedPendingRequests = Array.isArray(relatedRequestsResponse)
+      ? relatedRequestsResponse
+      : relatedRequestsResponse.data || [];
+
+    // Log để kiểm tra dữ liệu trả về từ API
+    console.log("Related Pending Requests:", relatedPendingRequests);
+
+    // Sắp xếp các request theo ngày tăng dần (cũ nhất trước)
+    relatedPendingRequests.sort((a, b) => new Date(a.requestDate) - new Date(b.requestDate));
+
+    // Lấy responses cho từng request "Pending"
+    const pendingRequestsWithResponses = await Promise.all(
+      relatedPendingRequests.map(async (req) => {
+        const reqResponses = await doctorApi.getConsultationResponsesOData(
+          `?$filter=requestId eq ${req.requestId}`
+        );
+        return {
+          ...req,
+          responses: reqResponses.data || [],
+        };
+      })
+    );
+
+    // Log để kiểm tra dữ liệu sau khi lấy responses
+    console.log("Pending Requests with Responses:", pendingRequestsWithResponses);
+
+    // Lấy rating, comment, feedbackDate
+    let rating = 0;
+    let comment = "";
+    let feedbackDate = "";
+    if (latestResponse.responseId) {
+      try {
+        const feedbackResponse = await doctorApi.getRatingFeedbackByResponseId(
+          latestResponse.responseId
+        );
+        const feedbackData = feedbackResponse.data[0] || {};
+        rating = feedbackData.rating || 0;
+        comment = feedbackData.comment || "";
+        feedbackDate = feedbackData.feedbackDate || "";
+      } catch (error) {
+        console.error(
+          `Error fetching feedback for responseId=${latestResponse.responseId}:`,
+          error
+        );
+      }
+    }
+
+    const attachmentsArray = parseAttachments(detailedData.attachments);
+    // Xử lý description để loại bỏ các HTML entities
+    const cleanDescription = decodeHtmlEntities(detailedData.description || "N/A");
+
+    setSelectedConsultation({
+      ...record,
+      isLoading: false,
+      childAge: detailedData.child?.age
+        ? `${detailedData.child.age} years old`
+        : "N/A",
+      childGender: detailedData.child?.gender || "N/A",
+      childAllergies: detailedData.child?.allergies || "None",
+      childNotes: detailedData.child?.notes || "None",
+      childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
+      description: cleanDescription,
+      attachments: attachmentsArray,
+      response: latestResponse.content || "",
+      createdAt: detailedData.createdAt || moment().format(),
+      updatedAt: detailedData.updatedAt || moment().format(),
+      completedDate: detailedData.status === "Completed" ? detailedData.updatedAt : null,
+      rating,
+      comment,
+      feedbackDate,
+      // Lưu danh sách các request "Pending" liên quan và responses của chúng
+      relatedPendingRequests: pendingRequestsWithResponses,
+    });
+  } catch (error) {
+    message.error("Unable to load details");
+    console.error("Error fetching consultation detail:", error);
+  }
+};
 
   const handleRespond = async (record) => {
     try {
@@ -423,7 +534,7 @@ const Consultations = () => {
         completed: "Completed",
       };
 
-      // Nếu đang ở tab "new" hoặc status là "Pending", luôn sử dụng "completed"
+      // Nếu đang ở tab "new" hoặc status là "Pending", luôn sử dụng "Completed"
       const action =
         activeTab === "new" || selectedConsultation.status === "Pending"
           ? "completed"
@@ -441,10 +552,10 @@ const Consultations = () => {
       };
 
       await doctorApi.createConsultationResponse(responsePayload);
-      await doctorApi.updateConsultationRequestsStatus(
-        selectedConsultation.requestId,
-        stringStatus
-      );
+      // await doctorApi.updateConsultationRequestsStatus(
+      //   selectedConsultation.requestId,
+      //   stringStatus
+      // );
 
       await fetchConsultationsWithPagination(
         pagination.current,
@@ -472,10 +583,10 @@ const Consultations = () => {
   const handleComplete = async (record) => {
     setLoading(true);
     try {
-      await doctorApi.updateConsultationRequestsStatus(
-        record.requestId,
-        "Completed"
-      );
+      // await doctorApi.updateConsultationRequestsStatus(
+      //   record.requestId,
+      //   "Completed"
+      // );
       await fetchConsultationsWithPagination(
         pagination.current,
         pagination.pageSize
@@ -1133,27 +1244,44 @@ const Consultations = () => {
 
               <Divider orientation="left">Progress</Divider>
               <Timeline>
-                <Timeline.Item>
-                  <p>
-                    <strong>Request</strong> -{" "}
-                    {moment(selectedConsultation.requestDate).format(
-                      "DD/MM/YYYY HH:mm"
-                    )}
-                  </p>
-                  <Card size="small">
-                    <p>{selectedConsultation.description}</p>
-                  </Card>
-                </Timeline.Item>
-                {selectedConsultation.response && (
+                {selectedConsultation.relatedPendingRequests &&
+                selectedConsultation.relatedPendingRequests.length > 0 ? (
+                  selectedConsultation.relatedPendingRequests.map((req, index) => (
+                    <React.Fragment key={index}>
+                      <Timeline.Item>
+                        <p>
+                          <strong>Request</strong> -{" "}
+                          {moment(req.requestDate).format("DD/MM/YYYY HH:mm")}
+                        </p>
+                        <Card size="small">
+                          <p>{decodeHtmlEntities(req.description || "N/A")}</p>
+                        </Card>
+                      </Timeline.Item>
+                      {req.responses &&
+                        req.responses.length > 0 &&
+                        req.responses.map((res, resIndex) => (
+                          <Timeline.Item key={`response-${resIndex}`}>
+                            <p>
+                              <strong>Response</strong> -{" "}
+                              {moment(res.createdAt).format("DD/MM/YYYY HH:mm")}
+                            </p>
+                            <Card size="small">
+                              <p>{res.content || "N/A"}</p>
+                            </Card>
+                          </Timeline.Item>
+                        ))}
+                    </React.Fragment>
+                  ))
+                ) : (
                   <Timeline.Item>
                     <p>
-                      <strong>Response</strong> -{" "}
-                      {moment(selectedConsultation.updatedAt).format(
+                      <strong>Request</strong> -{" "}
+                      {moment(selectedConsultation.requestDate).format(
                         "DD/MM/YYYY HH:mm"
                       )}
                     </p>
                     <Card size="small">
-                      <p>{selectedConsultation.response}</p>
+                      <p>{selectedConsultation.description}</p>
                     </Card>
                   </Timeline.Item>
                 )}

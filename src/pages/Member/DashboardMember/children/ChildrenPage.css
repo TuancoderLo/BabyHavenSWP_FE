@@ -61,7 +61,7 @@
 .parent {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: repeat(2, 1fr);
+  grid-template-rows: repeat(3, auto);
   gap: 12px;
   width: 100%;
   padding: 20px;
@@ -151,9 +151,7 @@
   background: white;
   border-radius: 8px;
   padding: 20px;
-  height: 100%;
-  min-height: 160px;
-  max-height: 280px;
+  /* max-height: 255px; */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
@@ -181,14 +179,13 @@
 
 /* Latest record section */
 .latest-record-section {
-  grid-area: 1 / 3 / 2 / 5;
-  max-height: 150px;
+  grid-area: 1 / 3 / 1 / 5;
   background: white;
   border-radius: 12px;
   padding: 20px;
+  max-height: 150px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
   box-shadow: 0 4px 15px rgba(255, 182, 193, 0.15);
 }
 
@@ -196,14 +193,12 @@
   font-size: 20px;
   color: black;
   font-weight: 600;
-  margin-bottom: 8px;
 }
 
 .latest-record-content {
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding: 10px;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(255, 182, 193, 0.1);
 }
@@ -255,17 +250,16 @@
 .analyze-ai-section {
   grid-area: 1 / 5 / 2 / 6;
   padding: 14px;
-  width: 15rem;
-  height: 9.5rem;
   background: white;
   border-radius: 12px;
   display: flex;
+  max-height: 150px;
   flex-direction: column;
   transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 
 .analyze-ai-title {
-  font-size: 18px;
+  font-size: 12px;
   font-weight: 600;
   color: #000000;
   text-align: left;
@@ -303,10 +297,11 @@
 
 /* Milestone section */
 .milestone-section {
-  grid-area: 1 / 6 / 3 / 7;
+  grid-area: 1 / 6 / 3 / 6;
   background: linear-gradient(135deg, #fff4f8, #f0f7ff);
   border-radius: 16px;
   padding: 20px;
+  /* max-height: 260px; */
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -321,7 +316,7 @@
 
 .milestone-content {
   color: #444;
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.6;
   text-align: center;
   padding: 0 10px;
@@ -339,12 +334,12 @@
 
 /* Growth chart section */
 .growth-chart-section {
+  grid-area: 3 / 2 / 3 / 6;
   width: 100%;
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 208, 188, 0.1);
   padding: 16px;
-  margin: 20px auto 0;
   display: flex;
   flex-direction: column;
   min-height: 400px;
@@ -397,6 +392,86 @@
   border-radius: 2px;
 }
 
+/* Growth Analysis Section */
+.growth-analysis-section {
+  grid-area: 3 / 6 / 4 / 7;
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.growth-analysis-section h3 {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.analysis-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.connect-doctor-button {
+  background: rgb(64, 0, 255);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(0, 208, 188, 0.2);
+  margin-top: auto;
+  margin-bottom: 10px;
+}
+
+.connect-doctor-button:hover {
+  background: linear-gradient(45deg, #00d0bc, #7112ff);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(6, 130, 255, 0.4);
+}
+
+.analysis-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #f8f9fa;
+}
+
+.analysis-label {
+  color: #666;
+  font-size: 13px;
+  font-weight: 500;
+  min-width: 95px;
+}
+
+.analysis-value {
+  font-weight: 600;
+  font-size: 13px;
+  text-align: right;
+  min-width: 60px;
+}
+
+.analysis-item.increase .analysis-value {
+  color: #00d0bc;
+}
+
+.analysis-item.decrease .analysis-value {
+  color: #ff9aa2;
+}
+
 /* Child slot content styling */
 .child-info {
   display: flex;
@@ -433,28 +508,28 @@
   color: #666;
 }
 
-.child-details-content {
-  margin-top: 20px;
-}
 
-.detail-row {
+.detail-child-row {
   display: flex;
   justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid #eee;
+  padding: 5px 0;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  gap: 40px;
 }
 
-.detail-row:last-child {
+.detail-child-row:last-child {
   border-bottom: none;
 }
 
-.detail-label {
+.detail-child-label {
   color: #666;
-  font-weight: bold;
+  font-weight: 700;
   font-size: 14px;
+  min-width: 100px;
 }
 
-.detail-value {
+.detail-child-value {
   color: #333;
   font-weight: 600;
   font-size: 14px;
@@ -502,4 +577,38 @@
 .compare-selected {
   font-size: 14px;
   color: #333;
+}
+
+.personalized-growth-section {
+  grid-area: 3 / 3 / 4 / 6; /* Third row, columns 3-4 */
+  background: linear-gradient(135deg, #f0fffb, #e6f7f5);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 208, 188, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 150px;
+  transition: all 0.3s ease;
+}
+
+.personalized-growth-section:hover {
+  box-shadow: 0 6px 15px rgba(0, 208, 188, 0.15);
+}
+
+.personalized-growth-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #00d0bc;
+  margin: 0;
+}
+
+.personalized-growth-content {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.personalized-growth-content p {
+  margin: 0;
 }

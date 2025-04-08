@@ -7,6 +7,7 @@ import {
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import doctorApi from '../../../services/DoctorApi';
 import DoctorCalendar from './DoctorCalendar';
+import doctorImages from '../../../data/doctorImages'; // Import the doctor images
 
 const Home = () => {
   const [currentDateTime, setCurrentDateTime] = useState('');
@@ -166,23 +167,27 @@ const Home = () => {
 
       {/* Phần bên phải */}
       <div className="right-section">
-        <div className="profile-section-doctor">
-          <img src={Doctor} alt="Profile" className="profile-image-doctor" />
-          <h3>{doctorInfo ? doctorInfo.name : 'Dr. John Doe'}</h3>
-          <p className="specialty">{doctorInfo ? doctorInfo.degree : 'Online Consultant'}</p>
-          <p className="location">📍 {doctorInfo ? doctorInfo.hospitalAddress : 'Remote'}</p>
-          <p className="biography">{doctorInfo ? doctorInfo.biography : 'N/A'}</p>
-          <div className="profile-details-doctor">
-            <div>
-              <p>Phone</p>
-              <p>{doctorInfo ? doctorInfo.phoneNumber : 'N/A'}</p>
-            </div>
-            <div>
-              <p>Hospital</p>
-              <p>{doctorInfo ? doctorInfo.hospitalName : 'N/A'}</p>
-            </div>
-          </div>
-        </div>
+      <div className="profile-section-doctor">
+  <img
+    src={doctorInfo ? (doctorImages[doctorInfo.doctorId] || "/assets/default-doctor.jpg") : "/assets/default-doctor.jpg"}
+    alt="Profile"
+    className="profile-image-doctor"
+  />
+  <h3>{doctorInfo ? doctorInfo.name : 'Dr. John Doe'}</h3>
+  <p className="specialty">{doctorInfo ? doctorInfo.degree : 'Online Consultant'}</p>
+  <p className="location">📍 {doctorInfo ? doctorInfo.hospitalAddress : 'Remote'}</p>
+  <p className="biography">{doctorInfo ? doctorInfo.biography : 'N/A'}</p>
+  <div className="profile-details-doctor">
+    <div>
+      <p>Phone</p>
+      <p>{doctorInfo ? doctorInfo.phoneNumber : 'N/A'}</p>
+    </div>
+    <div>
+      <p>Hospital</p>
+      <p>{doctorInfo ? doctorInfo.hospitalName : 'N/A'}</p>
+    </div>
+  </div>
+</div>
 
         <div className="calendar-schedule">
           <div className="calendar-section-doctor">

@@ -371,84 +371,75 @@ function Packages() {
   )}
 </div>
                   {/* Standard Package */}
-                  <div className="package-card-homepage standard">
-                    <div className="best-service-badge">POPULAR</div>
-                    <h3>STANDARD</h3>
-                    <p className="package-description">
-                      Standard membership with advance features
-                    </p>
-                    <div className="feature-list">
-                      <div className="feature-item">
-                        <span className="feature-label">Support services</span>
-                        <span className="feature-value">Medium</span>
-                      </div>
-                      <div className="feature-item">
-                        <span className="feature-label">
-                          Max children allowed
-                        </span>
-                        <span className="feature-value">
-                          {packagesData
-                          .find((p) => p.packageName === "Standard")
-                          ?.maxChildrenAllowed}
-                        </span>
-                      </div>
-                      <div className="feature-item">
-                        <span className="feature-label">
-                          Available to make consultation with AI
-                        </span>
-                        <span className="feature-value">
-                        Unlimited
-                        </span>
-                      </div>
-                      <div className="feature-item">
-                        <span className="feature-label">
-                          Tracking milestones of child
-                        </span>
-                        <span className="feature-value">Unlimited</span>
-                      </div>
-                      <div className="feature-item">
-                        <span className="feature-label">
-                          Early warning about child health
-                        </span>
-                        <span className="feature-value">Available</span>
-                      </div>
-                    </div>
+                 {/* Standard Package */}
+<div className="package-card-homepage standard">
+  <div className="best-service-badge">POPULAR</div>
+  <h3>STANDARD</h3>
+  <p className="package-description">
+    Standard membership with advance features
+  </p>
+  <div className="feature-list">
+    <div className="feature-item">
+      <span className="feature-label">Support services</span>
+      <span className="feature-value">Medium</span>
+    </div>
+    <div className="feature-item">
+      <span className="feature-label">Max children allowed</span>
+      <span className="feature-value">
+        {packagesData.find((p) => p.packageName === "Standard")?.maxChildrenAllowed}
+      </span>
+    </div>
+    <div className="feature-item">
+      <span className="feature-label">Available to make consultation with AI</span>
+      <span className="feature-value">Unlimited</span>
+    </div>
+    <div className="feature-item">
+      <span className="feature-label">Tracking milestones of child</span>
+      <span className="feature-value">Unlimited</span>
+    </div>
+    <div className="feature-item">
+      <span className="feature-label">Early warning about child health</span>
+      <span className="feature-value">Available</span>
+    </div>
+  </div>
 
-                    <div className="package-price-homepage">
-                      <span className="price-amount-homepage">
-                        {packagesData
-                          .find((p) => p.packageName === "Standard")
-                          ?.price.toLocaleString()}
-                        đ
-                      </span>
-                      <span className="price-duration-homepage">
-                        /{
-                          packagesData.find((p) => p.packageName === "Standard")
-                            ?.durationMonths
-                        }
-                      </span>
-                      <span className="price-duration-homepage"> Months</span>
-                    </div>
+  <div className="package-price-homepage">
+    <span className="price-amount-homepage">
+      {packagesData.find((p) => p.packageName === "Standard")?.price.toLocaleString()}đ
+    </span>
+    <span className="price-duration-homepage">
+      /{packagesData.find((p) => p.packageName === "Standard")?.durationMonths}
+    </span>
+    <span className="price-duration-homepage"> Months</span>
+  </div>
 
-                    <button
-                      className={`package-btn-homepage ${
-                        currentPlan?.packageName === "Standard"
-                          ? "current-plan"
-                          : "standard"
-                      }`}
-                      onClick={() =>
-                        currentPlan?.packageName !== "Standard" &&
-                        handleBuyPackage(
-                          packagesData.find((p) => p.packageName === "Standard")
-                        )
-                      }
-                      disabled={currentPlan?.packageName === "Standard"}
-                    >
-                      {currentPlan?.packageName === "Standard"
-                        ? "YOUR CURRENT PLAN"
-                        : "GO STANDARD"}
-                    </button>
-                  </div>
+  {/* Chỉ hiển thị nút nếu:
+       - Người dùng chưa đăng nhập, hoặc
+       - Người dùng không có gói hiện tại, hoặc
+       - Người dùng có gói hiện tại là Free (được phép nâng cấp lên Standard)
+  */}
+  {(!isLoggedIn || !currentPlan || currentPlan.packageName === "Free") && (
+    <button
+      className="package-btn-homepage standard"
+      onClick={() =>
+        handleBuyPackage(packagesData.find((p) => p.packageName === "Standard"))
+      }
+    >
+      GO STANDARD
+    </button>
+  )}
+
+  {/* Nếu đã có gói Standard, hiển thị nút disable */}
+  {currentPlan?.packageName === "Standard" && (
+    <button className="package-btn-homepage current-plan" disabled>
+      YOUR CURRENT PLAN
+    </button>
+  )}
+
+  {/* Nếu đang ở gói Premium, không hiển thị nút mua gói Standard */}
+  {currentPlan?.packageName === "Premium" && null}
+</div>
+
                   {/* Premium Package */}
                   <div className="package-card-homepage premium">
                     <div className="premium-icon">
@@ -737,9 +728,9 @@ function Packages() {
                   Your <strong>{selectedPackage.packageName}</strong> features
                   is available successfully
                 </p>
-                <button className="follow-btn">
+                {/* <button className="follow-btn">
                   Follow your children growth here &rarr;
-                </button>
+                </button> */}
 
                 <button className="close-overlay" onClick={handleFinish}>
                   Close
