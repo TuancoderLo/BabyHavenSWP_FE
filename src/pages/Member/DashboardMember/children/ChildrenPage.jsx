@@ -555,6 +555,8 @@ const renderCompareControl = () => {
                         {selectedChild.gender || "Not set"}
                       </span>
                     </div>
+                    {/* Hiển thị nút Compare */}
+                    {renderCompareControl()}
                   </div>
                 </>
               ) : (
@@ -716,8 +718,6 @@ const renderCompareControl = () => {
               )}
             </div>
           </div>
-             {/* Hiển thị nút Compare */}
-             {renderCompareControl()}
           </div>
         </>
       )}
