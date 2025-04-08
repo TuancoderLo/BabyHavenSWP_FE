@@ -16,7 +16,6 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
 
   // Debug newMessage
   useEffect(() => {
-    console.log("newMessage:", newMessage);
   }, [newMessage]);
 
   // Fetch children list when modal opens and auto-select the first child
@@ -148,28 +147,12 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
   const sendMessageToAI = async (message, child) => {
     try {
       const age = parseInt(calculateAge(child.dateOfBirth)) || 0;
-      const hasGrowthData =
-        child.weight ||
-        child.height ||
-        child.chestCircumference ||
-        child.muscleMass ||
-        child.bloodSugarLevel ||
-        child.triglycerides ||
-        child.nutritionalStatus;
+      const childInfor = await childApi.getChildByName(child, localStorage.getItem("memberId"));
 
-      const growthData = hasGrowthData
-        ? {
-            weight: child.weight || 0,
-            height: child.height || 0,
-            chestCircumference: child.chestCircumference || 0,
-            muscleMass: child.muscleMass || 0,
-            bloodSugarLevel: child.bloodSugarLevel || 0,
-            triglycerides: child.triglycerides || 0,
-            nutritionalStatus: child.nutritionalStatus || "Unknown",
-          }
-        : null;
+      const growthData = await childApi.getGrowthRecords(child.name, localStorage.getItem("name"));
+      console.log("Growth Data:", growthData);
 
-      const response = await aiChatApi.postMessage(child.name, age, message, growthData);
+      const response = await aiChatApi.postMessage(child.name, age, message, growthData.data);
 
       if (response.data.data && response.data.data.aiResponse) {
         return response.data.data.aiResponse;

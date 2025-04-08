@@ -6,16 +6,22 @@ const aiChatApi = {
     // Chuẩn bị initialRecord (có thể là null)
     let initialRecord = null;
     if (growthData) {
-      initialRecord = {
-        age: age || 0, // Sử dụng age được truyền vào
-        weight: growthData.weight || 0,
-        height: growthData.height || 0,
-        chestCircumference: growthData.chestCircumference || 0,
-        muscleMass: growthData.muscleMass || 0,
-        bloodSugarLevel: growthData.bloodSugarLevel || 0,
-        triglycerides: growthData.triglycerides || 0,
-        nutritionalStatus: growthData.nutritionalStatus?.trim() || "Unknown",
-      };
+      growthData.forEach(element => {
+        if (element) {
+          initialRecord = {
+            age: age || 0, // Sử dụng age được truyền vào
+            childName: name,
+            height: element.height,
+            weight: element.weight,
+            chestCircumference: growthData.chestCircumference || 0,
+            muscleMass: growthData.muscleMass || 0,
+            bloodSugarLevel: growthData.bloodSugarLevel || 0,
+            bmi: element.bmi,
+            nutritionalStatus: growthData.nutritionalStatus?.trim() || "Unknown",
+            triglycerides: growthData.triglycerides || 0,
+          };
+        }
+      });
     }
 
     // Chuẩn bị dữ liệu gửi đi
