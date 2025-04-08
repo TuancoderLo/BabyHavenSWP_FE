@@ -79,3 +79,46 @@
   font-weight: bold !important;
   fill: #333 !important;
 }
+/* Container chứa các input filter */
+.filter-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 0;
+  background-color: #f1f3f5;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+/* Kiểu cho các input dạng ngày (datepicker) */
+.filter-container input[type="date"] {
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+/* Trạng thái focus cho input */
+.filter-container input[type="date"]:focus {
+  border-color: #008cff;
+}
+
+/* Kiểu cho nút lọc */
+.filter-container .filter-btn {
+  background-color: #008cff;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+/* Hover cho nút lọc */
+.filter-container .filter-btn:hover {
+  background-color: #006bb3;
+}

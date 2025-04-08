@@ -29,13 +29,12 @@ const childApi = {
       },
     }),
 
-  getGrowthRecordsRange: (childId, startDate, endDate) =>
-    api.get(`GrowthRecord/child/${childId}/date-range`, {
-      params: {
-        startDate,
-        endDate,
-      },
-    }),
+getGrowthRecordsByDateRange: (childName, parentName, startDate, endDate) =>
+  api.get(`GrowthRecord/odata`, {
+    params: {
+      $filter: `ChildName eq '${childName}' and ParentName eq '${parentName}' and createdAt ge '${startDate}' and createdAt le '${endDate}'`
+    }
+  }),
 };
 
 export default childApi;

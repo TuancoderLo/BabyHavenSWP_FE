@@ -22,13 +22,12 @@ const getWHOBMIData = async (ageInYears, gender) => {
     let bmiData = storedData ? JSON.parse(storedData) : {};
     if (bmiData[dataKey]) {
       const lms = bmiData[dataKey];
-      const whoData = {
+      return {
         p01: Number(lms.P01.toFixed(1)),
         p50: Number(lms.P50.toFixed(1)),
         p75: Number(lms.P75.toFixed(1)),
         p99: Number(lms.P99.toFixed(1)),
       };
-      return whoData;
     }
     const response = await bmiPercentitleApi.getByAgeAndGender(ageInYears, gender);
     const lms = response.data?.data || response.data;
@@ -52,13 +51,12 @@ const getWHOBMIData = async (ageInYears, gender) => {
     }
     bmiData[dataKey] = normalizedLms;
     localStorage.setItem(storageKey, JSON.stringify(bmiData));
-    const whoData = {
+    return {
       p01: Number(normalizedLms.P01.toFixed(1)),
       p50: Number(normalizedLms.P50.toFixed(1)),
       p75: Number(normalizedLms.P75.toFixed(1)),
       p99: Number(normalizedLms.P99.toFixed(1)),
     };
-    return whoData;
   } catch (error) {
     console.error("Error fetching WHO BMI data:", error);
     return {
@@ -70,6 +68,27 @@ const getWHOBMIData = async (ageInYears, gender) => {
   }
 };
 
+// Component FilterBar hiển thị các trường nhập liệu cho startDate, endDate và nút Filter
+const FilterBar = ({ startDate, endDate, onStartDateChange, onEndDateChange, onFilter }) => {
+  return (
+    <div className="filter-container">
+      <input 
+        type="date" 
+        value={startDate} 
+        onChange={(e) => onStartDateChange(e.target.value)} 
+        placeholder="Start Date"
+      />
+      <input 
+        type="date" 
+        value={endDate} 
+        onChange={(e) => onEndDateChange(e.target.value)} 
+        placeholder="End Date"
+      />
+      <button className="filter-btn" onClick={onFilter}>Filter</button>
+    </div>
+  );
+};
+
 const GrowthChart = ({
   childName,
   selectedTool,
@@ -78,7 +97,7 @@ const GrowthChart = ({
   gender,
   ageInMonths,
   ageInYears,
-  compareChild, // New prop: second child for comparison
+  compareChild,
 }) => {
   const [data, setData] = useState([]);
   const [allRecords, setAllRecords] = useState([]); // Primary child's records
@@ -86,14 +105,19 @@ const GrowthChart = ({
   const [loading, setLoading] = useState(true);
   const [whoBMIData, setWhoBMIData] = useState(null);
 
+  // State quản lý cho bộ lọc ngày
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  // filterTrigger được dùng để kích hoạt lại fetch data khi nhấn nút Filter
+  const [filterTrigger, setFilterTrigger] = useState(0);
+
   const calculateBMI = (weight, height) => {
     const validWeight = parseFloat(weight);
     const validHeight = parseFloat(height);
     if (isNaN(validWeight) || isNaN(validHeight) || validWeight <= 0 || validHeight <= 0)
       return null;
     const heightInMeters = validHeight / 100;
-    const bmi = Number((validWeight / (heightInMeters * heightInMeters)).toFixed(1));
-    return bmi;
+    return Number((validWeight / (heightInMeters * heightInMeters)).toFixed(1));
   };
 
   useEffect(() => {
@@ -115,16 +139,26 @@ const GrowthChart = ({
       setLoading(true);
       try {
         const parentName = localStorage.getItem("name");
-        if (!parentName) {
-          throw new Error("parentName is undefined or empty");
-        }
+        if (!parentName) throw new Error("parentName is undefined or empty");
+
         let whoData = null;
         if (selectedTool === "BMI" || selectedTool === "ALL") {
           whoData = await getWHOBMIData(ageInYears, gender);
           setWhoBMIData(whoData);
         }
-        const response = await childApi.getGrowthRecords(childName, parentName);
+
+        let response;
+        // Nếu startDate và endDate có giá trị thì gọi API với filter theo ngày
+        if (startDate && endDate) {
+          // Chuyển đổi sang định dạng ISO, loại bỏ phần mili giây
+          const isoStartDate = new Date(startDate).toISOString().split('.')[0];
+          const isoEndDate = new Date(endDate).toISOString().split('.')[0];
+          response = await childApi.getGrowthRecordsByDateRange(childName, parentName, isoStartDate, isoEndDate);
+        } else {
+          response = await childApi.getGrowthRecords(childName, parentName);
+        }
         const records = Array.isArray(response.data) ? response.data : [response.data];
+
         const processedRecords = records
           .filter((record) => record && (record.weight || record.height))
           .map((record) => {
@@ -140,10 +174,7 @@ const GrowthChart = ({
             return {
               x,
               month: recordDate.toLocaleDateString("en-US", { month: "short" }),
-              date: recordDate.toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "short",
-              }),
+              date: recordDate.toLocaleDateString("en-GB", { day: "2-digit", month: "short" }),
               bmi,
               weight,
               height,
@@ -154,6 +185,7 @@ const GrowthChart = ({
           .filter((record) => record !== null)
           .sort((a, b) => a.timestamp - b.timestamp);
         setAllRecords(processedRecords);
+        // Tạo data chart theo 12 tháng
         const chartData = Array.from({ length: 12 }, (_, i) => {
           const recordsInMonth = processedRecords.filter((r) => Math.floor(r.x) === i);
           return {
@@ -175,11 +207,12 @@ const GrowthChart = ({
         setLoading(false);
       }
     };
-    fetchGrowthData();
-  }, [childName, refreshTrigger, gender, ageInMonths, ageInYears, selectedTool]);
 
-  // Fetch compare child's data if compareChild is provided
-  useEffect(() => { console.log("Compare child:", compareChild); 
+    fetchGrowthData();
+  }, [childName, refreshTrigger, gender, ageInMonths, ageInYears, selectedTool, startDate, endDate, filterTrigger]);
+
+  // Fetch compare child's data nếu có compareChild
+  useEffect(() => {
     const fetchCompareData = async () => {
       if (!compareChild) {
         setCompareRecords([]);
@@ -189,7 +222,7 @@ const GrowthChart = ({
         const parentName = localStorage.getItem("name");
         const response = await childApi.getGrowthRecords(compareChild.name, parentName);
         const records = Array.isArray(response.data) ? response.data : [response.data];
-        console.log("Compare API response:", response.data);
+
         const processedRecords = records
           .filter((record) => record && (record.weight || record.height))
           .map((record) => {
@@ -205,10 +238,7 @@ const GrowthChart = ({
             return {
               x,
               month: recordDate.toLocaleDateString("en-US", { month: "short" }),
-              date: recordDate.toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "short",
-              }),
+              date: recordDate.toLocaleDateString("en-GB", { day: "2-digit", month: "short" }),
               bmi,
               weight,
               height,
@@ -224,6 +254,7 @@ const GrowthChart = ({
         setCompareRecords([]);
       }
     };
+
     fetchCompareData();
   }, [compareChild]);
 
@@ -234,23 +265,15 @@ const GrowthChart = ({
   const renderChart = () => {
     if (!data || data.length === 0 || allRecords.length === 0) {
       return (
-        <div
-          style={{
-            height: "350px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#666",
-          }}
-        >
+        <div style={{ height: "350px", display: "flex", alignItems: "center", justifyContent: "center", color: "#666" }}>
           No data available
         </div>
       );
     }
-  
+
     const primaryName = childName || "Primary Child";
     const compareName = compareChild?.name || "Compare Child";
-  
+
     switch (selectedTool) {
       case "BMI":
         return (
@@ -263,10 +286,7 @@ const GrowthChart = ({
                 domain={[0, 11]}
                 ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
                 tickFormatter={(value) => {
-                  const months = [
-                    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-                  ];
+                  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
                   return months[Math.floor(value)];
                 }}
                 stroke="#666"
@@ -297,91 +317,47 @@ const GrowthChart = ({
                 labelFormatter={(label, payload) => {
                   if (payload && payload.length > 0 && payload[0].payload) {
                     const record = payload[0].payload;
-                    if (record.timestamp) {
+                    if (record.timestamp)
                       return `Date: ${new Date(record.timestamp).toLocaleDateString("en-GB", {
                         day: "2-digit",
                         month: "short",
                         year: "numeric",
                       })}`;
-                    }
                   }
                   return "";
                 }}
               />
               <Legend verticalAlign="top" height={30} wrapperStyle={{ paddingTop: "5px", fontSize: "12px" }} />
-              {/* Primary child's BMI */}
               <Line
                 yAxisId="bmi"
                 data={allRecords}
                 type="monotone"
                 dataKey="bmi"
-                stroke="#FF9AA2" // Pink for primary
+                stroke="#FF9AA2"
                 strokeWidth={2}
                 dot={{ fill: "#FF9AA2", r: 4 }}
                 activeDot={{ r: 6, fill: "#FF9AA2" }}
                 name={`${primaryName} BMI`}
                 connectNulls={true}
-                onClick={(point) => {
-                  if (onRecordSelect && point) onRecordSelect(point);
-                }}
+                onClick={(point) => { if (onRecordSelect && point) onRecordSelect(point); }}
               />
-              {/* WHO BMI Percentile lines */}
-              <Line
-                yAxisId="bmi"
-                type="monotone"
-                dataKey="p01"
-                stroke="#ff4040"
-                strokeWidth={1}
-                dot={false}
-                name="1st Percentile"
-                connectNulls={true}
-              />
-              <Line
-                yAxisId="bmi"
-                type="monotone"
-                dataKey="p50"
-                stroke="#82ca9d"
-                strokeWidth={1}
-                dot={false}
-                name="50th Percentile"
-                connectNulls={true}
-              />
-              <Line
-                yAxisId="bmi"
-                type="monotone"
-                dataKey="p75"
-                stroke="#ffa500"
-                strokeWidth={1}
-                dot={false}
-                name="75th Percentile"
-                connectNulls={true}
-              />
-              <Line
-                yAxisId="bmi"
-                type="monotone"
-                dataKey="p99"
-                stroke="#ff7300"
-                strokeWidth={1}
-                dot={false}
-                name="99th Percentile"
-                connectNulls={true}
-              />
-              {/* Compare child's BMI */}
+              <Line yAxisId="bmi" type="monotone" dataKey="p01" stroke="#ff4040" strokeWidth={1} dot={false} name="1st Percentile" connectNulls={true} />
+              <Line yAxisId="bmi" type="monotone" dataKey="p50" stroke="#82ca9d" strokeWidth={1} dot={false} name="50th Percentile" connectNulls={true} />
+              <Line yAxisId="bmi" type="monotone" dataKey="p75" stroke="#ffa500" strokeWidth={1} dot={false} name="75th Percentile" connectNulls={true} />
+              <Line yAxisId="bmi" type="monotone" dataKey="p99" stroke="#ff7300" strokeWidth={1} dot={false} name="99th Percentile" connectNulls={true} />
               {compareRecords && compareRecords.length > 0 && (
                 <Line
                   yAxisId="bmi"
                   data={compareRecords}
                   type="monotone"
                   dataKey="bmi"
-                  stroke="#008cff" // Blue for compare
+                  stroke="#008cff"
                   strokeWidth={2}
                   dot={{ fill: "#008cff", r: 4 }}
                   activeDot={{ r: 6, fill: "#008cff" }}
                   name={`${compareName} BMI`}
                   connectNulls={true}
-                  onClick={(point) => {
-                    if (onRecordSelect && point) onRecordSelect(point);
-                  }}
+                  onClick={(point) => { if (onRecordSelect && point) onRecordSelect(point); }}
                 />
               )}
             </LineChart>
@@ -398,10 +374,7 @@ const GrowthChart = ({
                 domain={[0, 11]}
                 ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
                 tickFormatter={(value) => {
-                  const months = [
-                    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-                  ];
+                  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
                   return months[Math.floor(value)];
                 }}
                 stroke="#666"
@@ -425,13 +398,12 @@ const GrowthChart = ({
                 labelFormatter={(label, payload) => {
                   if (payload && payload.length > 0 && payload[0].payload) {
                     const record = payload[0].payload;
-                    if (record.timestamp) {
+                    if (record.timestamp)
                       return `Date: ${new Date(record.timestamp).toLocaleDateString("en-GB", {
                         day: "2-digit",
                         month: "short",
                         year: "numeric",
                       })}`;
-                    }
                   }
                   return "";
                 }}
@@ -441,30 +413,26 @@ const GrowthChart = ({
                 data={allRecords}
                 type="monotone"
                 dataKey="height"
-                stroke="#FF9AA2" // Pink for primary
+                stroke="#FF9AA2"
                 strokeWidth={2}
                 dot={{ r: 4, fill: "#FF9AA2" }}
                 activeDot={{ r: 6, fill: "#FF9AA2" }}
                 name={`${primaryName} Height`}
                 connectNulls={true}
-                onClick={(point) => {
-                  if (onRecordSelect && point) onRecordSelect(point);
-                }}
+                onClick={(point) => { if (onRecordSelect && point) onRecordSelect(point); }}
               />
               {compareRecords && compareRecords.length > 0 && (
                 <Line
                   data={compareRecords}
                   type="monotone"
                   dataKey="height"
-                  stroke="#008cff" // Blue for compare
+                  stroke="#008cff"
                   strokeWidth={2}
                   dot={{ r: 4, fill: "#008cff" }}
                   activeDot={{ r: 6, fill: "#008cff" }}
                   name={`${compareName} Height`}
                   connectNulls={true}
-                  onClick={(point) => {
-                    if (onRecordSelect && point) onRecordSelect(point);
-                  }}
+                  onClick={(point) => { if (onRecordSelect && point) onRecordSelect(point); }}
                 />
               )}
             </LineChart>
@@ -481,10 +449,7 @@ const GrowthChart = ({
                 domain={[0, 11]}
                 ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
                 tickFormatter={(value) => {
-                  const months = [
-                    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-                  ];
+                  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
                   return months[Math.floor(value)];
                 }}
                 stroke="#666"
@@ -508,13 +473,12 @@ const GrowthChart = ({
                 labelFormatter={(label, payload) => {
                   if (payload && payload.length > 0 && payload[0].payload) {
                     const record = payload[0].payload;
-                    if (record.timestamp) {
+                    if (record.timestamp)
                       return `Date: ${new Date(record.timestamp).toLocaleDateString("en-GB", {
                         day: "2-digit",
                         month: "short",
                         year: "numeric",
                       })}`;
-                    }
                   }
                   return "";
                 }}
@@ -524,30 +488,26 @@ const GrowthChart = ({
                 data={allRecords}
                 type="monotone"
                 dataKey="weight"
-                stroke="#FF9AA2" // Pink for primary
+                stroke="#FF9AA2"
                 strokeWidth={2}
                 dot={{ r: 4, fill: "#FF9AA2" }}
                 activeDot={{ r: 6, fill: "#FF9AA2" }}
                 name={`${primaryName} Weight`}
                 connectNulls={true}
-                onClick={(point) => {
-                  if (onRecordSelect && point) onRecordSelect(point);
-                }}
+                onClick={(point) => { if (onRecordSelect && point) onRecordSelect(point); }}
               />
               {compareRecords && compareRecords.length > 0 && (
                 <Line
                   data={compareRecords}
                   type="monotone"
                   dataKey="weight"
-                  stroke="#008cff" // Blue for compare
+                  stroke="#008cff"
                   strokeWidth={2}
                   dot={{ r: 4, fill: "#008cff" }}
                   activeDot={{ r: 6, fill: "#008cff" }}
                   name={`${compareName} Weight`}
-                connectNulls={true}
-                  onClick={(point) => {
-                    if (onRecordSelect && point) onRecordSelect(point);
-                  }}
+                  connectNulls={true}
+                  onClick={(point) => { if (onRecordSelect && point) onRecordSelect(point); }}
                 />
               )}
             </LineChart>
@@ -564,10 +524,7 @@ const GrowthChart = ({
                 domain={[0, 11]}
                 ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}
                 tickFormatter={(value) => {
-                  const months = [
-                    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-                  ];
+                  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
                   return months[Math.floor(value)];
                 }}
                 stroke="#666"
@@ -614,13 +571,12 @@ const GrowthChart = ({
                 labelFormatter={(label, payload) => {
                   if (payload && payload.length > 0 && payload[0].payload) {
                     const record = payload[0].payload;
-                    if (record.timestamp) {
+                    if (record.timestamp)
                       return `Date: ${new Date(record.timestamp).toLocaleDateString("en-GB", {
                         day: "2-digit",
                         month: "short",
                         year: "numeric",
                       })}`;
-                    }
                   }
                   return "";
                 }}
@@ -637,9 +593,7 @@ const GrowthChart = ({
                 activeDot={{ r: 6, fill: "#FF9AA2" }}
                 name={`${primaryName} BMI`}
                 connectNulls={true}
-                onClick={(point) => {
-                  if (onRecordSelect && point) onRecordSelect(point);
-                }}
+                onClick={(point) => { if (onRecordSelect && point) onRecordSelect(point); }}
               />
               {compareRecords && compareRecords.length > 0 && (
                 <Line
@@ -653,9 +607,7 @@ const GrowthChart = ({
                   activeDot={{ r: 6, fill: "#008cff" }}
                   name={`${compareName} BMI`}
                   connectNulls={true}
-                  onClick={(point) => {
-                    if (onRecordSelect && point) onRecordSelect(point);
-                  }}
+                  onClick={(point) => { if (onRecordSelect && point) onRecordSelect(point); }}
                 />
               )}
               <Line
@@ -669,9 +621,7 @@ const GrowthChart = ({
                 activeDot={{ r: 6, fill: "#ff7300" }}
                 name={`${primaryName} Weight`}
                 connectNulls={true}
-                onClick={(point) => {
-                  if (onRecordSelect && point) onRecordSelect(point);
-                }}
+                onClick={(point) => { if (onRecordSelect && point) onRecordSelect(point); }}
               />
               {compareRecords && compareRecords.length > 0 && (
                 <Line
@@ -685,9 +635,7 @@ const GrowthChart = ({
                   activeDot={{ r: 6, fill: "#008cff" }}
                   name={`${compareName} Weight`}
                   connectNulls={true}
-                  onClick={(point) => {
-                    if (onRecordSelect && point) onRecordSelect(point);
-                  }}
+                  onClick={(point) => { if (onRecordSelect && point) onRecordSelect(point); }}
                 />
               )}
               <Line
@@ -701,9 +649,7 @@ const GrowthChart = ({
                 activeDot={{ r: 6, fill: "#008cff" }}
                 name={`${primaryName} Height`}
                 connectNulls={true}
-                onClick={(point) => {
-                  if (onRecordSelect && point) onRecordSelect(point);
-                }}
+                onClick={(point) => { if (onRecordSelect && point) onRecordSelect(point); }}
               />
               {compareRecords && compareRecords.length > 0 && (
                 <Line
@@ -717,9 +663,7 @@ const GrowthChart = ({
                   activeDot={{ r: 6, fill: "#FF9AA2" }}
                   name={`${compareName} Height`}
                   connectNulls={true}
-                  onClick={(point) => {
-                    if (onRecordSelect && point) onRecordSelect(point);
-                  }}
+                  onClick={(point) => { if (onRecordSelect && point) onRecordSelect(point); }}
                 />
               )}
             </LineChart>
@@ -730,7 +674,21 @@ const GrowthChart = ({
     }
   };
 
-  return <div className="growth-chart-container">{renderChart()}</div>;
+  return (
+    <div>
+      {/* Phần filter để chọn ngày */}
+      <FilterBar
+        startDate={startDate}
+        endDate={endDate}
+        onStartDateChange={setStartDate}
+        onEndDateChange={setEndDate}
+        onFilter={() => setFilterTrigger(filterTrigger + 1)}
+      />
+      <div className="growth-chart-container">
+        {renderChart()}
+      </div>
+    </div>
+  );
 };
 
 export default GrowthChart;

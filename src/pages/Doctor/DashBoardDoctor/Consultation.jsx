@@ -301,79 +301,6 @@ const Consultations = () => {
   };
 
   // Khi xem chi tiết
-  // const handleViewDetail = async (record) => {
-  //   try {
-  //     setSelectedConsultation({ ...record, isLoading: true });
-  //     setDetailVisible(true);
-
-  //     const detailedData = await fetchConsultationRequestsById(
-  //       record.requestId
-  //     );
-
-  //     // Lấy responses
-  //     const responses = await doctorApi.getConsultationResponsesOData(
-  //       `?$filter=requestId eq ${record.requestId}`
-  //     );
-  //     const latestResponse = responses.data[0] || {};
-
-  //     // Lấy rating, comment, feedbackDate
-  //     let rating = 0;
-  //     let comment = "";
-  //     let feedbackDate = "";
-  //     if (latestResponse.responseId) {
-  //       try {
-  //         const feedbackResponse =
-  //           await doctorApi.getRatingFeedbackByResponseId(
-  //             latestResponse.responseId
-  //           );
-  //         const feedbackData = feedbackResponse.data[0] || {};
-  //         rating = feedbackData.rating || 0;
-  //         comment = feedbackData.comment || "";
-  //         feedbackDate = feedbackData.feedbackDate || "";
-  //       } catch (error) {
-  //         console.error(
-  //           `Error fetching feedback for responseId=${latestResponse.responseId}:`,
-  //           error
-  //         );
-  //       }
-  //     }
-
-  //     const attachmentsArray = parseAttachments(detailedData.attachments);
-  //     // Xử lý description để loại bỏ các HTML entities
-  //     const cleanDescription = decodeHtmlEntities(
-  //       detailedData.description || "N/A"
-  //     );
-
-  //     setSelectedConsultation({
-  //       ...record,
-  //       isLoading: false,
-  //       childAge: detailedData.child?.age
-  //         ? `${detailedData.child.age} years old`
-  //         : "N/A",
-  //       childGender: detailedData.child?.gender || "N/A",
-  //       childAllergies: detailedData.child?.allergies || "None",
-  //       childNotes: detailedData.child?.notes || "None",
-  //       childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
-  //       description: cleanDescription,
-  //       attachments: attachmentsArray,
-  //       response: latestResponse.content || "",
-  //       createdAt: detailedData.createdAt || moment().format(),
-  //       updatedAt: detailedData.updatedAt || moment().format(),
-  //       completedDate:
-  //         detailedData.status === "Completed" ? detailedData.updatedAt : null,
-
-  //       // [CHANGED] Lưu thêm rating, comment, feedbackDate trong selectedConsultation
-  //       rating,
-  //       comment,
-  //       feedbackDate,
-  //     });
-  //   } catch (error) {
-  //     message.error("Unable to load details");
-  //     console.error("Error fetching consultation detail:", error);
-  //   }
-  // };
-
-  // Khi xem chi tiết
 const handleViewDetail = async (record) => {
   try {
     setSelectedConsultation({ ...record, isLoading: true });
@@ -537,7 +464,7 @@ const handleViewDetail = async (record) => {
       // Nếu đang ở tab "new" hoặc status là "Pending", luôn sử dụng "Completed"
       const action =
         activeTab === "new" || selectedConsultation.status === "Pending"
-          ? "completed"
+          ? "pending"
           : values.action;
 
       const numericStatus = statusMapForResponse[action];
