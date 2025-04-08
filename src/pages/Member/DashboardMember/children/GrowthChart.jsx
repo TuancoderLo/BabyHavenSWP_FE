@@ -153,9 +153,14 @@ const GrowthChart = ({
           // Chuyển đổi sang định dạng ISO, loại bỏ phần mili giây
           const isoStartDate = new Date(startDate).toISOString().split('.')[0];
           const isoEndDate = new Date(endDate).toISOString().split('.')[0];
+          console.log("Filter parameters - startDate:", isoStartDate, "endDate:", isoEndDate);
           response = await childApi.getGrowthRecordsByDateRange(childName, parentName, isoStartDate, isoEndDate);
+          console.log("Filtered response data:", response.data);
+
         } else {
           response = await childApi.getGrowthRecords(childName, parentName);
+          console.log("Unfiltered response data:", response.data);
+
         }
         const records = Array.isArray(response.data) ? response.data : [response.data];
 
