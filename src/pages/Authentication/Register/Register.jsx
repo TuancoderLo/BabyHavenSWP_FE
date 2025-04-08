@@ -94,6 +94,20 @@ function Register() {
       return false;
     }
 
+    // Check age (must be 18+)
+    const birthDate = new Date(formData.dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    if (age < 18) {
+      setError("You must be at least 18 years old to register");
+      return false;
+    }
+
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters long");
       return false;
@@ -293,7 +307,11 @@ function Register() {
                 value={formData.dateOfBirth}
                 onChange={handleChange}
                 required
-                max={new Date().toISOString().split("T")[0]}
+                max={(() => {
+                  const date = new Date();
+                  date.setFullYear(date.getFullYear() - 18);
+                  return date.toISOString().split("T")[0];
+                })()}
               />
             </div>
 
