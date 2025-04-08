@@ -8,6 +8,17 @@ const childApi = {
   // Tạo mới growth record
   createGrowthRecord: (growthData) => api.post("/GrowthRecord", growthData),
 
+  // Cập nhật thông tin trẻ
+  updateGrowthRecord: (childId, growthData) =>
+    api.put(`/GrowthRecord/${childId}`, growthData),
+
+  getGrowthRecordsOdata: (query) =>
+    api.get(`/GrowthRecord/odata`, {
+      params: {
+        query,
+      },
+    }),
+
   getChildByName: (child, memberId) =>
     api.get(`Children/${child.name}/${child.dateOfBirth}/${memberId}`),
 
