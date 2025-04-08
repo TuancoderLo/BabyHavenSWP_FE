@@ -116,6 +116,21 @@ const RevenueChart = () => {
     }
   }, [quarterlyRevenueData]);
 
+  // Thêm state để lưu trữ năm đang chọn cho biểu đồ doanh thu hàng tháng
+  const [selectedMonthlyYear, setSelectedMonthlyYear] = useState(
+    new Date().getFullYear()
+  );
+
+  // Hàm trả về các năm có sẵn trong dữ liệu doanh thu
+  const getAvailableYearsForMonthly = () => {
+    if (!revenueData || revenueData.length === 0) {
+      return [new Date().getFullYear()];
+    }
+
+    const years = [...new Set(revenueData.map((item) => item.year))];
+    return years.sort((a, b) => b - a); // Sắp xếp giảm dần (năm mới nhất trước)
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -162,74 +177,62 @@ const RevenueChart = () => {
     fetchData();
   }, []);
 
-  // Tính toán doanh thu theo tháng
+  // Tính toán doanh thu theo tháng - cập nhật để tính cho nhiều năm
   const calculateRevenueByMonth = (transactions) => {
-    // Thiết lập ngày bắt đầu là ngày hiện tại - 12 tháng
-    const currentDate = new Date();
-    const startDate = new Date(currentDate);
-    startDate.setFullYear(currentDate.getFullYear() - 1);
-    startDate.setDate(1);
+    // Mảng để lưu dữ liệu của các tháng theo từng năm
+    const monthlyDataByYear = {};
 
-    // Tính số tháng để hiển thị (12 tháng gần nhất)
-    const monthDiff = 12;
-
-    // Mảng để lưu dữ liệu của các tháng
-    const months = [];
-
-    // Tạo dữ liệu cho 12 tháng gần nhất
-    for (let i = 0; i < monthDiff; i++) {
-      const date = new Date(startDate);
-      date.setMonth(startDate.getMonth() + i);
-      const month = `${String(date.getMonth() + 1).padStart(
-        2,
-        "0"
-      )}/${date.getFullYear()}`;
-      months.push({
-        month,
-        year: date.getFullYear(),
-        monthNumber: date.getMonth() + 1,
-        revenue: 0,
-        standardRevenue: 0,
-        premiumRevenue: 0,
-        transactionCount: 0,
-        standardCount: 0,
-        premiumCount: 0,
-      });
-    }
-
-    // Tính toán doanh thu cho mỗi tháng
+    // Xử lý giao dịch để phân loại theo năm và tháng
     transactions.forEach((transaction) => {
+      if (!transaction.transactionDate) return;
+
       const transactionDate = new Date(transaction.transactionDate);
+      const year = transactionDate.getFullYear();
+      const month = transactionDate.getMonth() + 1; // 1-12
       const amount = transaction.amount || 0;
       const packageName = transaction.packageName;
 
-      // Tìm tháng tương ứng với giao dịch
-      months.forEach((monthData) => {
-        const monthStart = new Date(
-          monthData.year,
-          monthData.monthNumber - 1,
-          1
-        );
-        const monthEnd = new Date(monthData.year, monthData.monthNumber, 0);
+      // Khởi tạo dữ liệu cho năm nếu chưa có
+      if (!monthlyDataByYear[year]) {
+        monthlyDataByYear[year] = Array(12)
+          .fill()
+          .map((_, index) => {
+            return {
+              month: `${String(index + 1).padStart(2, "0")}/${year}`,
+              year: year,
+              monthNumber: index + 1,
+              revenue: 0,
+              standardRevenue: 0,
+              premiumRevenue: 0,
+              transactionCount: 0,
+              standardCount: 0,
+              premiumCount: 0,
+            };
+          });
+      }
 
-        // Kiểm tra xem giao dịch có trong tháng này không
-        if (transactionDate >= monthStart && transactionDate <= monthEnd) {
-          monthData.revenue += amount;
-          monthData.transactionCount += 1;
+      // Cập nhật dữ liệu cho tháng tương ứng
+      const monthIndex = month - 1;
+      monthlyDataByYear[year][monthIndex].revenue += amount;
+      monthlyDataByYear[year][monthIndex].transactionCount += 1;
 
-          // Phân loại theo gói
-          if (packageName === "Standard") {
-            monthData.standardRevenue += amount;
-            monthData.standardCount += 1;
-          } else if (packageName === "Premium") {
-            monthData.premiumRevenue += amount;
-            monthData.premiumCount += 1;
-          }
-        }
-      });
+      // Phân loại theo gói
+      if (packageName === "Standard") {
+        monthlyDataByYear[year][monthIndex].standardRevenue += amount;
+        monthlyDataByYear[year][monthIndex].standardCount += 1;
+      } else if (packageName === "Premium") {
+        monthlyDataByYear[year][monthIndex].premiumRevenue += amount;
+        monthlyDataByYear[year][monthIndex].premiumCount += 1;
+      }
     });
 
-    return months;
+    // Chuyển đổi từ dạng object sang array để dễ sử dụng
+    const result = [];
+    Object.keys(monthlyDataByYear).forEach((year) => {
+      result.push(...monthlyDataByYear[year]);
+    });
+
+    return result;
   };
 
   // Tính toán doanh thu theo gói
@@ -360,12 +363,20 @@ const RevenueChart = () => {
     );
   };
 
-  // Chuẩn bị dữ liệu cho biểu đồ đường (doanh thu theo tháng)
+  // Chuẩn bị dữ liệu cho biểu đồ đường (doanh thu theo tháng) - cập nhật để lọc theo năm được chọn
   const prepareRevenueChartData = () => {
     if (!revenueData.length) return null;
 
-    const labels = revenueData.map((item) => item.month);
-    const revenueValues = revenueData.map((item) => item.revenue);
+    // Lọc dữ liệu theo năm đã chọn
+    const yearData = revenueData.filter(
+      (item) => item.year === selectedMonthlyYear
+    );
+
+    // Sắp xếp theo tháng tăng dần
+    yearData.sort((a, b) => a.monthNumber - b.monthNumber);
+
+    const labels = yearData.map((item) => item.month);
+    const revenueValues = yearData.map((item) => item.revenue);
 
     return {
       labels,
@@ -386,9 +397,17 @@ const RevenueChart = () => {
   const preparePackageRevenueChartData = () => {
     if (!revenueData.length) return null;
 
-    const labels = revenueData.map((item) => item.month);
-    const standardData = revenueData.map((item) => item.standardRevenue);
-    const premiumData = revenueData.map((item) => item.premiumRevenue);
+    // Lọc dữ liệu theo năm đã chọn
+    const yearData = revenueData.filter(
+      (item) => item.year === selectedMonthlyYear
+    );
+
+    // Sắp xếp theo tháng tăng dần
+    yearData.sort((a, b) => a.monthNumber - b.monthNumber);
+
+    const labels = yearData.map((item) => item.month);
+    const standardData = yearData.map((item) => item.standardRevenue);
+    const premiumData = yearData.map((item) => item.premiumRevenue);
 
     return {
       labels,
@@ -566,7 +585,7 @@ const RevenueChart = () => {
       ...commonOptions.plugins,
       title: {
         display: true,
-        text: "Doanh Thu Hàng Tháng",
+        text: `Doanh Thu Hàng Tháng - Năm ${selectedMonthlyYear}`,
         font: {
           size: 16,
           weight: "bold",
@@ -582,7 +601,7 @@ const RevenueChart = () => {
       ...commonOptions.plugins,
       title: {
         display: true,
-        text: "Doanh Thu Theo Gói Dịch Vụ",
+        text: `Doanh Thu Theo Gói Dịch Vụ - Năm ${selectedMonthlyYear}`,
         font: {
           size: 16,
           weight: "bold",
@@ -1358,14 +1377,22 @@ const RevenueChart = () => {
     );
   };
 
-  // Tính toán doanh thu theo gói CÓ áp dụng bộ lọc thời gian
+  // Tính toán doanh thu theo gói CÓ áp dụng bộ lọc thời gian và lọc theo năm đã chọn
   const calculateFilteredRevenueByPackage = () => {
     // Lấy các giao dịch đã được lọc theo thời gian và trạng thái
-    const filteredTransactions = getFilteredTransactions().filter(
+    let filteredTransactions = getFilteredTransactions().filter(
       (t) => t.paymentStatus.toLowerCase() === "completed"
     );
 
-    const packageRevenue = {
+    // Thêm lọc theo năm đã chọn cho tab phân tích gói dịch vụ
+    if (activeTab === "packages") {
+      filteredTransactions = filteredTransactions.filter((t) => {
+        const transactionDate = new Date(t.transactionDate);
+        return transactionDate.getFullYear() === selectedMonthlyYear;
+      });
+    }
+
+    const filteredPackageRevenue = {
       Standard: {
         revenue: 0,
         count: 0,
@@ -1388,27 +1415,27 @@ const RevenueChart = () => {
       totalCount += 1;
 
       if (packageName === "Standard") {
-        packageRevenue.Standard.revenue += amount;
-        packageRevenue.Standard.count += 1;
+        filteredPackageRevenue.Standard.revenue += amount;
+        filteredPackageRevenue.Standard.count += 1;
       } else if (packageName === "Premium") {
-        packageRevenue.Premium.revenue += amount;
-        packageRevenue.Premium.count += 1;
+        filteredPackageRevenue.Premium.revenue += amount;
+        filteredPackageRevenue.Premium.count += 1;
       }
     });
 
     // Tính phần trăm của tổng doanh thu
     if (totalRevenue > 0) {
-      packageRevenue.Standard.percentageOfTotal =
-        (packageRevenue.Standard.revenue / totalRevenue) * 100;
-      packageRevenue.Premium.percentageOfTotal =
-        (packageRevenue.Premium.revenue / totalRevenue) * 100;
+      filteredPackageRevenue.Standard.percentageOfTotal =
+        (filteredPackageRevenue.Standard.revenue / totalRevenue) * 100;
+      filteredPackageRevenue.Premium.percentageOfTotal =
+        (filteredPackageRevenue.Premium.revenue / totalRevenue) * 100;
     }
 
     // Thêm tổng doanh thu vào kết quả
-    packageRevenue.totalRevenue = totalRevenue;
-    packageRevenue.totalCount = totalCount;
+    filteredPackageRevenue.totalRevenue = totalRevenue;
+    filteredPackageRevenue.totalCount = totalCount;
 
-    return packageRevenue;
+    return filteredPackageRevenue;
   };
 
   // Thêm hàm mới để chuẩn bị dữ liệu biểu đồ theo quý - không bị ảnh hưởng bởi bộ lọc thời gian
@@ -1714,13 +1741,58 @@ const RevenueChart = () => {
                 <i className="fas fa-chart-line"></i> Biểu Đồ Doanh Thu Hàng
                 Tháng
               </h3>
+              {/* Thêm dropdown để chọn năm cho biểu đồ doanh thu hàng tháng */}
+              <div
+                className="year-selector"
+                style={{
+                  marginBottom: "15px",
+                  display: "flex",
+                  alignItems: "center",
+                  background: "#f8f9fa",
+                  padding: "8px 15px",
+                  borderRadius: "6px",
+                }}
+              >
+                <label
+                  htmlFor="monthlyYearSelect"
+                  style={{ marginRight: "10px", fontWeight: "500" }}
+                >
+                  <i
+                    className="fas fa-calendar-year"
+                    style={{ marginRight: "5px" }}
+                  ></i>
+                  Chọn năm:
+                </label>
+                <select
+                  id="monthlyYearSelect"
+                  className="year-dropdown"
+                  value={selectedMonthlyYear}
+                  onChange={(e) =>
+                    setSelectedMonthlyYear(parseInt(e.target.value))
+                  }
+                  style={{
+                    padding: "5px 10px",
+                    borderRadius: "4px",
+                    border: "1px solid #ddd",
+                    backgroundColor: "#fff",
+                    fontWeight: "500",
+                    cursor: "pointer",
+                  }}
+                >
+                  {getAvailableYearsForMonthly().map((year) => (
+                    <option key={year} value={year}>
+                      Năm {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div className="chart-area">
                 {revenueChartData ? (
                   <Line data={revenueChartData} options={revenueChartOptions} />
                 ) : (
                   <div className="no-data-message">
                     <i className="fas fa-info-circle"></i> Không có dữ liệu
-                    doanh thu để hiển thị
+                    doanh thu để hiển thị cho năm {selectedMonthlyYear}
                   </div>
                 )}
               </div>
@@ -1738,6 +1810,51 @@ const RevenueChart = () => {
                 <i className="fas fa-boxes"></i> So Sánh Doanh Thu Theo Gói Dịch
                 Vụ
               </h3>
+              {/* Thêm dropdown để chọn năm cho biểu đồ phân tích theo gói */}
+              <div
+                className="year-selector"
+                style={{
+                  marginBottom: "15px",
+                  display: "flex",
+                  alignItems: "center",
+                  background: "#f8f9fa",
+                  padding: "8px 15px",
+                  borderRadius: "6px",
+                }}
+              >
+                <label
+                  htmlFor="packageYearSelect"
+                  style={{ marginRight: "10px", fontWeight: "500" }}
+                >
+                  <i
+                    className="fas fa-calendar-year"
+                    style={{ marginRight: "5px" }}
+                  ></i>
+                  Chọn năm:
+                </label>
+                <select
+                  id="packageYearSelect"
+                  className="year-dropdown"
+                  value={selectedMonthlyYear}
+                  onChange={(e) =>
+                    setSelectedMonthlyYear(parseInt(e.target.value))
+                  }
+                  style={{
+                    padding: "5px 10px",
+                    borderRadius: "4px",
+                    border: "1px solid #ddd",
+                    backgroundColor: "#fff",
+                    fontWeight: "500",
+                    cursor: "pointer",
+                  }}
+                >
+                  {getAvailableYearsForMonthly().map((year) => (
+                    <option key={year} value={year}>
+                      Năm {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div className="chart-area">
                 {packageRevenueChartData ? (
                   <Line
@@ -1747,7 +1864,7 @@ const RevenueChart = () => {
                 ) : (
                   <div className="no-data-message">
                     <i className="fas fa-info-circle"></i> Không có dữ liệu để
-                    hiển thị
+                    hiển thị cho năm {selectedMonthlyYear}
                   </div>
                 )}
               </div>
