@@ -29,12 +29,23 @@ const childApi = {
       },
     }),
 
-getGrowthRecordsByDateRange: (childName, parentName, startDate, endDate) =>
-  api.get(`GrowthRecord/odata`, {
-    params: {
-      $filter: `ChildName eq '${childName}' and ParentName eq '${parentName}' and createdAt ge '${startDate}' and createdAt le '${endDate}'`
-    }
-  }),
+  getGrowthRecordsByDateRange: (childName, parentName, startDate, endDate) => {
+    // Chuyển đổi định dạng mm/dd/yyyy thành ISO string
+    const formatDate = (dateStr) => {
+      const date = new Date(dateStr);
+      return date.toISOString();
+    };
+
+    // Convert to ISO format
+    const formattedStartDate = formatDate(startDate);
+    const formattedEndDate = formatDate(endDate);
+
+    return api.get(`GrowthRecord/odata`, {
+      params: {
+        $filter: `ChildName eq '${childName}' and ParentName eq '${parentName}' and createdAt ge ${formattedStartDate} and createdAt le ${formattedEndDate}`,
+      },
+    });
+  },
 };
 
 export default childApi;
