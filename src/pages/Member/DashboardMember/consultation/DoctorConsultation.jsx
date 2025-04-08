@@ -7,9 +7,45 @@ import moment from "moment";
 import doctorImage from "../../../../data/doctorImages";
 import PopupNotification from "../../../../layouts/Member/popUp/PopupNotification";
 
+// Hàm định dạng thời gian từ chuỗi ISO - Chỉ hiển thị ngày tháng năm
+const formatDateTime = (isoString) => {
+  if (!isoString) return { date: "N/A", time: "N/A" };
+
+  try {
+    const date = new Date(isoString);
+
+    // Định dạng ngày: DD/MM/YYYY
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    const formattedDate = `${day}/${month}/${year}`;
+
+    // Vẫn lưu thời gian nhưng không hiển thị
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const seconds = date.getSeconds().toString().padStart(2, "0");
+    const formattedTime = `${hours}:${minutes}:${seconds}`;
+
+    return {
+      date: formattedDate,
+      time: formattedTime,
+      dateTime: formattedDate, // Chỉ trả về ngày tháng năm
+    };
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return { date: "N/A", time: "N/A", dateTime: "N/A" };
+  }
+};
+
+// Khôi phục lại function getVietnameseStatus sang tiếng Anh
+const getStatusText = (status) => {
+  return status; // Giữ nguyên status gốc bằng tiếng Anh
+};
+
 // Response Card
 function ExpandableResponseCard({ response, request, onClick }) {
-  const combinedText = `Date: ${response.responseDate} | Doctor: ${
+  const { date } = formatDateTime(response.responseDate);
+  const combinedText = `Date: ${date} | Doctor: ${
     response.doctorName
   } | Child: ${request?.childName || "N/A"} | Category: ${
     request?.category || "N/A"
@@ -25,7 +61,7 @@ function ExpandableResponseCard({ response, request, onClick }) {
       onClick={() => onClick(response)}
     >
       <header className="response-header">
-        <span className="response-date">{response.responseDate}</span>
+        <span className="response-date">{date}</span>
         <span className="response-status">{response.status}</span>
       </header>
       <section className="response-summary">
@@ -43,8 +79,9 @@ function ExpandableResponseCard({ response, request, onClick }) {
 
 // Sent Request Card
 function ExpandableSentRequestCard({ request, onClick }) {
+  const { date } = formatDateTime(request.requestDate);
   const truncatedText =
-    `ID: ${request.requestId} | Child: ${request.childName} | Date: ${request.requestDate} | Description: ${request.description}`.slice(
+    `ID: ${request.requestId} | Child: ${request.childName} | Date: ${date} | Description: ${request.description}`.slice(
       0,
       50
     ) + "...";
@@ -54,9 +91,7 @@ function ExpandableSentRequestCard({ request, onClick }) {
       onClick={() => onClick(request)}
     >
       <header className="sent-header">
-        <span className="sent-date">
-          {moment(request.requestDate).format("DD/MM/YYYY HH:mm")}
-        </span>
+        <span className="sent-date">{date}</span>
         <span className="sent-status">{request.status}</span>
       </header>
       <section className="sent-summary">
@@ -79,8 +114,9 @@ function ExpandableFeedbackEntry({
   consultationResponses,
   consultationRequests,
 }) {
+  const { date } = formatDateTime(feedback.feedbackDate);
   const truncatedText =
-    `Rating: ${feedback.rating} stars`.slice(0, 100) + "...";
+    `Rating: ${feedback.rating} stars | Date: ${date}`.slice(0, 100) + "...";
   const relatedResponse = consultationResponses.find(
     (resp) => resp.responseId === feedback.responseId
   );
@@ -94,7 +130,7 @@ function ExpandableFeedbackEntry({
       onClick={() => onClick({ feedback, relatedResponse, relatedRequest })}
     >
       <header className="feedback-header">
-        <span className="feedback-date">{feedback.feedbackDate}</span>
+        <span className="feedback-date">{date}</span>
         <span className="feedback-rating">{feedback.rating} ★</span>
       </header>
       <section className="feedback-summary">
@@ -648,7 +684,7 @@ function DoctorConsultation() {
                 <strong>Child:</strong> {selectedChild?.name || "Not selected"}
               </section>
               <section className="review-item consultation-details">
-                <strong>Details:</strong>
+                <strong>Chi tiết:</strong>
                 <div
                   className="consultation-details-content"
                   dangerouslySetInnerHTML={{ __html: consultationContent }}
@@ -656,7 +692,7 @@ function DoctorConsultation() {
               </section>
               {selectedFiles.length > 0 && (
                 <section className="review-item">
-                  <strong>Attached Files:</strong>
+                  <strong>Tệp đính kèm:</strong>
                   <ul>
                     {selectedFiles.map((file, index) => (
                       <li key={index}>{file.name}</li>
@@ -667,7 +703,7 @@ function DoctorConsultation() {
             </article>
             {selectedDoctor && (
               <article className="doctor-review-section">
-                <h4 className="doctor-section-title">Selected Doctor</h4>
+                <h4 className="doctor-section-title">Bác sĩ đã chọn</h4>
                 <section className="doctor-profile-card">
                   <header className="doctor-profile-header">
                     <img
@@ -944,7 +980,7 @@ function DoctorConsultation() {
                 </button>
                 <button
                   className="complete-request-button"
-                  onClick={handleCompleteRequest} // Gọi hàm mới
+                  onClick={handleCompleteRequest}
                 >
                   Complete
                 </button>
@@ -967,7 +1003,10 @@ function DoctorConsultation() {
                     </p>
                     <p>
                       <strong>Request Date:</strong>{" "}
-                      {selectedResponse.request.requestDate}
+                      {
+                        formatDateTime(selectedResponse.request.requestDate)
+                          .date
+                      }
                     </p>
                   </>
                 ) : (
@@ -978,7 +1017,7 @@ function DoctorConsultation() {
                 <h4>Response Information</h4>
                 <p>
                   <strong>Date:</strong>{" "}
-                  {selectedResponse.response.responseDate}
+                  {formatDateTime(selectedResponse.response.responseDate).date}
                 </p>
                 <p>
                   <strong>Doctor:</strong>{" "}
@@ -1072,7 +1111,7 @@ function DoctorConsultation() {
                 </p>
                 <p>
                   <strong>Request Date:</strong>{" "}
-                  {selectedSentRequest.requestDate}
+                  {formatDateTime(selectedSentRequest.requestDate).date}
                 </p>
                 <p>
                   <strong>Status:</strong> {selectedSentRequest.status}
@@ -1128,7 +1167,7 @@ function DoctorConsultation() {
                 </p>
                 <p>
                   <strong>Date:</strong>{" "}
-                  {selectedFeedback.feedback.feedbackDate}
+                  {formatDateTime(selectedFeedback.feedback.feedbackDate).date}
                 </p>
               </article>
               {selectedFeedback.relatedResponse && (
@@ -1136,7 +1175,9 @@ function DoctorConsultation() {
                   <h4>Response Information</h4>
                   <p>
                     <strong>Date:</strong>{" "}
-                    {selectedFeedback.relatedResponse.responseDate || "N/A"}
+                    {formatDateTime(
+                      selectedFeedback.relatedResponse.responseDate
+                    ).date || "N/A"}
                   </p>
                   <p>
                     <strong>Doctor:</strong>{" "}
