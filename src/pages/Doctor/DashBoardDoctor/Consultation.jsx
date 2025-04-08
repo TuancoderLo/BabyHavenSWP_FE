@@ -300,6 +300,7 @@ const Consultations = () => {
     return element.textContent;
   };
 
+
   // Khi xem chi tiết
 const handleViewDetail = async (record) => {
   try {
@@ -330,7 +331,7 @@ const handleViewDetail = async (record) => {
     }
 
     // Sử dụng OData query để lọc trực tiếp từ API
-    const odataQuery = `${doctorId} and status eq 'Pending' and memberId eq ${detailedData.child.memberId} and childName eq '${detailedData.childName}'`;
+    const odataQuery = `${doctorId} and memberId eq ${detailedData.child.memberId} and childName eq '${detailedData.childName}' and status eq 'Pending'`;
     const relatedRequestsResponse = await doctorApi.getConsultationRequestsByDoctorOData(odataQuery);
     const relatedPendingRequests = Array.isArray(relatedRequestsResponse)
       ? relatedRequestsResponse
@@ -1177,8 +1178,8 @@ const handleViewDetail = async (record) => {
                     <React.Fragment key={index}>
                       <Timeline.Item>
                         <p>
-                          <strong>Request</strong> -{" "}
-                          {moment(req.requestDate).format("DD/MM/YYYY HH:mm")}
+                        <strong>{index === 0 ? "Request" : "Re-request"}</strong> -{" "}
+                        {moment(req.requestDate).format("DD/MM/YYYY HH:mm")}
                         </p>
                         <Card size="small">
                           <p>{decodeHtmlEntities(req.description || "N/A")}</p>
