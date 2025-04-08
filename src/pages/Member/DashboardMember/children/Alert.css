@@ -34,7 +34,7 @@
 .alert-message p {
   margin: 0;
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 700;
   line-height: 1.5;
 }
 
@@ -48,7 +48,7 @@
 .alert-item.warning {
   border-color: #f4e800;
   color: #ef6c00;
-  background: #fff3cd;
+  background: #ffffff;
 }
 
 .alert-item.warning.fadeable {
@@ -58,20 +58,11 @@
 .alert-item.danger {
   border-color: #ff6262;
   color: #c62828;
-  background: #ffe6e6;
+  background: #ffffff;
 }
 
 .alert-item.danger.fadeable {
   border-bottom: 3px solid #ff6262;
-}
-
-.alert-item.fadeable {
-  animation: fade 1s infinite;
-}
-
-@keyframes fade {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
 }
 
 /* Alert Buttons */
@@ -165,11 +156,8 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  background: #ff9999;
   border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  height: 5px;
   color: #fff;
   font-size: 16px;
   cursor: pointer;
@@ -179,9 +167,6 @@
   transition: background 0.3s ease;
 }
 
-.modal-close:hover {
-  background: #ff6262;
-}
 
 /* Alert History Table */
 .alert-history-table {
