@@ -97,7 +97,9 @@ const userAccountsApi = {
   },
 
   findByEmail: (email) => {
-    return api.get(`UserAccounts/odata?$filter=email eq '${email}'`);
+    return api.get(
+      `UserAccounts/odata?$select=email,name,phoneNumber,dateOfBirth,address&$filter=email eq '${email}'`
+    );
   },
 
   createDoctor: async (doctorData) => {
