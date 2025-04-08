@@ -92,6 +92,7 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
       try {
         const response = await childApi.getChildByName(child, memberId);
         setChildDetails(response.data.data);
+        console.log("Child details:", response);
         const ageInMonths = calculateAgeInMonths(child.dateOfBirth);
         const stage = getGrowthStage(ageInMonths);
         setStageInfo(growthStages[stage]);
@@ -244,7 +245,15 @@ const AddRecord = ({ child, memberId, closeOverlay }) => {
     };
 
     try {
-      await childApi.createGrowthRecord(growthPayload);
+      const response = await childApi.createGrowthRecord(growthPayload);
+
+      if (response.data.status == 10) {
+        setPopupType("error");
+        setPopupMessage("You have already added a record for this date.");
+        setShowPopup(true);
+        return;
+      }
+
       setPopupType("success");
       setPopupMessage("Growth record added successfully.");
       setShowPopup(true);
