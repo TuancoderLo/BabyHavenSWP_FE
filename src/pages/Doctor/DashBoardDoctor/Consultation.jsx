@@ -219,6 +219,10 @@ const Consultations = () => {
         filteredData = allRequests.filter((item) => item.status === "Pending");
         // Sắp xếp request cũ lên trên (tăng dần theo ngày) với tab "new"
         filteredData = sortByDateAsc(filteredData);
+      } else if (activeTab === "onGoing") {
+        // Lọc các request có trạng thái "Approved" cho tab On going
+        filteredData = allRequests.filter((item) => item.status === "Approved");
+        filteredData = sortByDateDesc(filteredData);
       } else if (activeTab === "completed") {
         filteredData = allRequests.filter(
           (item) => item.status === "Completed"
@@ -269,6 +273,8 @@ const Consultations = () => {
       if (historyFilterStatus) {
         data = data.filter((item) => item.status === historyFilterStatus);
       }
+    } else if (activeTab === "onGoing") {
+      data = data.filter((item) => item.status === "Approved");
     } else {
       // Tab "new" => Pending
       data = data.filter((item) => item.status === "Pending");
@@ -331,7 +337,7 @@ const handleViewDetail = async (record) => {
     }
 
     // Sử dụng OData query để lọc trực tiếp từ API
-    const odataQuery = `${doctorId} and memberId eq ${detailedData.child.memberId} and childName eq '${detailedData.childName}' and status eq 'Pending'`;
+    const odataQuery = `${doctorId} and memberId eq ${detailedData.child.memberId} and childName eq '${detailedData.childName}' and status eq 'Approved'`;
     const relatedRequestsResponse = await doctorApi.getConsultationRequestsByDoctorOData(odataQuery);
     const relatedPendingRequests = Array.isArray(relatedRequestsResponse)
       ? relatedRequestsResponse
@@ -465,7 +471,7 @@ const handleViewDetail = async (record) => {
       // Nếu đang ở tab "new" hoặc status là "Pending", luôn sử dụng "Completed"
       const action =
         activeTab === "new" || selectedConsultation.status === "Pending"
-          ? "pending"
+          ? "completed"
           : values.action;
 
       const numericStatus = statusMapForResponse[action];
@@ -480,10 +486,10 @@ const handleViewDetail = async (record) => {
       };
 
       await doctorApi.createConsultationResponse(responsePayload);
-      // await doctorApi.updateConsultationRequestsStatus(
-      //   selectedConsultation.requestId,
-      //   stringStatus
-      // );
+      await doctorApi.updateConsultationRequestsStatus(
+        selectedConsultation.requestId,
+        "Approved"
+      );
 
       await fetchConsultationsWithPagination(
         pagination.current,
@@ -508,25 +514,25 @@ const handleViewDetail = async (record) => {
     }
   };
 
-  const handleComplete = async (record) => {
-    setLoading(true);
-    try {
-      // await doctorApi.updateConsultationRequestsStatus(
-      //   record.requestId,
-      //   "Completed"
-      // );
-      await fetchConsultationsWithPagination(
-        pagination.current,
-        pagination.pageSize
-      );
-      message.success("Consultation completed");
-    } catch (error) {
-      message.error("Failed to complete consultation!");
-      console.error("Error completing consultation:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleComplete = async (record) => {
+  //   setLoading(true);
+  //   try {
+  //     // await doctorApi.updateConsultationRequestsStatus(
+  //     //   record.requestId,
+  //     //   "Completed"
+  //     // );
+  //     await fetchConsultationsWithPagination(
+  //       pagination.current,
+  //       pagination.pageSize
+  //     );
+  //     message.success("Consultation completed");
+  //   } catch (error) {
+  //     message.error("Failed to complete consultation!");
+  //     console.error("Error completing consultation:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const getStatusTag = (status) => {
     switch (status) {
@@ -654,7 +660,7 @@ const handleViewDetail = async (record) => {
               Respond
             </Button>
           )}
-          {record.status === "Approved" && (
+          {/* {record.status === "Approved" && (
             <Button
               type="primary"
               icon={<CheckCircleOutlined />}
@@ -662,7 +668,7 @@ const handleViewDetail = async (record) => {
             >
               Complete
             </Button>
-          )}
+          )} */}
         </Space>
       ),
     },
@@ -929,7 +935,16 @@ const handleViewDetail = async (record) => {
               onChange={handleTableChange}
             />
           </Tabs.TabPane>
-
+          <Tabs.TabPane key="onGoing" tab="On going">
+            <Table
+              columns={columns}
+              dataSource={filteredConsultations}
+              rowKey="id"
+              loading={loading}
+              pagination={pagination}
+              onChange={handleTableChange}
+            />
+          </Tabs.TabPane>
           <Tabs.TabPane key="completed" tab="Completed">
             <Table
               columns={columns}
