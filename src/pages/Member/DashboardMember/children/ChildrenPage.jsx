@@ -449,6 +449,26 @@ const renderCompareControl = () => {
     );
   };
 
+  const handleSendConsultationRequest = (alertData) => {
+    if (!selectedChild) {
+      setPopupType("error");
+      setPopupMessage("Please select a child before sending a consultation request.");
+      setShowPopup(true);
+      return;
+    }
+  
+    // Chuẩn bị dữ liệu để truyền sang DoctorConsultation
+    const consultationData = {
+      child: selectedChild,
+      description: alertData.message || "No description provided.",
+      urgency: alertData.severityLevel?.toLowerCase() === "high" ? "High" : "Medium",
+      category: "Health",
+    };
+  
+    // Chuyển hướng đến trang DoctorConsultation với dữ liệu
+    navigate("/member/doctor-consultation", { state: consultationData });
+  };
+
   return (
     <>
       {isLoading ? (
@@ -642,6 +662,8 @@ const renderCompareControl = () => {
                 }}
                 child={selectedChild}
                 growthRecords={growthRecords}
+                onConsultDoctor={handleSendConsultationRequest} // Truyền hàm xử lý consultation request
+                onSendConsultationRequest={handleSendConsultationRequest} // Thêm prop mới
               />
             </div>
 
