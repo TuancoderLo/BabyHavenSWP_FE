@@ -187,7 +187,6 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-
 }
 
 .doctor-avatar-grid img {
@@ -209,7 +208,7 @@
   flex-direction: column;
   text-align: left;
   gap: 15px;
-  flex:1;
+  flex: 1;
 }
 
 .doctor-info-grid h4 {
@@ -222,9 +221,8 @@
 .doctor-info-grid p {
   font-size: 14px;
   color: #666;
-  margin:0;
+  margin: 0;
 }
-
 
 .doctor-specialization-grid {
   font-size: 12px;
@@ -340,24 +338,44 @@
   transform: scale(1.01);
 }
 
-.response-header, .sent-header, .feedback-header {
+.response-header,
+.sent-header,
+.feedback-header {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
 }
 
-.response-date, .sent-date, .feedback-date {
+.response-header .response-date,
+.sent-header .sent-date,
+.feedback-header .feedback-date {
   font-size: 14px;
   color: #666;
 }
 
-.response-status, .sent-status, .feedback-rating {
+.response-header .response-status,
+.sent-header .sent-status,
+.feedback-header .feedback-rating {
   font-size: 14px;
   color: #4a90e2;
   font-weight: 500;
 }
 
-.response-summary, .sent-summary, .feedback-summary {
+/* Xóa các phần CSS thêm vào cho status */
+.status-pending,
+.status-đang-chờ,
+.status-completed,
+.status-hoàn-thành,
+.status-approved,
+.status-đã-duyệt,
+.status-rejected,
+.status-bị-từ-chối {
+  background-color: transparent !important;
+}
+
+.response-summary,
+.sent-summary,
+.feedback-summary {
   margin-bottom: 10px;
 }
 
@@ -452,21 +470,27 @@
   gap: 15px;
 }
 
-.response-section, .request-section, .feedback-section {
+.response-section,
+.request-section,
+.feedback-section {
   background: #f9fbff;
   padding: 15px;
   border: 1px solid #d9e4f5;
   border-radius: 10px;
 }
 
-.response-section h4, .request-section h4, .feedback-section h4 {
+.response-section h4,
+.request-section h4,
+.feedback-section h4 {
   font-size: 16px;
   color: #4a90e2;
   margin-bottom: 10px;
   font-weight: 600;
 }
 
-.response-section p, .request-section p, .feedback-section p {
+.response-section p,
+.request-section p,
+.feedback-section p {
   font-size: 14px;
   color: #333;
   margin-bottom: 5px;
@@ -515,7 +539,8 @@
   box-shadow: 0 0 0 3px rgba(74, 193, 226, 0.2);
 }
 
-.feedback-button, .submit-feedback-button {
+.feedback-button,
+.submit-feedback-button {
   padding: 8px 16px;
   background: #4a90e2;
   font-weight: 600;
@@ -529,7 +554,8 @@
   margin-top: 10px;
 }
 
-.feedback-button:hover, .submit-feedback-button:hover {
+.feedback-button:hover,
+.submit-feedback-button:hover {
   background: #357abd;
   transition: all 0.3s ease;
 }
@@ -540,7 +566,9 @@
 }
 
 /* Buttons */
-.doctor-back-button, .doctor-next-button, .doctor-action-button {
+.doctor-back-button,
+.doctor-next-button,
+.doctor-action-button {
   padding: 8px 16px;
   background: #4a90e2;
   color: #fff;
@@ -552,7 +580,9 @@
   font-weight: 500;
 }
 
-.doctor-back-button:hover, .doctor-next-button:hover, .doctor-action-button:hover {
+.doctor-back-button:hover,
+.doctor-next-button:hover,
+.doctor-action-button:hover {
   background: #357abd;
   transform: scale(1.05);
 }
@@ -583,8 +613,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .submit-error {

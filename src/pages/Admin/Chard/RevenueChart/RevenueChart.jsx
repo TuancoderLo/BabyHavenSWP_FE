@@ -18,6 +18,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import "./RevenueChart.css";
 import transactionApi from "../../../../services/transactionApi";
 import axios from "axios";
+import userAccountsApi from "../../../../services/userAccountsApi";
 
 // Cấu hình axios để xử lý lỗi CORS
 const axiosInstance = axios.create({
@@ -921,49 +922,67 @@ const RevenueChart = () => {
 
     setIsLoadingUserDetail(true);
     try {
-      // Sử dụng axiosInstance đã cấu hình thay vì axios trực tiếp
-      const response = await axiosInstance.get("/api/UserAccounts/odata");
+      console.log("Fetching user details for email:", email);
+      // Sử dụng userAccountsApi.findByEmail để gọi API
+      const response = await userAccountsApi.findByEmail(email);
+      console.log("API response:", response);
 
-      if (response.data && Array.isArray(response.data)) {
-        // Tìm người dùng theo email
-        const userDetail = response.data.find(
-          (user) =>
-            user.email && user.email.toLowerCase() === email.toLowerCase()
-        );
-
-        setUserAccountDetail(userDetail || null);
+      // Kiểm tra nếu response có dữ liệu
+      if (response && response.data) {
+        // OData thường trả về mảng các đối tượng, nên lấy phần tử đầu tiên
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          const userDetail = response.data[0];
+          console.log("User detail found:", userDetail);
+          setUserAccountDetail(userDetail);
+        }
+        // Trường hợp API không trả về mảng mà trả về object trực tiếp
+        else if (typeof response.data === "object" && response.data !== null) {
+          console.log("User detail found (object format):", response.data);
+          setUserAccountDetail(response.data);
+        } else {
+          console.log("Empty data array or invalid format");
+          // Tạo thông tin cơ bản từ dữ liệu giao dịch
+          createMockUserDetail();
+        }
       } else {
-        setUserAccountDetail(null);
+        console.log("Invalid API response format");
+        createMockUserDetail();
       }
     } catch (error) {
       console.error("Error fetching user details:", error);
-      // Tạo mock data nếu API bị lỗi CORS
+      createMockUserDetail();
+    } finally {
+      setIsLoadingUserDetail(false);
+    }
+
+    // Hàm tạo dữ liệu giả khi không tìm thấy thông tin hoặc có lỗi
+    function createMockUserDetail() {
       const mockUserDetail = {
-        fullName: selectedTransaction.fullName,
-        email: selectedTransaction.email,
-        phoneNumber: "Không có dữ liệu",
+        fullName: selectedTransaction.fullName || "Không có tên",
+        email: selectedTransaction.email || "Không có email",
+        phoneNumber: "Không có thông tin điện thoại",
         dateOfBirth: null,
         gender: null,
-        address: "Không có dữ liệu",
+        address: "Không có thông tin địa chỉ",
         roleName: "Khách hàng",
         status: "Đang hoạt động",
       };
       setUserAccountDetail(mockUserDetail);
-    } finally {
-      setIsLoadingUserDetail(false);
     }
   };
 
   // Mở modal xem chi tiết giao dịch - Cập nhật để gọi API lấy thông tin người dùng
-  const openTransactionDetail = (transaction) => {
+  const openTransactionDetail = async (transaction) => {
     setSelectedTransaction(transaction);
     setShowTransactionDetail(true);
 
+    // Reset userAccountDetail để tránh hiển thị dữ liệu cũ
+    setUserAccountDetail(null);
+
     // Chỉ khi mở modal mới gọi API lấy thông tin người dùng
     if (transaction && transaction.email) {
-      fetchUserAccountDetail(transaction.email);
-    } else {
-      setUserAccountDetail(null);
+      // Đặt timeout ngắn để đảm bảo modal đã render trước khi fetch dữ liệu
+      await fetchUserAccountDetail(transaction.email);
     }
   };
 
@@ -2186,473 +2205,110 @@ const RevenueChart = () => {
             </div>
 
             <div className="modal-body">
-              {/* Thông tin cơ bản của khách hàng */}
-              <div className="user-profile-section">
-                <div className="user-basic-info">
-                  <div className="user-name">
-                    <h4>{selectedTransaction.fullName}</h4>
-                    <span className="user-since">
-                      Khách hàng từ:{" "}
-                      {formatDate(
-                        getUserFirstTransaction(selectedTransaction.userId)
-                      )}
-                    </span>
-                  </div>
-                  <div className="user-contact">
-                    <p>
-                      <i className="fas fa-envelope"></i>{" "}
-                      {selectedTransaction.email || "Không có thông tin email"}
-                    </p>
-                    {isLoadingUserDetail ? (
-                      <div className="loading-user-details">
-                        <div className="spinner"></div>
-                        <span>Đang tải thông tin chi tiết...</span>
+              {isLoadingUserDetail ? (
+                <div className="loading-info">
+                  Đang tải thông tin người dùng...
+                </div>
+              ) : (
+                <>
+                  {/* Thông tin cơ bản của khách hàng */}
+                  <div className="user-profile-section">
+                    <div className="user-basic-info">
+                      <div className="user-name">
+                        <h4>
+                          {userAccountDetail?.Name ||
+                            selectedTransaction.fullName}
+                        </h4>
                       </div>
-                    ) : userAccountDetail ? (
-                      <>
+                      <div className="user-contact">
+                        <p>
+                          <i className="fas fa-envelope"></i>{" "}
+                          {userAccountDetail?.Email ||
+                            selectedTransaction.email ||
+                            "Không có thông tin email"}
+                        </p>
                         <p>
                           <i className="fas fa-phone"></i>{" "}
-                          {userAccountDetail.phoneNumber ||
-                            "Không có số điện thoại"}
-                        </p>
-                        <p>
-                          <i className="fas fa-birthday-cake"></i>{" "}
-                          {userAccountDetail.dateOfBirth
-                            ? formatDate(userAccountDetail.dateOfBirth).split(
-                                " "
-                              )[0]
-                            : "Không có ngày sinh"}
-                        </p>
-                        <p>
-                          <i className="fas fa-venus-mars"></i>{" "}
-                          {userAccountDetail.gender === "Male"
-                            ? "Nam"
-                            : userAccountDetail.gender === "Female"
-                            ? "Nữ"
-                            : "Không xác định"}
+                          {userAccountDetail?.PhoneNumber ||
+                            "Không có thông tin điện thoại"}
                         </p>
                         <p>
                           <i className="fas fa-map-marker-alt"></i>{" "}
-                          {userAccountDetail.address || "Không có địa chỉ"}
+                          {userAccountDetail?.Address ||
+                            "Không có thông tin địa chỉ"}
                         </p>
-                        <p>
-                          <i className="fas fa-user-tag"></i>{" "}
-                          {userAccountDetail.roleName || "Không có vai trò"}
-                        </p>
-                        <p>
-                          <i className="fas fa-shield-alt"></i>{" "}
-                          {userAccountDetail.status || "Không xác định"}
-                        </p>
-                      </>
-                    ) : (
-                      <p>
-                        <i className="fas fa-exclamation-circle"></i> Không tìm
-                        thấy thông tin chi tiết người dùng
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Tổng hợp và thống kê */}
-              <div className="user-stats-section">
-                <div className="stats-cards">
-                  <div className="user-stat-card total-spent">
-                    <div className="stat-icon">
-                      <i className="fas fa-money-bill-wave"></i>
-                    </div>
-                    <div className="stat-content">
-                      <div className="stat-title">Tổng Chi Tiêu</div>
-                      <div className="stat-value">
-                        {formatAmount(
-                          calculateUserTotalSpent(selectedTransaction.userId)
+                        {userAccountDetail?.DateOfBirth && (
+                          <p>
+                            <i className="fas fa-birthday-cake"></i>{" "}
+                            {new Date(
+                              userAccountDetail.DateOfBirth
+                            ).toLocaleDateString("vi-VN")}
+                          </p>
                         )}
                       </div>
                     </div>
                   </div>
 
-                  <div className="user-stat-card total-transactions">
-                    <div className="stat-icon">
-                      <i className="fas fa-shopping-cart"></i>
-                    </div>
-                    <div className="stat-content">
-                      <div className="stat-title">Tổng Giao Dịch</div>
-                      <div className="stat-value">
-                        {getUserTransactions(selectedTransaction.userId).length}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="user-stat-card success-rate">
-                    <div className="stat-icon">
-                      <i className="fas fa-check-circle"></i>
-                    </div>
-                    <div className="stat-content">
-                      <div className="stat-title">Tỷ Lệ Thành Công</div>
-                      <div className="stat-value">
-                        {calculateUserSuccessRate(selectedTransaction.userId)}%
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Chi tiết giao dịch hiện tại */}
-              <div className="current-transaction-section">
-                <h4>
-                  <i className="fas fa-receipt"></i> Chi Tiết Giao Dịch
-                </h4>
-                <div className="transaction-details">
-                  <div className="transaction-row">
-                    <div className="detail-label">ID Giao Dịch:</div>
-                    <div className="detail-value">
-                      {selectedTransaction.gatewayTransactionId || "N/A"}
-                    </div>
-                  </div>
-                  <div className="transaction-row">
-                    <div className="detail-label">Gói Dịch Vụ:</div>
-                    <div className="detail-value">
-                      {renderPackageBadge(selectedTransaction.packageName)}
-                    </div>
-                  </div>
-                  <div className="transaction-row">
-                    <div className="detail-label">Số Tiền:</div>
-                    <div className="detail-value">
-                      {formatAmount(selectedTransaction.amount)}
-                    </div>
-                  </div>
-                  <div className="transaction-row">
-                    <div className="detail-label">Phương Thức:</div>
-                    <div className="detail-value">
-                      {selectedTransaction.paymentMethod || "Không xác định"}
-                    </div>
-                  </div>
-                  <div className="transaction-row">
-                    <div className="detail-label">Ngày Giao Dịch:</div>
-                    <div className="detail-value">
-                      {formatDate(selectedTransaction.transactionDate)}
-                    </div>
-                  </div>
-                  <div className="transaction-row">
-                    <div className="detail-label">Ngày Thanh Toán:</div>
-                    <div className="detail-value">
-                      {selectedTransaction.paymentDate
-                        ? formatDate(selectedTransaction.paymentDate)
-                        : "Chưa thanh toán"}
-                    </div>
-                  </div>
-                  <div className="transaction-row">
-                    <div className="detail-label">Trạng Thái:</div>
-                    <div className="detail-value">
-                      {renderPaymentStatus(selectedTransaction.paymentStatus)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Lịch sử gói dịch vụ đã mua */}
-              <div className="purchase-history-section">
-                <h4>
-                  <i className="fas fa-history"></i> Lịch Sử Mua Gói Dịch Vụ
-                </h4>
-                <div className="package-history-container">
-                  <table className="package-history-table">
-                    <thead>
-                      <tr>
-                        <th>Gói Dịch Vụ</th>
-                        <th>Ngày Mua</th>
-                        <th>Số Tiền</th>
-                        <th>Trạng Thái</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {getUserPackageHistory(selectedTransaction.userId).map(
-                        (transaction, index) => (
-                          <tr key={index}>
-                            <td>
-                              {renderPackageBadge(transaction.packageName)}
-                            </td>
-                            <td>{formatDate(transaction.transactionDate)}</td>
-                            <td>{formatAmount(transaction.amount)}</td>
-                            <td>
-                              {renderPaymentStatus(transaction.paymentStatus)}
-                            </td>
+                  {/* Lịch sử mua gói */}
+                  <div className="purchase-history-section">
+                    <h4>
+                      <i className="fas fa-history"></i> Lịch Sử Mua Gói Dịch Vụ
+                    </h4>
+                    <div className="package-history-container">
+                      <table className="package-history-table">
+                        <thead>
+                          <tr>
+                            <th>Gói Dịch Vụ</th>
+                            <th>Ngày Thanh Toán</th>
+                            <th>Số Tiền</th>
+                            <th>Trạng Thái</th>
                           </tr>
-                        )
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Biểu đồ chi tiêu theo thời gian */}
-              <div className="user-spending-chart">
-                <h4>
-                  <i className="fas fa-chart-line"></i> Biểu Đồ Chi Tiêu Theo
-                  Thời Gian
-                </h4>
-                <div className="chart-area user-chart">
-                  {/* Biểu đồ chi tiêu được render tại đây */}
-                  {prepareUserSpendingChartData(selectedTransaction.userId) ? (
-                    <Line
-                      data={prepareUserSpendingChartData(
-                        selectedTransaction.userId
-                      )}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: {
-                            position: "top",
-                          },
-                          title: {
-                            display: true,
-                            text: "Chi Tiêu Theo Thời Gian",
-                            font: {
-                              size: 14,
-                              weight: "bold",
-                            },
-                          },
-                          tooltip: {
-                            callbacks: {
-                              label: function (context) {
-                                let label = context.dataset.label || "";
-                                if (label) {
-                                  label += ": ";
-                                }
-                                if (context.parsed.y !== null) {
-                                  label += new Intl.NumberFormat("vi-VN", {
-                                    style: "currency",
-                                    currency: "VND",
-                                  }).format(context.parsed.y);
-                                }
-                                return label;
-                              },
-                            },
-                          },
-                        },
-                        scales: {
-                          y: {
-                            beginAtZero: true,
-                            ticks: {
-                              callback: function (value) {
-                                return new Intl.NumberFormat("vi-VN", {
-                                  style: "currency",
-                                  currency: "VND",
-                                  notation: "compact",
-                                  compactDisplay: "short",
-                                }).format(value);
-                              },
-                            },
-                          },
-                        },
-                        layout: {
-                          padding: {
-                            left: 10,
-                            right: 10,
-                            top: 20,
-                            bottom: 10,
-                          },
-                        },
-                      }}
-                    />
-                  ) : (
-                    <div className="no-data-message">
-                      <i className="fas fa-info-circle"></i> Không đủ dữ liệu để
-                      hiển thị biểu đồ
+                        </thead>
+                        <tbody>
+                          {selectedTransaction && selectedTransaction.userId ? (
+                            getUserTransactions(selectedTransaction.userId)
+                              .filter((t) => t.paymentStatus === "Completed")
+                              .map((transaction, index) => (
+                                <tr key={index}>
+                                  <td>
+                                    {renderPackageBadge(
+                                      transaction.packageName
+                                    )}
+                                  </td>
+                                  <td>
+                                    {formatDate(
+                                      transaction.paymentDate ||
+                                        transaction.transactionDate
+                                    )}
+                                  </td>
+                                  <td className="amount-value">
+                                    {formatAmount(transaction.amount)}
+                                  </td>
+                                  <td>
+                                    {renderPaymentStatus(
+                                      transaction.paymentStatus
+                                    )}
+                                  </td>
+                                </tr>
+                              ))
+                          ) : (
+                            <tr>
+                              <td colSpan="4" className="no-data">
+                                <i className="fas fa-info-circle"></i> Không có
+                                dữ liệu giao dịch
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
                     </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Phân tích gói dịch vụ */}
-              <div className="package-analysis-section">
-                <h4>
-                  <i className="fas fa-boxes"></i> Phân Tích Gói Dịch Vụ
-                </h4>
-                <div className="package-stats">
-                  <div className="package-donut-chart">
-                    {prepareUserPackageDistributionChart(
-                      selectedTransaction.userId
-                    ) ? (
-                      <Doughnut
-                        data={prepareUserPackageDistributionChart(
-                          selectedTransaction.userId
-                        )}
-                        options={{
-                          responsive: true,
-                          maintainAspectRatio: false,
-                          cutout: "60%",
-                          plugins: {
-                            legend: {
-                              position: "right",
-                              align: "center",
-                              labels: {
-                                padding: 15,
-                                boxWidth: 12,
-                                font: {
-                                  size: 12,
-                                },
-                              },
-                            },
-                            title: {
-                              display: true,
-                              text: "Phân Bổ Gói Dịch Vụ",
-                              font: {
-                                size: 14,
-                                weight: "bold",
-                              },
-                            },
-                            tooltip: {
-                              callbacks: {
-                                label: function (context) {
-                                  const value = context.raw;
-                                  const total = context.dataset.data.reduce(
-                                    (a, b) => a + b,
-                                    0
-                                  );
-                                  const percentage = Math.round(
-                                    (value / total) * 100
-                                  );
-                                  return `${context.label}: ${value} gói (${percentage}%)`;
-                                },
-                              },
-                            },
-                          },
-                          layout: {
-                            padding: {
-                              left: 5,
-                              right: 5,
-                              top: 5,
-                              bottom: 5,
-                            },
-                          },
-                        }}
-                      />
-                    ) : (
-                      <div className="no-data-message">
-                        <i className="fas fa-info-circle"></i> Không đủ dữ liệu
-                      </div>
-                    )}
                   </div>
-                  <div className="package-stats-details">
-                    {getUserPackageStats(selectedTransaction.userId).map(
-                      (stat, index) => (
-                        <div key={index} className="package-stat-item">
-                          <div className="package-icon">
-                            <i
-                              className={
-                                stat.packageName === "Premium"
-                                  ? "fas fa-crown"
-                                  : "fas fa-box"
-                              }
-                            ></i>
-                          </div>
-                          <div className="package-stat-content">
-                            <h5>{stat.packageName}</h5>
-                            <div className="package-stat-values">
-                              <div className="package-count">
-                                <span>{stat.count}</span> gói
-                              </div>
-                              <div className="package-total">
-                                {formatAmount(stat.total)}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Giao dịch gần đây */}
-              <div className="recent-transactions-section">
-                <h4>
-                  <i className="fas fa-clock"></i> Giao Dịch Gần Đây
-                </h4>
-                <div className="recent-transactions-container">
-                  <table className="recent-transactions-table">
-                    <thead>
-                      <tr>
-                        <th>ID Giao Dịch</th>
-                        <th>Gói</th>
-                        <th>Ngày Giao Dịch</th>
-                        <th>Số Tiền</th>
-                        <th>Trạng Thái</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {getUserRecentTransactions(
-                        selectedTransaction.userId,
-                        5
-                      ).map((transaction, index) => (
-                        <tr key={index}>
-                          <td>{transaction.gatewayTransactionId || "N/A"}</td>
-                          <td>{renderPackageBadge(transaction.packageName)}</td>
-                          <td>{formatDate(transaction.transactionDate)}</td>
-                          <td>{formatAmount(transaction.amount)}</td>
-                          <td>
-                            {renderPaymentStatus(transaction.paymentStatus)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Giao dịch thành công trong quý hiện tại */}
-              <div className="recent-transactions-section">
-                <h4>
-                  <i className="fas fa-chart-line"></i> Giao Dịch Thành Công
-                  Trong Quý Hiện Tại
-                </h4>
-                <div className="recent-transactions-container">
-                  <table className="recent-transactions-table">
-                    <thead>
-                      <tr>
-                        <th>ID Giao Dịch</th>
-                        <th>Gói</th>
-                        <th>Ngày Giao Dịch</th>
-                        <th>Số Tiền</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {getUserTransactionsForCurrentQuarter(
-                        selectedTransaction.userId
-                      ).length > 0 ? (
-                        getUserTransactionsForCurrentQuarter(
-                          selectedTransaction.userId
-                        ).map((transaction, index) => (
-                          <tr key={index}>
-                            <td>{transaction.gatewayTransactionId || "N/A"}</td>
-                            <td>
-                              {renderPackageBadge(transaction.packageName)}
-                            </td>
-                            <td>{formatDate(transaction.transactionDate)}</td>
-                            <td>{formatAmount(transaction.amount)}</td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="4" className="no-data-message">
-                            <i className="fas fa-info-circle"></i> Không có giao
-                            dịch thành công nào trong quý này
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                </>
+              )}
             </div>
 
             <div className="modal-footer">
-              <button
-                className="modal-btn primary"
-                onClick={closeTransactionDetail}
-              >
+              <button className="modal-btn" onClick={closeTransactionDetail}>
                 Đóng
               </button>
             </div>

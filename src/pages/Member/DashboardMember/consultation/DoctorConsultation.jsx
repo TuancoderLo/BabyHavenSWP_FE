@@ -7,20 +7,70 @@ import moment from "moment";
 import doctorImage from "../../../../data/doctorImages";
 import PopupNotification from "../../../../layouts/Member/popUp/PopupNotification";
 
+// Hàm định dạng thời gian từ chuỗi ISO - Chỉ hiển thị ngày tháng năm
+const formatDateTime = (isoString) => {
+  if (!isoString) return { date: "N/A", time: "N/A" };
+
+  try {
+    const date = new Date(isoString);
+
+    // Định dạng ngày: DD/MM/YYYY
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    const formattedDate = `${day}/${month}/${year}`;
+
+    // Vẫn lưu thời gian nhưng không hiển thị
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const seconds = date.getSeconds().toString().padStart(2, "0");
+    const formattedTime = `${hours}:${minutes}:${seconds}`;
+
+    return {
+      date: formattedDate,
+      time: formattedTime,
+      dateTime: formattedDate, // Chỉ trả về ngày tháng năm
+    };
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return { date: "N/A", time: "N/A", dateTime: "N/A" };
+  }
+};
+
+// Khôi phục lại function getVietnameseStatus sang tiếng Anh
+const getStatusText = (status) => {
+  return status; // Giữ nguyên status gốc bằng tiếng Anh
+};
+
 // Response Card
 function ExpandableResponseCard({ response, request, onClick }) {
-  const combinedText = `Date: ${response.responseDate} | Doctor: ${response.doctorName} | Child: ${request?.childName || "N/A"} | Category: ${request?.category || "N/A"}`;
-  const truncatedText = combinedText.length > 100 ? combinedText.slice(0, 100) + "..." : combinedText;
+  const { date } = formatDateTime(response.responseDate);
+  const combinedText = `Date: ${date} | Doctor: ${
+    response.doctorName
+  } | Child: ${request?.childName || "N/A"} | Category: ${
+    request?.category || "N/A"
+  }`;
+  const truncatedText =
+    combinedText.length > 100
+      ? combinedText.slice(0, 100) + "..."
+      : combinedText;
 
   return (
-    <article className="consultation-response-card" onClick={() => onClick(response)}>
+    <article
+      className="consultation-response-card"
+      onClick={() => onClick(response)}
+    >
       <header className="response-header">
-        <span className="response-date">{response.responseDate}</span>
+        <span className="response-date">{date}</span>
         <span className="response-status">{response.status}</span>
       </header>
       <section className="response-summary">
-        <p><strong>Doctor:</strong> {response.doctorName}</p>
-        <p><strong>Child:</strong> {request?.childName || "N/A"}</p>
+        <p>
+          <strong>Doctor:</strong> {response.doctorName}
+        </p>
+        <p>
+          <strong>Child:</strong> {request?.childName || "N/A"}
+        </p>
       </section>
       <footer className="truncated-content">{truncatedText}</footer>
     </article>
@@ -29,18 +79,28 @@ function ExpandableResponseCard({ response, request, onClick }) {
 
 // Sent Request Card
 function ExpandableSentRequestCard({ request, onClick }) {
+  const { date } = formatDateTime(request.requestDate);
   const truncatedText =
-    `ID: ${request.requestId} | Child: ${request.childName} | Date: ${request.requestDate} | Description: ${request.description}`
-      .slice(0, 50) + "...";
+    `ID: ${request.requestId} | Child: ${request.childName} | Date: ${date} | Description: ${request.description}`.slice(
+      0,
+      50
+    ) + "...";
   return (
-    <article className="consultation-sent-card" onClick={() => onClick(request)}>
+    <article
+      className="consultation-sent-card"
+      onClick={() => onClick(request)}
+    >
       <header className="sent-header">
-        <span className="sent-date">{moment(request.requestDate).format("DD/MM/YYYY HH:mm")}</span>
+        <span className="sent-date">{date}</span>
         <span className="sent-status">{request.status}</span>
       </header>
       <section className="sent-summary">
-        <p><strong>Child:</strong> {request.childName}</p>
-        <p><strong>Description:</strong> {request.description.slice(0, 50)}...</p>
+        <p>
+          <strong>Child:</strong> {request.childName}
+        </p>
+        <p>
+          <strong>Description:</strong> {request.description.slice(0, 50)}...
+        </p>
       </section>
       <footer className="truncated-content">{truncatedText}</footer>
     </article>
@@ -48,21 +108,35 @@ function ExpandableSentRequestCard({ request, onClick }) {
 }
 
 // Feedback Card
-function ExpandableFeedbackEntry({ feedback, onClick, consultationResponses, consultationRequests }) {
-  const truncatedText = `Rating: ${feedback.rating} stars`.slice(0, 100) + "...";
+function ExpandableFeedbackEntry({
+  feedback,
+  onClick,
+  consultationResponses,
+  consultationRequests,
+}) {
+  const { date } = formatDateTime(feedback.feedbackDate);
+  const truncatedText =
+    `Rating: ${feedback.rating} stars | Date: ${date}`.slice(0, 100) + "...";
   const relatedResponse = consultationResponses.find(
     (resp) => resp.responseId === feedback.responseId
   );
-  const relatedRequest = relatedResponse ? consultationRequests[relatedResponse.requestId] : null;
+  const relatedRequest = relatedResponse
+    ? consultationRequests[relatedResponse.requestId]
+    : null;
 
   return (
-    <article className="consultation-feedback-card" onClick={() => onClick({ feedback, relatedResponse, relatedRequest })}>
+    <article
+      className="consultation-feedback-card"
+      onClick={() => onClick({ feedback, relatedResponse, relatedRequest })}
+    >
       <header className="feedback-header">
-        <span className="feedback-date">{feedback.feedbackDate}</span>
+        <span className="feedback-date">{date}</span>
         <span className="feedback-rating">{feedback.rating} ★</span>
       </header>
       <section className="feedback-summary">
-        <p><strong>Comment:</strong> {feedback.comment.slice(0, 50)}...</p>
+        <p>
+          <strong>Comment:</strong> {feedback.comment.slice(0, 50)}...
+        </p>
       </section>
       <footer className="truncated-content">{truncatedText}</footer>
     </article>
@@ -205,17 +279,32 @@ function DoctorConsultation() {
     }
   };
 
+  // Hàm sắp xếp theo thời gian mới nhất với trường ngày tùy chỉnh
+  const sortByDateDesc = (items, dateField = "responseDate") => {
+    return [...items].sort((a, b) => {
+      const dateA = new Date(a[dateField]);
+      const dateB = new Date(b[dateField]);
+      return dateB - dateA; // Sắp xếp giảm dần (mới nhất đầu tiên)
+    });
+  };
+
   const fetchConsultationResponses = async () => {
     try {
       const memberId = localStorage.getItem("memberId");
-      if (!memberId) throw new Error("Please log in to fetch consultation responses");
+      if (!memberId)
+        throw new Error("Please log in to fetch consultation responses");
       const res = await doctorApi.getConsultationResponses(memberId);
       const responses = Array.isArray(res?.data) ? res.data : [res.data];
       const parsedResponses = responses.map((item) => ({
         ...item,
-        content: typeof item.content === "string" ? parseContentToObject(item.content) : item.content,
+        content:
+          typeof item.content === "string"
+            ? parseContentToObject(item.content)
+            : item.content,
       }));
-      setConsultationResponses(parsedResponses);
+      // Sắp xếp các response theo thời gian mới nhất đầu tiên
+      const sortedResponses = sortByDateDesc(parsedResponses);
+      setConsultationResponses(sortedResponses);
     } catch (error) {
       console.error("Error fetching consultation responses:", error);
     }
@@ -224,12 +313,20 @@ function DoctorConsultation() {
   const fetchConsultationRequestDetail = async (requestId) => {
     try {
       if (!consultationRequests[requestId]) {
-        const requestRes = await doctorApi.getConsultationRequestsById(requestId);
+        const requestRes = await doctorApi.getConsultationRequestsById(
+          requestId
+        );
         if (requestRes?.data) {
-          setConsultationRequests((prev) => ({ ...prev, [requestId]: requestRes.data }));
+          setConsultationRequests((prev) => ({
+            ...prev,
+            [requestId]: requestRes.data,
+          }));
         }
       }
-      console.log("Consultation request detail:", consultationRequests[requestId]);
+      console.log(
+        "Consultation request detail:",
+        consultationRequests[requestId]
+      );
     } catch (error) {
       console.error("Error fetching consultation request detail:", error);
     }
@@ -252,9 +349,11 @@ function DoctorConsultation() {
       const requestsData = Array.isArray(res.value)
         ? res.data.value
         : Array.isArray(res.data)
-          ? res.data
-          : [];
-      setSentRequests(requestsData);
+        ? res.data
+        : [];
+      // Sắp xếp các request mới nhất lên đầu
+      const sortedRequests = sortByDateDesc(requestsData, "requestDate");
+      setSentRequests(sortedRequests);
     } catch (error) {
       console.error("Error fetching sent requests:", error);
       setSentRequests([]);
@@ -269,9 +368,11 @@ function DoctorConsultation() {
       const feedbackData = Array.isArray(res.data.value)
         ? res.data.value
         : Array.isArray(res.data)
-          ? res.data
-          : [];
-      setUserFeedback(feedbackData);
+        ? res.data
+        : [];
+      // Sắp xếp feedback mới nhất lên đầu
+      const sortedFeedback = sortByDateDesc(feedbackData, "feedbackDate");
+      setUserFeedback(sortedFeedback);
     } catch (error) {
       console.error("Error fetching user feedback:", error);
       setUserFeedback([]);
@@ -279,8 +380,10 @@ function DoctorConsultation() {
   };
 
   const handleChildSelect = (child) => setSelectedChild(child);
-  const handleNextStep = () => currentStep < steps.length - 1 && setCurrentStep(currentStep + 1);
-  const handleBackStep = () => currentStep > 0 && setCurrentStep(currentStep - 1);
+  const handleNextStep = () =>
+    currentStep < steps.length - 1 && setCurrentStep(currentStep + 1);
+  const handleBackStep = () =>
+    currentStep > 0 && setCurrentStep(currentStep - 1);
   const stripHtml = (html) => {
     const tmp = document.createElement("div");
     tmp.innerHTML = html;
@@ -325,7 +428,12 @@ function DoctorConsultation() {
       if (!selectedDoctor) throw new Error("Please select a doctor");
 
       const currentDate = new Date();
-      const requestDate = `${currentDate.toISOString().slice(0, 10)} ${currentDate.toTimeString().slice(0, 8)}.${currentDate.getMilliseconds().toString().padEnd(3, "0")}`;
+      const requestDate = `${currentDate
+        .toISOString()
+        .slice(0, 10)} ${currentDate.toTimeString().slice(0, 8)}.${currentDate
+        .getMilliseconds()
+        .toString()
+        .padEnd(3, "0")}`;
       const plainDescription = consultationContent.replace(/<[^>]+>/g, "");
       const attachments = await Promise.all(
         selectedFiles.map(async (file) => {
@@ -370,8 +478,8 @@ function DoctorConsultation() {
     } catch (error) {
       setSubmitError(
         error.response?.data?.title ||
-        error.message ||
-        "Unable to send consultation request"
+          error.message ||
+          "Unable to send consultation request"
       );
       setPopupType("error");
       setPopupMessage("Failed to send consultation request. Please try again.");
@@ -429,59 +537,73 @@ function DoctorConsultation() {
   const renderStepContent = () => {
     switch (currentStep) {
       case 0: // Select Doctor
-      return (
-        <section className="doctor-selection-container">
-          {loading ? (
-            <div className="loading-state">
-              <span className="loading-spinner"></span>
-              <p>Loading doctor list...</p>
-            </div>
-          ) : error ? (
-            <div className="error-state">
-              <p>{error}</p>
-              <button onClick={fetchDoctors} className="doctor-action-button">
-                Retry
-              </button>
-            </div>
-          ) : doctors.length === 0 ? (
-            <p>No doctors found.</p>
-          ) : (
-            <article className="doctor-selection-grid">
-              {doctors.map((doctor) => (
-                <section key={doctor.doctorId} className="doctor-card-grid">
-                  <div className="doctor-avatar-grid">
-                    <img
-                      src={doctorImage[doctor.doctorId] || "/assets/default-doctor.jpg"}
-                      alt={doctor.name}
-                    />
-                  </div>
-                  <article className="doctor-info-grid">
-                    <h4>{doctor.name}</h4>
-                    <p><strong>Degree:</strong> {doctor.degree}</p>
-                    <p><strong>Hospital:</strong> {doctor.hospitalName}</p>
-                    {Array.isArray(doctorSpecializations[doctor.name]) && (
-                      <div className="doctor-specializations-grid">
-                        <p><strong>Specializations:</strong></p>
-                        {doctorSpecializations[doctor.name].map((spec, index) => (
-                          <p key={index} className="doctor-specialization-grid">
-                            {spec}
+        return (
+          <section className="doctor-selection-container">
+            {loading ? (
+              <div className="loading-state">
+                <span className="loading-spinner"></span>
+                <p>Loading doctor list...</p>
+              </div>
+            ) : error ? (
+              <div className="error-state">
+                <p>{error}</p>
+                <button onClick={fetchDoctors} className="doctor-action-button">
+                  Retry
+                </button>
+              </div>
+            ) : doctors.length === 0 ? (
+              <p>No doctors found.</p>
+            ) : (
+              <article className="doctor-selection-grid">
+                {doctors.map((doctor) => (
+                  <section key={doctor.doctorId} className="doctor-card-grid">
+                    <div className="doctor-avatar-grid">
+                      <img
+                        src={
+                          doctorImage[doctor.doctorId] ||
+                          "/assets/default-doctor.jpg"
+                        }
+                        alt={doctor.name}
+                      />
+                    </div>
+                    <article className="doctor-info-grid">
+                      <h4>{doctor.name}</h4>
+                      <p>
+                        <strong>Degree:</strong> {doctor.degree}
+                      </p>
+                      <p>
+                        <strong>Hospital:</strong> {doctor.hospitalName}
+                      </p>
+                      {Array.isArray(doctorSpecializations[doctor.name]) && (
+                        <div className="doctor-specializations-grid">
+                          <p>
+                            <strong>Specializations:</strong>
                           </p>
-                        ))}
-                      </div>
-                    )}
-                    <button
-                      className="message-button"
-                      onClick={() => handleMessageDoctor(doctor)}
-                    >
-                      Send Message
-                    </button>
-                  </article>
-                </section>
-              ))}
-            </article>
-          )}
-        </section>
-      );
+                          {doctorSpecializations[doctor.name].map(
+                            (spec, index) => (
+                              <p
+                                key={index}
+                                className="doctor-specialization-grid"
+                              >
+                                {spec}
+                              </p>
+                            )
+                          )}
+                        </div>
+                      )}
+                      <button
+                        className="message-button"
+                        onClick={() => handleMessageDoctor(doctor)}
+                      >
+                        Send Message
+                      </button>
+                    </article>
+                  </section>
+                ))}
+              </article>
+            )}
+          </section>
+        );
 
       case 1: // Enter Information
         return (
@@ -497,7 +619,10 @@ function DoctorConsultation() {
                 ) : error ? (
                   <div className="error-state">
                     <p>{error}</p>
-                    <button onClick={fetchChildren} className="doctor-action-button">
+                    <button
+                      onClick={fetchChildren}
+                      className="doctor-action-button"
+                    >
                       Retry
                     </button>
                   </div>
@@ -559,7 +684,7 @@ function DoctorConsultation() {
                 <strong>Child:</strong> {selectedChild?.name || "Not selected"}
               </section>
               <section className="review-item consultation-details">
-                <strong>Details:</strong>
+                <strong>Chi tiết:</strong>
                 <div
                   className="consultation-details-content"
                   dangerouslySetInnerHTML={{ __html: consultationContent }}
@@ -567,7 +692,7 @@ function DoctorConsultation() {
               </section>
               {selectedFiles.length > 0 && (
                 <section className="review-item">
-                  <strong>Attached Files:</strong>
+                  <strong>Tệp đính kèm:</strong>
                   <ul>
                     {selectedFiles.map((file, index) => (
                       <li key={index}>{file.name}</li>
@@ -578,7 +703,7 @@ function DoctorConsultation() {
             </article>
             {selectedDoctor && (
               <article className="doctor-review-section">
-                <h4 className="doctor-section-title">Selected Doctor</h4>
+                <h4 className="doctor-section-title">Bác sĩ đã chọn</h4>
                 <section className="doctor-profile-card">
                   <header className="doctor-profile-header">
                     <img
@@ -590,19 +715,28 @@ function DoctorConsultation() {
                       className="doctor-profile-avatar"
                     />
                     <article className="doctor-profile-info">
-                      <h4 className="doctor-profile-name">{selectedDoctor.name}</h4>
+                      <h4 className="doctor-profile-name">
+                        {selectedDoctor.name}
+                      </h4>
                     </article>
                   </header>
                   <section className="doctor-profile-details">
                     <p>{selectedDoctor.degree}</p>
                     <p>{selectedDoctor.hospitalName}</p>
-                    {Array.isArray(doctorSpecializations[selectedDoctor.name]) && (
+                    {Array.isArray(
+                      doctorSpecializations[selectedDoctor.name]
+                    ) && (
                       <div className="doctor-specializations">
-                        {doctorSpecializations[selectedDoctor.name].map((spec, index) => (
-                          <p key={index} className="doctor-profile-specialization">
-                            {spec}
-                          </p>
-                        ))}
+                        {doctorSpecializations[selectedDoctor.name].map(
+                          (spec, index) => (
+                            <p
+                              key={index}
+                              className="doctor-profile-specialization"
+                            >
+                              {spec}
+                            </p>
+                          )
+                        )}
                       </div>
                     )}
                   </section>
@@ -637,14 +771,22 @@ function DoctorConsultation() {
                 <React.Fragment key={index}>
                   <article
                     className={`progress-step ${
-                      currentStep === index ? "active" : currentStep > index ? "completed" : ""
+                      currentStep === index
+                        ? "active"
+                        : currentStep > index
+                        ? "completed"
+                        : ""
                     }`}
                   >
                     <div className="progress-step-circle">{index + 1}</div>
                     <span>{step}</span>
                   </article>
                   {index !== steps.length - 1 && (
-                    <div className={`progress-line ${currentStep > index ? "completed" : ""}`}></div>
+                    <div
+                      className={`progress-line ${
+                        currentStep > index ? "completed" : ""
+                      }`}
+                    ></div>
                   )}
                 </React.Fragment>
               ))}
@@ -653,12 +795,18 @@ function DoctorConsultation() {
               {renderStepContent()}
               <footer className="doctor-navigation-buttons">
                 {currentStep > 0 && (
-                  <button className="doctor-back-button" onClick={handleBackStep}>
+                  <button
+                    className="doctor-back-button"
+                    onClick={handleBackStep}
+                  >
                     Back
                   </button>
                 )}
                 {currentStep < steps.length - 1 && currentStep > 0 && (
-                  <button className="doctor-next-button" onClick={handleNextStep}>
+                  <button
+                    className="doctor-next-button"
+                    onClick={handleNextStep}
+                  >
                     Next
                   </button>
                 )}
@@ -687,7 +835,11 @@ function DoctorConsultation() {
         return sentRequests.length > 0 ? (
           <section className="tab-content">
             {sentRequests.map((req, index) => (
-              <ExpandableSentRequestCard key={index} request={req} onClick={setSelectedSentRequest} />
+              <ExpandableSentRequestCard
+                key={index}
+                request={req}
+                onClick={setSelectedSentRequest}
+              />
             ))}
           </section>
         ) : (
@@ -735,8 +887,11 @@ function DoctorConsultation() {
       if (selectedResponse?.response?.requestId) {
         const requestId = selectedResponse.response.requestId;
         console.log("Completing request with ID:", requestId);
-        
-        const response = await doctorApi.updateConsultationRequestsStatus(requestId, "Completed");
+
+        const response = await doctorApi.updateConsultationRequestsStatus(
+          requestId,
+          "Completed"
+        );
         console.log("Update response:", response);
         // Sau khi cập nhật trạng thái thành công, cập nhật lại danh sách sent requests
         await fetchSentRequests();
@@ -758,25 +913,33 @@ function DoctorConsultation() {
     <main className="doctor-consultation">
       <header className="top-tab-container">
         <button
-          className={`top-tab-button ${currentTab === "consultation" ? "active" : ""}`}
+          className={`top-tab-button ${
+            currentTab === "consultation" ? "active" : ""
+          }`}
           onClick={() => setCurrentTab("consultation")}
         >
           Consultation
         </button>
         <button
-          className={`top-tab-button ${currentTab === "responses" ? "active" : ""}`}
+          className={`top-tab-button ${
+            currentTab === "responses" ? "active" : ""
+          }`}
           onClick={() => setCurrentTab("responses")}
         >
           Responses
         </button>
         <button
-          className={`top-tab-button ${currentTab === "sentRequests" ? "active" : ""}`}
+          className={`top-tab-button ${
+            currentTab === "sentRequests" ? "active" : ""
+          }`}
           onClick={() => setCurrentTab("sentRequests")}
         >
           Sent Requests
         </button>
         <button
-          className={`top-tab-button ${currentTab === "feedback" ? "active" : ""}`}
+          className={`top-tab-button ${
+            currentTab === "feedback" ? "active" : ""
+          }`}
           onClick={() => setCurrentTab("feedback")}
         >
           Feedback
@@ -786,9 +949,18 @@ function DoctorConsultation() {
       <section className="tab-content">{renderTabContent()}</section>
 
       {selectedResponse && (
-        <aside className="modal-overlay" onClick={() => setSelectedResponse(null)}>
-          <article className="modal-response-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedResponse(null)}>
+        <aside
+          className="modal-overlay"
+          onClick={() => setSelectedResponse(null)}
+        >
+          <article
+            className="modal-response-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="modal-close"
+              onClick={() => setSelectedResponse(null)}
+            >
               ×
             </button>
             <header className="modal-response-title">Response Details</header>
@@ -808,7 +980,7 @@ function DoctorConsultation() {
                 </button>
                 <button
                   className="complete-request-button"
-                  onClick={handleCompleteRequest} // Gọi hàm mới
+                  onClick={handleCompleteRequest}
                 >
                   Complete
                 </button>
@@ -817,10 +989,25 @@ function DoctorConsultation() {
                 <h4>Request Information</h4>
                 {selectedResponse.request ? (
                   <>
-                    <p><strong>Member:</strong> {selectedResponse.request.memberName}</p>
-                    <p><strong>Child:</strong> {selectedResponse.request.childName}</p>
-                    <p><strong>Description:</strong> {selectedResponse.request.description}</p>
-                    <p><strong>Request Date:</strong> {selectedResponse.request.requestDate}</p>
+                    <p>
+                      <strong>Member:</strong>{" "}
+                      {selectedResponse.request.memberName}
+                    </p>
+                    <p>
+                      <strong>Child:</strong>{" "}
+                      {selectedResponse.request.childName}
+                    </p>
+                    <p>
+                      <strong>Description:</strong>{" "}
+                      {selectedResponse.request.description}
+                    </p>
+                    <p>
+                      <strong>Request Date:</strong>{" "}
+                      {
+                        formatDateTime(selectedResponse.request.requestDate)
+                          .date
+                      }
+                    </p>
                   </>
                 ) : (
                   <p>No request details available.</p>
@@ -828,10 +1015,21 @@ function DoctorConsultation() {
               </article>
               <article className="response-section">
                 <h4>Response Information</h4>
-                <p><strong>Date:</strong> {selectedResponse.response.responseDate}</p>
-                <p><strong>Doctor:</strong> {selectedResponse.response.doctorName}</p>
-                <p><strong>Status:</strong> {selectedResponse.response.status}</p>
-                <p><strong>Follow-up:</strong> {selectedResponse.response.content.followUp || "N/A"}</p>
+                <p>
+                  <strong>Date:</strong>{" "}
+                  {formatDateTime(selectedResponse.response.responseDate).date}
+                </p>
+                <p>
+                  <strong>Doctor:</strong>{" "}
+                  {selectedResponse.response.doctorName}
+                </p>
+                <p>
+                  <strong>Status:</strong> {selectedResponse.response.status}
+                </p>
+                <p>
+                  <strong>Follow-up:</strong>{" "}
+                  {selectedResponse.response.content.followUp || "N/A"}
+                </p>
               </article>
               {showFeedbackForm && (
                 <article className="feedback-form">
@@ -865,7 +1063,9 @@ function DoctorConsultation() {
                     >
                       {isSubmitting ? "Sending..." : "Submit Feedback"}
                     </button>
-                    {feedbackSubmitError && <p className="submit-error">{feedbackSubmitError}</p>}
+                    {feedbackSubmitError && (
+                      <p className="submit-error">{feedbackSubmitError}</p>
+                    )}
                   </footer>
                 </article>
               )}
@@ -875,36 +1075,63 @@ function DoctorConsultation() {
       )}
 
       {selectedSentRequest && (
-        <aside className="modal-overlay" onClick={() => setSelectedSentRequest(null)}>
-          <article className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedSentRequest(null)}>
+        <aside
+          className="modal-overlay"
+          onClick={() => setSelectedSentRequest(null)}
+        >
+          <article
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="modal-close"
+              onClick={() => setSelectedSentRequest(null)}
+            >
               ×
             </button>
             <header className="modal-title">Sent Request Details</header>
             <section className="response-details">
               <article className="request-section">
                 <h4>Request Information</h4>
-                <p><strong>ID:</strong> {selectedSentRequest.requestId}</p>
-                <p><strong>Child:</strong> {selectedSentRequest.childName}</p>
-                <p><strong>Category:</strong> {selectedSentRequest.category}</p>
-                <p><strong>Urgency:</strong> {selectedSentRequest.urgency}</p>
-                <p><strong>Description:</strong> {selectedSentRequest.description}</p>
-                <p><strong>Request Date:</strong> {selectedSentRequest.requestDate}</p>
-                <p><strong>Status:</strong> {selectedSentRequest.status}</p>
+                <p>
+                  <strong>ID:</strong> {selectedSentRequest.requestId}
+                </p>
+                <p>
+                  <strong>Child:</strong> {selectedSentRequest.childName}
+                </p>
+                <p>
+                  <strong>Category:</strong> {selectedSentRequest.category}
+                </p>
+                <p>
+                  <strong>Urgency:</strong> {selectedSentRequest.urgency}
+                </p>
+                <p>
+                  <strong>Description:</strong>{" "}
+                  {selectedSentRequest.description}
+                </p>
+                <p>
+                  <strong>Request Date:</strong>{" "}
+                  {formatDateTime(selectedSentRequest.requestDate).date}
+                </p>
+                <p>
+                  <strong>Status:</strong> {selectedSentRequest.status}
+                </p>
                 {selectedSentRequest.attachments && (
                   <section>
                     <h4>Attachments</h4>
-                    {JSON.parse(selectedSentRequest.attachments).map((attachment, index) => (
-                      <article key={index} style={{ marginBottom: "10px" }}>
-                        <p>{attachment.fileName}</p>
-                        <button
-                          className="doctor-action-button"
-                          onClick={() => downloadAttachment(attachment)}
-                        >
-                          Download
-                        </button>
-                      </article>
-                    ))}
+                    {JSON.parse(selectedSentRequest.attachments).map(
+                      (attachment, index) => (
+                        <article key={index} style={{ marginBottom: "10px" }}>
+                          <p>{attachment.fileName}</p>
+                          <button
+                            className="doctor-action-button"
+                            onClick={() => downloadAttachment(attachment)}
+                          >
+                            Download
+                          </button>
+                        </article>
+                      )
+                    )}
                   </section>
                 )}
               </article>
@@ -914,26 +1141,57 @@ function DoctorConsultation() {
       )}
 
       {selectedFeedback && (
-        <aside className="modal-overlay" onClick={() => setSelectedFeedback(null)}>
-          <article className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedFeedback(null)}>
+        <aside
+          className="modal-overlay"
+          onClick={() => setSelectedFeedback(null)}
+        >
+          <article
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="modal-close"
+              onClick={() => setSelectedFeedback(null)}
+            >
               ×
             </button>
             <header className="modal-title">Feedback Details</header>
             <section className="response-details">
               <article className="feedback-section">
                 <h4>Feedback Information</h4>
-                <p><strong>Rating:</strong> {selectedFeedback.feedback.rating} ★</p>
-                <p><strong>Comment:</strong> {selectedFeedback.feedback.comment}</p>
-                <p><strong>Date:</strong> {selectedFeedback.feedback.feedbackDate}</p>
+                <p>
+                  <strong>Rating:</strong> {selectedFeedback.feedback.rating} ★
+                </p>
+                <p>
+                  <strong>Comment:</strong> {selectedFeedback.feedback.comment}
+                </p>
+                <p>
+                  <strong>Date:</strong>{" "}
+                  {formatDateTime(selectedFeedback.feedback.feedbackDate).date}
+                </p>
               </article>
               {selectedFeedback.relatedResponse && (
                 <article className="response-section">
                   <h4>Response Information</h4>
-                  <p><strong>Date:</strong> {selectedFeedback.relatedResponse.responseDate || "N/A"}</p>
-                  <p><strong>Doctor:</strong> {selectedFeedback.relatedResponse.doctorName || "N/A"}</p>
-                  <p><strong>Status:</strong> {selectedFeedback.relatedResponse.status || "N/A"}</p>
-                  <p><strong>Follow-up:</strong> {selectedFeedback.relatedResponse.content?.followUp || "N/A"}</p>
+                  <p>
+                    <strong>Date:</strong>{" "}
+                    {formatDateTime(
+                      selectedFeedback.relatedResponse.responseDate
+                    ).date || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Doctor:</strong>{" "}
+                    {selectedFeedback.relatedResponse.doctorName || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Status:</strong>{" "}
+                    {selectedFeedback.relatedResponse.status || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Follow-up:</strong>{" "}
+                    {selectedFeedback.relatedResponse.content?.followUp ||
+                      "N/A"}
+                  </p>
                 </article>
               )}
             </section>
