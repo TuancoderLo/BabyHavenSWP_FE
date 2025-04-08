@@ -740,14 +740,39 @@ const RevenueChart = () => {
 
   // Thiết lập khung thời gian và lọc
   const handleTimeFrameChange = (newTimeFrame) => {
-    setTimeFrame(newTimeFrame);
-
-    // Nếu chọn "all", xóa bỏ các giới hạn thời gian
-    if (newTimeFrame === "all") {
+    // Nếu đã có newTimeFrame được chọn trước đó và được click lần nữa, hủy chọn
+    if (timeFrame === newTimeFrame) {
+      setTimeFrame("all");
       setStartDate(null);
       setEndDate(null);
     } else {
-      applyTimeFrameFilter();
+      setTimeFrame(newTimeFrame);
+
+      // Nếu chọn "all", xóa bỏ các giới hạn thời gian
+      if (newTimeFrame === "all") {
+        setStartDate(null);
+        setEndDate(null);
+      } else {
+        applyTimeFrameFilter();
+      }
+    }
+  };
+
+  // Xử lý thay đổi ngày bắt đầu
+  const handleStartDateChange = (date) => {
+    setStartDate(date);
+    // Nếu có chọn khoảng thời gian (all, today, thisWeek,...) thì reset để tránh xung đột
+    if (timeFrame !== "all") {
+      setTimeFrame("all");
+    }
+  };
+
+  // Xử lý thay đổi ngày kết thúc
+  const handleEndDateChange = (date) => {
+    setEndDate(date);
+    // Nếu có chọn khoảng thời gian (all, today, thisWeek,...) thì reset để tránh xung đột
+    if (timeFrame !== "all") {
+      setTimeFrame("all");
     }
   };
 
@@ -1571,13 +1596,26 @@ const RevenueChart = () => {
               <label>Từ ngày:</label>
               <DatePicker
                 selected={startDate}
-                onChange={(date) => setStartDate(date)}
+                onChange={handleStartDateChange}
                 selectsStart
                 startDate={startDate}
                 endDate={endDate}
                 dateFormat="dd/MM/yyyy"
                 placeholderText="Chọn ngày bắt đầu"
                 className="date-picker"
+                isClearable={true}
+                showYearDropdown
+                scrollableYearDropdown
+                yearDropdownItemNumber={10}
+                popperPlacement="bottom-start"
+                popperModifiers={{
+                  preventOverflow: {
+                    enabled: true,
+                    escapeWithReference: false,
+                    boundariesElement: "viewport",
+                  },
+                }}
+                onClickOutside={(e) => e.stopPropagation()}
               />
             </div>
 
@@ -1585,7 +1623,7 @@ const RevenueChart = () => {
               <label>Đến ngày:</label>
               <DatePicker
                 selected={endDate}
-                onChange={(date) => setEndDate(date)}
+                onChange={handleEndDateChange}
                 selectsEnd
                 startDate={startDate}
                 endDate={endDate}
@@ -1593,6 +1631,19 @@ const RevenueChart = () => {
                 dateFormat="dd/MM/yyyy"
                 placeholderText="Chọn ngày kết thúc"
                 className="date-picker"
+                isClearable={true}
+                showYearDropdown
+                scrollableYearDropdown
+                yearDropdownItemNumber={10}
+                popperPlacement="bottom-start"
+                popperModifiers={{
+                  preventOverflow: {
+                    enabled: true,
+                    escapeWithReference: false,
+                    boundariesElement: "viewport",
+                  },
+                }}
+                onClickOutside={(e) => e.stopPropagation()}
               />
             </div>
           </div>
