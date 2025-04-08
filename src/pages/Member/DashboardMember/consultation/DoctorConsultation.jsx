@@ -181,7 +181,19 @@ function DoctorConsultation() {
     fetchConsultationResponses();
     fetchSentRequests();
     fetchUserFeedback();
-  }, []);
+  
+    // Kiểm tra nếu có dữ liệu từ location.state (từ ChildrenPage)
+    if (location.state) {
+      const { child, description } = location.state;
+      if (child) {
+        setSelectedChild(child); // Điền sẵn child
+      }
+      if (description) {
+        setConsultationContent(description); // Điền sẵn description
+      }
+      setCurrentStep(1); // Chuyển thẳng đến bước "Enter Information"
+    }
+  }, [location.state]);
 
   useEffect(() => {
     setShowFeedbackForm(false);

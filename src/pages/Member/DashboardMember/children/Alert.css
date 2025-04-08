@@ -124,19 +124,18 @@
 }
 
 /* Modal Content */
-.modal-content {
+.modal-alert-content {
   background: #fff;
   padding: 20px;
   border-radius: 12px;
-  max-width: 600px;
-  max-height: 80vh;
+  width: 1200px;
+  height: 80vh;
   overflow-y: auto;
   position: relative;
-  border: 2px solid #00d0bc;
 }
 
 /* Modal Title */
-.modal-content h2 {
+.modal-alert-content h2 {
   color: #00d0bc;
   font-size: 18px;
   font-weight: 600;
@@ -144,7 +143,7 @@
 }
 
 /* Modal Text */
-.modal-content p {
+.modal-alert-content p {
   color: #333;
   font-size: 13px;
   line-height: 1.5;
@@ -170,7 +169,7 @@
 
 /* Alert History Table */
 .alert-history-table {
-  width: 100%;
+  width: 500px;
   border-collapse: collapse;
   margin: 10px 0;
 }
