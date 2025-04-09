@@ -1677,12 +1677,18 @@ const RevenueChart = () => {
             <h4>Total Transactions</h4>
             <div className="card-value">{statusCounts.total}</div>
             <div className="transaction-status-summary">
-              <span className="status-dot completed"></span> Completed:{" "}
-              {statusCounts.completed}
-              <span className="status-dot pending"></span> Pending:{" "}
-              {statusCounts.pending}
-              <span className="status-dot failed"></span> Failed:{" "}
-              {statusCounts.failed}
+              <span className="status-completed">
+              Completed:{" "} {statusCounts.completed}
+              </span>
+              
+              <span className="status-completed">
+              Pending:{" "} {statusCounts.pending}
+              </span>
+              
+              <span className="status-completed">
+              Failed:{" "} {statusCounts.failed}
+              </span>
+              
             </div>
           </div>
         </div>
