@@ -23,15 +23,28 @@ function getFieldLabel(field) {
     createdAt: "Record Date",
     weight: "Weight (kg)",
     height: "Height (cm)",
-    headCircumference: "Head circumference (cm)",
-    chestCircumference: "Chest circumference (cm)",
-    bodyTemperature: "Body temperature (°C)",
-    heartRate: "Heart rate (bpm)",
-    oxygenSaturation: "Oxygen saturation (%)",
-    sleepDuration: "Sleep duration (hrs)",
+    headCircumference: "Head Circumference (cm)",
+    chestCircumference: "Chest Circumference (cm)",
+    bodyTemperature: "Body Temperature (°C)",
+    heartRate: "Heart Rate (bpm)",
+    oxygenSaturation: "Oxygen Saturation (%)",
+    sleepDuration: "Sleep Duration (hrs)",
+    muscleMass: "Muscle Mass (kg)",
+    nutritionalStatus: "Nutritional Status",
+    ferritinLevel: "Ferritin Level (ng/mL)",
+    triglycerides: "Triglycerides (mg/dL)",
+    bloodSugarLevel: "Blood Sugar Level (mg/dL)",
+    physicalActivityLevel: "Physical Activity Level",
+    immunizationStatus: "Immunization Status",
+    mentalHealthStatus: "Mental Health Status",
+    growthHormoneLevel: "Growth Hormone Level (ng/mL)",
+    attentionSpan: "Attention Span",
+    neurologicalReflexes: "Neurological Reflexes",
+    developmentalMilestones: "Developmental Milestones"
   };
   return mapping[field] || field.charAt(0).toUpperCase() + field.slice(1);
 }
+
 
 const AddChild = ({ closeOverlay }) => {
   const [submitted, setSubmitted] = useState(false);
@@ -154,10 +167,10 @@ const AddChild = ({ closeOverlay }) => {
 // Validate birthHeight if a value is entered
 if (childForm.birthHeight) {
   const birthHeight = Number(childForm.birthHeight);
-  if (birthHeight > 40) {
-    childErrors.birthHeight = "Birth height must not exceed 40 cm";
-  } else if (birthHeight < 0) {
-    childErrors.birthHeight = "Birth height cannot be negative";
+  if (birthHeight > 60) {
+    childErrors.birthHeight = "Birth height must not exceed 60 cm";
+  } else if (birthHeight < 30) {
+    childErrors.birthHeight = "Birth height must not be less than 30 cm";
   }
 }
 
@@ -416,16 +429,6 @@ setErrors(childErrors);
     {errors.birthHeight && <p className="error-text">{errors.birthHeight}</p>}
   </div>
 </div>
-              <div className="notes-section">
-                <label>Notes</label>
-                <input
-                  type="text"
-                  placeholder="Any note..."
-                  name="notes"
-                  value={childForm.notes}
-                  onChange={handleChildChange}
-                />
-              </div>
             </div>
             {/* Growth Record Section - Render dynamic fields */}
             <details>
@@ -435,89 +438,119 @@ setErrors(childErrors);
                 <div className="measurements-section">
                   {/* Render required fields */}
                   {stageInfo &&
-                    stageInfo.requiredFields.map((field) => {
-                      if (field === "createdAt") {
-                        return (
-                          <div key={field}>
-                            <label>
-                              {getFieldLabel(field)}{" "}
-                              <span className="required-asterisk">*</span>
-                            </label>
-                            <input
-                              type="date"
-                              name="createdAt"
-                              value={growthForm.createdAt}
-                              onChange={handleGrowthChange}
-                              max={new Date().toISOString().split("T")[0]}
-                              className={errors.createdAt ? "error-input" : ""}
-                            />
-                            {errors.createdAt && (
-                              <p className="error-text">{errors.createdAt}</p>
-                            )}
-                          </div>
-                        );
-                      } else {
-                        return (
-                          <div key={field}>
-                            <label>
-                              {getFieldLabel(field)}{" "}
-                              <span className="required-asterisk">*</span>
-                            </label>
-                            <input
-                              type="number"
-                              name={field}
-                              value={growthForm[field] || ""}
-                              onChange={handleGrowthChange}
-                              min="0"
-                              placeholder={
-                                stageInfo?.reference?.[field]?.[childForm.gender?.toLowerCase()]?.avg?.join("–") ||
-                                stageInfo?.reference?.[field]?.both?.avg?.join("–") ||
-                                ""
-                              }
-                              className={errors[field] ? "error-input" : ""}
-                              onKeyDown={(e) =>
-                                ["-", "e"].includes(e.key) && e.preventDefault()
-                              }
-                            />
-                            {errors[field] && (
-                              <p className="error-text">{errors[field]}</p>
-                            )}
-                            {warnings[field] && (
-                              <p className="warning-text-record">{warnings[field]}</p>
-                            )}
-                          </div>
-                        );
-                      }
-                    })}
-                  {/* Render optional fields */}
-                  {stageInfo &&
-                    stageInfo.optionalFields.map((field) => (
-                      <div key={field}>
-                        <label>{getFieldLabel(field)}</label>
-                        <input
-                          type="number"
-                          name={field}
-                          value={growthForm[field] || ""}
-                          onChange={handleGrowthChange}
-                          min="0"
-                          placeholder={
-                            stageInfo?.reference?.[field]?.[childForm.gender?.toLowerCase()]?.avg?.join("–") ||
-                            stageInfo?.reference?.[field]?.both?.avg?.join("–") ||
-                            ""
-                          }
-                          className={errors[field] ? "error-input" : ""}
-                          onKeyDown={(e) =>
-                            ["-", "e"].includes(e.key) && e.preventDefault()
-                          }
-                        />
-                        {errors[field] && (
-                          <p className="error-text">{errors[field]}</p>
-                        )}
-                        {warnings[field] && (
-                          <p className="warning-text-record">{warnings[field]}</p>
-                        )}
-                      </div>
-                    ))}
+  stageInfo.requiredFields.map((field) => {
+    if (field === "createdAt") {
+      return (
+        <div key={field}>
+          <label>
+            {getFieldLabel(field)} <span className="required-asterisk">*</span>
+          </label>
+          <input
+            type="date"
+            name="createdAt"
+            value={growthForm.createdAt}
+            onChange={handleGrowthChange}
+            max={new Date().toISOString().split("T")[0]}
+            className={errors.createdAt ? "error-input" : ""}
+          />
+          {errors.createdAt && <p className="error-text">{errors.createdAt}</p>}
+        </div>
+      );
+    } else {
+      return (
+        <div key={field}>
+          <label>
+            {getFieldLabel(field)} <span className="required-asterisk">*</span>
+          </label>
+          {(field === "notes" ||
+            field === "nutritionalStatus" ||
+            field === "physicalActivityLevel" ||
+            field === "mentalHealthStatus") ? (
+            <input
+              type="text"
+              name={field}
+              value={growthForm[field] || ""}
+              onChange={handleGrowthChange}
+              placeholder={
+                stageInfo?.reference?.[field]?.[childForm.gender?.toLowerCase()]?.avg?.join("–") ||
+                stageInfo?.reference?.[field]?.both?.avg?.join("–") ||
+                (field === "notes" ? "Enter your notes here..." : "")
+              }
+              className={errors[field] ? "error-input" : ""}
+            />
+          ) : (
+            <input
+              type="number"
+              name={field}
+              value={growthForm[field] || ""}
+              onChange={handleGrowthChange}
+              min="0"
+              placeholder={
+                stageInfo?.reference?.[field]?.[childForm.gender?.toLowerCase()]?.avg?.join("–") ||
+                stageInfo?.reference?.[field]?.both?.avg?.join("–") ||
+                ""
+              }
+              className={errors[field] ? "error-input" : ""}
+              onKeyDown={(e) =>
+                ["-", "e"].includes(e.key) && e.preventDefault()
+              }
+            />
+          )}
+          {errors[field] && <p className="error-text">{errors[field]}</p>}
+          {warnings[field] && (
+            <p className="warning-text-record">{warnings[field]}</p>
+          )}
+        </div>
+      );
+    }
+  })}
+{stageInfo &&
+  stageInfo.optionalFields.map((field) => {
+    return (
+      <div key={field}>
+        <label>{getFieldLabel(field)}</label>
+        {(field === "notes" ||
+          field === "nutritionalStatus" ||
+          field === "physicalActivityLevel" ||
+          field === "mentalHealthStatus") ? (
+          <input
+            type="text"
+            name={field}
+            value={growthForm[field] || ""}
+            onChange={handleGrowthChange}
+            placeholder={
+              stageInfo?.reference?.[field]?.[childForm.gender?.toLowerCase()]?.avg?.join("–") ||
+              stageInfo?.reference?.[field]?.both?.avg?.join("–") ||
+              (field === "notes" ? "Enter additional notes..." : "")
+            }
+            className={errors[field] ? "error-input" : ""}
+          />
+        ) : (
+          <input
+            type="number"
+            name={field}
+            value={growthForm[field] || ""}
+            onChange={handleGrowthChange}
+            min="0"
+            placeholder={
+              stageInfo?.reference?.[field]?.[childForm.gender?.toLowerCase()]?.avg?.join("–") ||
+              stageInfo?.reference?.[field]?.both?.avg?.join("–") ||
+              ""
+            }
+            className={errors[field] ? "error-input" : ""}
+            onKeyDown={(e) =>
+              ["-", "e"].includes(e.key) && e.preventDefault()
+            }
+          />
+        )}
+        {errors[field] && <p className="error-text">{errors[field]}</p>}
+        {warnings[field] && (
+          <p className="warning-text-record">{warnings[field]}</p>
+        )}
+      </div>
+    );
+  })}
+
                   {/* BMI */}
                   <div>
                     <label>{getFieldLabel("bmi") || "BMI (kg/m²)"}</label>
@@ -528,7 +561,7 @@ setErrors(childErrors);
                     />
                   </div>
                 </div>
-                <div className="notes-section">
+                {/* <div className="notes-section">
                   <label>Notes</label>
                   <input
                     type="text"
@@ -536,7 +569,7 @@ setErrors(childErrors);
                     value={growthForm.notes}
                     onChange={handleGrowthChange}
                   />
-                </div>
+                </div> */}
               </div>
             </details>
             <button type="button" className="confirm-button-step1" onClick={handleSubmit}>
