@@ -1374,17 +1374,17 @@ const RevenueChart = () => {
                 <div className="stat-value pending">{statusCounts.pending}</div>
               </div>
               <div className="stat-item">
-                <div className="stat-label">Giao dịch thất bại:</div>
+                <div className="stat-label">Transaction failed:</div>
                 <div className="stat-value failed">{statusCounts.failed}</div>
               </div>
               <div className="stat-item">
-                <div className="stat-label">Giao dịch đã hủy:</div>
+                <div className="stat-label">Canceled transaction:</div>
                 <div className="stat-value cancelled">
                   {statusCounts.cancelled}
                 </div>
               </div>
               <div className="stat-item">
-                <div className="stat-label">Tỷ lệ thành công:</div>
+                <div className="stat-label">Success rate:</div>
                 <div className="stat-value">
                   {statusCounts.total
                     ? (
