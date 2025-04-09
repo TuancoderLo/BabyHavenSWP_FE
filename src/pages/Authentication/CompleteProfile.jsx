@@ -54,6 +54,24 @@ function CompleteProfile() {
       return false;
     }
 
+    // Kiểm tra tuổi phải từ 18 trở lên
+    const birthDate = new Date(formData.dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    if (age < 18) {
+      setError("You must be at least 18 years old to register");
+      return false;
+    }
+
     return true;
   };
 
@@ -81,7 +99,7 @@ function CompleteProfile() {
       };
 
       await createMember(memberData);
-      
+
       // Step 2: Prepare the data for updating the user account
       const updateData = {
         userId: userId,
@@ -100,7 +118,10 @@ function CompleteProfile() {
       };
 
       // Call the API to update the user's profile
-      const response = await userAccountsApi.updateMemberAccount(userId, updateData);
+      const response = await userAccountsApi.updateMemberAccount(
+        userId,
+        updateData
+      );
 
       try {
         const member = await api.get("Members/member/" + userId);
@@ -193,7 +214,15 @@ function CompleteProfile() {
                 value={formData.dateOfBirth}
                 onChange={handleChange}
                 required
-                max={new Date().toISOString().split("T")[0]}
+                max={(() => {
+                  const today = new Date();
+                  const eighteenYearsAgo = new Date(
+                    today.getFullYear() - 18,
+                    today.getMonth(),
+                    today.getDate()
+                  );
+                  return eighteenYearsAgo.toISOString().split("T")[0];
+                })()}
               />
             </div>
 
