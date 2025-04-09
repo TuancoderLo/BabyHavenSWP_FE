@@ -1549,7 +1549,7 @@ const RevenueChart = () => {
 
       {/* Time filter and time frame */}
       <div className="time-filter-container">
-        <div className="time-frame-selector">
+        <div className="time-frame-selector" style={{ display: "none" }}>
           <button
             className={timeFrame === "all" ? "active" : ""}
             onClick={() => handleTimeFrameChange("all")}
@@ -2188,7 +2188,7 @@ const RevenueChart = () => {
                       onChange={(e) => setStatusFilter(e.target.value)}
                     >
                       <option value="all">All statuses</option>
-                      <option value="completed">Paid</option>
+                      <option value="completed">Completed</option>
                       <option value="pending">Pending</option>
                       <option value="failed">Failed</option>
                       <option value="cancelled">Cancelled</option>
