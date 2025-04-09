@@ -2411,7 +2411,7 @@ const RevenueChart = () => {
                   </div>
 
                   {/* Purchase history */}
-                  <div className="purchase-history-section">
+                  {/* <div className="purchase-history-section">
                     <h4>
                       <i className="fas fa-history"></i> Package Purchase
                       History
@@ -2464,7 +2464,7 @@ const RevenueChart = () => {
                         </tbody>
                       </table>
                     </div>
-                  </div>
+                  </div> */}
                 </>
               )}
             </div>
@@ -2487,7 +2487,7 @@ const RevenueChart = () => {
           >
             <div className="modal-header">
               <h3>
-                <i className="fas fa-users"></i> Customer List - Quarter{" "}
+                <i className="fas fa-users"></i> Transaction List - Quarter{" "}
                 {selectedQuarter.name}
               </h3>
               <button className="close-modal" onClick={closeQuarterDetail}>
@@ -2555,10 +2555,6 @@ const RevenueChart = () => {
                         <div className="stat-value">
                           {premiumCount} transactions
                         </div>
-                      </div>
-                      <div className="quarter-stat-item">
-                        <div className="stat-title">Customers</div>
-                        <div className="stat-value">{uniqueUsers} people</div>
                       </div>
                     </>
                   );
