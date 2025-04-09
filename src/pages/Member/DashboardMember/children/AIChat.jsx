@@ -151,7 +151,7 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
       const growthData = await childApi.getGrowthRecords(child.name, localStorage.getItem("name"));
       console.log("Growth Data:", growthData);
 
-      const response = await aiChatApi.postMessage(child.name, age, message, growthData.data.length > 0 || null);
+      const response = await aiChatApi.postMessage(child.name, age, message, growthData.data);
 
       if (response.data.data && response.data.data.aiResponse) {
         return response.data.data.aiResponse;
