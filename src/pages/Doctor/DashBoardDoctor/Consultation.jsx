@@ -471,7 +471,7 @@ const handleViewDetail = async (record) => {
       // Nếu đang ở tab "new" hoặc status là "Pending", luôn sử dụng "Completed"
       const action =
         activeTab === "new" || selectedConsultation.status === "Pending"
-          ? "completed"
+          ? "approved"
           : values.action;
 
       const numericStatus = statusMapForResponse[action];

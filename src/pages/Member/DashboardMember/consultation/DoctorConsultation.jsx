@@ -172,6 +172,7 @@ function DoctorConsultation() {
   const [feedbackSubmitError, setFeedbackSubmitError] = useState("");
   const [userFeedback, setUserFeedback] = useState([]);
   const [currentTab, setCurrentTab] = useState("consultation");
+  const [anotherRequestCount, setAnotherRequestCount] = useState(0);
 
   const steps = ["Select Doctor", "Enter Information", "Confirm"];
 
@@ -431,6 +432,14 @@ function DoctorConsultation() {
   };
 
   const handleSubmit = async () => {
+      // Kiểm tra nếu có request nào chưa ở trạng thái Completed
+  const hasPendingRequest = sentRequests.some(req => req.status !== "Completed");
+  if (hasPendingRequest) {
+    setPopupType("error");
+    setPopupMessage("Vui lòng cập nhật các request hiện tại ở tab Response (chưa Completed) trước khi gửi request mới.");
+    setShowPopup(true);
+    return; // Không tiến hành gửi mới nếu có request chưa hoàn thành
+  }
     try {
       setSubmitLoading(true);
       setSubmitError(null);
@@ -542,9 +551,22 @@ function DoctorConsultation() {
   };
 
   const handleMessageDoctor = (doctor) => {
+    // Kiểm tra nếu trong danh sách sentRequests có request nào chưa được cập nhật thành "Completed"
+    const pendingRequestExists = sentRequests.some(req => req.status !== "Completed");
+    
+    if (pendingRequestExists) {
+      // Nếu tồn tại request chưa hoàn thành, thông báo cho người dùng
+      setPopupType("error");
+      setPopupMessage("Vui lòng cập nhật các request hiện tại (chưa Completed) ở tab Response trước khi gửi request mới.");
+      setShowPopup(true);
+      return; // Không chuyển sang bước tiếp theo
+    }
+    
+    // Nếu không có request nào đang chờ cập nhật, tiến hành chọn bác sĩ và chuyển sang bước nhập thông tin
     setSelectedDoctor(doctor);
     setCurrentStep(1);
   };
+  
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -882,6 +904,10 @@ function DoctorConsultation() {
 
   // Hàm xử lý khi nhấn "Send Another Request" (giữ nguyên logic cũ)
   const handleSendAnotherRequest = () => {
+    if (anotherRequestCount < 3) {
+      // Tăng số lần đã gửi lên 1
+      const newCount = anotherRequestCount + 1;
+      setAnotherRequestCount(newCount);
     setCurrentStep(0); // Quay lại bước chọn bác sĩ
     setSelectedChild(null); // Đặt lại child đã chọn
     setConsultationContent(""); // Đặt lại nội dung tư vấn
@@ -889,37 +915,48 @@ function DoctorConsultation() {
     setSelectedFiles([]); // Đặt lại danh sách file đính kèm
     setSelectedResponse(null); // Đóng modal
     setCurrentTab("consultation"); // Chuyển về tab Consultation
+    const remaining = 3 - newCount;
+    setPopupType("success");
+    setPopupMessage(`Yêu cầu mới đã được khởi tạo. Bạn còn ${remaining} lần gửi request nữa.`);
+    setShowPopup(true);
+  } else {
+    // Nếu đã vượt quá số lần cho phép thì thông báo lỗi
+    setPopupType("error");
+    setPopupMessage("Bạn đã vượt quá số lần gửi request cho phép (3 lần).");
+    setShowPopup(true);
+  }
   };
 
-  // Hàm xử lý khi nhấn "Complete" (chỉ cập nhật trạng thái request)
   const handleCompleteRequest = async () => {
     try {
-      // Kiểm tra nếu có selectedResponse và requestId để cập nhật trạng thái request
-      console.log("Selected response:", selectedResponse);
-      if (selectedResponse?.response?.requestId) {
+      if (selectedResponse?.response?.requestId && selectedResponse?.response?.responseId) {
         const requestId = selectedResponse.response.requestId;
-        console.log("Completing request with ID:", requestId);
-
-        const response = await doctorApi.updateConsultationRequestsStatus(
-          requestId,
-          "Completed"
-        );
-        console.log("Update response:", response);
-        // Sau khi cập nhật trạng thái thành công, cập nhật lại danh sách sent requests
+        const responseId = selectedResponse.response.responseId;
+        
+        // Cập nhật trạng thái request thành "Completed"
+        await doctorApi.updateConsultationRequestsStatus(requestId, "Completed");
+  
+        // Cập nhật trạng thái response thành "Completed"
+        await doctorApi.updateConsultationResponseStatus(responseId, "Completed");
+  
+        // Refresh danh sách sau khi cập nhật
         await fetchSentRequests();
+        await fetchConsultationResponses();
+  
         setPopupType("success");
-        setPopupMessage("Request marked as completed successfully!");
+        setPopupMessage("Request and response đã được cập nhật thành Completed thành công!");
         setShowPopup(true);
       } else {
-        throw new Error("No request ID found to complete.");
+        throw new Error("Không tìm thấy thông tin request/response hợp lệ để cập nhật.");
       }
     } catch (error) {
-      console.error("Error updating request status:", error);
+      console.error("Error updating request/response status:", error);
       setPopupType("error");
-      setPopupMessage("Failed to complete the request. Please try again.");
+      setPopupMessage("Cập nhật không thành công. Vui lòng thử lại sau.");
       setShowPopup(true);
     }
   };
+  
 
   return (
     <main className="doctor-consultation">
