@@ -4,7 +4,10 @@ const aiChatApi = {
   // Gửi tin nhắn đến AI
   postMessage: async (name, age, userMessage, growthData = null) => {
     // Chuẩn bị initialRecord (có thể là null)
-    let initialRecord = null;
+    let initialRecord = {
+      age: age || 0, // Sử dụng age được truyền vào
+      childName: name,
+    };
     if (growthData) {
       growthData.forEach(element => {
         if (element) {

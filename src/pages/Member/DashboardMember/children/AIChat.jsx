@@ -147,7 +147,6 @@ const AIChat = ({ isOpen, onClose, selectedChild: initialSelectedChild }) => {
   const sendMessageToAI = async (message, child) => {
     try {
       const age = parseInt(calculateAge(child.dateOfBirth)) || 0;
-      const childInfor = await childApi.getChildByName(child, localStorage.getItem("memberId"));
 
       const growthData = await childApi.getGrowthRecords(child.name, localStorage.getItem("name"));
       console.log("Growth Data:", growthData);
