@@ -290,7 +290,7 @@ justify-content: center;
 .wizard-left-content .child-info-card {
   background-color: #f8f5ff;
   border-radius: 12px;
-  padding: 18px;
+  padding: 8px;
   border-left: 4px solid #9c7df3;
   box-shadow: 0 3px 10px rgba(156, 125, 243, 0.1);
 }
