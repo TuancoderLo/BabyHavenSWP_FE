@@ -328,7 +328,7 @@ const Alert = ({ alert, alerts, member, child, growthRecords, onConsultDoctor, o
                   >
                     View Alert History
                   </Button>
-                  <Button
+                  {/* <Button
                     style={{
                       color: "#008cff",
                       border: "1px solid #008cff",
@@ -337,7 +337,7 @@ const Alert = ({ alert, alerts, member, child, growthRecords, onConsultDoctor, o
                     onClick={handleLearnMore}
                   >
                     Learn More
-                  </Button>
+                  </Button> */}
                 </>
               )}
             </Space>
