@@ -33,9 +33,12 @@ import {
   FileImageOutlined,
   FileWordOutlined,
   FileTextOutlined,
+  LeftOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
 import doctorApi from "../../../services/DoctorApi";
+import childApi from "../../../services/childApi";
+import alertApi from "../../../services/alertApi";
 import "./Consultation.css";
 
 const { Title } = Typography;
@@ -52,25 +55,76 @@ const Consultations = () => {
   const [detailVisible, setDetailVisible] = useState(false);
   const [activeTab, setActiveTab] = useState("new");
   const [searchText, setSearchText] = useState("");
-
-  // [CHANGED] Xoá biến historyFilterRating
-  // và mọi logic filter rating bên ngoài
   const [historyFilterStatus, setHistoryFilterStatus] = useState("");
-
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 5,
     total: 0,
   });
-
   const [cache, setCache] = useState({
     consultationDetails: {},
     lastFetch: {
       consultations: null,
     },
   });
-
   const [totalNewRequestsCount, setTotalNewRequestsCount] = useState(0);
+  const [childInfoVisible, setChildInfoVisible] = useState(false);
+  const [growthRecords, setGrowthRecords] = useState([]);
+  const [growthLoading, setGrowthLoading] = useState(false);
+  const [alerts, setAlerts] = useState([]);
+  const [alertsLoading, setAlertsLoading] = useState(false);
+
+  // Hàm parseAlertMessage từ Alert.jsx
+  const parseAlertMessage = (message) => {
+    const fieldConfig = [
+      { key: "alert", label: "Alert: " },
+      { key: "diseaseType", label: "Disease Type: " },
+      { key: "symptoms", label: "Symptoms: " },
+      { key: "recommendedTreatment", label: "Recommended Treatment: " },
+      { key: "preventionTips", label: "Prevention Tips: " },
+      { key: "description", label: "Description: " },
+      { key: "notes", label: "Notes: " },
+      { key: "trendAnalysis", label: "Trend Analysis: " },
+    ];
+
+    const fields = {
+      alert: "N/A",
+      diseaseType: "N/A",
+      symptoms: "N/A",
+      recommendedTreatment: "N/A",
+      preventionTips: "N/A",
+      description: "N/A",
+      notes: "N/A",
+      trendAnalysis: "N/A",
+    };
+
+    if (!message || typeof message !== "string") {
+      return fields;
+    }
+
+    fieldConfig.forEach(({ key, label }, i) => {
+      const startIndex = message.indexOf(label);
+      if (startIndex === -1) return;
+
+      const contentStart = startIndex + label.length;
+      let contentEnd;
+
+      const nextField = fieldConfig[i + 1];
+      if (nextField) {
+        const nextLabelIndex = message.indexOf(nextField.label, contentStart);
+        contentEnd = nextLabelIndex !== -1 ? nextLabelIndex : message.length;
+      } else {
+        contentEnd = message.endsWith(".") ? message.length - 1 : message.length;
+      }
+
+      const content = message.slice(contentStart, contentEnd).trim();
+      if (content) {
+        fields[key] = content;
+      }
+    });
+
+    return fields;
+  };
 
   const getConsultationDetailFromCache = (requestId) => {
     return cache.consultationDetails[requestId];
@@ -90,7 +144,6 @@ const Consultations = () => {
   };
 
   useEffect(() => {
-    // Reset pagination về trang 1 khi thay đổi tab
     setPagination((prev) => ({
       ...prev,
       current: 1,
@@ -104,7 +157,6 @@ const Consultations = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchText, historyFilterStatus, consultations]);
 
-  // Lấy chi tiết request (có cache)
   const fetchConsultationRequestsById = async (requestId) => {
     const cachedData = getConsultationDetailFromCache(requestId);
     const currentTime = new Date().getTime();
@@ -120,7 +172,6 @@ const Consultations = () => {
       return detailData;
     } catch (error) {
       console.error(`Error when getting request details ${requestId}:`, error);
-      // Trả về mặc định khi lỗi
       return {
         requestId,
         memberName: "N/A (Data unavailable)",
@@ -170,25 +221,22 @@ const Consultations = () => {
     }
   };
 
-  // Thêm hàm helper để sắp xếp theo thời gian mới nhất
   const sortByDateDesc = (items) => {
     return [...items].sort((a, b) => {
       const dateA = new Date(a.requestDate);
       const dateB = new Date(b.requestDate);
-      return dateB - dateA; // Sắp xếp giảm dần (mới nhất đầu tiên)
+      return dateB - dateA;
     });
   };
 
-  // Thêm hàm helper để sắp xếp theo thời gian cũ nhất
   const sortByDateAsc = (items) => {
     return [...items].sort((a, b) => {
       const dateA = new Date(a.requestDate);
       const dateB = new Date(b.requestDate);
-      return dateA - dateB; // Sắp xếp tăng dần (cũ nhất đầu tiên)
+      return dateA - dateB;
     });
   };
 
-  // Sửa lại hàm fetchConsultationsWithPagination để sắp xếp trước khi phân trang
   const fetchConsultationsWithPagination = async (page = 1, pageSize = 5) => {
     setLoading(true);
     try {
@@ -205,33 +253,25 @@ const Consultations = () => {
         ? response
         : response.data || [];
 
-      // Tính tổng số yêu cầu mới (Pending) từ tất cả yêu cầu
       const totalPendingRequests = allRequests.filter(
         (item) => item.status === "Pending"
       ).length;
 
-      // Cập nhật state lưu tổng số yêu cầu mới
       setTotalNewRequestsCount(totalPendingRequests);
 
-      // Lọc theo tab
       let filteredData = allRequests;
       if (activeTab === "new") {
         filteredData = allRequests.filter((item) => item.status === "Pending");
-        // Sắp xếp request cũ lên trên (tăng dần theo ngày) với tab "new"
         filteredData = sortByDateAsc(filteredData);
       } else if (activeTab === "onGoing") {
-        // Lọc các request có trạng thái "Approved" cho tab On going
         filteredData = allRequests.filter((item) => item.status === "Approved");
         filteredData = sortByDateDesc(filteredData);
       } else if (activeTab === "completed") {
         filteredData = allRequests.filter(
           (item) => item.status === "Completed"
         );
-        // Mặc định sắp xếp cho tab completed - giữ nguyên
         filteredData = sortByDateDesc(filteredData);
       } else if (activeTab === "history") {
-        // hiển thị tất cả (nếu muốn)
-        // Cho tab history sắp xếp luôn theo mới nhất (giảm dần)
         filteredData = sortByDateDesc(filteredData);
       }
 
@@ -263,7 +303,6 @@ const Consultations = () => {
     }
   };
 
-  // Cập nhật hàm applyFilters để duy trì thứ tự sắp xếp
   const applyFilters = () => {
     let data = [...consultations];
 
@@ -276,7 +315,6 @@ const Consultations = () => {
     } else if (activeTab === "onGoing") {
       data = data.filter((item) => item.status === "Approved");
     } else {
-      // Tab "new" => Pending
       data = data.filter((item) => item.status === "Pending");
     }
 
@@ -290,7 +328,6 @@ const Consultations = () => {
       );
     }
 
-    // Dữ liệu đã được sắp xếp từ API, không cần sắp xếp lại ở đây
     setFilteredConsultations(data);
   };
 
@@ -298,7 +335,6 @@ const Consultations = () => {
     setSearchText(e.target.value);
   };
 
-  // Thêm hàm helper để loại bỏ các entity HTML như &nbsp;
   const decodeHtmlEntities = (text) => {
     if (!text) return "";
     const element = document.createElement("div");
@@ -306,117 +342,106 @@ const Consultations = () => {
     return element.textContent;
   };
 
+  const handleViewDetail = async (record) => {
+    try {
+      setSelectedConsultation({ ...record, isLoading: true });
+      setDetailVisible(true);
 
-  // Khi xem chi tiết
-const handleViewDetail = async (record) => {
-  try {
-    setSelectedConsultation({ ...record, isLoading: true });
-    setDetailVisible(true);
+      const detailedData = await fetchConsultationRequestsById(record.requestId);
 
-    const detailedData = await fetchConsultationRequestsById(record.requestId);
+      console.log("Detailed Data:", detailedData);
 
-    // Log để kiểm tra dữ liệu từ detailedData
-    console.log("Detailed Data:", detailedData);
-
-    // Kiểm tra xem detailedData có memberId và childId không
-    if (!detailedData.child.memberId || !detailedData.child.childId) {
-      console.error("memberId hoặc childId không tồn tại trong detailedData:", detailedData);
-      throw new Error("Không thể lấy memberId hoặc childId từ chi tiết request");
-    }
-
-    // Lấy responses cho request hiện tại
-    const responses = await doctorApi.getConsultationResponsesOData(
-      `?$filter=requestId eq ${record.requestId}`
-    );
-    const latestResponse = responses.data[0] || {};
-
-    // Lấy tất cả các request "Pending" liên quan đến memberId và childId bằng OData query
-    const doctorId = localStorage.getItem("doctorId");
-    if (!doctorId) {
-      throw new Error("Doctor ID not found in localStorage!");
-    }
-
-    // Sử dụng OData query để lọc trực tiếp từ API
-    const odataQuery = `${doctorId} and memberId eq ${detailedData.child.memberId} and childName eq '${detailedData.childName}' and status eq 'Approved'`;
-    const relatedRequestsResponse = await doctorApi.getConsultationRequestsByDoctorOData(odataQuery);
-    const relatedPendingRequests = Array.isArray(relatedRequestsResponse)
-      ? relatedRequestsResponse
-      : relatedRequestsResponse.data || [];
-
-    // Log để kiểm tra dữ liệu trả về từ API
-    console.log("Related Pending Requests:", relatedPendingRequests);
-
-    // Sắp xếp các request theo ngày tăng dần (cũ nhất trước)
-    relatedPendingRequests.sort((a, b) => new Date(a.requestDate) - new Date(b.requestDate));
-
-    // Lấy responses cho từng request "Pending"
-    const pendingRequestsWithResponses = await Promise.all(
-      relatedPendingRequests.map(async (req) => {
-        const reqResponses = await doctorApi.getConsultationResponsesOData(
-          `?$filter=requestId eq ${req.requestId}`
-        );
-        return {
-          ...req,
-          responses: reqResponses.data || [],
-        };
-      })
-    );
-
-    // Log để kiểm tra dữ liệu sau khi lấy responses
-    console.log("Pending Requests with Responses:", pendingRequestsWithResponses);
-
-    // Lấy rating, comment, feedbackDate
-    let rating = 0;
-    let comment = "";
-    let feedbackDate = "";
-    if (latestResponse.responseId) {
-      try {
-        const feedbackResponse = await doctorApi.getRatingFeedbackByResponseId(
-          latestResponse.responseId
-        );
-        const feedbackData = feedbackResponse.data[0] || {};
-        rating = feedbackData.rating || 0;
-        comment = feedbackData.comment || "";
-        feedbackDate = feedbackData.feedbackDate || "";
-      } catch (error) {
-        console.error(
-          `Error fetching feedback for responseId=${latestResponse.responseId}:`,
-          error
-        );
+      if (!detailedData.child.memberId || !detailedData.child.childId) {
+        console.error("memberId hoặc childId không tồn tại trong detailedData:", detailedData);
+        throw new Error("Không thể lấy memberId hoặc childId từ chi tiết request");
       }
+
+      const responses = await doctorApi.getConsultationResponsesOData(
+        `?$filter=requestId eq ${record.requestId}`
+      );
+      const latestResponse = responses.data[0] || {};
+
+      const doctorId = localStorage.getItem("doctorId");
+      if (!doctorId) {
+        throw new Error("Doctor ID not found in localStorage!");
+      }
+
+      const odataQuery = `${doctorId} and memberId eq ${detailedData.child.memberId} and childName eq '${detailedData.childName}' and status eq 'Approved'`;
+      const relatedRequestsResponse = await doctorApi.getConsultationRequestsByDoctorOData(odataQuery);
+      const relatedPendingRequests = Array.isArray(relatedRequestsResponse)
+        ? relatedRequestsResponse
+        : relatedRequestsResponse.data || [];
+
+      console.log("Related Pending Requests:", relatedPendingRequests);
+
+      relatedPendingRequests.sort((a, b) => new Date(a.requestDate) - new Date(b.requestDate));
+
+      const pendingRequestsWithResponses = await Promise.all(
+        relatedPendingRequests.map(async (req) => {
+          const reqResponses = await doctorApi.getConsultationResponsesOData(
+            `?$filter=requestId eq ${req.requestId}`
+          );
+          return {
+            ...req,
+            responses: reqResponses.data || [],
+          };
+        })
+      );
+
+      console.log("Pending Requests with Responses:", pendingRequestsWithResponses);
+
+      let rating = 0;
+      let comment = "";
+      let feedbackDate = "";
+      if (latestResponse.responseId) {
+        try {
+          const feedbackResponse = await doctorApi.getRatingFeedbackByResponseId(
+            latestResponse.responseId
+          );
+          const feedbackData = feedbackResponse.data[0] || {};
+          rating = feedbackData.rating || 0;
+          comment = feedbackData.comment || "";
+          feedbackDate = feedbackData.feedbackDate || "";
+        } catch (error) {
+          console.error(
+            `Error fetching feedback for responseId=${latestResponse.responseId}:`,
+            error
+          );
+        }
+      }
+
+      const attachmentsArray = parseAttachments(detailedData.attachments);
+      const cleanDescription = decodeHtmlEntities(detailedData.description || "N/A");
+
+      setSelectedConsultation({
+        ...record,
+        isLoading: false,
+        memberId: detailedData.child.memberId,
+        childId: detailedData.child?.childId || "N/A",
+        childAge: detailedData.child?.age
+          ? `${detailedData.child.age} years old`
+          : "N/A",
+        childGender: detailedData.child?.gender || "N/A",
+        childAllergies: detailedData.child?.allergies || "None",
+        childNotes: detailedData.child?.notes || "None",
+        childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
+        description: cleanDescription,
+        attachments: attachmentsArray,
+        response: latestResponse.content || "",
+        createdAt: detailedData.createdAt || moment().format(),
+        updatedAt: detailedData.updatedAt || moment().format(),
+        completedDate: detailedData.status === "Completed" ? detailedData.updatedAt : null,
+        rating,
+        comment,
+        feedbackDate,
+        relatedPendingRequests: pendingRequestsWithResponses,
+      });
+      console.log("Selected Consultation:", selectedConsultation);
+    } catch (error) {
+      message.error("Unable to load details");
+      console.error("Error fetching consultation detail:", error);
     }
-
-    const attachmentsArray = parseAttachments(detailedData.attachments);
-    // Xử lý description để loại bỏ các HTML entities
-    const cleanDescription = decodeHtmlEntities(detailedData.description || "N/A");
-
-    setSelectedConsultation({
-      ...record,
-      isLoading: false,
-      childAge: detailedData.child?.age
-        ? `${detailedData.child.age} years old`
-        : "N/A",
-      childGender: detailedData.child?.gender || "N/A",
-      childAllergies: detailedData.child?.allergies || "None",
-      childNotes: detailedData.child?.notes || "None",
-      childDateOfBirth: detailedData.child?.dateOfBirth || "N/A",
-      description: cleanDescription,
-      attachments: attachmentsArray,
-      response: latestResponse.content || "",
-      createdAt: detailedData.createdAt || moment().format(),
-      updatedAt: detailedData.updatedAt || moment().format(),
-      completedDate: detailedData.status === "Completed" ? detailedData.updatedAt : null,
-      rating,
-      comment,
-      feedbackDate,
-      // Lưu danh sách các request "Pending" liên quan và responses của chúng
-      relatedPendingRequests: pendingRequestsWithResponses,
-    });
-  } catch (error) {
-    message.error("Unable to load details");
-    console.error("Error fetching consultation detail:", error);
-  }
-};
+  };
 
   const handleRespond = async (record) => {
     try {
@@ -428,7 +453,6 @@ const handleViewDetail = async (record) => {
         record.requestId
       );
       const attachmentsArray = parseAttachments(detailedData.attachments);
-      // Xử lý description để loại bỏ các HTML entities
       const cleanDescription = decodeHtmlEntities(
         detailedData.description || "N/A"
       );
@@ -436,6 +460,7 @@ const handleViewDetail = async (record) => {
       setSelectedConsultation({
         ...record,
         isLoading: false,
+        childId: detailedData.child?.childId || "N/A",
         childAge: detailedData.child?.age
           ? `${detailedData.child.age} years old`
           : "N/A",
@@ -468,7 +493,6 @@ const handleViewDetail = async (record) => {
         completed: "Completed",
       };
 
-      // Nếu đang ở tab "new" hoặc status là "Pending", luôn sử dụng "Completed"
       const action =
         activeTab === "new" || selectedConsultation.status === "Pending"
           ? "approved"
@@ -514,26 +538,6 @@ const handleViewDetail = async (record) => {
     }
   };
 
-  // const handleComplete = async (record) => {
-  //   setLoading(true);
-  //   try {
-  //     // await doctorApi.updateConsultationRequestsStatus(
-  //     //   record.requestId,
-  //     //   "Completed"
-  //     // );
-  //     await fetchConsultationsWithPagination(
-  //       pagination.current,
-  //       pagination.pageSize
-  //     );
-  //     message.success("Consultation completed");
-  //   } catch (error) {
-  //     message.error("Failed to complete consultation!");
-  //     console.error("Error completing consultation:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const getStatusTag = (status) => {
     switch (status) {
       case "Pending":
@@ -549,7 +553,6 @@ const handleViewDetail = async (record) => {
     }
   };
 
-  // [CHANGED] Bỏ cột Rating ngoài bảng
   const newRequestColumns = [
     {
       title: "Parent",
@@ -604,7 +607,6 @@ const handleViewDetail = async (record) => {
     },
   ];
 
-  // [CHANGED] Cũng bỏ cột Rating ở bảng chung
   const columns = [
     {
       title: "Parent",
@@ -660,15 +662,6 @@ const handleViewDetail = async (record) => {
               Respond
             </Button>
           )}
-          {/* {record.status === "Approved" && (
-            <Button
-              type="primary"
-              icon={<CheckCircleOutlined />}
-              onClick={() => handleComplete(record)}
-            >
-              Complete
-            </Button>
-          )} */}
         </Space>
       ),
     },
@@ -760,6 +753,50 @@ const handleViewDetail = async (record) => {
     });
   };
 
+  const fetchGrowthRecords = async (childName, parentName) => {
+    setGrowthLoading(true);
+    try {
+      const response = await childApi.getGrowthRecords(childName, parentName);
+      const records = response.data || [];
+      const sortedRecords = records.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setGrowthRecords(sortedRecords);
+    } catch (error) {
+      console.error("Error fetching growth records:", error);
+      message.error("Failed to load growth records!");
+      setGrowthRecords([]);
+    } finally {
+      setGrowthLoading(false);
+    }
+  };
+
+  const fetchAlerts = async (childName, dob, memberId) => {
+    setAlertsLoading(true);
+    try {
+      const response = await alertApi.getAlertsByChild(childName, dob, memberId);
+      if (response.data && Array.isArray(response.data.data)) {
+        const alertsData = response.data.data;
+        alertsData.sort((a, b) => new Date(b.alertDate) - new Date(a.alertDate));
+        setAlerts(alertsData || []);
+      } else {
+        setAlerts([]);
+      }
+    } catch (error) {
+      console.error("Error fetching alerts:", error);
+      message.error("Failed to load alerts!");
+      setAlerts([]);
+    } finally {
+      setAlertsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (childInfoVisible && selectedConsultation) {
+      fetchGrowthRecords(selectedConsultation.childName, selectedConsultation.parentName);
+      const formattedDob = moment(selectedConsultation.childDateOfBirth).format("YYYY-MM-DD");
+      fetchAlerts(selectedConsultation.childName, formattedDob, selectedConsultation.memberId);
+    }
+  }, [childInfoVisible, selectedConsultation]);
+
   useEffect(() => {
     const attachmentStyles = `
       .attachments-container {
@@ -805,6 +842,10 @@ const handleViewDetail = async (record) => {
         font-size: 12px;
         color: #8c8c8c;
       }
+
+      .ant-drawer.child-info-drawer .ant-drawer-content-wrapper {
+        right: 500px !important;
+      }
     `;
 
     const styleElement = document.createElement("style");
@@ -825,14 +866,16 @@ const handleViewDetail = async (record) => {
     );
   };
 
-  // Cập nhật hàm setActiveTab để đảm bảo reset pagination khi chuyển tab
   const handleTabChange = (newTab) => {
     setActiveTab(newTab);
-    // Reset pagination về trang 1
     setPagination((prev) => ({
       ...prev,
       current: 1,
     }));
+  };
+
+  const handleOpenChildInfo = () => {
+    setChildInfoVisible(true);
   };
 
   return (
@@ -853,7 +896,6 @@ const handleViewDetail = async (record) => {
             onChange={handleSearch}
             style={{ width: 300 }}
           />
-          {/* [CHANGED] Bỏ luôn filter rating UI */}
           {activeTab === "history" && (
             <div style={{ display: "flex", gap: "10px", marginLeft: 10 }}>
               <Select
@@ -955,7 +997,6 @@ const handleViewDetail = async (record) => {
               onChange={handleTableChange}
             />
           </Tabs.TabPane>
-
           <Tabs.TabPane key="history" tab="History">
             <Table
               columns={columns}
@@ -969,7 +1010,6 @@ const handleViewDetail = async (record) => {
         </Tabs>
       </Card>
 
-      {/* Modal Respond */}
       <Modal
         title="Respond to Consultation Request"
         open={responseVisible}
@@ -1044,7 +1084,6 @@ const handleViewDetail = async (record) => {
 
               <Divider orientation="left">Response</Divider>
 
-              {/* Chỉ hiển thị lựa chọn Action khi KHÔNG phải ở tab "new" và status KHÔNG phải là "Pending" */}
               {activeTab !== "new" &&
                 selectedConsultation.status !== "Pending" && (
                   <Form.Item
@@ -1103,9 +1142,22 @@ const handleViewDetail = async (record) => {
         )}
       </Modal>
 
-      {/* Drawer Chi Tiết */}
       <Drawer
-        title="Consultation Details"
+        title={
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <Button
+              icon={<LeftOutlined />}
+              onClick={handleOpenChildInfo}
+              style={{
+                marginRight: 16,
+                border: "none",
+                boxShadow: "none",
+                background: "transparent",
+              }}
+            />
+            Consultation Details
+          </div>
+        }
         placement="right"
         onClose={() => setDetailVisible(false)}
         open={detailVisible}
@@ -1193,8 +1245,8 @@ const handleViewDetail = async (record) => {
                     <React.Fragment key={index}>
                       <Timeline.Item>
                         <p>
-                        <strong>{index === 0 ? "Request" : "Re-request"}</strong> -{" "}
-                        {moment(req.requestDate).format("DD/MM/YYYY HH:mm")}
+                          <strong>{index === 0 ? "Request" : "Re-request"}</strong> -{" "}
+                          {moment(req.requestDate).format("DD/MM/YYYY HH:mm")}
                         </p>
                         <Card size="small">
                           <p>{decodeHtmlEntities(req.description || "N/A")}</p>
@@ -1250,7 +1302,6 @@ const handleViewDetail = async (record) => {
                 )}
               </Timeline>
 
-              {/* [CHANGED] Thêm phần hiển thị rating, comment, feedbackDate */}
               <Divider orientation="left">Feedback</Divider>
               <Descriptions bordered column={1}>
                 <Descriptions.Item label="Rating">
@@ -1273,6 +1324,85 @@ const handleViewDetail = async (record) => {
               </Descriptions>
             </>
           )
+        )}
+      </Drawer>
+
+      <Drawer
+        title="Child Information - Alerts & Growth Records"
+        placement="right"
+        onClose={() => setChildInfoVisible(false)}
+        open={childInfoVisible}
+        width={500}
+        className="child-info-drawer"
+        zIndex={1000}
+      >
+        {selectedConsultation && (
+          <>
+            <Divider orientation="left">Alerts</Divider>
+            <div style={{ minHeight: 100 }}>
+              {alertsLoading ? (
+                <div style={{ textAlign: "center", padding: "20px" }}>
+                  <Spin size="large" />
+                </div>
+              ) : alerts.length > 0 ? (
+                <Timeline>
+                  {alerts.map((alert, index) => {
+                    const parsedMessage = parseAlertMessage(alert.message);
+                    return (
+                      <Timeline.Item key={index} color="red">
+                        <p>
+                          <strong>Alert Date:</strong>{" "}
+                          {alert.alertDate
+                            ? moment(alert.alertDate).format("DD/MM/YYYY HH:mm")
+                            : "N/A"}
+                        </p>
+                        <Card size="small">
+                          <p><strong>Alert:</strong> {parsedMessage.alert}</p>
+                          <p><strong>Disease Type:</strong> {parsedMessage.diseaseType}</p>
+                          <p><strong>Symptoms:</strong> {parsedMessage.symptoms}</p>
+                          <p><strong>Recommended Treatment:</strong> {parsedMessage.recommendedTreatment}</p>
+                          <p><strong>Prevention Tips:</strong> {parsedMessage.preventionTips}</p>
+                          <p><strong>Description:</strong> {parsedMessage.description}</p>
+                          <p><strong>Notes:</strong> {parsedMessage.notes}</p>
+                          <p><strong>Trend Analysis:</strong> {parsedMessage.trendAnalysis}</p>
+                        </Card>
+                      </Timeline.Item>
+                    );
+                  })}
+                </Timeline>
+              ) : (
+                <p>No alerts found for this child.</p>
+              )}
+            </div>
+
+            <Divider orientation="left">Growth Records</Divider>
+            <div style={{ minHeight: 100 }}>
+              {growthLoading ? (
+                <div style={{ textAlign: "center", padding: "20px" }}>
+                  <Spin size="large" />
+                </div>
+              ) : growthRecords.length > 0 ? (
+                <Timeline>
+                  {growthRecords.map((record, index) => (
+                    <Timeline.Item key={index}>
+                      <p>
+                        <strong>Record Date:</strong>{" "}
+                        {moment(record.createdAt).format("DD/MM/YYYY HH:mm")}
+                      </p>
+                      <Card size="small">
+                        <p><strong>Height:</strong> {record.height || "N/A"} cm</p>
+                        <p><strong>Weight:</strong> {record.weight || "N/A"} kg</p>
+                        <p><strong>Head Circumference:</strong> {record.headCircumference || "N/A"} cm</p>
+                        <p><strong>Notes:</strong> {record.notes || "N/A"}</p>
+                      </Card>
+                    </Timeline.Item>
+                  ))}
+                </Timeline>
+              ) : (
+                <p>No growth records found for this child.</p>
+              )}
+            </div>
+          </>
         )}
       </Drawer>
     </div>
