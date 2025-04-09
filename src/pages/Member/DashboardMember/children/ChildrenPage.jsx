@@ -212,7 +212,37 @@ function ChildrenPage() {
     }
   };
 
-  const handleOpenChat = () => {
+  const handleOpenChat = async () => {
+    const allPackagesRes = await memberShipApi.getAllPackages();
+      const packages = allPackagesRes.data?.data;
+      const membershipRes = await memberShipApi.getMemberMembership(memberId);
+      const membershipData = membershipRes.data?.data;
+      if (
+        !membershipData ||
+        membershipData.status !== "Active" ||
+        membershipData.isActive !== true
+      ) {
+        setPopupType("error");
+        setPopupMessage("No active membership found. Please activate a membership plan.");
+        setShowPopup(true);
+        return;
+      }
+      const userPackage = packages.find(
+        (pkg) => pkg.packageName === membershipData.packageName
+      );
+      if (!userPackage) {
+        setPopupType("error");
+        setPopupMessage("User membership package not found.");
+        setShowPopup(true);
+        return;
+      }
+      console.log("userPackage", membershipData);
+    if (membershipData.packageName == "Free") {
+      setPopupType("error");
+      setPopupMessage("The Free plan does not support AI chat. Please upgrade your plan to use this feature.");
+      setShowPopup(true);
+      return;
+    }
     if (!selectedChild) {
       alert("Please select a child to chat with AI.");
       return;
