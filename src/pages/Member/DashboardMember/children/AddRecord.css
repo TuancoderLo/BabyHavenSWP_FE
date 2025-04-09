@@ -15,7 +15,7 @@ justify-content: center;
   background: #fff;
   width: 80%;
   max-width: 1000px;
-  max-height: 600px;
+  max-height: 640px;
   border-radius: 12px;
   position: relative;
   display: flex; /* Cho phép hiển thị 2 cột */
@@ -54,9 +54,11 @@ justify-content: center;
   border-radius: 10px;
 }
 .main-title {
-  font-size: 1.2rem;
-  color: #7e52ff;
+  font-size: 1.4rem;
+  color: #d970ff;
+  line-height: 1.4;
   margin: 0;
+  font-weight: 700;
 }
 
 .step-labels {
@@ -217,7 +219,6 @@ justify-content: center;
 .babygrowth-img {
   display: flex;
   justify-content: center;
-  margin: 20px 0;
 }
 
 .babygrowth-img img {
@@ -287,7 +288,6 @@ justify-content: center;
 }
 
 .wizard-left-content .child-info-card {
-  margin-top: 20px;
   background-color: #f8f5ff;
   border-radius: 12px;
   padding: 18px;

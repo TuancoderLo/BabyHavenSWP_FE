@@ -1,5 +1,5 @@
 .growth-chart-container {
-  width: 100%;
+  width: 105%;
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -85,10 +85,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 10px 0;
-  background-color: #f1f3f5;
   border-radius: 8px;
-  margin-bottom: 20px;
 }
 
 /* Kiểu cho các input dạng ngày (datepicker) */

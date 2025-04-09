@@ -290,9 +290,9 @@ setErrors(childErrors);
         <div className="wizard-left">
           <div className="blue-bar" />
           <div className="wizard-left-content">
-            <h1 className="main-title">Enter your baby’s information</h1>
+            <h1 className="main-title-addchild">Enter your baby’s information</h1>
           </div>
-          <div className="babygrowth-img">
+          <div className="babygrowth-img-addchild">
             <img src={BabyGrowth} alt="Baby Growth" />
           </div>
         </div>
