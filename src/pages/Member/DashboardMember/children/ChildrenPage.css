@@ -611,3 +611,9 @@
 .personalized-growth-content p {
   margin: 0;
 }
+
+.chart-area-child {
+  height: 400px;
+  width: 95%;
+  position: relative;
+}

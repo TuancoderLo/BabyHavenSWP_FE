@@ -721,7 +721,7 @@ const renderCompareControl = () => {
                 </span>
               </div>
             </h2>
-            <div className="chart-area">
+            <div className="chart-area-child">
               {selectedChild ? (
                 <GrowthChart
                   childName={selectedChild.name}
