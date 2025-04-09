@@ -2067,3 +2067,59 @@
 .modal-btn:hover {
   background-color: #1976d2;
 }
+
+/* Customer Details modal */
+.customer-details-container {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.customer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.customer-info-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.customer-info-item i {
+  flex-shrink: 0;
+  width: 20px;
+}
+
+.customer-info-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: calc(100% - 28px);
+}
+
+.customer-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  display: inline-block;
+}
+
+/* Media query for smaller screens */
+@media screen and (max-width: 576px) {
+  .modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .customer-details-container .user-name h4 {
+    font-size: 18px;
+  }
+
+  .customer-info-item {
+    font-size: 14px;
+  }
+}

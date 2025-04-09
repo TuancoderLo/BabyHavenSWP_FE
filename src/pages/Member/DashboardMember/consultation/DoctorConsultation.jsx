@@ -432,14 +432,14 @@ function DoctorConsultation() {
   };
 
   const handleSubmit = async () => {
-      // Kiểm tra nếu có request nào chưa ở trạng thái Completed
-  const hasPendingRequest = sentRequests.some(req => req.status !== "Completed");
-  if (hasPendingRequest) {
-    setPopupType("error");
-    setPopupMessage("Vui lòng cập nhật các request hiện tại ở tab Response (chưa Completed) trước khi gửi request mới.");
-    setShowPopup(true);
-    return; // Không tiến hành gửi mới nếu có request chưa hoàn thành
-  }
+  //     // Kiểm tra nếu có request nào chưa ở trạng thái Completed
+  // const hasPendingRequest = sentRequests.some(req => req.status !== "Completed");
+  // if (hasPendingRequest) {
+  //   setPopupType("error");
+  //   setPopupMessage("Vui lòng cập nhật các request hiện tại ở tab Response (chưa Completed) trước khi gửi request mới.");
+  //   setShowPopup(true);
+  //   return; // Không tiến hành gửi mới nếu có request chưa hoàn thành
+  // }
     try {
       setSubmitLoading(true);
       setSubmitError(null);
@@ -551,16 +551,16 @@ function DoctorConsultation() {
   };
 
   const handleMessageDoctor = (doctor) => {
-    // Kiểm tra nếu trong danh sách sentRequests có request nào chưa được cập nhật thành "Completed"
-    const pendingRequestExists = sentRequests.some(req => req.status !== "Completed");
+    // // Kiểm tra nếu trong danh sách sentRequests có request nào chưa được cập nhật thành "Completed"
+    // const pendingRequestExists = sentRequests.some(req => req.status !== "Completed");
     
-    if (pendingRequestExists) {
-      // Nếu tồn tại request chưa hoàn thành, thông báo cho người dùng
-      setPopupType("error");
-      setPopupMessage("Vui lòng cập nhật các request hiện tại (chưa Completed) ở tab Response trước khi gửi request mới.");
-      setShowPopup(true);
-      return; // Không chuyển sang bước tiếp theo
-    }
+    // if (pendingRequestExists) {
+    //   // Nếu tồn tại request chưa hoàn thành, thông báo cho người dùng
+    //   setPopupType("error");
+    //   setPopupMessage("Vui lòng cập nhật các request hiện tại (chưa Completed) ở tab Response trước khi gửi request mới.");
+    //   setShowPopup(true);
+    //   return; // Không chuyển sang bước tiếp theo
+    // }
     
     // Nếu không có request nào đang chờ cập nhật, tiến hành chọn bác sĩ và chuyển sang bước nhập thông tin
     setSelectedDoctor(doctor);

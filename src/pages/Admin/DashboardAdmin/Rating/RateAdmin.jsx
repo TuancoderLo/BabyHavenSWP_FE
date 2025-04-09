@@ -40,7 +40,7 @@ const RateAdmin = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        "https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/RatingFeedback"
+        "https://babyhaven-swp-web-emhrccb7hfh7bkf5.southeastasia-01.azurewebsites.net/api/RatingFeedback"
       );
 
       if (response.data.status === 1) {
@@ -67,7 +67,7 @@ const RateAdmin = () => {
 
     try {
       const response = await axios.get(
-        "https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/UserAccounts/odata"
+        "https://babyhaven-swp-web-emhrccb7hfh7bkf5.southeastasia-01.azurewebsites.net/api/UserAccounts/odata"
       );
 
       if (response.data) {
@@ -95,7 +95,7 @@ const RateAdmin = () => {
 
       // Bước 1: Lấy thông tin phản hồi tư vấn từ responseId
       const responseDetail = await axios.get(
-        `https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/ConsultationResponses/odata?$filter=responseId eq ${responseId}`
+        `https://babyhaven-swp-web-emhrccb7hfh7bkf5.southeastasia-01.azurewebsites.net/api/ConsultationResponses/odata?$filter=responseId eq ${responseId}`
       );
 
       console.log("Response detail API result:", responseDetail.data);
@@ -127,7 +127,7 @@ const RateAdmin = () => {
 
           // Khi sử dụng OData với API ConsultationRequests
           const requestDetail = await axios.get(
-            `https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/ConsultationRequests/odata?$filter=requestId eq ${consultationResponse.requestId}`
+            `https://babyhaven-swp-web-emhrccb7hfh7bkf5.southeastasia-01.azurewebsites.net/api/ConsultationRequests/odata?$filter=requestId eq ${consultationResponse.requestId}`
           );
 
           console.log("Request detail API result:", requestDetail.data);
@@ -157,7 +157,7 @@ const RateAdmin = () => {
             // Nếu không tìm thấy, thử tìm trực tiếp trong dữ liệu hoàn chỉnh
             try {
               const allRequests = await axios.get(
-                `https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/ConsultationRequests/odata`
+                `https://babyhaven-swp-web-emhrccb7hfh7bkf5.southeastasia-01.azurewebsites.net/api/ConsultationRequests/odata`
               );
 
               console.log("All requests:", allRequests.data);
@@ -213,7 +213,7 @@ const RateAdmin = () => {
     try {
       setLoading(true);
       const response = await axios.delete(
-        `https://babyhaven-swp-a3f2frh5g4gtf4ee.southeastasia-01.azurewebsites.net/api/RatingFeedback/${feedbackToDelete.feedbackId}`
+        `https://babyhaven-swp-web-emhrccb7hfh7bkf5.southeastasia-01.azurewebsites.net/api/RatingFeedback/${feedbackToDelete.feedbackId}`
       );
 
       if (response.status === 200) {

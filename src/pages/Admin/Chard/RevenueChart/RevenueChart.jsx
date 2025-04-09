@@ -1374,17 +1374,17 @@ const RevenueChart = () => {
                 <div className="stat-value pending">{statusCounts.pending}</div>
               </div>
               <div className="stat-item">
-                <div className="stat-label">Giao dịch thất bại:</div>
+                <div className="stat-label">Transaction failed:</div>
                 <div className="stat-value failed">{statusCounts.failed}</div>
               </div>
               <div className="stat-item">
-                <div className="stat-label">Giao dịch đã hủy:</div>
+                <div className="stat-label">Canceled transaction:</div>
                 <div className="stat-value cancelled">
                   {statusCounts.cancelled}
                 </div>
               </div>
               <div className="stat-item">
-                <div className="stat-label">Tỷ lệ thành công:</div>
+                <div className="stat-label">Success rate:</div>
                 <div className="stat-value">
                   {statusCounts.total
                     ? (
@@ -2380,97 +2380,49 @@ const RevenueChart = () => {
                 <>
                   {/* Basic customer information */}
                   <div className="user-profile-section">
-                    <div className="user-basic-info">
+                    <div className="user-basic-info customer-details-container">
                       <div className="user-name">
                         <h4>
                           {userAccountDetail?.Name ||
                             selectedTransaction.fullName}
                         </h4>
                       </div>
-                      <div className="user-contact">
-                        <p>
-                          <i className="fas fa-envelope"></i>{" "}
-                          {userAccountDetail?.Email ||
-                            selectedTransaction.email ||
-                            "No email information"}
-                        </p>
-                        <p>
-                          <i className="fas fa-phone"></i>{" "}
-                          {userAccountDetail?.PhoneNumber ||
-                            "No phone information"}
-                        </p>
-                        <p>
-                          <i className="fas fa-map-marker-alt"></i>{" "}
-                          {userAccountDetail?.Address ||
-                            "No address information"}
-                        </p>
+                      <div className="user-contact customer-info">
+                        <div className="customer-info-item">
+                          <i className="fas fa-envelope"></i>
+                          <span className="customer-info-value customer-email">
+                            {userAccountDetail?.Email ||
+                              selectedTransaction.email ||
+                              "No email information"}
+                          </span>
+                        </div>
+                        <div className="customer-info-item">
+                          <i className="fas fa-phone"></i>
+                          <span className="customer-info-value">
+                            {userAccountDetail?.PhoneNumber ||
+                              "No phone information"}
+                          </span>
+                        </div>
+                        <div className="customer-info-item">
+                          <i className="fas fa-map-marker-alt"></i>
+                          <span className="customer-info-value">
+                            {userAccountDetail?.Address ||
+                              "No address information"}
+                          </span>
+                        </div>
                         {userAccountDetail?.DateOfBirth && (
-                          <p>
-                            <i className="fas fa-birthday-cake"></i>{" "}
-                            {new Date(
-                              userAccountDetail.DateOfBirth
-                            ).toLocaleDateString("en-US")}
-                          </p>
+                          <div className="customer-info-item">
+                            <i className="fas fa-birthday-cake"></i>
+                            <span className="customer-info-value">
+                              {new Date(
+                                userAccountDetail.DateOfBirth
+                              ).toLocaleDateString("en-US")}
+                            </span>
+                          </div>
                         )}
                       </div>
                     </div>
                   </div>
-
-                  {/* Purchase history */}
-                  {/* <div className="purchase-history-section">
-                    <h4>
-                      <i className="fas fa-history"></i> Package Purchase
-                      History
-                    </h4>
-                    <div className="package-history-container">
-                      <table className="package-history-table">
-                        <thead>
-                          <tr>
-                            <th>Package</th>
-                            <th>Payment Date</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {selectedTransaction && selectedTransaction.userId ? (
-                            getUserTransactions(selectedTransaction.userId)
-                              .filter((t) => t.paymentStatus === "Completed")
-                              .map((transaction, index) => (
-                                <tr key={index}>
-                                  <td>
-                                    {renderPackageBadge(
-                                      transaction.packageName
-                                    )}
-                                  </td>
-                                  <td>
-                                    {formatDate(
-                                      transaction.paymentDate ||
-                                        transaction.transactionDate
-                                    )}
-                                  </td>
-                                  <td className="amount-value">
-                                    {formatAmount(transaction.amount)}
-                                  </td>
-                                  <td>
-                                    {renderPaymentStatus(
-                                      transaction.paymentStatus
-                                    )}
-                                  </td>
-                                </tr>
-                              ))
-                          ) : (
-                            <tr>
-                              <td colSpan="4" className="no-data">
-                                <i className="fas fa-info-circle"></i> No
-                                transaction data
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div> */}
                 </>
               )}
             </div>
