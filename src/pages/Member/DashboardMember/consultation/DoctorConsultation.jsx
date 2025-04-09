@@ -908,29 +908,16 @@ function DoctorConsultation() {
       // Tăng số lần đã gửi lên 1
       const newCount = anotherRequestCount + 1;
       setAnotherRequestCount(newCount);
-      const confirm = window.confirm(
-        "Bạn có muốn gửi yêu cầu mới không? Nếu có, bạn sẽ không thể gửi yêu cầu này nữa.");
-      if (confirm) {
-        // Nếu người dùng xác nhận, thực hiện gửi yêu cầu mới
-        setSelectedResponse(null); // Đóng modal
-        setCurrentStep(0); // Quay lại bước chọn bác sĩ
-        setSelectedChild(null); // Đặt lại child đã chọn
-        setConsultationContent(""); // Đặt lại nội dung tư vấn
-        setSelectedDoctor(null); // Đặt lại bác sĩ đã chọn
-        setSelectedFiles([]); // Đặt lại danh sách file đính kèm
-      } else {
-
-      }
-    // setCurrentStep(0); // Quay lại bước chọn bác sĩ
-    // setSelectedChild(null); // Đặt lại child đã chọn
-    // setConsultationContent(""); // Đặt lại nội dung tư vấn
-    // setSelectedDoctor(null); // Đặt lại bác sĩ đã chọn
-    // setSelectedFiles([]); // Đặt lại danh sách file đính kèm
-    // setSelectedResponse(null); // Đóng modal
-    // setCurrentTab("consultation"); // Chuyển về tab Consultation
-    // const remaining = 3 - newCount;
-    // setPopupType("success");
-    // setPopupMessage(`Yêu cầu mới đã được khởi tạo. Bạn còn ${remaining} lần gửi request nữa.`);
+    setCurrentStep(0); // Quay lại bước chọn bác sĩ
+    setSelectedChild(null); // Đặt lại child đã chọn
+    setConsultationContent(""); // Đặt lại nội dung tư vấn
+    setSelectedDoctor(null); // Đặt lại bác sĩ đã chọn
+    setSelectedFiles([]); // Đặt lại danh sách file đính kèm
+    setSelectedResponse(null); // Đóng modal
+    setCurrentTab("consultation"); // Chuyển về tab Consultation
+    const remaining = 3 - newCount;
+    setPopupType("success");
+    setPopupMessage(`Yêu cầu mới đã được khởi tạo. Bạn còn ${remaining} lần gửi request nữa.`);
     setShowPopup(true);
   } else {
     // Nếu đã vượt quá số lần cho phép thì thông báo lỗi
@@ -950,7 +937,7 @@ function DoctorConsultation() {
         await doctorApi.updateConsultationRequestsStatus(requestId, "Completed");
   
         // Cập nhật trạng thái response thành "Completed"
-        // await doctorApi.updateConsultationResponseStatus(responseId, "Completed");
+        await doctorApi.updateConsultationResponseStatus(responseId, "Completed");
   
         // Refresh danh sách sau khi cập nhật
         await fetchSentRequests();
